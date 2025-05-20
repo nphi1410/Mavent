@@ -1,5 +1,4 @@
 import React from 'react';
-import styles from './css/ProfileContent.module.css'; // Adjust the path as necessary
 
 const ProfileContent = () => {
   const userData = {
@@ -11,38 +10,48 @@ const ProfileContent = () => {
   };
 
   return (
-    <main className={styles.profileContent}>
-      <div className={styles.avatarSection}>
-        <div className={styles.avatarLarge}>
+    <main className="flex-grow p-10 bg-white flex flex-col">
+      {/* Avatar Section */}
+      <div className="flex justify-center mb-10">
+        <div className="w-40 h-40 rounded-full bg-gray-200 flex justify-center items-center text-xl text-gray-600 font-medium">
           useravatar
         </div>
       </div>
 
-      <div className={styles.detailsSection}>
-        <div className={styles.detailItem}>
-          <span className={styles.detailLabel}>Full Name:</span>
-          <span className={styles.detailValue}>{userData.fullName}</span>
+      {/* Details Section */}
+      <div className="mb-10">
+        {/* Full Name */}
+        <div className="flex items-center py-4.5 border-b border-gray-200 text-base">
+          <span className="font-medium text-gray-700 min-w-[150px] flex-shrink-0">Full Name:</span>
+          <span className="text-gray-800">{userData.fullName}</span>
         </div>
-        <div className={styles.detailItem}>
-          <span className={styles.detailLabel}>Date of Birth:</span>
-          <span className={styles.detailValue}>{userData.dateOfBirth}</span>
+        {/* Date of Birth */}
+        <div className="flex items-center py-4.5 border-b border-gray-200 text-base">
+          <span className="font-medium text-gray-700 min-w-[150px] flex-shrink-0">Date of Birth:</span>
+          <span className="text-gray-800">{userData.dateOfBirth}</span>
         </div>
-        <div className={styles.detailItem}>
-          <span className={styles.detailLabel}>Gender:</span>
-          <span className={styles.detailValue}>{userData.gender}</span>
+        {/* Gender */}
+        <div className="flex items-center py-4.5 border-b border-gray-200 text-base">
+          <span className="font-medium text-gray-700 min-w-[150px] flex-shrink-0">Gender:</span>
+          <span className="text-gray-800">{userData.gender}</span>
         </div>
-        <div className={styles.detailItem}>
-          <span className={styles.detailLabel}>Email:</span>
-          <span className={styles.detailValue}>{userData.email}</span>
+        {/* Email */}
+        <div className="flex items-center py-4.5 border-b border-gray-200 text-base">
+          <span className="font-medium text-gray-700 min-w-[150px] flex-shrink-0">Email:</span>
+          <span className="text-gray-800">{userData.email}</span>
         </div>
-        <div className={styles.detailItem}>
-          <span className={styles.detailLabel}>Phone:</span>
-          <span className={styles.detailValue}>{userData.phone}</span>
+        {/* Phone */}
+        <div className="flex items-center py-4.5 border-b border-gray-200 text-base last:border-b-0">
+          <span className="font-medium text-gray-700 min-w-[150px] flex-shrink-0">Phone:</span>
+          <span className="text-gray-800">{userData.phone}</span>
         </div>
       </div>
 
-      <div className={styles.actionsSection}>
-        <button className={styles.changeInfoButton}>Change Information</button>
+      {/* Actions Section */}
+      <div>
+        <button className="px-6 py-2 bg-blue-600 text-black rounded-md hover:bg-blue-700 transition-colors">
+          Change Information
+        </button>
       </div>
     </main>
   );
