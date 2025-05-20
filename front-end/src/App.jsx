@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getGreeting } from './services/testService';
-import CreateEvent from './pages/createEvent';
-
+import CreateEvent from './pages/CreateEvent';
 
 function App() {
   const [message, setMessage] = useState('');
@@ -16,8 +15,10 @@ function App() {
   }, []);
 
   return (
-    <div>
-      <CreateEvent />
+    <div className='w-screen h-screen'>
+      <div className='w-full h-full flex justify-center items-center'>
+        <CreateEvent />
+      </div>
     </div>
   );
 }
