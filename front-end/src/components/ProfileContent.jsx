@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './ProfileContent.module.css';
+import styles from './css/ProfileContent.module.css'; // Adjust the path as necessary
 
 const ProfileContent = () => {
   const userData = {
