@@ -1,0 +1,77 @@
+.profileContent {
+    flex-grow: 1;
+    padding: 40px 50px;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+}
+
+.avatarSection {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+.avatarLarge {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    color: #555;
+    font-weight: 500;
+}
+
+.detailsSection {
+    margin-bottom: 40px;
+}
+
+.detailItem {
+    display: flex;
+    align-items: center;
+    padding: 18px 0;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 16px;
+}
+
+.detailItem:last-child {
+    border-bottom: none;
+}
+
+.detailLabel {
+    font-weight: 500;
+    color: #495057;
+    min-width: 150px;
+    flex-shrink: 0;
+}
+
+.detailValue {
+    color: #212529;
+    margin-left: 20px;
+}
+
+.actionsSection {
+    text-align: center;
+    margin-top: auto;
+    /* Pushes button to bottom if content is short */
+    padding-top: 20px;
+}
+
+.changeInfoButton {
+    padding: 12px 30px;
+    background-color: #e9ecef;
+    border: none;
+    border-radius: 25px;
+    font-size: 16px;
+    color: #343a40;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.changeInfoButton:hover {
+    background-color: #dee2e6;
+}
