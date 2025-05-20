@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getGreeting } from './services/testService';
+import CreateEvent from './pages/createEvent';
+
 
 function App() {
   const [message, setMessage] = useState('');
@@ -9,14 +11,14 @@ function App() {
       .then(response => setMessage(response.data))
       .catch(error => {
         console.error('Error fetching greeting:', error);
-        setMessage('Failed to load message');
+        setMessage('Error to load message');
       });
   }, []);
 
   return (
-    <>
-      <h1>{message}</h1>
-    </>
+    <div>
+      <CreateEvent />
+    </div>
   );
 }
 
