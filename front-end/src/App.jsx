@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getGreeting } from './services/testService';
-import CreateEvent from './pages/CreateEvent';
+import CreateEvent from './pages/createEvent';
+import SuperAdminSidebar from './components/SuperAdminSidebar';
 
 function App() {
   const [message, setMessage] = useState('');
@@ -16,9 +17,10 @@ function App() {
 
   return (
     <div className='w-screen h-screen'>
+      <SuperAdminSidebar />
+{/* 
       <div className='w-full h-full flex justify-center items-center'>
-        <CreateEvent />
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -1,11 +1,11 @@
 import React from 'react'
 
-function Navbar() {
+function SuperAdminHeader() {
   return (
     <div>
-      
+
     </div>
   )
 }
 
-export default Navbar
+export default SuperAdminHeader

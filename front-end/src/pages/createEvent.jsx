@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendar } from "@fortawesome/free-solid-svg-icons";
 import { faClock } from "@fortawesome/free-solid-svg-icons";
+import SuperAdminHeader from '../components/SuperAdminHeader';
+import SuperAdminSidebar from '../components/SuperAdminSidebar';
+
 
 const CreateEvent = () => {
     const [eventName, setEventName] = useState('');
@@ -32,6 +35,7 @@ const CreateEvent = () => {
         alert('Event cancelled');
     }
     return (
+
         <div className="p-6 rounded-lg shadow-lg w-full max-w-md">
             <div className="flex justify-between items-center mb-8 pl-12">
                 <h1 className="text-xl text-black font-semibold">Create Event</h1>
