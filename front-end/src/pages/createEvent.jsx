@@ -8,9 +8,7 @@ const CreateEvent = () => {
     const [description, setDescription] = useState('');
     const [date, setDate] = useState('2025-01-01');
     const [time, setTime] = useState('00:00');
-    const [duration, setDuration] = useState('3h 45m');
     const [location, setLocation] = useState('');
-    const [guests, setGuests] = useState(['user1@example.com', 'user2@example.com', 'user3@example.com']);
 
     const handleAddGuest = () => {
         setGuests([...guests, '']);
@@ -34,7 +32,7 @@ const CreateEvent = () => {
         alert('Event cancelled');
     }
     return (
-        <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+        <div className="p-6 rounded-lg shadow-lg w-full max-w-md">
             <div className="flex justify-between items-center mb-8 pl-12">
                 <h1 className="text-xl text-black font-semibold">Create Event</h1>
             </div>
