@@ -15,22 +15,27 @@ public class CloudConfig {
     private final S3Client s3Client;
 
     public CloudConfig() {
-        AwsBasicCredentials credentials = AwsBasicCredentials.create("0057c6c9b9fd1c70000000002", "K005NcntKSbKUC7EA1cAe1BY54lTRyo");
+        String accessKey = System.getenv("AWS_ACCESS_KEY");
+        String secretKey = System.getenv("AWS_SECRET_KEY");
+        String endpoint = System.getenv("AWS_ENDPOINT");
+        String region = System.getenv("AWS_REGION");
+
+        AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
 
         this.s3Client = S3Client.builder()
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
-                .endpointOverride(URI.create("https://s3.us-east-005.backblazeb2.com"))
-                .region(Region.US_WEST_2) // Use any dummy region; Backblaze doesn't validate it
+                .endpointOverride(URI.create(endpoint))
+                .region(Region.of(region)) // Use any dummy region; Backblaze doesn't validate it
                 .requestChecksumCalculation(RequestChecksumCalculation.WHEN_REQUIRED)
                 .build();
     }
 
     public void uploadFile() {
+        String bucket = System.getenv("AWS_BUCKET_NAME");
         PutObjectRequest request = PutObjectRequest.builder()
-                .bucket("Mavent")
+                .bucket(bucket)
                 .key("images/group.jpg")
                 .build();
-    System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
         s3Client.putObject(request, Paths.get("C:/Users/AD/Downloads/10.jpg"));
     }
 }
