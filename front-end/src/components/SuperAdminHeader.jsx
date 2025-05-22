@@ -14,11 +14,10 @@ function SuperAdminHeader() {
 
       {/* Right section */}
       <div className="flex items-center gap-4">
-        <FontAwesomeIcon icon={faBell} className="text-gray-600 text-lg" />
         <div className="flex items-center gap-2">
-          <FontAwesomeIcon icon={faUserTie} className="text-gray-600 text-lg" />
-          <span className="text-sm font-medium text-gray-700">
-            <span className="text-black">Super</span>Admin
+          <FontAwesomeIcon icon={faUserTie} className="text-gray-600 text-xl" />
+          <span className="text-xl font-medium text-gray-700">
+            <span className="text-black">Super</span> Admin
           </span>
         </div>
       </div>
