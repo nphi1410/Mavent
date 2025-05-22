@@ -3,6 +3,7 @@ package com.mavent.dev.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.mavent.dev.DTO.YourDataDTO;
+import com.mavent.dev.config.CloudConfig;
 import com.mavent.dev.entity.Item;
 import com.mavent.dev.repository.ItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,8 @@ public class UserController {
 
     @GetMapping("/greeting")
     public ResponseEntity<String> greet() {
+        CloudConfig cloud = new CloudConfig();
+        cloud.uploadFile();
         return ResponseEntity.ok("Hello from Spring Boot!");
     }
 
