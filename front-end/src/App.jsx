@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getGreeting } from './services/testService';
+import CreateEvent from './pages/createEvent';
+import SuperAdminSidebar from './components/SuperAdminSidebar';
 
 function App() {
   const [message, setMessage] = useState('');
@@ -9,14 +11,17 @@ function App() {
       .then(response => setMessage(response.data))
       .catch(error => {
         console.error('Error fetching greeting:', error);
-        setMessage('Failed to load message');
+        setMessage('Error to load message');
       });
   }, []);
 
   return (
-    <>
-      <h1>{message}</h1>
-    </>
+    <div className='w-screen h-screen'>
+      <SuperAdminSidebar />
+{/* 
+      <div className='w-full h-full flex justify-center items-center'>
+      </div> */}
+    </div>
   );
 }
 
