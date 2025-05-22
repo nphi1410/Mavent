@@ -1,18 +1,15 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendar, faCalendarDays, faPlus, faGauge, faUsers, faChevronRight, faChevronDown, faUser, faGear } from '@fortawesome/free-solid-svg-icons';
+import { faCalendar, faCalendarDays, faBell, faGauge, faUsers, faChevronRight, faChevronDown, faUser, faGear, faPersonShelter } from '@fortawesome/free-solid-svg-icons';
 
 function SuperAdminSidebar() {
   const [eventOpen, setEventOpen] = useState(true);
   const [userOpen, setUserOpen] = useState(true);
 
   return (
-    <div className="w-64 h-screen bg-white shadow-md flex flex-col justify-between border-r border-gray-200">
+    <div className="w-64 h-screen py-16 bg-white shadow-md flex flex-col justify-between border-r border-gray-200">
       {/* Top Section */}
       <div>
-        <div className="flex items-center justify-center p-4 text-xl font-bold border-b border-gray-200 text-gray-800">
-          Super Admin
-        </div>
 
         {/* Dashboard */}
         <div className="p-4 hover:bg-gray-100 cursor-pointer flex items-center gap-3 text-gray-800">
@@ -39,8 +36,8 @@ function SuperAdminSidebar() {
                 All Events
               </div>
               <div className="py-2 flex items-center gap-3 hover:text-black cursor-pointer text-gray-600">
-                <FontAwesomeIcon icon={faPlus} />
-                Create Event
+                <FontAwesomeIcon icon={faBell} />
+                Pending Events
               </div>
             </div>
           )}
@@ -64,15 +61,13 @@ function SuperAdminSidebar() {
                 <FontAwesomeIcon icon={faUsers} />
                 All Users
               </div>
+              <div className="py-2 flex items-center gap-3 hover:text-black cursor-pointer text-gray-600">
+                <FontAwesomeIcon icon={faPersonShelter} />
+                Invitations
+              </div>
             </div>
           )}
         </div>
-      </div>
-
-      {/* Settings */}
-      <div className="p-4 border-t border-gray-200 hover:bg-gray-100 cursor-pointer text-gray-800 flex items-center gap-3">
-        <FontAwesomeIcon icon={faGear} />
-        Settings
       </div>
     </div>
   );
