@@ -12,23 +12,25 @@ function Login() {
 
         {/* Right Panel */}
         <div className="w-1/2 flex flex-col items-center justify-center p-8 space-y-5">
-          <h2 className="text-xl font-semibold text-center">WELCOME TO<br />MAVENT</h2>
+          <h1 className="text-xl font-semibold text-center pb-4">WELCOME TO MAVENT</h1>
 
           <input
             type="text"
             placeholder="Username or email"
-            className="w-full px-4 py-2 border-2 border-black rounded-full focus:outline-none
-                    focus:border-blue-800 hover:border-blue-300 transition"
+            className=" px-4 py-2 border-2 border-black rounded-full focus:outline-none
+                  focus:border-blue-800 hover:border-blue-300 w-19/24
+                    transition"
           />
 
           <input
             type="password"
             placeholder="Password"
-            className="w-full px-4 py-2 border-2 border-black rounded-full focus:outline-none
-                    focus:border-blue-800 hover:border-blue-300 transition"
+            className=" px-4 py-2 border-2 border-black rounded-full focus:outline-none
+                  focus:border-blue-800 hover:border-blue-300 w-19/24
+                    transition"
           />
 
-          <button className="px-6 py-2 rounded-full bg-blue-900 text-blask hover:bg-white hover:text-blue-900 transition">
+          <button className="px-6 py-2 rounded-full bg-blue-900 text-white hover:bg-[#2f52bc] transition">
             LOGIN
           </button>
 
@@ -36,9 +38,9 @@ function Login() {
             Forgot Password?
           </a>
 
-          <p className="text-[10px]">
+          <p className="text-[0.9rem]">
             Don’t have an account? Click{' '}
-            <a href="#" className="underline hover:text-blue-900 text-xs">Here</a>
+            <a href="#" className="hover:underline hover:text-blue-900 text-xs">HERE</a>
           </p>
         </div>
       </div>
