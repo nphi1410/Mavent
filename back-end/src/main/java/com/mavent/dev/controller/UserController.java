@@ -3,13 +3,17 @@ package com.mavent.dev.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.mavent.dev.DTO.YourDataDTO;
+import com.mavent.dev.DTO.UserProfileDTO;
 import com.mavent.dev.config.CloudConfig;
 import com.mavent.dev.entity.Item;
 import com.mavent.dev.repository.ItemRepository;
+import com.mavent.dev.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -18,6 +22,9 @@ public class UserController {
 
     @Autowired
     private ItemRepository itemRepository;
+
+    @Autowired
+    private AccountService accountService;
 
     @GetMapping("/greeting")
     public ResponseEntity<String> greet() {
@@ -44,5 +51,25 @@ public class UserController {
         System.out.println(items.get(0).toString());
         return  ResponseEntity.ok(items);
     }
-}
 
+    @GetMapping("/user/profile")
+    public ResponseEntity<UserProfileDTO> getUserProfile() {
+        String username = "khoind";
+        UserProfileDTO profile = accountService.getUserProfile(username);
+        return ResponseEntity.ok(profile);
+    }
+
+    @PutMapping("/user/profile/update")
+    public ResponseEntity<Void> updateProfile(@RequestBody UserProfileDTO userProfileDTO) {
+        String username = "testuser";
+        accountService.updateProfile(username, userProfileDTO);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/user/avatar")
+    public ResponseEntity<String> uploadAvatar(@RequestParam("file") MultipartFile file) throws IOException {
+        String username = "testuser";
+        String avatarUrl = accountService.uploadAvatar(username, file.getBytes(), file.getOriginalFilename());
+        return ResponseEntity.ok(avatarUrl);
+    }
+}

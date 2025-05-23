@@ -3,7 +3,12 @@ import { getGreeting } from './services/testService';
 import SuperAdminSidebar from './components/SuperAdminSidebar';
 import SuperAdminHeader from './components/SuperAdminHeader';
 import SuperAdminDashboard from './pages/SuperAdminDashBoard';
-
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route
+} from "react-router-dom";
+import ProfilePage from './pages/ProfilePage';
 
 function App() {
   const [message, setMessage] = useState('');
@@ -16,18 +21,15 @@ function App() {
         setMessage('Error to load message');
       });
   }, []);
-
+  
   return (
-    <div className="h-screen flex">
-      <SuperAdminSidebar />
-      <div className="flex flex-col flex-1">
-        <SuperAdminHeader />
-
-        <main className="flex-1 overflow-y-auto p-10 bg-gray-50">
-            <SuperAdminDashboard />
-        </main>
+    <Router>
+      <div className="min-h-screen">
+        <Routes>
+          <Route path="/profile/*" element={<ProfilePage />} />
+        </Routes>
       </div>
-    </div>
+    </Router>
   );
 }
 
