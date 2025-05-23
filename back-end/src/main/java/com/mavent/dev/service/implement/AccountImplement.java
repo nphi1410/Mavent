@@ -32,4 +32,26 @@ public class AccountImplement implements AccountService {
                 account.getGender()
         );
     }
+
+    @Override
+    public void updateProfile(String username, UserProfileDTO userProfileDTO) {
+        Account account = accountRepositiory.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        account.setEmail(userProfileDTO.getEmail());
+        account.setFullName(userProfileDTO.getFullName());
+        account.setAvatarImg(userProfileDTO.getAvatarImg());
+        account.setPhone(userProfileDTO.getPhone());
+        account.setGender(userProfileDTO.getGender());
+        accountRepositiory.save(account);
+    }
+
+    @Override
+    public String uploadAvatar(String username, byte[] avatarBytes, String fileName) {
+        Account account = accountRepositiory.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        String avatarUrl = "/uploads/" + fileName;
+        account.setAvatarImg(avatarUrl);
+        accountRepositiory.save(account);
+        return avatarUrl;
+    }
 }
