@@ -21,8 +21,8 @@ public class UserController {
 
     @GetMapping("/greeting")
     public ResponseEntity<String> greet() {
-        CloudConfig cloud = new CloudConfig();
-        cloud.uploadFile();
+//        CloudConfig cloud = new CloudConfig();
+//        cloud.uploadFile();
         return ResponseEntity.ok("Hello from Spring Boot!");
     }
 
