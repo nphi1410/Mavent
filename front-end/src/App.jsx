@@ -1,9 +1,14 @@
 import { useEffect, useState } from 'react';
 import { getGreeting } from './services/testService';
-import CreateEvent from './pages/createEvent';
 import SuperAdminSidebar from './components/SuperAdminSidebar';
-import Register from './pages/Register';
-import Login from './pages/Login';
+import SuperAdminHeader from './components/SuperAdminHeader';
+import SuperAdminDashboard from './pages/SuperAdminDashBoard';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route
+} from "react-router-dom";
+import ProfilePage from './pages/ProfilePage';
 
 function App() {
   const [message, setMessage] = useState('');
@@ -16,13 +21,15 @@ function App() {
         setMessage('Error to load message');
       });
   }, []);
-
+  
   return (
-    <div className='w-screen h-screen'>
-{/* 
-      <div className='w-full h-full flex justify-center items-center'>
-      </div> */}
-    </div>
+    <Router>
+      <div className="min-h-screen">
+        <Routes>
+          <Route path="/profile/*" element={<ProfilePage />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
