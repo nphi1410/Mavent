@@ -1,14 +1,14 @@
 import React from 'react';
-import SideBar from '../components/SidebarSettings';
+import Sidebar from '../components/SidebarSettings';
 import ProfileContent from '../components/ProfileContent';
-import Header from '../components/Header';
+import Header from '../components/common/Header';
 
 const ProfilePage = () => {
   return (
     <div className="flex flex-col min-h-screen w-screen bg-gray-100">
       <Header/>
       <div className="flex flex-grow w-full">
-        <SideBar/>
+        <Sidebar/>
         <ProfileContent/>
       </div>
     </div>

@@ -1,11 +1,8 @@
 package com.mavent.dev.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.mavent.dev.DTO.YourDataDTO;
-import com.mavent.dev.config.CloudConfig;
-import com.mavent.dev.entity.Item;
-import com.mavent.dev.repository.ItemRepository;
+import com.mavent.dev.entity.Account;
+import com.mavent.dev.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +14,36 @@ import java.util.List;
 public class UserController {
 
     @Autowired
-    private ItemRepository itemRepository;
+    private AccountService accountService;
 
+    // DTO for login request
+    public static class LoginRequest {
+        public String username;
+        public String password;
+    }
+
+//    @PostMapping("/login")
+//    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpSession session) {
+//        // Replace with real authentication logic
+//        if (accountService.checkLogin(loginRequest.username, loginRequest.password)) {
+//            session.setAttribute("username", loginRequest.username);
+//            return ResponseEntity.ok().build();
+//        } else {
+//            return ResponseEntity.status(401).body("Invalid credentials");
+//        }
+//    }
+
+//    @GetMapping("/user/profile")
+//    public ResponseEntity<UserProfileDTO> getUserProfile(HttpSession session) {
+////        String username = (String) session.getAttribute("username");
+//        String username = "khoind"; // For testing purposes, replace with session attribute in production
+//        if (username == null) {
+//            return ResponseEntity.status(401).build();
+//        }
+//        UserProfileDTO profile = accountService.getUserProfile(username);
+//        return ResponseEntity.ok(profile);
+//    }
+//
     @GetMapping("/greeting")
     public ResponseEntity<String> greet() {
 //        CloudConfig cloud = new CloudConfig();
@@ -32,17 +57,29 @@ public class UserController {
         return ResponseEntity.ok("Received: " + data);
     }
 
-    @GetMapping("/info")
-    public ResponseEntity<Item> getItemDetails(@RequestParam String itemId) {
-        return ResponseEntity.ok(itemRepository.findByItemId(itemId));
-    }
+//    @PutMapping("/user/profile/update")
+//    public ResponseEntity<Void> updateProfile(@RequestBody UserProfileDTO userProfileDTO, HttpSession session) {
+//        String username = (String) session.getAttribute("username");
+//        if (username == null) {
+//            return ResponseEntity.status(401).build();
+//        }
+//        accountService.updateProfile(username, userProfileDTO);
+//        return ResponseEntity.ok().build();
+//    }
 
-    @GetMapping("/item")
-    public ResponseEntity<List<Item>> getItems(){
-        List<Item> items = itemRepository.findAll();
+//    @PostMapping("/user/avatar")
+//    public ResponseEntity<String> uploadAvatar(@RequestParam("file") MultipartFile file, HttpSession session) throws IOException {
+//        String username = (String) session.getAttribute("username");
+//        if (username == null) {
+//            return ResponseEntity.status(401).build();
+//        }
+//        String avatarUrl = accountService.uploadAvatar(username, file.getBytes(), file.getOriginalFilename());
+//        return ResponseEntity.ok(avatarUrl);
+//    }
 
-        System.out.println(items.get(0).toString());
-        return  ResponseEntity.ok(items);
+    @GetMapping("/accounts")
+    public ResponseEntity<List<Account>> getAllAccounts() {
+        List<Account> accounts = accountService.findAllAccount();
+        return ResponseEntity.ok(accounts);
     }
 }
-
