@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { getGreeting } from './services/testService';
 import CreateEvent from './pages/createEvent';
 import SuperAdminSidebar from './components/SuperAdminSidebar';
+import Register from './pages/Register';
+import Login from './pages/Login';
 
 function App() {
   const [message, setMessage] = useState('');
@@ -17,7 +19,6 @@ function App() {
 
   return (
     <div className='w-screen h-screen'>
-      <Login />
 {/* 
       <div className='w-full h-full flex justify-center items-center'>
       </div> */}

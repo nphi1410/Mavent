@@ -14,6 +14,7 @@ function Login() {
         <div className="w-1/2 flex flex-col items-center justify-center p-8 space-y-5">
           <h1 className="text-xl font-semibold text-center pb-4">WELCOME TO MAVENT</h1>
 
+          <form onSubmit={}
           <input
             type="text"
             placeholder="Username or email"
@@ -34,13 +35,13 @@ function Login() {
             LOGIN
           </button>
 
-          <Link to="/about" className="text-xs text-blue-900 hover:underline">
+          {/* <Link to="/about" className="text-xs text-blue-900 hover:underline">
             Forgot Password?
-          </Link>
+          </Link> */}
 
           <p className="text-[0.9rem]">
             Don’t have an account? Click{' '}
-            <Link to="/about" className="hover:underline hover:text-blue-900 text-xs">HERE</Link>
+            {/* <Link to="/about" className="hover:underline hover:text-blue-900 text-xs">HERE</Link> */}
           </p>
         </div>
       </div>
