@@ -7,4 +7,15 @@ const api = axios.create({
 
 export const getGreeting = () => api.get("/greeting");
 
+export const getUserProfile = () => api.get("/user/profile");
+
+export const updateProfile = (data) => api.put("/user/profile", data);
+
+export const uploadAvatar = (formData) => api.post("/user/avatar", formData, {
+    headers: {
+        'Content-Type': 'multipart/form-data'
+    }
+});
+
+export const getAllAccounts = () => api.get("/accounts");
 export const submitExample = (data) => api.post("/submit", data);

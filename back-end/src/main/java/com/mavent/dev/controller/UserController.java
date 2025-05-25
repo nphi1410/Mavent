@@ -27,19 +27,40 @@ import java.util.List;
 public class UserController {
 
     @Autowired
-    private ItemRepository itemRepository;
+    private AccountRepository accountRepository;
 
     @Autowired
     private AccountService accountService;
 
-    @Autowired
-    private AccountRepository accountRepository;
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestBody LoginDTO loginDTO, HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        boolean success = accountService.checkLogin(loginDTO.getUsername(), loginDTO.getPassword());
+        if (success) {
+            Account acc = accountRepository.findByUsername(loginDTO.getUsername())
+                    .orElseThrow(() -> new RuntimeException("Account not found"));
+            // Here you can set the account in the session or perform any other logic needed after login
+            // For example, you might want to store the account in the session
+            session.setAttribute("account", acc);
+            session.setAttribute("username", loginDTO.getUsername());
+            session.setAttribute("isSuperAdmin", acc.getSystemRole() != null && !acc.getSystemRole().equals("USER"));
+
+            String username = (String) session.getAttribute("username");
+            System.out.println("Username from sessionaaa: " + username);
+            System.out.println("Session ID: " + session.getId());
+
+            return ResponseEntity.ok("Login successful as " + acc.getSystemRole());
+        } else {
+            return ResponseEntity.status(401).body("Invalid username or password");
+        }
+    }
 
     @GetMapping("/user/profile")
     public ResponseEntity<UserProfileDTO> getUserProfile(HttpServletRequest request) {
         HttpSession session = request.getSession();
         String username = (String) session.getAttribute("username");
         System.out.println("Username from session: " + username);
+        System.out.println("Session ID: " + session.getId());
         if (username == null) {
             return ResponseEntity.status(401).build();
         }
@@ -60,19 +81,6 @@ public class UserController {
         return ResponseEntity.ok("Received: " + data);
     }
 
-    @GetMapping("/info")
-    public ResponseEntity<Item> getItemDetails(@RequestParam String itemId) {
-        return ResponseEntity.ok(itemRepository.findByItemId(itemId));
-    }
-
-    @GetMapping("/item")
-    public ResponseEntity<List<Item>> getItems(){
-        List<Item> items = itemRepository.findAll();
-
-        System.out.println(items.get(0).toString());
-        return  ResponseEntity.ok(items);
-    }
-
     @PutMapping("/user/profile/update")
     public ResponseEntity<Void> updateProfile(@RequestBody UserProfileDTO userProfileDTO, HttpSession session) {
         String username = (String) session.getAttribute("username");
@@ -87,27 +95,5 @@ public class UserController {
     public ResponseEntity<List<Account>> getAllAccounts() {
         List<Account> accounts = accountService.findAllAccount();
         return ResponseEntity.ok(accounts);
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginDTO loginDTO, HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        boolean success = accountService.checkLogin(loginDTO.getUsername(), loginDTO.getPassword());
-        if (success) {
-            Account acc = accountRepository.findByUsername(loginDTO.getUsername())
-                    .orElseThrow(() -> new RuntimeException("Account not found"));
-            // Set session attributes
-            session.setAttribute("account", acc);
-            session.setAttribute("username", loginDTO.getUsername());
-            session.setAttribute("isSuperAdmin", acc.getSystemRole() != null && !acc.getSystemRole().equals("USER"));
-
-//            test session attribute
-            String usernameSession = (String) session.getAttribute("username");
-            System.out.println("Username from session line 106: " + usernameSession);
-
-            return ResponseEntity.ok("Login successful as " + acc.getUsername() + " with role of " + acc.getSystemRole());
-        } else {
-            return ResponseEntity.status(401).body("Invalid username or password");
-        }
     }
 }
