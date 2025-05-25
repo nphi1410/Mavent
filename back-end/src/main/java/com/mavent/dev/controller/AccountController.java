@@ -4,6 +4,7 @@ import com.mavent.dev.DTO.LoginDTO;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.service.AccountService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -32,16 +33,20 @@ public class AccountController {
     }
 
     @PostMapping()
-    public ResponseEntity<String> login(@RequestBody LoginDTO loginDTO, HttpSession session) {
+    public ResponseEntity<String> login(@RequestBody LoginDTO loginDTO, HttpServletRequest request) {
+        HttpSession session = request.getSession();
         boolean success = accountService.checkLogin(loginDTO.getUsername(), loginDTO.getPassword());
         if (success) {
             Account acc = accountRepository.findByUsername(loginDTO.getUsername())
                     .orElseThrow(() -> new RuntimeException("Account not found"));
-            // Here you can set the account in the session or perform any other logic needed after login
-            // For example, you might want to store the account in the session
+            // Set session attributes
             session.setAttribute("account", acc);
             session.setAttribute("username", loginDTO.getUsername());
             session.setAttribute("isSuperAdmin", acc.getSystemRole() != null && !acc.getSystemRole().equals("USER"));
+
+//            test session attribute
+//            String usernameSession = (String) session.getAttribute("username");
+//            System.out.println("Username from session: " + usernameSession);
 
             return ResponseEntity.ok("Login successful as " + acc.getSystemRole());
         } else {
