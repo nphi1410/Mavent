@@ -1,13 +1,7 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
-  faHome, 
-  faCalendarAlt, 
-  faUsers, 
-  faChartBar, 
-  faCreditCard, 
-  faCog, 
-  faQuestionCircle 
+  faUsers
 } from '@fortawesome/free-solid-svg-icons';
 
 // Sidebar component for admin dashboard

@@ -1,108 +1,90 @@
-import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
+import React, { useState, useEffect } from "react";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faX } from '@fortawesome/free-solid-svg-icons';
 
 /**
- * Reusable Modal component
+ * Modal component using only React and Tailwind CSS
+ * @param {Object} props - Component props
+ * @param {boolean} props.isOpen - Controls whether the modal is visible
+ * @param {function} props.onClose - Function called when modal is closed
+ * @param {string} props.title - Modal title
+ * @param {React.ReactNode} props.children - Modal content
+ * @param {React.ReactNode} props.footer - Modal footer content
  */
-const Modal = ({
-  isOpen,
-  onClose,
-  title,
-  children,
-  size = 'medium',
-  closeOnOverlayClick = true,
-}) => {
-  const [isVisible, setIsVisible] = useState(isOpen);
-
+const Modal = ({ isOpen = false, onClose, title, children, footer }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  
   useEffect(() => {
     setIsVisible(isOpen);
     
-    // Disable body scroll when modal is open
+    // Prevent scrolling on body when modal is open
     if (isOpen) {
       document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
     }
     
-    // Cleanup function
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
     };
   }, [isOpen]);
-
-  // Handle overlay click
-  const handleOverlayClick = (e) => {
-    if (e.target === e.currentTarget && closeOnOverlayClick) {
-      onClose();
-    }
-  };
-
-  // Handle ESC key press
-  useEffect(() => {
-    const handleEsc = (event) => {
-      if (event.key === 'Escape' && isVisible) {
-        onClose();
-      }
-    };
-    
-    window.addEventListener('keydown', handleEsc);
-    
-    return () => {
-      window.removeEventListener('keydown', handleEsc);
-    };
-  }, [isVisible, onClose]);
-
-  // Size classes
-  const sizeClasses = {
-    small: 'max-w-md',
-    medium: 'max-w-lg',
-    large: 'max-w-2xl',
-    xlarge: 'max-w-4xl',
-    full: 'max-w-full mx-4',
-  };
-
+  
   if (!isVisible) return null;
-
+  
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
-      onClick={handleOverlayClick}
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop overlay */}
       <div 
-        className={`${sizeClasses[size]} w-full bg-white rounded-lg shadow-lg overflow-hidden transform transition-all`}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modal-title"
-      >
-        <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-          <h3 id="modal-title" className="text-lg font-medium text-gray-900">
-            {title}
-          </h3>
-          <button
-            type="button"
-            className="text-gray-400 hover:text-gray-500 focus:outline-none"
-            onClick={onClose}
-            aria-label="Close modal"
-          >
-            <span className="text-2xl">&times;</span>
-          </button>
-        </div>
+        className="fixed inset-0 bg-black bg-opacity-80 transition-opacity" 
+        onClick={onClose}
+      />
+      
+      {/* Modal container */}
+      <div className="relative z-10 w-full max-w-lg bg-white rounded-lg shadow-lg p-6 mx-4 transition-all">
+        {/* Close button */}
+        <button 
+          className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
+          onClick={onClose}
+        >
+          <FontAwesomeIcon icon={faX} className="h-4 w-4" />
+          <span className="sr-only">Close</span>
+        </button>
         
-        <div className="px-6 py-4">
-          {children}
-        </div>
+        {/* Header */}
+        {title && (
+          <div className="mb-4 text-center sm:text-left">
+            <h3 className="text-lg font-semibold">{title}</h3>
+          </div>
+        )}
+        
+        {/* Content */}
+        <div>{children}</div>
+        
+        {/* Footer */}
+        {footer && (
+          <div className="mt-6 flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-Modal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  title: PropTypes.string.isRequired,
-  children: PropTypes.node.isRequired,
-  size: PropTypes.oneOf(['small', 'medium', 'large', 'xlarge', 'full']),
-  closeOnOverlayClick: PropTypes.bool,
+// For backward compatibility
+export const Dialog = Modal;
+export const DialogContent = ({ children }) => <>{children}</>;
+export const DialogHeader = ({ children }) => <div className="mb-4">{children}</div>;
+export const DialogFooter = ({ children }) => <div className="mt-4 flex justify-end">{children}</div>;
+export const DialogTitle = ({ children }) => <h3 className="text-lg font-semibold">{children}</h3>;
+export const DialogDescription = ({ children }) => <p className="text-gray-500 text-sm">{children}</p>;
+
+// Export named components for existing usage
+export {
+  Modal as DialogPortal,
+  Modal as DialogOverlay,
+  Modal as DialogTrigger,
+  Modal as DialogClose,
 };
 
 export default Modal;

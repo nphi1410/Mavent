@@ -1,59 +1,46 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+
+// Map of button variants to class names
+const BUTTON_VARIANTS = {
+  default: "bg-blue-600 text-white hover:bg-blue-700",
+  destructive: "bg-red-600 text-white hover:bg-red-700",
+  outline: "border border-gray-300 bg-transparent hover:bg-gray-100",
+  secondary: "bg-gray-200 text-gray-800 hover:bg-gray-300",
+  ghost: "bg-transparent hover:bg-gray-100",
+  link: "bg-transparent text-blue-600 underline-offset-4 hover:underline"
+};
+
+// Map of button sizes to class names
+const BUTTON_SIZES = {
+  default: "h-10 px-4 py-2",
+  sm: "h-9 rounded-md px-3 text-sm",
+  lg: "h-11 rounded-md px-8 text-lg",
+  icon: "h-10 w-10"
+};
 
 /**
- * Reusable Button component
+ * Button component using only React and Tailwind CSS
  */
 const Button = ({
   children,
-  type = 'button',
-  variant = 'primary',
-  size = 'medium',
-  fullWidth = false,
+  className = "",
   disabled = false,
+  variant = "default",
+  size = "default",
+  type = "button",
   onClick,
-  className = '',
   ...props
 }) => {
-  // Base classes
-  const baseClasses = 'font-medium rounded focus:outline-none transition-colors';
+  const baseClasses = "inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50";
+  const variantClasses = BUTTON_VARIANTS[variant] || BUTTON_VARIANTS.default;
+  const sizeClasses = BUTTON_SIZES[size] || BUTTON_SIZES.default;
   
-  // Variant classes
-  const variantClasses = {
-    primary: 'bg-blue-600 hover:bg-blue-700 text-white',
-    secondary: 'bg-gray-600 hover:bg-gray-700 text-white',
-    outline: 'border border-blue-600 text-blue-600 hover:bg-blue-50',
-    danger: 'bg-red-600 hover:bg-red-700 text-white',
-    success: 'bg-green-600 hover:bg-green-700 text-white',
-  };
-  
-  // Size classes
-  const sizeClasses = {
-    small: 'text-xs py-1 px-2',
-    medium: 'text-sm py-2 px-4',
-    large: 'text-base py-3 px-6',
-  };
-  
-  // Width classes
-  const widthClasses = fullWidth ? 'w-full' : '';
-  
-  // Disabled classes
-  const disabledClasses = disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer';
-  
-  // Combine all classes
-  const buttonClasses = `
-    ${baseClasses}
-    ${variantClasses[variant]}
-    ${sizeClasses[size]}
-    ${widthClasses}
-    ${disabledClasses}
-    ${className}
-  `;
+  const classes = [baseClasses, variantClasses, sizeClasses, className].filter(Boolean).join(" ");
   
   return (
     <button
       type={type}
-      className={buttonClasses}
+      className={classes}
       disabled={disabled}
       onClick={onClick}
       {...props}
@@ -63,15 +50,5 @@ const Button = ({
   );
 };
 
-Button.propTypes = {
-  children: PropTypes.node.isRequired,
-  type: PropTypes.oneOf(['button', 'submit', 'reset']),
-  variant: PropTypes.oneOf(['primary', 'secondary', 'outline', 'danger', 'success']),
-  size: PropTypes.oneOf(['small', 'medium', 'large']),
-  fullWidth: PropTypes.bool,
-  disabled: PropTypes.bool,
-  onClick: PropTypes.func,
-  className: PropTypes.string,
-};
-
+export { Button, BUTTON_VARIANTS as buttonVariants };
 export default Button;
