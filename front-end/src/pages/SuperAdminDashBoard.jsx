@@ -33,7 +33,7 @@ const SuperAdminDashboard = () => {
 
     ];
     return (
-        <div className="py-10 w-screen">
+        <div className="py-10 w-full">
             <h1 className="text-3xl font-bold text-gray-800 mb-4">Dashboard</h1>
             <p className="text-gray-500 mb-6">Welcome back, Super Admin!</p>
 

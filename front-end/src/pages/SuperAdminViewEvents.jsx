@@ -1,34 +1,28 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faEllipsis, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { getEvents } from '../services/eventService';
+
 
 function SuperAdminViewEvents() {
-    const eventsData = [
-        { name: "Codefest 2024", date: "6/15/2025", location: "Hoa Lac, Ha Noi", status: "Upcoming", members: 500 },
-        { name: "Codefest 2025", date: "6/15/2025", location: "Hoa Lac, Ha Noi", status: "Completed", members: 500 },
-        { name: "Codefest 2026", date: "6/15/2025", location: "Hoa Lac, Ha Noi", status: "Upcoming", members: 500 },
-        { name: "Codefest 2027", date: "6/15/2025", location: "Hoa Lac, Ha Noi", status: "Completed", members: 500 },
-        { name: "Codefest 2028", date: "6/15/2025", location: "Hoa Lac, Ha Noi", status: "Completed", members: 500 },
-        { name: "Codefest 2029", date: "6/15/2025", location: "Hoa Lac, Ha Noi", status: "Completed", members: 500 },
-        { name: "Codefest 2030", date: "6/15/2025", location: "Hoa Lac, Ha Noi", status: "Upcoming", members: 500 },
-        { name: "Codefest 2031", date: "6/15/2025", location: "Hoa Lac, Ha Noi", status: "Upcoming", members: 500 },
-        { name: "Codefest 2032", date: "6/15/2025", location: "Hoa Lac, Ha Noi", status: "Upcoming", members: 500 },
-    ];
 
     const statusOptions = ["All Statuses", "Upcoming", "Completed", "Cancelled"];
 
     const [statusFilter, setStatusFilter] = useState("All Statuses");
     const [searchTerm, setSearchTerm] = useState("");
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [events, setEvents] = useState([]);
 
-    const filteredEvents = eventsData.filter((event) => {
-        const matchesStatus = statusFilter === "All Statuses" || event.status === statusFilter;
-        const matchesSearch = event.name.toLowerCase().includes(searchTerm.toLowerCase());
-        return matchesStatus && matchesSearch;
-    });
+    useEffect(() => {
+        const fetchEvents = async () => {
+            const data = await getEvents();
+            setEvents(data);
+        };
+        fetchEvents();
+    }, []);
 
     return (
-        <div className="py-10 w-screen">
+        <div className="py-10 w-full">
             <h1 className="text-3xl font-bold text-gray-800 mb-4">Events</h1>
             <p className="text-gray-500 mb-6">Manage and view all your events</p>
 
@@ -78,32 +72,27 @@ function SuperAdminViewEvents() {
                         <thead>
                             <tr className="text-sm text-gray-500 border-b border-gray-200">
                                 <th className="p-2 font-medium ">Event Name</th>
-                                <th className="p-2 font-medium">Date</th>
+                                <th className="p-2 font-medium">Start Date</th>
+                                <th className="p-2 font-medium">End Date</th>
                                 <th className="p-2 font-medium">Location</th>
                                 <th className="p-2 font-medium">Status</th>
-                                <th className="p-2 font-medium">Members</th>
                                 <th className="p-2 font-medium">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredEvents.map((event, idx) => (
-                                <tr key={idx} className="border-b border-gray-200">
-                                    <td className="p-2 font-medium text-black whitespace-nowrap">{event.name}</td>
-                                    <td className="p-2 whitespace-nowrap text-gray-600">{event.date}</td>
-                                    <td className="p-2 whitespace-nowrap text-gray-600">{event.location}</td>
+                            {events.map((event) => (
+                                <tr key={event.eventId} className="border-b border-gray-200">
+                                    <td className="p-2 font-medium text-black whitespace-nowrap">{event.eventName}</td>
+                                    <td className="p-2 whitespace-nowrap text-gray-600">{event.eventStartDate.slice(0, 10)}</td>
+                                    <td className="p-2 whitespace-nowrap text-gray-600">{event.eventEndDate.slice(0, 10)}</td>
+                                    <td className="p-2 whitespace-nowrap text-gray-600">{event.eventLocation}</td>
                                     <td className="p-2 whitespace-nowrap text-gray-600">
                                         <span
-                                            className={`text-xs font-semibold px-2 py-1 rounded-full ${event.status === "Upcoming"
-                                                ? "bg-black text-white"
-                                                : event.status === "Completed"
-                                                    ? "bg-gray-200 text-black"
-                                                    : "bg-red-200 text-black"
-                                                }`}
+                                            className="text-xs font-semibold px-2 py-1 rounded-full"
                                         >
-                                            {event.status}
+                                            {event.eventStatus}
                                         </span>
                                     </td>
-                                    <td className="p-2 whitespace-nowrap text-gray-600">{event.members}</td>
                                     <td className="p-2 whitespace-nowrap text-right flex justify-start items-center">
                                         <FontAwesomeIcon icon={faEllipsis} className="text-gray-500 cursor-pointer" />
                                     </td>
@@ -117,4 +106,29 @@ function SuperAdminViewEvents() {
     );
 }
 
-export default SuperAdminViewEvents
+export default SuperAdminViewEvents;
+
+// const SuperAdminViewEvents = () => {
+
+//     return (
+//         <div className="container mx-auto p-4 bg-amber-50 text-black">
+//             <h1>Danh sách Sự kiện</h1>
+//             <ul className="list-none p-0 m-0">
+//                 {events.map((event) => (
+//                     <li key={event.eventId}
+//                         className="border border-gray-200 rounded-lg p-4 bg-white mb-4">
+//                         <strong>{event.eventName}</strong> - {event.eventDescription}
+//                         <br />Địa điểm: {event.eventLocation}
+//                         <br />Thời gian: {event.eventStartDate} đến {event.eventEndDate}
+//                         <br />D-Day Info: {event.eventDDayInfo}
+//                         <br />Số thành viên tối đa: {event.eventMaxMember}
+//                         <br />Số người tham gia tối đa: {event.eventMaxParticipant}
+//                         <hr />
+//                     </li>
+//                 ))}
+//             </ul>
+//         </div>
+//     );
+// };
+
+// export default SuperAdminViewEvents;
