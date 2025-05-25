@@ -1,19 +1,19 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { logout } from '../../store/slices/authSlice';
+import React, { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const location = useLocation();
-  const dispatch = useDispatch();
-  const { isAuthenticated, currentUser } = useSelector((state) => ({
-    isAuthenticated: state.auth.isAuthenticated,
-    currentUser: state.user.currentUser,
-  }));
+  const navigate = useNavigate();
+  // Mock authentication state with useState (replace with context or localStorage in real app)
+  const [isAuthenticated, setIsAuthenticated] = useState(localStorage.getItem('token') ? true : true);
+  const [currentUser, setCurrentUser] = useState({ username: 'John Doe' });
 
   // Handle logout
   const handleLogout = () => {
-    dispatch(logout());
+    // Remove token from localStorage
+    localStorage.removeItem('token');
+    setIsAuthenticated(false);
+    navigate('/');
   };
 
   // Check if the link is active
