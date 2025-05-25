@@ -4,7 +4,6 @@ import com.mavent.dev.DTO.UserProfileDTO;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.service.AccountService;
-import com.mavent.dev.service.S3UploaderService; // <-- Import S3UploaderService mới
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -17,9 +16,6 @@ public class AccountImplement implements AccountService {
 
     @Autowired
     private AccountRepository accountRepository;
-
-    @Autowired
-    private S3UploaderService s3UploaderService; // <-- Inject S3UploaderService mới thay vì CloudConfig
 
     @Override
     public void register(Account accountInfo) {
@@ -40,47 +36,10 @@ public class AccountImplement implements AccountService {
 
         account.setEmail(userProfileDTO.getEmail());
         account.setFullName(userProfileDTO.getFullName());
-        account.setPhone(userProfileDTO.getPhone());
+        account.setPhoneNumber(userProfileDTO.getPhoneNumber());
         account.setGender(userProfileDTO.getGender());
 
         accountRepository.save(account);
-    }
-
-    @Override
-    public String uploadAvatar(String username, MultipartFile avatarFile) throws IOException {
-        Account account = accountRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Account not found with username: " + username));
-
-        if (avatarFile.isEmpty()) {
-            throw new IllegalArgumentException("Avatar file cannot be empty.");
-        }
-        if (!isImageFile(avatarFile)) {
-            throw new IllegalArgumentException("Only image files (JPEG, PNG, GIF) are allowed for avatar.");
-        }
-
-        // Tải file lên dịch vụ đám mây bằng S3UploaderService
-        String avatarUrl = s3UploaderService.uploadFile(avatarFile, "avatars"); // "avatars" là thư mục trong bucket
-
-        account.setAvatarImg(avatarUrl);
-        accountRepository.save(account);
-
-        return avatarUrl;
-    }
-
-    @Override
-    public String uploadAvatar(String username, byte[] avatarBytes, String fileName) {
-        Account account = accountRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Account not found with username: " + username));
-
-        if (avatarBytes == null || avatarBytes.length == 0) {
-            throw new IllegalArgumentException("Avatar file cannot be empty.");
-        }
-        // You may want to add more checks for file type based on fileName if needed
-
-        String avatarUrl = s3UploaderService.uploadFile(avatarBytes, fileName, "avatars");
-        account.setAvatarImg(avatarUrl);
-        accountRepository.save(account);
-        return avatarUrl;
     }
 
     @Override
@@ -107,16 +66,12 @@ public class AccountImplement implements AccountService {
         dto.setEmail(account.getEmail());
         dto.setFullName(account.getFullName());
         dto.setAvatarImg(account.getAvatarImg());
-        dto.setPhone(account.getPhone());
+        dto.setPhoneNumber(account.getPhoneNumber());
         dto.setGender(account.getGender());
+        dto.setDateOfBirth(account.getDateOfBirth());
+        dto.setStudentId(account.getStudentId());
         return dto;
     }
 
-    private boolean isImageFile(MultipartFile file) {
-        String contentType = file.getContentType();
-        return contentType != null && (contentType.equals("image/jpeg") ||
-                contentType.equals("image/png") ||
-                contentType.equals("image/gif"));
-    }
 }
 

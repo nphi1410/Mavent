@@ -5,13 +5,13 @@ import Header from '../components/common/Header';
 
 const ProfilePage = () => {
   return (
-    <div className="flex flex-col min-h-screen w-screen bg-gray-100">
-      <Header/>
-      <div className="flex flex-grow w-full">
-        <Sidebar/>
-        <ProfileContent/>
+      <div className="flex h-screen w-screen bg-gray-100">
+        <Sidebar />
+        
+        <ProfileContent />
+        
       </div>
-    </div>
+    
   );
 };
 

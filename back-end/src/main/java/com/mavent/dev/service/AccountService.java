@@ -11,8 +11,6 @@ public interface AccountService {
     void register(Account accountInfo);
     UserProfileDTO getUserProfile(String username);
     void updateProfile(String username, UserProfileDTO userProfileDTO);
-    String uploadAvatar(String username, byte[] avatarBytes, String fileName);
-    String uploadAvatar(String username, MultipartFile avatarFile) throws IOException;
     boolean checkLogin(String username, String password);
     List<Account> findAllAccount();
 }

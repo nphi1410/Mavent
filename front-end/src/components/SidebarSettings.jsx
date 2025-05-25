@@ -12,7 +12,7 @@ const Sidebar = () => {
     }`;
 
   return (
-    <aside className="w-[280px] bg-white p-[30px_20px] border-r border-gray-100 box-border flex-shrink-0">
+    <aside className="w-64 bg-white px-4 py-8 border-r border-gray-100 box-border flex-shrink-0">
       <h2 className="text-3xl font-bold text-[#0d2c5a] mt-0 mb-10 pl-4">Settings</h2>
       <nav>
         <ul className="list-none p-0 m-0">
@@ -22,7 +22,7 @@ const Sidebar = () => {
               className={navLinkClass}
             >
               <div className="flex items-center gap-3">
-                <FontAwesomeIcon icon={faUser} className="w-5 h-5" />
+                {/* <FontAwesomeIcon icon={faUser} className="w-5 h-5" /> */}
                 <span>Account</span>
               </div>
             </NavLink>

@@ -2,13 +2,16 @@ package com.mavent.dev.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.mavent.dev.DTO.LoginDTO;
 import com.mavent.dev.DTO.YourDataDTO;
 import com.mavent.dev.DTO.UserProfileDTO;
 import com.mavent.dev.config.CloudConfig;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.Item;
+import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.repository.ItemRepository;
 import com.mavent.dev.service.AccountService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +27,7 @@ import java.util.List;
 public class UserController {
 
     @Autowired
-    private ItemRepository itemRepository;
+    private AccountRepository accountRepository;
 
     @Autowired
     private AccountService accountService;
@@ -35,21 +38,36 @@ public class UserController {
         public String password;
     }
 
+
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpSession session) {
-        // Replace with real authentication logic
-        if (accountService.checkLogin(loginRequest.username, loginRequest.password)) {
-            session.setAttribute("username", loginRequest.username);
-            return ResponseEntity.ok().build();
+    public ResponseEntity<String> login(@RequestBody LoginDTO loginDTO, HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        boolean success = accountService.checkLogin(loginDTO.getUsername(), loginDTO.getPassword());
+        if (success) {
+            Account acc = accountRepository.findByUsername(loginDTO.getUsername())
+                    .orElseThrow(() -> new RuntimeException("Account not found"));
+            // Here you can set the account in the session or perform any other logic needed after login
+            // For example, you might want to store the account in the session
+            session.setAttribute("account", acc);
+            session.setAttribute("username", loginDTO.getUsername());
+            session.setAttribute("isSuperAdmin", acc.getSystemRole() != null && !acc.getSystemRole().equals("USER"));
+
+            String username = (String) session.getAttribute("username");
+            System.out.println("Username from sessionaaa: " + username);
+            System.out.println("Session ID: " + session.getId());
+
+            return ResponseEntity.ok("Login successful as " + acc.getSystemRole());
         } else {
-            return ResponseEntity.status(401).body("Invalid credentials");
+            return ResponseEntity.status(401).body("Invalid username or password");
         }
     }
 
     @GetMapping("/user/profile")
-    public ResponseEntity<UserProfileDTO> getUserProfile(HttpSession session) {
-//        String username = (String) session.getAttribute("username");
-        String username = "khoind"; // For testing purposes, replace with session attribute in production
+    public ResponseEntity<UserProfileDTO> getUserProfile(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        String username = (String) session.getAttribute("username");
+        System.out.println("Username from session: " + username);
+        System.out.println("Session ID: " + session.getId());
         if (username == null) {
             return ResponseEntity.status(401).build();
         }
@@ -70,19 +88,6 @@ public class UserController {
         return ResponseEntity.ok("Received: " + data);
     }
 
-    @GetMapping("/info")
-    public ResponseEntity<Item> getItemDetails(@RequestParam String itemId) {
-        return ResponseEntity.ok(itemRepository.findByItemId(itemId));
-    }
-
-    @GetMapping("/item")
-    public ResponseEntity<List<Item>> getItems(){
-        List<Item> items = itemRepository.findAll();
-
-        System.out.println(items.get(0).toString());
-        return  ResponseEntity.ok(items);
-    }
-
     @PutMapping("/user/profile/update")
     public ResponseEntity<Void> updateProfile(@RequestBody UserProfileDTO userProfileDTO, HttpSession session) {
         String username = (String) session.getAttribute("username");
@@ -91,16 +96,6 @@ public class UserController {
         }
         accountService.updateProfile(username, userProfileDTO);
         return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/user/avatar")
-    public ResponseEntity<String> uploadAvatar(@RequestParam("file") MultipartFile file, HttpSession session) throws IOException {
-        String username = (String) session.getAttribute("username");
-        if (username == null) {
-            return ResponseEntity.status(401).build();
-        }
-        String avatarUrl = accountService.uploadAvatar(username, file.getBytes(), file.getOriginalFilename());
-        return ResponseEntity.ok(avatarUrl);
     }
 
     @GetMapping("/accounts")
