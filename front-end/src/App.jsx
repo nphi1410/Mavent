@@ -3,6 +3,7 @@ import { getGreeting } from './services/testService';
 import SuperAdminSidebar from './components/SuperAdminSidebar';
 import SuperAdminHeader from './components/SuperAdminHeader';
 import SuperAdminDashboard from './pages/SuperAdminDashBoard';
+import SuperAdminViewEvents from './pages/SuperAdminViewEvents';
 
 
 function App() {
@@ -18,13 +19,14 @@ function App() {
   }, []);
 
   return (
-    <div className="h-screen flex">
+    <div className="h-screen flex bg-amber-50">
       <SuperAdminSidebar />
       <div className="flex flex-col flex-1">
         <SuperAdminHeader />
 
-        <main className="flex-1 overflow-y-auto p-10 bg-gray-50">
+        <main className="flex-1 overflow-y-auto p-10 bg-gray-100">
             <SuperAdminDashboard />
+            {/* <SuperAdminViewEvents /> */}
         </main>
       </div>
     </div>
