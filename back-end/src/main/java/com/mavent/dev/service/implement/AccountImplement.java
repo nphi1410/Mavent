@@ -4,7 +4,7 @@ import com.mavent.dev.DTO.UserProfileDTO;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.service.AccountService;
-import com.mavent.dev.service.S3UploaderService; // <-- Import S3UploaderService mới
+//import com.mavent.dev.service.S3UploaderService; // <-- Import S3UploaderService mới
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -18,8 +18,8 @@ public class AccountImplement implements AccountService {
     @Autowired
     private AccountRepository accountRepository;
 
-    @Autowired
-    private S3UploaderService s3UploaderService; // <-- Inject S3UploaderService mới thay vì CloudConfig
+//    @Autowired
+//    private S3UploaderService s3UploaderService; // <-- Inject S3UploaderService mới thay vì CloudConfig
 
     @Override
     public void register(Account accountInfo) {
@@ -59,7 +59,8 @@ public class AccountImplement implements AccountService {
         }
 
         // Tải file lên dịch vụ đám mây bằng S3UploaderService
-        String avatarUrl = s3UploaderService.uploadFile(avatarFile, "avatars"); // "avatars" là thư mục trong bucket
+        String avatarUrl = "";
+//                s3UploaderService.uploadFile(avatarFile, "avatars"); // "avatars" là thư mục trong bucket
 
         account.setAvatarImg(avatarUrl);
         accountRepository.save(account);
@@ -77,7 +78,8 @@ public class AccountImplement implements AccountService {
         }
         // You may want to add more checks for file type based on fileName if needed
 
-        String avatarUrl = s3UploaderService.uploadFile(avatarBytes, fileName, "avatars");
+        String avatarUrl = "";
+//                s3UploaderService.uploadFile(avatarBytes, fileName, "avatars");
         account.setAvatarImg(avatarUrl);
         accountRepository.save(account);
         return avatarUrl;
@@ -87,7 +89,12 @@ public class AccountImplement implements AccountService {
     public boolean checkLogin(String username, String password) {
         // Find account by username
         Account account = accountRepository.findByUsername(username).orElse(null);
-        if (account == null) return false;
+        if (account == null) {
+//            System.out.println("Account not found for username: " + username);
+            return false;
+        }
+//        System.out.println("Checking login for user: " + username);
+//        System.out.println("Stored password hash: " + account.getPasswordHash());
         // Compare raw password with stored hash (for demo, plain text; for real, use BCrypt)
         // Example for plain text (NOT recommended for production):
         return account.getPasswordHash().equals(password);
