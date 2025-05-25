@@ -23,11 +23,11 @@ function Login() {
       if (response.ok) {
         // redirect to home page
         window.location.href = "/home";
-      } else {
-        const data = await response.json();
-        setError(data.message || "Invalid username or password");
-        console.error("Login failed");
+      } else if (response.status === 401) {
+        const message = await response.text();
+        setError(message || "Invalid username or password");
       }
+      // if we get other errors, it goes to the catch block
     } catch (err) {
       setError("Network error. Please try again later.");
       console.error("Login error", err);
