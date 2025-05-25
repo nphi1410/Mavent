@@ -12,7 +12,7 @@ function Login() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:8080/login", {
+      const response = await fetch("http://localhost:8080/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -22,7 +22,7 @@ function Login() {
 
       if (response.ok) {
         // redirect to home page
-        window.location.href = "/home";
+        window.location.href = "/profile";
       } else if (response.status === 401) {
         const message = await response.text();
         setError(message || "Invalid username or password");
