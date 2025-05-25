@@ -26,7 +26,7 @@ function App() {
 
         <main className="flex-1 overflow-y-auto p-10 bg-gray-100">
             <SuperAdminDashboard />
-            {/* <SuperAdminViewEvents /> */}
+            <SuperAdminViewEvents />
         </main>
       </div>
     </div>
