@@ -1,26 +1,64 @@
 package com.mavent.dev.entity;
 
+import jakarta.persistence.*; // Import JPA annotations
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.security.Timestamp;
+import java.time.LocalDateTime; 
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Entity 
+@Table(name = "accounts") 
+@Data 
+@NoArgsConstructor 
+@AllArgsConstructor 
 public class Account {
-    private int accountId;
+    @Id 
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "account_id") 
+    private Integer accountId;
+
+    @Column(nullable = false, unique = true) 
     private String username;
+
+    @Column(name = "password_hash", nullable = false) 
     private String passwordHash;
+
+    @Column(nullable = false, unique = true) 
     private String email;
+
+    @Column(name = "full_name") 
     private String fullName;
-    private String systemRole;
-    private Boolean isDeleted;
-    private String avatarImg;
+
+    @Column(name = "system_role") 
+    private String systemRole; 
+
+    @Column(name = "is_deleted") 
+    private Boolean isDeleted = false; 
+
+    @Column(name = "avatar_img") 
+    private String avatarImg; 
+
     private String phone;
     private String gender;
-    private Timestamp createdAt;
-    private Timestamp updatedAt;
 
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at") 
+    private LocalDateTime updatedAt;
+
+    @PrePersist 
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+        if (this.isDeleted == null) { 
+            this.isDeleted = false;
+        }
+    }
+
+    @PreUpdate 
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }
