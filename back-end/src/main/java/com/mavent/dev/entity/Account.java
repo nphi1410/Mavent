@@ -39,7 +39,7 @@ public class Account {
     @Column(name = "avatar_img") 
     private String avatarImg; 
 
-    private String phone;
+    private String phoneNumber;
     private String gender;
 
     @Column(name = "created_at", updatable = false)

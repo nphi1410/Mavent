@@ -1,14 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getGreeting } from './services/testService';
-import SuperAdminSidebar from './components/SuperAdminSidebar';
-import SuperAdminHeader from './components/SuperAdminHeader';
-import SuperAdminDashboard from './pages/SuperAdminDashBoard';
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route
-} from "react-router-dom";
-import ProfilePage from './pages/ProfilePage';
+import HomePage from './pages/HomePage';
+
 
 function App() {
   const [message, setMessage] = useState('');
@@ -21,15 +14,11 @@ function App() {
         setMessage('Error to load message');
       });
   }, []);
-  
+
   return (
-    <Router>
-      <div className="min-h-screen">
-        <Routes>
-          <Route path="/profile/*" element={<ProfilePage />} />
-        </Routes>
-      </div>
-    </Router>
+    <div>
+      <HomePage/>
+    </div>
   );
 }
 
