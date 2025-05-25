@@ -1,37 +1,30 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom';
-function Login() {
-  const [form, setForm] = useState({
-    usernameOrEmail: '',
-    password: ''
-  });
-  const [error, setError] = useState('');
+import axios from 'axios';
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+function Login() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    try {
-      const response = await fetch('/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: form.usernameOrEmail,
-          password: form.password
-        })
-      });
-      if (!response.ok) {
-        throw new Error('Login failed');
-      }
-      // Handle successful login (e.g., redirect, store token, etc.)
-      // Example: window.location.href = '/home';
-    } catch (err) {
-      setError('Invalid username/email or password');
+
+    const response = await fetch("http://localhost:8080/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username, password }),
+    });
+
+    if (response.ok) {
+      // redirect to home page
+      window.location.href = "/home";
+    } else {
+      console.error("Login failed");
     }
   };
+ 
 
   return (
     <div className="flex items-center justify-center min-h-screen w-full">
@@ -48,10 +41,10 @@ function Login() {
           <form onSubmit={handleSubmit} className="flex flex-col items-center space-y-4 w-full">
             <input
               type="text"
-              name="usernameOrEmail"
+              name="username"
               placeholder="Username or email"
-              value={form.usernameOrEmail}
-              onChange={handleChange}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className=" px-4 py-2 border-2 border-black rounded-full focus:outline-none
                   focus:border-blue-800 hover:border-blue-300 w-19/24
                     transition"
@@ -62,8 +55,8 @@ function Login() {
               type="password"
               name="password"
               placeholder="Password"
-              value={form.password}
-              onChange={handleChange}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className=" px-4 py-2 border-2 border-black rounded-full focus:outline-none
                   focus:border-blue-800 hover:border-blue-300 w-19/24
                     transition"
@@ -73,7 +66,7 @@ function Login() {
             <button className="px-6 py-2 rounded-full bg-blue-900 text-white hover:bg-[#2f52bc] transition">
               LOGIN
             </button>
-            {error && <div className="text-red-600 text-sm mt-2">{error}</div>}
+            {/* {error && <div className="text-red-600 text-sm mt-2">{error}</div>} */}
           </form>
 
           <Link to="/about" className="text-xs text-blue-900 hover:underline">
