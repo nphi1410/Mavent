@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import { store } from './store';
 import { getGreeting } from './services/testService';
-import AppRoutes from './routes';
+import AppRoutes from './routes/index.jsx';
 
 function App() {
   const [message, setMessage] = useState('');
@@ -18,14 +16,12 @@ function App() {
   }, []);
 
   return (
-    <Provider store={store}>
-      <Router>
-        <div className="flex flex-col min-h-screen">
-          <AppRoutes />
-          {message && <div className="text-center p-4 bg-blue-100">{message}</div>}
-        </div>
-      </Router>
-    </Provider>
+    <Router>
+      <div className="flex flex-col min-h-screen">
+        <AppRoutes />
+        {message && <div className="text-center p-4 bg-blue-100">{message}</div>}
+      </div>
+    </Router>
   );
 }
 
