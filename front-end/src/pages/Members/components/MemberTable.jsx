@@ -95,7 +95,7 @@ const MemberTable = ({
                             Edit User
                           </button>
                           <button 
-                            onClick={() => onBanUser(member.id)} 
+                            onClick={() => onBanUser(member, !bannedUsers[member.id])} 
                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
                           >
                             <FontAwesomeIcon icon={faBan} className="mr-3 h-4 w-4" />

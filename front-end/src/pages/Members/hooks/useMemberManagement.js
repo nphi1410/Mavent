@@ -230,8 +230,9 @@ export const useMemberManagement = () => {
       setLoading(true);
       const banData = {
         eventId: eventId,
-        accountId: member.accountId,
-        isBanned: isBanned
+        accountId: member.accountId || member.id,
+        isBanned: isBanned,
+        reason: isBanned ? 'Banned by admin' : 'Unbanned by admin'
       };
       
       const response = await memberService.banMember(banData);
