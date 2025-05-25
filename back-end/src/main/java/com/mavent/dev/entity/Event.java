@@ -8,7 +8,7 @@ import lombok.ToString;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "events") // Tuỳ chọn: nếu bạn muốn đặt tên bảng rõ ràng
+@Table(name = "events")
 @Data
 @NoArgsConstructor
 @ToString
@@ -43,5 +43,5 @@ public class Event {
     private int eventMaxMember;
 
     @Column(name = "event_max_participant")
-    private String eventMaxParticipant; // Nếu là số, hãy dùng int
+    private int eventMaxParticipant;
 }
