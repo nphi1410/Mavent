@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+.swiper-button-next,
+.swiper-button-prev {
+  @apply !text-gray-100 hover:!text-gray-600 !scale-150 !mx-4 transition;
+}
+
+.swiper-pagination-bullet {
+  @apply !bg-gray-300 opacity-100;
+}
+
+.swiper-pagination-bullet-active {
+  @apply !bg-gray-100 !scale-150 transition;
+}

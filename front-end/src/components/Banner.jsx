@@ -1,9 +1,52 @@
-import React from 'react'
+import React from "react";
+import "../style/banner.css";
+import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 
 const Banner = () => {
-  return (
-    <div className='border-2 border-gray-200 w-full h-dvh'>Banner</div>
-  )
-}
+  const slides = [
+    '/banner/codefest.png',
+    '/banner/f-camp.png',
+    '/banner/fptu-showcase.png',
+    '/banner/gameshow.png',
+    '/banner/petty-gone.png',
+    '/banner/soul-note.png'
+  ];
 
-export default Banner
+  return (
+    <div className="max-w-full p-4 m-4 rounded-lg overflow-hidden border border-gray-300 shadow-lg">
+      <Swiper
+        modules={[Navigation, Pagination, Autoplay]}
+        spaceBetween={20}
+        slidesPerView={1}
+        autoplay={{
+          delay: 5000,
+          disableOnInteraction: false,
+        }}
+        navigation
+        pagination={{ clickable: true }}
+        loop
+        className="h-64 sm:h-96 md:h-[400px] lg:h-[600px]"
+      >
+        {slides.map((slide, index) => (
+          <SwiperSlide key={index}>
+            <div className="relative h-full w-full">
+              <img
+                src={slide}
+                alt={`slide-${index}`}
+                className="w-full h-full object-cover rounded-lg"
+              />
+              {/* Overlay for subtle darkening */}
+              <div className="absolute inset-0 bg-black opacity-30 backdrop-blur-sm rounded-lg"></div>
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    </div>
+  );
+};
+
+export default Banner;

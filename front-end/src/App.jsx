@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getGreeting } from './services/testService';
-import SuperAdminSidebar from './components/SuperAdminSidebar';
-import SuperAdminHeader from './components/SuperAdminHeader';
-import SuperAdminDashboard from './pages/SuperAdminDashBoard';
+import HomePage from './pages/HomePage';
 
 
 function App() {
@@ -18,15 +16,8 @@ function App() {
   }, []);
 
   return (
-    <div className="h-screen flex">
-      <SuperAdminSidebar />
-      <div className="flex flex-col flex-1">
-        <SuperAdminHeader />
-
-        <main className="flex-1 overflow-y-auto p-10 bg-gray-50">
-            <SuperAdminDashboard />
-        </main>
-      </div>
+    <div>
+      <HomePage/>
     </div>
   );
 }
