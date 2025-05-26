@@ -11,26 +11,12 @@ import {
 import ProfilePage from './pages/ProfilePage';
 import Login from './pages/Login';
 import AccountList from './components/AccountList';
+import HomePage from './pages/HomePage';
 
 function App() {
-  const [message, setMessage] = useState('');
-
-  useEffect(() => {
-    getGreeting()
-      .then(response => setMessage(response.data))
-      .catch(error => {
-        console.error('Error fetching greeting:', error);
-        setMessage('Error to load message');
-      });
-  }, []);
-  
   return (
     <Router>
       <div className="min-h-screen w-full bg-gray-100">
-        {/* Show greeting message for testing */}
-        {/* <div className="p-4 text-center text-blue-800 font-bold">
-          {message}
-        </div> */}
         <Routes>
           <Route path="/profile/*" element={<ProfilePage />} />
           <Route path="/login" element={<Login />} />
