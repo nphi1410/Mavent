@@ -1,8 +1,14 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import ProfilePage from "./pages/ProfilePage";
-import Login from "./pages/Login";
-import HomePage from "./pages/HomePage";
-import SuperAdminDashboard from "./pages/SuperAdminDashBoard";
+
+import {
+    BrowserRouter as Router,
+    Routes,
+    Route
+} from "react-router-dom";
+import ProfilePage from './pages/ProfilePage';
+import Login from './pages/Login';
+import HomePage from './pages/HomePage';
+import SuperAdminDashboard from './pages/SuperAdminDashBoard';
+
 
 function App() {
   return (
