@@ -5,7 +5,6 @@ import SuperAdminHeader from './components/SuperAdminHeader';
 import SuperAdminDashboard from './pages/SuperAdminDashBoard';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import SuperAdminViewEvents from './pages/SuperAdminViewEvents';
-import SuperAdminManageUsers from './pages/SuperAdminManageUsers';
 
 
 
@@ -35,7 +34,6 @@ function App() {
 
                             {/* Route for view events */}
                             <Route path="/superadmin/events" element={<SuperAdminViewEvents />} />
-                            <Route path="/superadmin/users" element={<SuperAdminManageUsers />} />
 
                             <Route path="/superadmin" element={
                                 <>
