@@ -50,7 +50,7 @@ function Login() {
 
         {/* Right Panel */}
         <div className="w-1/2 flex flex-col items-center justify-center p-8 space-y-5">
-          <h1 className="text-xl font-semibold text-center pb-4 text-blue-900">WELCOME TO MAVENT</h1>
+          <h1 className="w-19/24 text-5xl font-semibold text-center pb-4 text-blue-900">WELCOME TO MAVENT</h1>
 
           <form onSubmit={handleSubmit} className="flex flex-col items-center space-y-4 w-full">
             <input
@@ -87,7 +87,7 @@ function Login() {
 
           <p className="text-[0.9rem]">
             Don’t have an account? Click{' '}
-            <Link to="/about" className="hover:underline hover:text-blue-900 text-xs">HERE</Link>
+            <Link to="/register" className="font-bold hover:underline hover:text-blue-900 text-md">HERE</Link>
           </p>
         </div>
       </div>

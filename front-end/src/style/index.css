@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
-body {
+/* body {
   @apply text-gray-600;
-}
+} */
 
 /* 
 :root {

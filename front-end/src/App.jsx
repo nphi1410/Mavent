@@ -18,7 +18,6 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/profile/*" element={<ProfilePage />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/accounts" element={<AccountList />} />
           <Route path="/admin" element={<SuperAdminDashboard />} />
 
         </Routes>
