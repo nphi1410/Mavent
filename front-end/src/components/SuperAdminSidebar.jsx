@@ -59,10 +59,10 @@ function SuperAdminSidebar() {
           </div>
           {userOpen && (
             <div className="pl-12">
-              <div className="py-2 flex items-center gap-3 hover:text-black cursor-pointer text-gray-600">
+              <Link to="/superadmin/users" className="py-2 flex items-center gap-3 hover:text-black cursor-pointer text-gray-600">
                 <FontAwesomeIcon icon={faUsers} />
                 All Users
-              </div>
+              </Link>
               <div className="py-2 flex items-center gap-3 hover:text-black cursor-pointer text-gray-600">
                 <FontAwesomeIcon icon={faPersonShelter} />
                 Invitations
