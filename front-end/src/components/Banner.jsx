@@ -28,7 +28,7 @@ const Banner = ({ bannerUrls }) => {
         navigation
         pagination={{ clickable: true }}
         loop
-        className="h-64 sm:h-96 md:h-[400px] lg:h-[600px] xl:h-[800px]"
+        className="h-64 sm:h-96 md:h-[400px] lg:h-[600px]"
       >
         {bannerUrls.map((bannerUrl, index) => (
           <SwiperSlide key={index}>
