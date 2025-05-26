@@ -2,7 +2,7 @@ import React from "react";
 import CardSmall from "./card/CardSmall";
 import CardDetails from "./card/CardDetails";
 
-const Content = () => {
+const Content = ({imageUrl}) => {
   return (
     <div className="flex flex-col md:flex-row mx-4 gap-8 my-6">
       {/* Left Column */}
@@ -11,12 +11,12 @@ const Content = () => {
           Upcoming Events
         </h2>
         <div className="flex flex-col gap-4 w-full">
-          <CardSmall />
-          <CardSmall />
-          <CardSmall />
-          <CardSmall />
-          <CardSmall />
-          <CardSmall />
+          <CardSmall imageUrl={imageUrl}/>
+          <CardSmall imageUrl={imageUrl}/>
+          <CardSmall imageUrl={imageUrl}/>
+          <CardSmall imageUrl={imageUrl}/>
+          <CardSmall imageUrl={imageUrl}/>
+          <CardSmall imageUrl={imageUrl}/>
         </div>
       </div>
 
@@ -26,11 +26,11 @@ const Content = () => {
           For You
         </h2>
         <div className="flex flex-col gap-6 w-full">
-          <CardDetails />
-          <CardDetails />
-          <CardDetails />
-          <CardDetails />
-          <CardDetails />
+          <CardDetails imageUrl={imageUrl}/>
+          <CardDetails imageUrl={imageUrl}/>
+          <CardDetails imageUrl={imageUrl}/>
+          <CardDetails imageUrl={imageUrl}/>
+          <CardDetails imageUrl={imageUrl}/>
         </div>
       </div>
     </div>

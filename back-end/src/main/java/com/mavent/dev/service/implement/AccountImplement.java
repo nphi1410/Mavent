@@ -7,6 +7,8 @@ import com.mavent.dev.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @Service
@@ -27,18 +29,8 @@ public class AccountImplement implements AccountService {
         return mapAccountToUserProfileDTO(account);
     }
 
-    @Override
-    public void updateProfile(String username, UserProfileDTO userProfileDTO) {
-        Account account = accountRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Account not found with username: " + username));
 
-        account.setEmail(userProfileDTO.getEmail());
-        account.setFullName(userProfileDTO.getFullName());
-        account.setPhoneNumber(userProfileDTO.getPhoneNumber());
-        account.setGender(userProfileDTO.getGender());
 
-        accountRepository.save(account);
-    }
 
     @Override
     public boolean checkLogin(String username, String password) {
@@ -51,7 +43,6 @@ public class AccountImplement implements AccountService {
         // If using BCrypt:
         // return passwordEncoder.matches(password, account.getPasswordHash());
     }
-
     @Override
     public List<Account> findAllAccount() {
         return accountRepository.findAll();
