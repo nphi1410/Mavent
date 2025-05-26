@@ -39,8 +39,6 @@ function Login() {
   return (
     <div className="flex items-center justify-center min-h-screen w-full bg-blue-900">
       <div className="flex w-8/12 h-9/12 bg-white rounded-[40px] overflow-hidden">
-    <div className="flex items-center justify-center min-h-screen w-full bg-blue-900">
-      <div className="flex w-8/12 h-9/12 bg-white rounded-[40px] overflow-hidden">
         {/* Left Panel */}
         <div className="w-1/2 flex items-center justify-center border-r border-black">
           {/* <p className="text-center text-sm">Ảnh sự kiện gần nhất hiện tại</p> */}
@@ -53,7 +51,6 @@ function Login() {
         {/* Right Panel */}
         <div className="w-1/2 flex flex-col items-center justify-center p-8 space-y-5">
           <h1 className="text-xl font-semibold text-center pb-4 text-blue-900">WELCOME TO MAVENT</h1>
-          <h1 className="text-xl font-semibold text-center pb-4 text-blue-900">WELCOME TO MAVENT</h1>
 
           <form onSubmit={handleSubmit} className="flex flex-col items-center space-y-4 w-full">
             <input
@@ -63,19 +60,7 @@ function Login() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className=" px-4 py-2 border-2 border-blue-900 rounded-full focus:outline-none
-                  focus:border-blue-700 hover:border-blue-300 w-19/24
-          <form onSubmit={handleSubmit} className="flex flex-col items-center space-y-4 w-full">
-            <input
-              type="text"
-              name="username"
-              placeholder="Username or email"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className=" px-4 py-2 border-2 border-blue-900 rounded-full focus:outline-none
-                  focus:border-blue-700 hover:border-blue-300 w-19/24
-                    transition"
-              required
-            />
+                  focus:border-blue-700 hover:border-blue-300 w-19/24"
               required
             />
 
@@ -86,18 +71,7 @@ function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className=" px-4 py-2 border-2 border-blue-900 rounded-full focus:outline-none
-                  focus:border-blue-700 hover:border-blue-300 w-19/24
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className=" px-4 py-2 border-2 border-blue-900 rounded-full focus:outline-none
-                  focus:border-blue-700 hover:border-blue-300 w-19/24
-                    transition"
-              required
-            />
+                  focus:border-blue-700 hover:border-blue-300 w-19/24"
               required
             />
 
@@ -108,20 +82,17 @@ function Login() {
           </form>
 
           <Link to="/about" className="text-xs text-blue-900 hover:underline">
-          <Link to="/about" className="text-xs text-blue-900 hover:underline">
             Forgot Password?
-          </Link>
           </Link>
 
           <p className="text-[0.9rem]">
             Don’t have an account? Click{' '}
             <Link to="/about" className="hover:underline hover:text-blue-900 text-xs">HERE</Link>
-            <Link to="/about" className="hover:underline hover:text-blue-900 text-xs">HERE</Link>
           </p>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default Login
+export default Login;

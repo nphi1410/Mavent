@@ -59,12 +59,6 @@ public class UserController {
         return ResponseEntity.ok(profile);
     }
 
-    @PostMapping("/submit")
-    public ResponseEntity<String> submitData(@RequestBody YourDataDTO data) {
-        // Process the data
-        return ResponseEntity.ok("Received: " + data);
-    }
-
     @PutMapping("/user/profile/update")
     public ResponseEntity<Void> updateProfile(@RequestBody UserProfileDTO userProfileDTO, HttpSession session) {
         String username = (String) session.getAttribute("username");

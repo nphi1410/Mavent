@@ -10,7 +10,7 @@ import {
 } from "react-router-dom";
 import ProfilePage from './pages/ProfilePage';
 import Login from './pages/Login';
-import AccountList from './components/AccountList';
+// import AccountList from './components/AccountList';
 import HomePage from './pages/HomePage';
 
 function App() {
