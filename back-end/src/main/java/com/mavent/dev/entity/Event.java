@@ -50,9 +50,9 @@ public class Event {
     @Column(name = "status")
     private EventStatus status = EventStatus.PENDING;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by_account_id")
-    private Account createdBy;
+//    @ManyToOne(fetch = FetchType.LAZY)
+    @Column(name = "created_by_account_id")
+    private Integer createdBy;
 
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
