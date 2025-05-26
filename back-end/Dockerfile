@@ -3,21 +3,24 @@ FROM maven:3.9.6-eclipse-temurin-21 AS builder
 
 WORKDIR /app
 
-# Copy all source code
-COPY . .
+# Copy only pom.xml first to leverage caching of dependencies
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+
+# Copy the rest of the source
+COPY src ./src
 
 # Build the application (skipping tests for faster build)
 RUN mvn clean package -DskipTests
 
-# ---- Stage 2: Run with lightweight JDK 21 image ----
-FROM eclipse-temurin:21-jdk
+# ---- Stage 2: Lightweight Runtime Image ----
+FROM eclipse-temurin:21-jre
 
-# Set working directory
 WORKDIR /app
 
-# Copy the built JAR from the builder stage
-COPY --from=builder /app/target/dev-0.0.1-SNAPSHOT.jar .
+# Copy built JAR from builder
+COPY --from=builder /app/target/dev-0.0.1-SNAPSHOT.jar app.jar
 COPY src/main/resources/truststore.jks truststore.jks
 
-# Run the Spring Boot application
-ENTRYPOINT ["java", "-jar", "dev-0.0.1-SNAPSHOT.jar"]
+# Run the app
+ENTRYPOINT ["java", "-jar", "app.jar"]

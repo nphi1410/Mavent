@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 public class AccountController {
 
     @Autowired
-    AccountService accountService;
+    private AccountService accountService;
 
     @GetMapping()
     public ResponseEntity<String> greet() {

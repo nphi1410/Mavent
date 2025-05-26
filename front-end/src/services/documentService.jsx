@@ -6,6 +6,4 @@ const api = axios.create({
     withCredentials: true,
 });
 
-export const getGreeting = () => api.get("/greeting");
-
-export const submitExample = (data) => api.post("/submit", data);
+export const getImages = () => api.get("/document");

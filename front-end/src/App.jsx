@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
-import { getGreeting } from './services/testService';
-import SuperAdminSidebar from './components/SuperAdminSidebar';
-import SuperAdminHeader from './components/SuperAdminHeader';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route
+} from "react-router-dom";
+import ProfilePage from './pages/ProfilePage';
+import Login from './pages/Login';
+import HomePage from './pages/HomePage';
 import SuperAdminDashboard from './pages/SuperAdminDashBoard';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import SuperAdminViewEvents from './pages/SuperAdminViewEvents';
-
-
 
 function App() {
 
