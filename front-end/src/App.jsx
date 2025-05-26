@@ -9,16 +9,6 @@ import SuperAdminViewEvents from './pages/SuperAdminViewEvents';
 
 
 function App() {
-    const [message, setMessage] = useState('');
-
-    useEffect(() => {
-        getGreeting()
-            .then(response => setMessage(response.data))
-            .catch(error => {
-                console.error('Error fetching greeting:', error);
-                setMessage('Error to load message');
-            });
-    }, []);
 
     return (
         <Router>

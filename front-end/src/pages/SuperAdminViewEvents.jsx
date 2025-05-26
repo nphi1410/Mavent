@@ -82,15 +82,15 @@ function SuperAdminViewEvents() {
                         <tbody>
                             {events.map((event) => (
                                 <tr key={event.eventId} className="border-b border-gray-200">
-                                    <td className="p-2 font-medium text-black whitespace-nowrap">{event.eventName}</td>
-                                    <td className="p-2 whitespace-nowrap text-gray-600">{event.eventStartDate.slice(0, 10)}</td>
-                                    <td className="p-2 whitespace-nowrap text-gray-600">{event.eventEndDate.slice(0, 10)}</td>
-                                    <td className="p-2 whitespace-nowrap text-gray-600">{event.eventLocation}</td>
+                                    <td className="p-2 font-medium text-black whitespace-nowrap">{event.name}</td>
+                                    <td className="p-2 whitespace-nowrap text-gray-600">{event.startDatetime.slice(0, 10)}</td>
+                                    <td className="p-2 whitespace-nowrap text-gray-600">{event.endDatetime.slice(0, 10)}</td>
+                                    <td className="p-2 whitespace-nowrap text-gray-600">{event.location}</td>
                                     <td className="p-2 whitespace-nowrap text-gray-600">
                                         <span
                                             className="text-xs font-semibold px-2 py-1 rounded-full"
                                         >
-                                            {event.eventStatus}
+                                            {event.status}
                                         </span>
                                     </td>
                                     <td className="p-2 whitespace-nowrap text-right flex justify-start items-center">
