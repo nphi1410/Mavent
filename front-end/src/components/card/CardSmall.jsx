@@ -2,12 +2,12 @@ import React from "react";
 import { faCalendar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-const CardSmall = () => {
+const CardSmall = ({imageUrl}) => {
   return (
     <div className="card flex items-center border border-gray-300 rounded-lg shadow-sm p-4 my-3 gap-4 hover:shadow-md transition-shadow duration-300 bg-white max-w-md">
       <div className="image w-24 flex-shrink-0 rounded-md overflow-hidden">
         <img
-          src="/avatar.jpg"
+          src={imageUrl}
           alt="upcoming event"
           className="w-full h-24 object-cover"
         />

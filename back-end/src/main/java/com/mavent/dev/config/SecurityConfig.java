@@ -21,8 +21,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(Customizer.withDefaults())  // new lambda style to disable CSRF
-                .cors(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())  // new lambda style to disable CSRF
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/**","/public/**", "/login").permitAll()
                         .anyRequest().authenticated()
@@ -47,4 +47,3 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
-
