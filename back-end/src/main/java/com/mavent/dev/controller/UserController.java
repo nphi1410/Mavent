@@ -1,8 +1,6 @@
 package com.mavent.dev.controller;
 
 import com.mavent.dev.DTO.LoginDTO;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.mavent.dev.DTO.LoginDTO;
 import com.mavent.dev.DTO.UserProfileDTO;
 import com.mavent.dev.config.CloudConfig;
