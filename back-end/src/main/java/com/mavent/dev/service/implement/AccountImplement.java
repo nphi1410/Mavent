@@ -1,14 +1,11 @@
 package com.mavent.dev.service.implement;
 
-import com.mavent.dev.DTO.UserProfileDTO;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import java.io.IOException;
 import java.util.List;
 
 @Service

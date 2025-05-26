@@ -17,9 +17,7 @@ import java.util.logging.Handler;
 public class AccountController {
 
     @Autowired
-    AccountService accountService;
-    @Autowired
-    private AccountRepository accountRepository;
+    private AccountService accountService;
 
     @GetMapping()
     public ResponseEntity<String> greet() {

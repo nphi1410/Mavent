@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.mavent.dev.DTO.LoginDTO;
 import com.mavent.dev.DTO.YourDataDTO;
-import com.mavent.dev.DTO.UserProfileDTO;
-import com.mavent.dev.config.CloudConfig;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.Item;
 import com.mavent.dev.repository.AccountRepository;
@@ -15,11 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.beans.factory.annotation.Value;
 
-import jakarta.servlet.http.HttpSession;
-import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -37,7 +31,6 @@ public class UserController {
         public String username;
         public String password;
     }
-
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginDTO loginDTO, HttpServletRequest request) {
@@ -77,8 +70,8 @@ public class UserController {
     
     @GetMapping("/greeting")
     public ResponseEntity<String> greet() {
-        CloudConfig cloud = new CloudConfig();
-        cloud.uploadFile();
+//        CloudConfig cloud = new CloudConfig();
+//        cloud.uploadFile();
         return ResponseEntity.ok("Hello from Spring Boot!");
     }
 
@@ -97,6 +90,7 @@ public class UserController {
         accountService.updateProfile(username, userProfileDTO);
         return ResponseEntity.ok().build();
     }
+
 
     @GetMapping("/accounts")
     public ResponseEntity<List<Account>> getAllAccounts() {
