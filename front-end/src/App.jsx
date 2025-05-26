@@ -38,7 +38,6 @@ function App() {
                             <Route path="/superadmin" element={
                                 <>
                                     <SuperAdminDashboard />
-                                    <SuperAdminViewEvents />
                                 </>
                             }
                             />
