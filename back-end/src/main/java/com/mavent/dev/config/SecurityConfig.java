@@ -21,8 +21,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable) // Disable CSRF for APIs
-                .cors(Customizer.withDefaults()) // Enable CORS with default settings
+                .cors(Customizer.withDefaults())  // new lambda style to disable CSRF
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/**","/public/**", "/login").permitAll()
                         .anyRequest().authenticated()

@@ -7,13 +7,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import Tag from "./Tag";
 
-const CardDetails = () => {
+const CardDetails = ({imageUrl}) => {
   return (
     <div className="card flex flex-col md:flex-row border border-gray-300 rounded-xl shadow-sm my-4 p-6 hover:shadow-lg transition-shadow duration-300 gap-6 bg-white">
       {/* Image */}
       <div className="image md:w-1/4 w-full rounded-lg overflow-hidden flex-shrink-0">
         <img
-          src="/avatar.jpg"
+          src={imageUrl}
           alt="upcoming event"
           className="w-full h-48 md:h-full object-cover"
         />

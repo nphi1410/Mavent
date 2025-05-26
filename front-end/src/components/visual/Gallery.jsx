@@ -1,17 +1,6 @@
 import React from 'react';
 
-const images = [
-  'https://picsum.photos/600/800',
-  'https://picsum.photos/600/800',
-  'https://picsum.photos/600/800',
-  'https://picsum.photos/600/800',
-  'https://picsum.photos/600/800',
-  'https://picsum.photos/600/800',
-  'https://picsum.photos/600/800',
-  'https://picsum.photos/600/800',
-];
-
-const Gallery = () => {
+const Gallery = ({imageUrls}) => {
   return (
     <div className="w-full bg-gradient-to-b from-white to-gray-100 py-16 px-6 flex flex-col items-center">
       <h1 className="text-5xl font-extrabold text-center text-gray-800 mb-12 border-b-4 border-green-500 pb-3">
@@ -19,7 +8,7 @@ const Gallery = () => {
       </h1>
 
       <div className="w-full max-w-7xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-        {images.map((src, index) => (
+        {imageUrls.map((src, index) => (
           <div
             key={index}
             className="overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300"
