@@ -22,7 +22,7 @@ function App() {
 
     return (
         <Router>
-            <div className="h-screen flex bg-amber-50">
+            <div className="h-screen w-screen flex bg-amber-50">
                 <SuperAdminSidebar />
                 <div className="flex flex-col flex-1">
                     <SuperAdminHeader />
