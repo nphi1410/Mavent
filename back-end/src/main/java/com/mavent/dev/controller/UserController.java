@@ -21,6 +21,8 @@ public class UserController {
 
     @Autowired
     private AccountRepository accountRepository;
+
+    @Autowired
     private AccountService accountService;
 
     @PostMapping("/login")
