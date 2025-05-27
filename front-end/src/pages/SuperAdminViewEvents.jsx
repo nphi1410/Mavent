@@ -6,6 +6,49 @@ import SuperAdminSidebar from '../components/SuperAdminSidebar';
 import SuperAdminHeader from '../components/SuperAdminHeader';
 
 
+
+const listEvents = [
+    {
+        id: "1",
+        name: "Annual Tech Conference",
+        date: "2025-06-15",
+        location: "San Francisco, CA",
+        status: "upcoming",
+        attendees: 450,
+    },
+    {
+        id: "2",
+        name: "Product Launch Event",
+        date: "2025-07-22",
+        location: "New York, NY",
+        status: "upcoming",
+        attendees: 320,
+    },
+    {
+        id: "3",
+        name: "Developer Workshop",
+        date: "2025-05-10",
+        location: "Austin, TX",
+        status: "completed",
+        attendees: 120,
+    },
+    {
+        id: "4",
+        name: "Marketing Summit",
+        date: "2025-08-05",
+        location: "Chicago, IL",
+        status: "upcoming",
+        attendees: 280,
+    },
+    {
+        id: "5",
+        name: "Design Conference",
+        date: "2025-04-18",
+        location: "Seattle, WA",
+        status: "completed",
+        attendees: 350,
+    },
+];
 function SuperAdminViewEvents() {
 
     const statusOptions = ["All Statuses", "Upcoming", "Completed", "Cancelled"];
@@ -119,28 +162,3 @@ function SuperAdminViewEvents() {
 }
 
 export default SuperAdminViewEvents;
-
-// const SuperAdminViewEvents = () => {
-
-//     return (
-//         <div className="container mx-auto p-4 bg-amber-50 text-black">
-//             <h1>Danh sách Sự kiện</h1>
-//             <ul className="list-none p-0 m-0">
-//                 {events.map((event) => (
-//                     <li key={event.eventId}
-//                         className="border border-gray-200 rounded-lg p-4 bg-white mb-4">
-//                         <strong>{event.eventName}</strong> - {event.eventDescription}
-//                         <br />Địa điểm: {event.eventLocation}
-//                         <br />Thời gian: {event.eventStartDate} đến {event.eventEndDate}
-//                         <br />D-Day Info: {event.eventDDayInfo}
-//                         <br />Số thành viên tối đa: {event.eventMaxMember}
-//                         <br />Số người tham gia tối đa: {event.eventMaxParticipant}
-//                         <hr />
-//                     </li>
-//                 ))}
-//             </ul>
-//         </div>
-//     );
-// };
-
-// export default SuperAdminViewEvents;
