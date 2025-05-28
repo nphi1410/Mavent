@@ -4,53 +4,12 @@ import { faChevronDown, faEllipsis, faPlus } from "@fortawesome/free-solid-svg-i
 import { getEvents } from '../services/eventService';
 import SuperAdminSidebar from '../components/SuperAdminSidebar';
 import SuperAdminHeader from '../components/SuperAdminHeader';
+import SuperAdminActionDropdown from '../components/SuperAdminActionDropdown';
 
-
-
-const listEvents = [
-    {
-        id: "1",
-        name: "Annual Tech Conference",
-        date: "2025-06-15",
-        location: "San Francisco, CA",
-        status: "upcoming",
-        attendees: 450,
-    },
-    {
-        id: "2",
-        name: "Product Launch Event",
-        date: "2025-07-22",
-        location: "New York, NY",
-        status: "upcoming",
-        attendees: 320,
-    },
-    {
-        id: "3",
-        name: "Developer Workshop",
-        date: "2025-05-10",
-        location: "Austin, TX",
-        status: "completed",
-        attendees: 120,
-    },
-    {
-        id: "4",
-        name: "Marketing Summit",
-        date: "2025-08-05",
-        location: "Chicago, IL",
-        status: "upcoming",
-        attendees: 280,
-    },
-    {
-        id: "5",
-        name: "Design Conference",
-        date: "2025-04-18",
-        location: "Seattle, WA",
-        status: "completed",
-        attendees: 350,
-    },
-];
 function SuperAdminManageEvents() {
 
+
+    const [openId, setOpenId] = useState(null);
     const statusOptions = ["All Statuses", "Upcoming", "Completed", "Cancelled"];
 
     const [statusFilter, setStatusFilter] = useState("All Statuses");
@@ -138,14 +97,44 @@ function SuperAdminManageEvents() {
                                                 <td className="p-2 whitespace-nowrap text-gray-600">{event.endDatetime.slice(0, 10)}</td>
                                                 <td className="p-2 whitespace-nowrap text-gray-600">{event.location}</td>
                                                 <td className="p-2 whitespace-nowrap text-gray-600">
-                                                    <span
-                                                        className="text-xs font-semibold px-2 py-1 rounded-full"
+                                                    <span className={`text-xs font-semibold px-2 py-1 rounded-full
+                                                        ${event.status === "RECRUITING"
+                                                            ? "bg-blue-100 text-blue-600"
+                                                            : event.status === "UPCOMING"
+                                                                ? "bg-yellow-100 text-yellow-600"
+                                                                : event.status === "ONGOING"
+                                                                    ? "bg-green-100 text-green-600"
+                                                                    : event.status === "CANCELLED"
+                                                                        ? "bg-[#ed4a3b] text-[#ebf5fa]"
+                                                                        : event.status === "ENDED"
+                                                                            ? "bg-red-100 text-red-600"
+                                                                            : event.status === "PENDING"
+                                                                                ? "bg-purple-100 text-purple-600"
+                                                                                : event.status === "REVIEWING"
+                                                                                    ? "bg-orange-100 text-orange-600"
+                                                                                    : "bg-gray-100 text-gray-600"
+                                                        }`}
                                                     >
                                                         {event.status}
                                                     </span>
                                                 </td>
                                                 <td className="p-2 whitespace-nowrap text-right flex justify-start items-center">
-                                                    <FontAwesomeIcon icon={faEllipsis} className="text-gray-500 cursor-pointer" />
+                                                    <SuperAdminActionDropdown
+                                                        isOpen={openId === event.eventId}
+                                                        onToggle={() => setOpenId(openId === event.eventId ? null : event.eventId)}
+                                                        onView={() => {
+                                                            alert(`Viewing ${event.name}`);
+                                                            setOpenId(null);
+                                                        }}
+                                                        onEdit={() => {
+                                                            alert(`Editing ${event.name}`);
+                                                            setOpenId(null);
+                                                        }}
+                                                        onDelete={() => {
+                                                            alert(`Deleting ${event.name}`);
+                                                            setOpenId(null);
+                                                        }}
+                                                    />
                                                 </td>
                                             </tr>
                                         ))}
