@@ -39,7 +39,7 @@ function SuperAdminManageEvents() {
     const filteredEvents = useMemo(() => { // useMemo để tránh lọc lại không cần thiết nếu không có thay đổi
         const noFilter = searchTerm.trim() === "" && statusFilter === "All Statuses"; // Nếu không có tìm kiếm và lọc
         return noFilter ? events : filterEvents(events, searchTerm, statusFilter); // Nếu không lọc thì trả về toàn bộ, ngược lại trả về kết quả lọc
-    }, [events, searchTerm, statusFilter]); // Tự động tính lại khi events, searchTerm hoặc statusFilter thay đổi
+    }, [events, searchTerm, statusFilter]); // Tự động lọc lại khi events, searchTerm hoặc statusFilter thay đổi
 
 
     return (
