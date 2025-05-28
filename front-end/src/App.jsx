@@ -8,6 +8,7 @@ import ProfilePage from './pages/ProfilePage';
 import Login from './pages/Login';
 import HomePage from './pages/HomePage';
 import SuperAdminDashboard from './pages/SuperAdminDashBoard';
+import Register from './pages/Register';
 
 
 function App() {
@@ -18,7 +19,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/profile/*" element={<ProfilePage />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/accounts" element={<AccountList />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/admin" element={<SuperAdminDashboard />} />
 
         </Routes>
