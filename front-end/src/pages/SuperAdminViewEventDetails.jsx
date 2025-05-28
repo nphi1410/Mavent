@@ -1,11 +1,22 @@
-import { React, useState } from "react";
+import { React, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarAlt, faUser, faClock, faLocationDot, faEdit } from "@fortawesome/free-solid-svg-icons";
 import SuperAdminSidebar from "../components/SuperAdminSidebar";
 import SuperAdminHeader from "../components/SuperAdminHeader";
+import { getEvents } from "../services/eventService";
 
 function SuperAdminViewEventDetails() {
     const [activeTab, setActiveTab] = useState("agenda");
+    const [events, setEvents] = useState([]);
+
+
+    useEffect(() => {
+        const fetchEvents = async () => {
+            const data = await getEvents();
+            setEvents(data);
+        };
+        fetchEvents();
+    }, []);
 
     return (
         <div className="h-screen w-screen flex bg-amber-50">
@@ -16,8 +27,8 @@ function SuperAdminViewEventDetails() {
                     <div className="py-10 w-full">
                         <div className="flex items-center justify-between mb-6">
                             <div>
-                                <h1 className="text-3xl text-gray-800 font-bold">Event name <span className="ml-2 text-sm bg-emerald-700 text-white px-2 py-0.5 rounded-full">Upcoming</span></h1>
-                                <p className="text-gray-500">Event ID: 1</p>
+                                <h1 className="text-3xl text-gray-800 font-bold">{events.name}<span className="ml-2 text-sm bg-emerald-700 text-white px-2 py-0.5 rounded-full">Upcoming</span></h1>
+                                <p className="text-gray-500">Event ID: {events.eventId}</p>
                             </div>
                             <button className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded hover:bg-gray-800">
                                 <FontAwesomeIcon icon={faEdit} /> Edit Event
@@ -43,14 +54,13 @@ function SuperAdminViewEventDetails() {
                                     <li className="flex items-start gap-3"><FontAwesomeIcon icon={faLocationDot} className="text-gray-600 mt-1" />
                                         <span>
                                             <strong>Location:</strong><br />
-                                            San Francisco Convention Center
-                                            747 Howard St, San Francisco, CA 94103
+                                            {events.location}
                                         </span>
                                     </li>
                                     <li className="flex items-start gap-3"><FontAwesomeIcon icon={faUser} className="text-gray-600 mt-1" />
                                         <span>
-                                            <strong>Participant:</strong><br />
-                                            500 <span>Participants</span>
+                                            <strong>Max Participant:</strong><br />
+                                            {events.maxParticipantNumber} <span>Participants</span>
                                         </span>
                                     </li>
                                 </ul>
@@ -58,15 +68,13 @@ function SuperAdminViewEventDetails() {
 
                             <div className="border rounded-lg p-4 shadow-sm">
                                 <h2 className="text-2xl font-bold text-black mb-4">Description</h2>
-                                <p className="text-gray-700">
-                                    Join us for the biggest tech conference of the year featuring keynotes from industry leaders, workshops, networking opportunities, and more.
-                                </p>
+                                <p className="text-gray-700">{events.description}</p>
                             </div>
                         </div>
 
                         <div className="mb-4">
                             <button onClick={() => setActiveTab("agenda")} className={`px-4 py-2 border rounded-l ${activeTab === "agenda" ? "bg-black text-white" : "bg-white text-gray-700"}`}>Agenda</button>
-                            <button onClick={() => setActiveTab("speakers")} className={`px-4 py-2 border rounded-r ${activeTab === "speakers" ? "bg-black text-white" : "bg-white text-gray-700"}`}>Speakers</button>
+                            <button onClick={() => setActiveTab("members")} className={`px-4 py-2 border rounded-r ${activeTab === "members" ? "bg-black text-white" : "bg-white text-gray-700"}`}>Members</button>
                         </div>
 
                         {activeTab === "agenda" && (
@@ -91,10 +99,10 @@ function SuperAdminViewEventDetails() {
                             </div>
                         )}
 
-                        {activeTab === "speakers" && (
+                        {activeTab === "members" && (
                             <div className="border rounded-lg p-4 shadow-sm">
-                                <h2 className="text-xl font-semibold">Speakers</h2>
-                                <p className="text-gray-600">Details about speakers will appear here.</p>
+                                <h2 className="text-xl font-semibold">Members</h2>
+                                <p className="text-gray-600">Details about members will appear here.</p>
                             </div>
                         )}
                     </div>

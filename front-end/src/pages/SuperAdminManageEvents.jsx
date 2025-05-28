@@ -1,29 +1,46 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faEllipsis, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { getEvents } from '../services/eventService';
 import SuperAdminSidebar from '../components/SuperAdminSidebar';
 import SuperAdminHeader from '../components/SuperAdminHeader';
 import SuperAdminActionDropdown from '../components/SuperAdminActionDropdown';
+import { Link, useNavigate } from 'react-router-dom';
 
 function SuperAdminManageEvents() {
 
-
-    const [openId, setOpenId] = useState(null);
-    const statusOptions = ["All Statuses", "Upcoming", "Completed", "Cancelled"];
-
-    const [statusFilter, setStatusFilter] = useState("All Statuses");
-    const [searchTerm, setSearchTerm] = useState("");
-    const [dropdownOpen, setDropdownOpen] = useState(false);
-    const [events, setEvents] = useState([]);
+    const [openId, setOpenId] = useState(null); // ID của dropdown đang mở cho mỗi hàng sự kiện (dùng cho menu Actions)
+    const [searchTerm, setSearchTerm] = useState(""); // Chuỗi tìm kiếm người dùng nhập vào
+    const [statusFilter, setStatusFilter] = useState("All Statuses"); // Trạng thái đang được chọn để lọc sự kiện
+    const [dropdownOpen, setDropdownOpen] = useState(false); // Cờ bật/tắt trạng thái dropdown filter
+    const [events, setEvents] = useState([]); // Danh sách toàn bộ sự kiện được fetch từ API
 
     useEffect(() => {
         const fetchEvents = async () => {
-            const data = await getEvents();
-            setEvents(data);
+            const data = await getEvents(); // Gọi API để lấy danh sách sự kiện
+            setEvents(data); // Lưu dữ liệu sự kiện vào state
         };
-        fetchEvents();
-    }, []);
+        fetchEvents(); // Chạy khi component được mount
+    }, []); // Chỉ chạy 1 lần khi component render lần đầu
+
+    const statusOptions = [ // Danh sách trạng thái có thể lọc, bao gồm "All Statuses" để hiển thị tất cả
+        "All Statuses", "RECRUITING", "UPCOMING", "ONGOING",
+        "ENDED", "CANCELLED", "PENDING", "REVIEWING"
+    ];
+
+    const filterEvents = (events, searchTerm, statusFilter) => { // Hàm lọc sự kiện theo tên và trạng thái
+        return events.filter((event) => {
+            const matchesSearch = event.name.toLowerCase().includes(searchTerm.toLowerCase()); // So sánh tên không phân biệt hoa thường
+            const matchesStatus = statusFilter === "All Statuses" || event.status === statusFilter; // Kiểm tra trạng thái có khớp không
+            return matchesSearch && matchesStatus; // Trả về true nếu khớp cả 2 điều kiện
+        });
+    };
+
+    const filteredEvents = useMemo(() => { // useMemo để tránh lọc lại không cần thiết nếu không có thay đổi
+        const noFilter = searchTerm.trim() === "" && statusFilter === "All Statuses"; // Nếu không có tìm kiếm và lọc
+        return noFilter ? events : filterEvents(events, searchTerm, statusFilter); // Nếu không lọc thì trả về toàn bộ, ngược lại trả về kết quả lọc
+    }, [events, searchTerm, statusFilter]); // Tự động tính lại khi events, searchTerm hoặc statusFilter thay đổi
+
 
     return (
         <div className="h-screen w-screen flex bg-amber-50">
@@ -81,7 +98,7 @@ function SuperAdminManageEvents() {
                                 <table className="w-full text-left border border-gray-200">
                                     <thead>
                                         <tr className="text-sm text-gray-500 border-b border-gray-200">
-                                            <th className="p-2 font-medium ">Event Name</th>
+                                            <th className="p-2 font-medium">Event Name</th>
                                             <th className="p-2 font-medium">Start Date</th>
                                             <th className="p-2 font-medium">End Date</th>
                                             <th className="p-2 font-medium">Location</th>
@@ -90,7 +107,7 @@ function SuperAdminManageEvents() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {events.map((event) => (
+                                        {filteredEvents.map((event) => (
                                             <tr key={event.eventId} className="border-b border-gray-200">
                                                 <td className="p-2 font-medium text-black whitespace-nowrap">{event.name}</td>
                                                 <td className="p-2 whitespace-nowrap text-gray-600">{event.startDatetime.slice(0, 10)}</td>
@@ -98,7 +115,7 @@ function SuperAdminManageEvents() {
                                                 <td className="p-2 whitespace-nowrap text-gray-600">{event.location}</td>
                                                 <td className="p-2 whitespace-nowrap text-gray-600">
                                                     <span className={`text-xs font-semibold px-2 py-1 rounded-full
-                                                        ${event.status === "RECRUITING"
+                                                    ${event.status === "RECRUITING"
                                                             ? "bg-blue-100 text-blue-600"
                                                             : event.status === "UPCOMING"
                                                                 ? "bg-yellow-100 text-yellow-600"
@@ -123,7 +140,7 @@ function SuperAdminManageEvents() {
                                                         isOpen={openId === event.eventId}
                                                         onToggle={() => setOpenId(openId === event.eventId ? null : event.eventId)}
                                                         onView={() => {
-                                                            alert(`Viewing ${event.name}`);
+                                                            navigate(`/superadmin/event-details/${event.eventId}`);
                                                             setOpenId(null);
                                                         }}
                                                         onEdit={() => {
