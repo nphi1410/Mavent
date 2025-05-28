@@ -1,8 +1,6 @@
 package com.mavent.dev.service.implement;
 
-import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.Event;
-import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.repository.EventRepository;
 import com.mavent.dev.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
