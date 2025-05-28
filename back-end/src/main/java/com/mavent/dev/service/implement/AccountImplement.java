@@ -29,8 +29,18 @@ public class AccountImplement implements AccountService {
         return mapAccountToUserProfileDTO(account);
     }
 
+    @Override
+    public void updateProfile(String username, UserProfileDTO userProfileDTO) {
+        Account account = accountRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Account not found with username: " + username));
 
+        account.setEmail(userProfileDTO.getEmail());
+        account.setFullName(userProfileDTO.getFullName());
+        account.setPhoneNumber(userProfileDTO.getPhoneNumber());
+        account.setGender(userProfileDTO.getGender());
 
+        accountRepository.save(account);
+    }
 
     @Override
     public boolean checkLogin(String username, String password) {

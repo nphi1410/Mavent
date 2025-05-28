@@ -8,8 +8,9 @@ import ProfilePage from './pages/ProfilePage';
 import Login from './pages/Login';
 import HomePage from './pages/HomePage';
 import SuperAdminDashboard from './pages/SuperAdminDashBoard';
-import SuperAdminViewEvents from './pages/SuperAdminViewEvents';
+import SuperAdminManageEvents from './pages/SuperAdminManageEvents';
 import SuperAdminManageUsers from './pages/SuperAdminManageUsers';
+import SuperAdminViewEventDetails from "./pages/SuperAdminViewEventDetails";
 
 
 function App() {
@@ -21,8 +22,9 @@ function App() {
                     <Route path="/profile/*" element={<ProfilePage />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/superadmin" element={<SuperAdminDashboard />}/>
-                    <Route path="/superadmin/events" element={<SuperAdminViewEvents />} />
+                    <Route path="/superadmin/events" element={<SuperAdminManageEvents />} />
                     <Route path="/superadmin/users" element={<SuperAdminManageUsers />} />
+                    <Route path="/superadmin/event-details/" element={<SuperAdminViewEventDetails />} />
                 </Routes>
             </div>
         </Router>

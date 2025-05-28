@@ -49,7 +49,7 @@ const listEvents = [
         attendees: 350,
     },
 ];
-function SuperAdminViewEvents() {
+function SuperAdminManageEvents() {
 
     const statusOptions = ["All Statuses", "Upcoming", "Completed", "Cancelled"];
 
@@ -161,4 +161,4 @@ function SuperAdminViewEvents() {
     );
 }
 
-export default SuperAdminViewEvents;
+export default SuperAdminManageEvents;
