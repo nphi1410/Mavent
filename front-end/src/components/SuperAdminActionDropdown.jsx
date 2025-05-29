@@ -7,7 +7,7 @@ const SuperAdminActionDropdown = ({ isOpen, onToggle, onView, onEdit, onDelete }
         <div className="relative inline-block text-left">
             <button
                 onClick={onToggle}
-                className="p-2 text-gray-600 hover:text-black rounded-md"
+                className="p-2 text-gray-600 hover:text-black rounded-md cursor-pointer"
             >
                 <FontAwesomeIcon icon={faEllipsis} className="w-4 h-4" />
             </button>

@@ -21,10 +21,11 @@ function App() {
                     <Route path="/" element={<HomePage />} />
                     <Route path="/profile/*" element={<ProfilePage />} />
                     <Route path="/login" element={<Login />} />
-                    <Route path="/superadmin" element={<SuperAdminDashboard />}/>
+                    <Route path="/superadmin" element={<SuperAdminDashboard />} />
                     <Route path="/superadmin/events" element={<SuperAdminManageEvents />} />
                     <Route path="/superadmin/users" element={<SuperAdminManageUsers />} />
-                    <Route path="/superadmin/event-details/" element={<SuperAdminViewEventDetails />} />
+                    <Route path="/superadmin/event-detail/:eventId" element={<SuperAdminViewEventDetails />} />
+
                 </Routes>
             </div>
         </Router>

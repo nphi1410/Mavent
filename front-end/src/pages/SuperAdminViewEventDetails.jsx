@@ -1,22 +1,25 @@
 import { React, useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarAlt, faUser, faClock, faLocationDot, faEdit } from "@fortawesome/free-solid-svg-icons";
 import SuperAdminSidebar from "../components/SuperAdminSidebar";
 import SuperAdminHeader from "../components/SuperAdminHeader";
-import { getEvents } from "../services/eventService";
+import { getEventById } from "../services/eventService";
 
 function SuperAdminViewEventDetails() {
+    const { eventId } = useParams(); //lấy eventId từ URL
     const [activeTab, setActiveTab] = useState("agenda");
-    const [events, setEvents] = useState([]);
-
+    const [event, setEvent] = useState(null);
 
     useEffect(() => {
-        const fetchEvents = async () => {
-            const data = await getEvents();
-            setEvents(data);
+        const fetchEvent = async () => {
+            const data = await getEventById(eventId); //gọi API theo ID
+            setEvent(data);
         };
-        fetchEvents();
-    }, []);
+        fetchEvent();
+    }, [eventId]);
+
+    if (!event) return <div className="p-10">Loading...</div>; //loading state
 
     return (
         <div className="h-screen w-screen flex bg-amber-50">
@@ -27,8 +30,29 @@ function SuperAdminViewEventDetails() {
                     <div className="py-10 w-full">
                         <div className="flex items-center justify-between mb-6">
                             <div>
-                                <h1 className="text-3xl text-gray-800 font-bold">{events.name}<span className="ml-2 text-sm bg-emerald-700 text-white px-2 py-0.5 rounded-full">Upcoming</span></h1>
-                                <p className="text-gray-500">Event ID: {events.eventId}</p>
+                                <h1 className="text-3xl text-gray-800 font-bold">
+                                    {event.name}
+                                    <span className={`ml-2 text-xs font-semibold px-2 py-1 rounded-full
+                                        ${event.status === "RECRUITING"
+                                            ? "bg-blue-100 text-blue-600"
+                                            : event.status === "UPCOMING"
+                                                ? "bg-yellow-100 text-yellow-600"
+                                                : event.status === "ONGOING"
+                                                    ? "bg-green-100 text-green-600"
+                                                    : event.status === "CANCELLED"
+                                                        ? "bg-[#ed4a3b] text-[#ebf5fa]"
+                                                        : event.status === "ENDED"
+                                                            ? "bg-red-100 text-red-600"
+                                                            : event.status === "PENDING"
+                                                                ? "bg-purple-100 text-purple-600"
+                                                                : event.status === "REVIEWING"
+                                                                    ? "bg-orange-100 text-orange-600"
+                                                                    : "bg-gray-100 text-gray-600"
+                                        }`}>
+                                        {event.status}
+                                    </span>
+                                </h1>
+                                <p className="text-gray-500">Event ID: {event.eventId}</p>
                             </div>
                             <button className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded hover:bg-gray-800">
                                 <FontAwesomeIcon icon={faEdit} /> Edit Event
@@ -42,25 +66,29 @@ function SuperAdminViewEventDetails() {
                                     <li className="flex items-start gap-3">
                                         <FontAwesomeIcon icon={faCalendarAlt} className="text-gray-600 mt-1" />
                                         <span>
-                                            <strong>Date:</strong><br />Sunday, June 15, 2025
+                                            <strong>Date:</strong><br />
+                                            {new Date(event.startDatetime).toLocaleDateString()} - {new Date(event.endDatetime).toLocaleDateString()}
                                         </span>
                                     </li>
                                     <li className="flex items-start gap-3">
                                         <FontAwesomeIcon icon={faClock} className="text-gray-600 mt-1" />
                                         <span>
-                                            <strong>Time:</strong><br />10:00 AM - 5:00 PM
+                                            <strong>Time:</strong><br />
+                                            {new Date(event.startDatetime).toLocaleTimeString()} - {new Date(event.endDatetime).toLocaleTimeString()}
                                         </span>
                                     </li>
-                                    <li className="flex items-start gap-3"><FontAwesomeIcon icon={faLocationDot} className="text-gray-600 mt-1" />
+                                    <li className="flex items-start gap-3">
+                                        <FontAwesomeIcon icon={faLocationDot} className="text-gray-600 mt-1" />
                                         <span>
                                             <strong>Location:</strong><br />
-                                            {events.location}
+                                            {event.location}
                                         </span>
                                     </li>
-                                    <li className="flex items-start gap-3"><FontAwesomeIcon icon={faUser} className="text-gray-600 mt-1" />
+                                    <li className="flex items-start gap-3">
+                                        <FontAwesomeIcon icon={faUser} className="text-gray-600 mt-1" />
                                         <span>
                                             <strong>Max Participant:</strong><br />
-                                            {events.maxParticipantNumber} <span>Participants</span>
+                                            {event.maxParticipantNumber} Participants
                                         </span>
                                     </li>
                                 </ul>
@@ -68,7 +96,7 @@ function SuperAdminViewEventDetails() {
 
                             <div className="border rounded-lg p-4 shadow-sm">
                                 <h2 className="text-2xl font-bold text-black mb-4">Description</h2>
-                                <p className="text-gray-700">{events.description}</p>
+                                <p className="text-gray-700">{event.description}</p>
                             </div>
                         </div>
 
@@ -81,21 +109,10 @@ function SuperAdminViewEventDetails() {
                             <div className="border rounded-lg p-4 shadow-sm">
                                 <h2 className="text-2xl font-bold text-black mb-2">Event Agenda</h2>
                                 <p className="text-sm text-gray-500 mb-1">Schedule for the day</p>
+                                {/* Replace with dynamic agenda if available */}
                                 <div className="border-b py-4">
                                     <p><span className="font-semibold">09:00 - 10:00</span> Registration & Breakfast</p>
                                 </div>
-                                <div className="border-b py-4">
-                                    <p><span className="font-semibold">09:00 - 10:00</span> Registration & Breakfast</p>
-                                </div><div className="border-b py-4">
-                                    <p><span className="font-semibold">09:00 - 10:00</span> Registration & Breakfast</p>
-                                </div><div className="border-b py-4">
-                                    <p><span className="font-semibold">09:00 - 10:00</span> Registration & Breakfast</p>
-                                </div><div className="border-b py-4">
-                                    <p><span className="font-semibold">09:00 - 10:00</span> Registration & Breakfast</p>
-                                </div><div className="border-b py-4">
-                                    <p><span className="font-semibold">09:00 - 10:00</span> Registration & Breakfast</p>
-                                </div>
-                                {/* Add more agenda items as needed */}
                             </div>
                         )}
 
@@ -112,4 +129,4 @@ function SuperAdminViewEventDetails() {
     );
 }
 
-export default SuperAdminViewEventDetails
+export default SuperAdminViewEventDetails;

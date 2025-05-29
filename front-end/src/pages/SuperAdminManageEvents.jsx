@@ -41,6 +41,7 @@ function SuperAdminManageEvents() {
         return noFilter ? events : filterEvents(events, searchTerm, statusFilter); // Nếu không lọc thì trả về toàn bộ, ngược lại trả về kết quả lọc
     }, [events, searchTerm, statusFilter]); // Tự động lọc lại khi events, searchTerm hoặc statusFilter thay đổi
 
+    const navigate = useNavigate();
 
     return (
         <div className="h-screen w-screen flex bg-amber-50">
@@ -69,7 +70,7 @@ function SuperAdminManageEvents() {
                                 <div className="relative w-full sm:w-48 border border-gray-300 rounded">
                                     <button
                                         onClick={() => setDropdownOpen(!dropdownOpen)}
-                                        className="border border-gray-300 rounded px-3 py-2 w-full flex justify-between items-center text-black"
+                                        className="cursor-pointer border border-gray-300 rounded px-3 py-2 w-full flex justify-between items-center text-black"
                                     >
                                         {statusFilter}
                                         <FontAwesomeIcon icon={faChevronDown} className="ml-2 w-4 h-4 text-black" />
@@ -140,7 +141,7 @@ function SuperAdminManageEvents() {
                                                         isOpen={openId === event.eventId}
                                                         onToggle={() => setOpenId(openId === event.eventId ? null : event.eventId)}
                                                         onView={() => {
-                                                            navigate(`/superadmin/event-details/${event.eventId}`);
+                                                            navigate(`/superadmin/event-detail/${event.eventId}`);
                                                             setOpenId(null);
                                                         }}
                                                         onEdit={() => {
