@@ -9,16 +9,7 @@ function SuperAdminManageUsers() {
     const [statusFilter, setStatusFilter] = useState("All Statuses");
     const [searchTerm, setSearchTerm] = useState("");
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    // const [events, setEvents] = useState([]);
-
-    // useEffect(() => {
-    //     const fetchEvents = async () => {
-    //         const data = await getEvents();
-    //         setEvents(data);
-    //     };
-    //     fetchEvents();
-    // }, []);
-
+    
     return (
         <div className="py-10 w-full">
             <h1 className="text-3xl font-bold text-gray-800 mb-4">Users</h1>
@@ -129,28 +120,3 @@ function SuperAdminManageUsers() {
 }
 
 export default SuperAdminManageUsers;
-
-// const SuperAdminViewEvents = () => {
-
-//     return (
-//         <div className="container mx-auto p-4 bg-amber-50 text-black">
-//             <h1>Danh sách Sự kiện</h1>
-//             <ul className="list-none p-0 m-0">
-//                 {events.map((event) => (
-//                     <li key={event.eventId}
-//                         className="border border-gray-200 rounded-lg p-4 bg-white mb-4">
-//                         <strong>{event.eventName}</strong> - {event.eventDescription}
-//                         <br />Địa điểm: {event.eventLocation}
-//                         <br />Thời gian: {event.eventStartDate} đến {event.eventEndDate}
-//                         <br />D-Day Info: {event.eventDDayInfo}
-//                         <br />Số thành viên tối đa: {event.eventMaxMember}
-//                         <br />Số người tham gia tối đa: {event.eventMaxParticipant}
-//                         <hr />
-//                     </li>
-//                 ))}
-//             </ul>
-//         </div>
-//     );
-// };
-
-// export default SuperAdminViewEvents;
