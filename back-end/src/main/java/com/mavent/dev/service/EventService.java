@@ -6,4 +6,5 @@ import java.util.List;
 public interface EventService {
     List<EventDTO> getAllEvents();
     EventDTO getEventById(Integer eventId);
+    EventDTO updateEvent(Integer eventId, EventDTO eventDTO);
 }

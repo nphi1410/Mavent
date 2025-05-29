@@ -32,6 +32,31 @@ public class EventImplement implements EventService {
         return mapToDTO(event);
     }
 
+    @Override
+    public EventDTO updateEvent(Integer eventId, EventDTO eventDTO) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EntityNotFoundException("Event not found with ID: " + eventId));
+
+        // cập nhật từng trường khi eventDTO không null
+        if (eventDTO.getName() != null) event.setName(eventDTO.getName());
+        if (eventDTO.getDescription() != null) event.setDescription(eventDTO.getDescription());
+        if (eventDTO.getStartDatetime() != null) event.setStartDatetime(eventDTO.getStartDatetime());
+        if (eventDTO.getEndDatetime() != null) event.setEndDatetime(eventDTO.getEndDatetime());
+        if (eventDTO.getLocation() != null) event.setLocation(eventDTO.getLocation());
+        if (eventDTO.getDdayInfo() != null) event.setDdayInfo(eventDTO.getDdayInfo());
+        if (eventDTO.getMaxMemberNumber() != null) event.setMaxMemberNumber(eventDTO.getMaxMemberNumber());
+        if (eventDTO.getMaxParticipantNumber() != null)
+            event.setMaxParticipantNumber(eventDTO.getMaxParticipantNumber());
+        if (eventDTO.getStatus() != null) event.setStatus(eventDTO.getStatus());
+        if (eventDTO.getCreatedBy() != null) event.setCreatedBy(eventDTO.getCreatedBy());
+        if (eventDTO.getIsDeleted() != null) event.setIsDeleted(eventDTO.getIsDeleted());
+
+        // Save entity
+        Event updatedEvent = eventRepository.save(event);
+
+        return mapToDTO(updatedEvent);
+    }
+
     private EventDTO mapToDTO(Event event) {
         return new EventDTO(
                 event.getEventId(),
