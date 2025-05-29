@@ -145,7 +145,7 @@ function SuperAdminManageEvents() {
                                                             setOpenId(null);
                                                         }}
                                                         onEdit={() => {
-                                                            alert(`Editing ${event.name}`);
+                                                            navigate(`/superadmin/edit-event/${event.eventId}`);
                                                             setOpenId(null);
                                                         }}
                                                         onDelete={() => {

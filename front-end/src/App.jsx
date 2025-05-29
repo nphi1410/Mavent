@@ -11,6 +11,7 @@ import SuperAdminDashboard from './pages/SuperAdminDashBoard';
 import SuperAdminManageEvents from './pages/SuperAdminManageEvents';
 import SuperAdminManageUsers from './pages/SuperAdminManageUsers';
 import SuperAdminViewEventDetails from "./pages/SuperAdminViewEventDetails";
+import SuperAdminEditEvent from "./pages/SuperAdminEditEvent";
 
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
                     <Route path="/superadmin/events" element={<SuperAdminManageEvents />} />
                     <Route path="/superadmin/users" element={<SuperAdminManageUsers />} />
                     <Route path="/superadmin/event-detail/:eventId" element={<SuperAdminViewEventDetails />} />
+                    <Route path="/superadmin/edit-event/:eventId" element={<SuperAdminEditEvent />} />
 
                 </Routes>
             </div>

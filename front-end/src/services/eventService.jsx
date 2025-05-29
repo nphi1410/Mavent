@@ -23,3 +23,14 @@ export const getEventById = async (id) => {
         return null;
     }
 };
+
+// Update event
+export const updateEvent = async (id, eventData) => {
+    try {
+        const response = await axios.put(`${API_URL}/${id}`, eventData);
+        return response.data; // updated EventDTO
+    } catch (error) {
+        console.error(`Error updating event with ID ${id}:`, error);
+        return null;
+    }
+};
