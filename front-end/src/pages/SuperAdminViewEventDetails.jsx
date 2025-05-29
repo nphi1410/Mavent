@@ -109,7 +109,6 @@ function SuperAdminViewEventDetails() {
                             <div className="border rounded-lg p-4 shadow-sm">
                                 <h2 className="text-2xl font-bold text-black mb-2">Event Agenda</h2>
                                 <p className="text-sm text-gray-500 mb-1">Schedule for the day</p>
-                                {/* Replace with dynamic agenda if available */}
                                 <div className="border-b py-4">
                                     <p><span className="font-semibold">09:00 - 10:00</span> Registration & Breakfast</p>
                                 </div>
