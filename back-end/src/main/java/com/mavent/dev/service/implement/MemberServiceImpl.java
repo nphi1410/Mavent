@@ -83,10 +83,10 @@ public class MemberServiceImpl implements MemberService {
             memberRole.setEventRole(EventAccountRole.EventRole.valueOf(request.getEventRole()));
         }
         
-        // Update department if provided (simplified - no validation for now)
+        // Update department if provided
         if (request.getDepartmentId() != null) {
-            // For simplicity, we'll handle department update later when needed
-            log.info("Department update requested but not implemented yet");
+            log.info("Updating department ID to: {}", request.getDepartmentId());
+            memberRole.setDepartmentId(request.getDepartmentId());
         }
         
         EventAccountRole updated = eventAccountRoleRepository.save(memberRole);

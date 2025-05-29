@@ -32,8 +32,20 @@ const MemberTable = ({
             <tr key={member.id} className="hover:bg-gray-50">
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                    <FontAwesomeIcon icon={faUser} className="text-gray-400" />
+                  <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                    {member.avatarUrl ? (
+                      <img 
+                        src={member.avatarUrl} 
+                        alt={`${member.name}'s avatar`} 
+                        className="h-full w-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.parentNode.innerHTML = '<div class="h-full w-full flex items-center justify-center"><svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg></div>';
+                        }}
+                      />
+                    ) : (
+                      <FontAwesomeIcon icon={faUser} className="text-gray-400" />
+                    )}
                   </div>
                   <div className="ml-4">
                     <div className={`text-sm font-medium text-blue-600 ${bannedUsers[member.id] ? 'line-through text-red-500' : ''}`}>
@@ -71,6 +83,7 @@ const MemberTable = ({
                   {/* Action menu button */}
                   <div className="relative">
                     <button 
+                      data-menu-button={`menu-button-${member.id}`}
                       onClick={() => onToggleMenu(member.id)} 
                       className="text-gray-500 hover:text-gray-700 focus:outline-none p-1"
                     >
@@ -80,25 +93,41 @@ const MemberTable = ({
                     {/* Action menu */}
                     {activeMenu === member.id && (
                       <div
+                        data-menu={`menu-${member.id}`}
                         className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-10 border"
                       >
                         <div className="py-1">
                           <button 
-                            onClick={() => onViewUser(member)} 
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              console.log('View user clicked for:', member.name);
+                              onViewUser(member);
+                            }} 
                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
                           >
                             <FontAwesomeIcon icon={faEye} className="mr-3 h-4 w-4" />
                             View Details
                           </button>
                           <button 
-                            onClick={() => onEditUser(member)} 
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              console.log('Edit user clicked for:', member.name);
+                              onEditUser(member);
+                            }} 
                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
                           >
                             <FontAwesomeIcon icon={faEdit} className="mr-3 h-4 w-4" />
                             Edit User
                           </button>
                           <button 
-                            onClick={() => onBanUser(member, !bannedUsers[member.id])} 
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              console.log('Ban/unban clicked for:', member.name);
+                              onBanUser(member, !bannedUsers[member.id]);
+                            }} 
                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
                           >
                             <FontAwesomeIcon icon={faBan} className="mr-3 h-4 w-4" />

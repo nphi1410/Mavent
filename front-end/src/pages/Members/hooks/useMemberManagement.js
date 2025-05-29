@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import memberService from '../../../services/memberService';
 
 // Custom hook to manage member data and related state
@@ -70,12 +70,14 @@ export const useMemberManagement = () => {
           role: member.eventRole, // Transform eventRole to role
           status: member.isActive ? 'Active' : 'Inactive', // Transform isActive to status
           department: member.departmentName || 'N/A', // Transform departmentName to department
-          isBanned: !member.isActive // Map inactive to banned for UI logic
+          isBanned: !member.isActive, // Map inactive to banned for UI logic
+          avatarUrl: member.avatarUrl || null // Ensure avatarUrl is available
         }));
         
         // Log thêm thông tin để debug
         console.log('Filter state:', { statusFilter, roleFilter, departmentFilter });
         console.log('Received filtered members:', response.data.content);
+        console.log('Member data with avatarUrls:', transformedMembers.map(m => ({ id: m.id, avatarUrl: m.avatarUrl })));
         
         setMembers(transformedMembers);
         setTotalPages(response.data.totalPages || 0);
@@ -126,6 +128,44 @@ export const useMemberManagement = () => {
   useEffect(() => {
     fetchDepartments();
   }, [fetchDepartments]);
+
+  // Add event listener for closing menus when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      // Skip if no menu is active
+      if (activeMenu === null) return;
+      
+      // Check if click was on menu elements
+      const menuElements = document.querySelectorAll('[data-menu]');
+      const ellipsisButtons = document.querySelectorAll('[data-menu-button]');
+      
+      // Check if the click was inside a menu or button
+      let clickedInsideMenu = false;
+      
+      menuElements.forEach(menu => {
+        if (menu && menu.contains(event.target)) {
+          clickedInsideMenu = true;
+        }
+      });
+      
+      ellipsisButtons.forEach(button => {
+        if (button && button.contains(event.target)) {
+          clickedInsideMenu = true;
+        }
+      });
+      
+      // Close menu if clicked outside
+      if (!clickedInsideMenu) {
+        setActiveMenu(null);
+      }
+    }
+    
+    // Add event listener
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [activeMenu]); // Re-attach when activeMenu changes
 
   // Computed values để tương thích với Members.jsx
   const currentMembers = members; // Đồng bộ với members từ API
@@ -186,12 +226,17 @@ export const useMemberManagement = () => {
   };
 
   const toggleMenu = (userId) => {
-    setActiveMenu(activeMenu === userId ? null : userId);
+    // If userId is null, we're explicitly closing the menu
+    // Otherwise toggle between the current menu and the requested one
+    setActiveMenu(userId === null ? null : (activeMenu === userId ? null : userId));
   };
 
   const handleViewUser = async (user) => {
     try {
       setLoading(true);
+      // Close any open menus when viewing user details
+      setActiveMenu(null);
+      
       const response = await memberService.getMemberDetails(eventId, user.accountId);
       
       if (response.success && response.data) {
@@ -227,6 +272,8 @@ export const useMemberManagement = () => {
   };
 
   const handleEditUser = (user) => {
+    // Close any open menus when editing
+    setActiveMenu(null);
     setEditedUser(user);
     setSelectedMember(user);
     setShowEditModal(true);
@@ -234,37 +281,111 @@ export const useMemberManagement = () => {
   };
 
   const handleEditInputChange = (field, value) => {
-    setEditedUser(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    // Log information for debugging
+    console.log(`Editing field: ${field}, with value: ${value}`);
+    console.log('Available departments:', departments);
+    
+    setEditedUser(prev => {
+      // When changing department, try to find the department ID as well
+      if (field === 'department' && departments.length > 0) {
+        console.log(`Looking for department match for: "${value}"`);
+        
+        // Strategy 1: Look for exact case-insensitive match
+        const exactMatch = departments.find(dept => 
+          dept.name.toLowerCase().trim() === value.toLowerCase().trim()
+        );
+        
+        if (exactMatch) {
+          console.log(`Found exact department match: ${exactMatch.name} (ID: ${exactMatch.departmentId})`);
+          return {
+            ...prev,
+            [field]: value,
+            departmentId: exactMatch.departmentId,
+            departmentName: exactMatch.name // Store normalized name for backend
+          };
+        }
+        
+        // Strategy 2: Look for partial match (contains)
+        const partialMatch = departments.find(dept => 
+          dept.name.toLowerCase().includes(value.toLowerCase()) || 
+          value.toLowerCase().includes(dept.name.toLowerCase())
+        );
+        
+        if (partialMatch) {
+          console.log(`Found partial department match: ${partialMatch.name} (ID: ${partialMatch.departmentId})`);
+          return {
+            ...prev,
+            [field]: value,
+            departmentId: partialMatch.departmentId,
+            departmentName: partialMatch.name // Store normalized name for backend
+          };
+        }
+        
+        console.log('No department match found');
+      }
+      
+      // Default behavior for other fields
+      return {
+        ...prev,
+        [field]: value
+      };
+    });
   };
 
   const handleSaveUser = async () => {
     try {
       setLoading(true);
       
-      // Debug information
+      // Clear debug information
+      console.log('=== SAVING USER CHANGES ===');
       console.log('Current departments:', departments);
       console.log('Edited user full data:', editedUser);
-      console.log('Department name being searched:', editedUser.department);
       
-      // Cải thiện cách tìm department với so sánh chi tiết hơn
-      const selectedDepartment = departments.find(dept => {
-        const deptName = dept.name.toLowerCase().trim();
-        const editedDeptName = (editedUser.department || '').toLowerCase().trim();
-        console.log(`Comparing: "${deptName}" with "${editedDeptName}"`);
-        return deptName === editedDeptName;
-      });
+      // Priority 1: Use departmentId directly if it's stored in editedUser during editing
+      let departmentId = null;
       
-      console.log('Selected department:', selectedDepartment);
+      // Check if we already have departmentId from the handleEditInputChange
+      if (editedUser.departmentId) {
+        console.log(`DIRECT: Using departmentId from editedUser: ${editedUser.departmentId}`);
+        departmentId = editedUser.departmentId;
+      } 
+      // If no departmentId stored, try to match department name
+      else if (editedUser.department) {
+        console.log(`SEARCH: Looking for department match for: "${editedUser.department}"`);
+        
+        const deptName = editedUser.department.toLowerCase().trim();
+        
+        // Try exact match first
+        const exactMatch = departments.find(dept => 
+          dept.name.toLowerCase().trim() === deptName
+        );
+        
+        if (exactMatch) {
+          console.log(`Found exact match: ${exactMatch.name} (ID: ${exactMatch.departmentId})`);
+          departmentId = exactMatch.departmentId;
+        } 
+        // Try contains match if exact match failed
+        else {
+          const partialMatch = departments.find(dept => 
+            dept.name.toLowerCase().includes(deptName) || 
+            deptName.includes(dept.name.toLowerCase())
+          );
+          
+          if (partialMatch) {
+            console.log(`Found partial match: ${partialMatch.name} (ID: ${partialMatch.departmentId})`);
+            departmentId = partialMatch.departmentId;
+          } else {
+            console.log('No department match found');
+          }
+        }
+      }
       
       // Transform the edited user data to match UpdateMemberRequestDTO      
       const updateData = {
         eventId: eventId,
         accountId: editedUser.accountId || editedUser.id,
-        eventRole: editedUser.role || editedUser.eventRole, // Bổ sung eventRole
-        departmentId: selectedDepartment ? selectedDepartment.departmentId : null,
+        eventRole: editedUser.role || editedUser.eventRole,
+        departmentId: departmentId,
         reason: "Updated by admin"
       };
       
@@ -273,11 +394,16 @@ export const useMemberManagement = () => {
       const response = await memberService.updateMember(updateData);
       
       if (response.success) {
+        console.log('Update response data:', response.data);
+        // Phải fetchMembers sau khi cập nhật thành công để refresh UI
         await fetchMembers();
         setShowEditModal(false);
         setIsEditModalOpen(false);
         setEditedUser(null);
         setSelectedMember(null);
+      } else {
+        setError('Không thể cập nhật thông tin thành viên');
+        console.error('Update failed:', response);
       }
     } catch (err) {
       console.error('Error updating member:', err);
@@ -304,6 +430,9 @@ export const useMemberManagement = () => {
   const handleBanMember = async (member, isBanned) => {
     try {
       setLoading(true);
+      // Close any open menus when banning/unbanning
+      setActiveMenu(null);
+      
       const banData = {
         eventId: eventId,
         accountId: member.accountId || member.id,
