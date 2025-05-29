@@ -8,13 +8,23 @@ const memberService = {
   // Lấy danh sách members của một event với phân trang và filter
   getMembers: async (eventId, params = {}) => {
     try {
+      console.log('memberService.getMembers called with:', { eventId, params });
+      
       const queryParams = new URLSearchParams();
       queryParams.append('eventId', eventId);
       
       if (params.search) queryParams.append('search', params.search);
       if (params.role) queryParams.append('role', params.role);
+      
+      // Map department name to ID if needed (for now keep as string, backend should handle)
       if (params.department) queryParams.append('department', params.department);
-      if (params.status) queryParams.append('status', params.status);
+      
+      // Map status to backend format
+      if (params.status) {
+        const statusValue = params.status.toLowerCase() === 'active' ? 'active' : 'inactive';
+        queryParams.append('status', statusValue);
+      }
+      
       if (params.page !== undefined) queryParams.append('page', params.page);
       if (params.size !== undefined) queryParams.append('size', params.size);
 
@@ -23,6 +33,7 @@ const memberService = {
       console.log('Full URL will be:', axiosInstance.defaults.baseURL + url);
       
       const response = await axiosInstance.get(url);
+      console.log('Raw API response:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error fetching members:', error);
@@ -44,7 +55,20 @@ const memberService = {
   // Cập nhật thông tin member (role, department)
   updateMember: async (memberData) => {
     try {
-      const response = await axiosInstance.put('/api/members', memberData);
+      console.log('memberService.updateMember called with:', memberData);
+      
+      // Transform frontend data to backend DTO format
+      const updateRequest = {
+        eventId: memberData.eventId,
+        accountId: memberData.accountId,
+        eventRole: memberData.role || memberData.eventRole,
+        departmentId: memberData.departmentId,
+        reason: memberData.reason || 'Updated by admin'
+      };
+      
+      console.log('Sending update request:', updateRequest);
+      const response = await axiosInstance.put('/api/members', updateRequest);
+      console.log('Update response:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error updating member:', error);
@@ -82,6 +106,29 @@ const memberService = {
     } catch (error) {
       console.error('Error removing member:', error);
       throw error;
+    }
+  },
+
+  // Lấy danh sách departments của một event
+  getDepartments: async (eventId) => {
+    try {
+      console.log('memberService.getDepartments called with eventId:', eventId);
+      const response = await axiosInstance.get(`/api/departments?eventId=${eventId}`);
+      console.log('Departments response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching departments:', error);
+      // Return mock data if API is not available
+      return {
+        success: true,
+        data: [
+          { departmentId: 1, name: 'Marketing' },
+          { departmentId: 2, name: 'HR' },
+          { departmentId: 3, name: 'IT' },
+          { departmentId: 4, name: 'Finance' },
+          { departmentId: 5, name: 'Sales' }
+        ]
+      };
     }
   }
 };

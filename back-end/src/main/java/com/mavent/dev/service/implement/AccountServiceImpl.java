@@ -1,4 +1,4 @@
-package com.mavent.dev.service.impl;
+package com.mavent.dev.service.implement;
 
 import com.mavent.dev.dto.account.AccountDTO;
 import com.mavent.dev.mapper.AccountMapper;

@@ -78,23 +78,4 @@ public class MemberMapper {
     private String getDisplayName(String fullName, String username) {
         return fullName != null && !fullName.trim().isEmpty() ? fullName : username;
     }
-
-    public Account toEntity(MemberResponseDTO memberResponseDTO) {
-        if (memberResponseDTO == null) {
-            return null;
-        }
-
-        return Account.builder()
-                .accountId(memberResponseDTO.getAccountId())
-                .username(memberResponseDTO.getUsername())
-                .email(memberResponseDTO.getEmail())
-                .fullName(memberResponseDTO.getFullName())
-                .studentId(memberResponseDTO.getStudentId())
-                .dateOfBirth(memberResponseDTO.getDateOfBirth())
-                .phoneNumber(memberResponseDTO.getPhoneNumber())
-                .gender(Account.Gender.valueOf(memberResponseDTO.getGender()))
-                .avatarUrl(memberResponseDTO.getAvatarUrl())
-                .systemRole(Account.SystemRole.valueOf(memberResponseDTO.getSystemRole()))
-                .build();
-    }
 }

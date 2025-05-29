@@ -58,7 +58,7 @@ public class MemberController {
                     .eventId(eventId)
                     .searchTerm(search)
                     .eventRole(role)
-                    .departmentId(department != null && !department.isEmpty() ? Integer.parseInt(department) : null)
+                    .departmentName(department) // Use department name instead of parsing as ID
                     .isActive(status != null ? "active".equalsIgnoreCase(status) : null)
                     .page(page)
                     .size(size)
@@ -117,6 +117,7 @@ public class MemberController {
 
         return ResponseEntity.ok(response);
     }
+
 
     /**
      * Update member role and department.

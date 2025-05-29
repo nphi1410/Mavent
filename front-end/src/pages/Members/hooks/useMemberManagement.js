@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import memberService from '../../../services/memberService';
 
 // Custom hook to manage member data and related state
@@ -9,6 +9,7 @@ export const useMemberManagement = () => {
   const [error, setError] = useState(null);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
+  const [departments, setDepartments] = useState([]);
 
   // State cho filters và pagination
   const [currentPage, setCurrentPage] = useState(0);
@@ -37,19 +38,26 @@ export const useMemberManagement = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Fetch members từ API
-  const fetchMembers = async () => {
+  const fetchMembers = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
       const params = {
         search: searchTerm || undefined,
-        role: roleFilter || undefined,
-        department: departmentFilter || undefined,
-        status: statusFilter || undefined,
+        role: (typeof roleFilter === 'string' && roleFilter !== '') ? roleFilter : undefined,
+        department: (typeof departmentFilter === 'string' && departmentFilter !== '') ? departmentFilter : undefined,
+        status: (typeof statusFilter === 'string' && statusFilter !== '') ? statusFilter : undefined,
         page: currentPage,
         size: pageSize
       };
+
+      // Remove undefined values
+      Object.keys(params).forEach(key => {
+        if (params[key] === undefined) {
+          delete params[key];
+        }
+      });
 
       const response = await memberService.getMembers(eventId, params);
       
@@ -65,24 +73,59 @@ export const useMemberManagement = () => {
           isBanned: !member.isActive // Map inactive to banned for UI logic
         }));
         
+        // Log thêm thông tin để debug
+        console.log('Filter state:', { statusFilter, roleFilter, departmentFilter });
+        console.log('Received filtered members:', response.data.content);
+        
         setMembers(transformedMembers);
         setTotalPages(response.data.totalPages || 0);
         setTotalElements(response.data.totalElements || 0);
       } else {
         setError('Không thể tải danh sách thành viên');
+        setMembers([]);
+        setTotalPages(0);
+        setTotalElements(0);
       }
     } catch (err) {
       console.error('Error fetching members:', err);
       setError('Lỗi kết nối đến server. Vui lòng thử lại sau.');
+      setMembers([]);
+      setTotalPages(0);
+      setTotalElements(0);
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, pageSize, eventId, searchTerm, statusFilter, roleFilter, departmentFilter]); // Include all dependencies
 
-  // Load members khi component mount hoặc khi filter thay đổi
+  // Fetch departments từ API
+  const fetchDepartments = useCallback(async () => {
+    try {
+      const response = await memberService.getDepartments(eventId);
+      if (response.success && response.data) {
+        setDepartments(response.data);
+      }
+    } catch (err) {
+      console.error('Error fetching departments:', err);
+      // Set default departments if API fails
+      setDepartments([
+        { departmentId: 1, name: 'Marketing' },
+        { departmentId: 2, name: 'HR' },
+        { departmentId: 3, name: 'IT' },
+        { departmentId: 4, name: 'Finance' },
+        { departmentId: 5, name: 'Sales' }
+      ]);
+    }
+  }, [eventId]);
+
+  // Single useEffect to handle all data fetching
   useEffect(() => {
     fetchMembers();
-  }, [currentPage, pageSize, eventId, searchTerm, roleFilter, departmentFilter, statusFilter]);
+  }, [fetchMembers]);
+
+  // Load departments khi component mount hoặc eventId thay đổi
+  useEffect(() => {
+    fetchDepartments();
+  }, [fetchDepartments]);
 
   // Computed values để tương thích với Members.jsx
   const currentMembers = members; // Đồng bộ với members từ API
@@ -94,36 +137,40 @@ export const useMemberManagement = () => {
   const itemsPerPage = pageSize; // Alias cho pageSize
 
   // Handler functions để tương thích với Members.jsx
-  const handleStatusFilter = (status) => {
-    setStatusFilter(status);
+  const handleStatusFilter = useCallback((status) => {
+    // Ensure status is always a string  
+    const statusValue = typeof status === 'string' ? status : '';
+    setStatusFilter(statusValue);
     setCurrentPage(0);
-  };
+  }, []);
 
-  const handleRoleFilter = (role) => {
-    setRoleFilter(role);
+  const handleRoleFilter = useCallback((role) => {
+    // Ensure role is always a string
+    const roleValue = typeof role === 'string' ? role : '';
+    setRoleFilter(roleValue);
     setCurrentPage(0);
-  };
+  }, []);
 
-  const handleStartDateChange = (date) => {
+  const handleStartDateChange = useCallback((date) => {
     setStartDate(date);
     setCurrentPage(0);
-  };
+  }, []);
 
-  const handleEndDateChange = (date) => {
+  const handleEndDateChange = useCallback((date) => {
     setEndDate(date);
     setCurrentPage(0);
-  };
+  }, []);
 
-  const toggleAdvancedFilter = () => {
+  const toggleAdvancedFilter = useCallback(() => {
     setShowAdvancedFilter(!showAdvancedFilter);
-  };
+  }, [showAdvancedFilter]);
 
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     setCurrentPage(0);
-    fetchMembers();
-  };
+    // fetchMembers will be called automatically due to dependencies
+  }, []);
 
-  const resetFilters = () => {
+  const resetFilters = useCallback(() => {
     setSearchTerm('');
     setStatusFilter('');
     setRoleFilter('');
@@ -131,10 +178,11 @@ export const useMemberManagement = () => {
     setStartDate('');
     setEndDate('');
     setCurrentPage(0);
-  };
+    // fetchMembers will be called automatically when dependencies change
+  }, []);
 
   const paginate = (page) => {
-    setCurrentPage(page);
+    setCurrentPage(page - 1); // Convert from 1-based to 0-based for API
   };
 
   const toggleMenu = (userId) => {
@@ -195,7 +243,34 @@ export const useMemberManagement = () => {
   const handleSaveUser = async () => {
     try {
       setLoading(true);
-      const response = await memberService.updateMember(editedUser);
+      
+      // Debug information
+      console.log('Current departments:', departments);
+      console.log('Edited user full data:', editedUser);
+      console.log('Department name being searched:', editedUser.department);
+      
+      // Cải thiện cách tìm department với so sánh chi tiết hơn
+      const selectedDepartment = departments.find(dept => {
+        const deptName = dept.name.toLowerCase().trim();
+        const editedDeptName = (editedUser.department || '').toLowerCase().trim();
+        console.log(`Comparing: "${deptName}" with "${editedDeptName}"`);
+        return deptName === editedDeptName;
+      });
+      
+      console.log('Selected department:', selectedDepartment);
+      
+      // Transform the edited user data to match UpdateMemberRequestDTO      
+      const updateData = {
+        eventId: eventId,
+        accountId: editedUser.accountId || editedUser.id,
+        eventRole: editedUser.role || editedUser.eventRole, // Bổ sung eventRole
+        departmentId: selectedDepartment ? selectedDepartment.departmentId : null,
+        reason: "Updated by admin"
+      };
+      
+      console.log('Update data being sent:', updateData);
+      
+      const response = await memberService.updateMember(updateData);
       
       if (response.success) {
         await fetchMembers();
@@ -219,11 +294,12 @@ export const useMemberManagement = () => {
     setSelectedMember(null);
   };
 
-  // Handle search với alias
-  const handleSearch = (term) => {
-    setSearchTerm(term);
+  // Handle search với debounce để tránh gọi API quá nhiều
+  const handleSearch = useCallback((term) => {
+    const searchValue = typeof term === 'string' ? term : '';
+    setSearchTerm(searchValue);
     setCurrentPage(0);
-  };
+  }, []);
 
   const handleBanMember = async (member, isBanned) => {
     try {
@@ -287,7 +363,7 @@ export const useMemberManagement = () => {
 
   // Handle pagination (giữ lại cho tương thích)
   const handlePageChange = (page) => {
-    setCurrentPage(page);
+    setCurrentPage(page - 1); // Convert from 1-based to 0-based for API
   };
 
   const handlePageSizeChange = (size) => {
@@ -332,6 +408,7 @@ export const useMemberManagement = () => {
     filteredMembers,
     bannedUsers,
     members, // Giữ lại cho các component khác
+    departments, // Add departments to the return
     loading,
     error,
     totalPages,
@@ -347,7 +424,7 @@ export const useMemberManagement = () => {
     showAdvancedFilter,
     
     // Pagination state - tương thích với Members.jsx
-    currentPage,
+    currentPage: currentPage + 1, // Convert to 1-based for UI
     totalPages,
     itemsPerPage,
     pageSize, // Giữ lại cho tương thích

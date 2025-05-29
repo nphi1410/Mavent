@@ -17,15 +17,14 @@ const MemberFilters = ({
   return (
     <div className="p-3 sm:p-4 border-b space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between">
       {/* Search and Filters */}
-      <div className="space-y-2 sm:space-y-0 sm:flex sm:items-center sm:space-x-3">
-        {/* Search input */}
+      <div className="space-y-2 sm:space-y-0 sm:flex sm:items-center sm:space-x-3">          {/* Search input */}
         <div className="relative w-full sm:w-auto">
           <input 
             type="text" 
             placeholder="Search members..." 
             className="w-full border rounded-lg px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             value={searchTerm}
-            onChange={onSearchChange} 
+            onChange={(e) => onSearchChange(e.target.value)} 
           />
           <FontAwesomeIcon 
             icon={faSearch} 
@@ -39,10 +38,10 @@ const MemberFilters = ({
           <div className="relative">
             <select 
               className="w-full border rounded-lg px-3 py-2 appearance-none pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-              value={statusFilter}
-              onChange={onStatusFilterChange}
+              value={statusFilter || ''}
+              onChange={(e) => onStatusFilterChange(e.target.value)}
             >
-              <option value="All">All Status</option>
+              <option value="">All Status</option>
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
             </select>
@@ -56,13 +55,13 @@ const MemberFilters = ({
           <div className="relative">
             <select 
               className="w-full border rounded-lg px-3 py-2 appearance-none pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-              value={roleFilter}
-              onChange={onRoleFilterChange}
+              value={roleFilter || ''}
+              onChange={(e) => onRoleFilterChange(e.target.value)}
             >
-              <option value="All">All Roles</option>
-              <option value="Admin">Admin</option>
-              <option value="Moderator">Moderator</option>
-              <option value="Member">Member</option>
+              <option value="">All Roles</option>
+              <option value="ADMIN">Admin</option>
+              <option value="DEPARTMENT_MANAGER">Department Manager</option>
+              <option value="MEMBER">Member</option>
             </select>
             <FontAwesomeIcon 
               icon={faChevronDown} 

@@ -71,7 +71,7 @@ const AdvancedFilterSidebar = ({
                     name="role" 
                     value="All" 
                     checked={roleFilter === 'All'}
-                    onChange={() => onRoleFilterChange({ target: { value: 'All' } })}
+                    onChange={() => onRoleFilterChange('All')}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                   />
                   <label htmlFor="role-all" className="ml-2 block text-sm text-gray-700">All Roles</label>
@@ -83,7 +83,7 @@ const AdvancedFilterSidebar = ({
                     name="role" 
                     value="Admin" 
                     checked={roleFilter === 'Admin'}
-                    onChange={() => onRoleFilterChange({ target: { value: 'Admin' } })}
+                    onChange={() => onRoleFilterChange('Admin')}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                   />
                   <label htmlFor="role-admin" className="ml-2 block text-sm text-gray-700">Admin</label>
@@ -95,7 +95,7 @@ const AdvancedFilterSidebar = ({
                     name="role" 
                     value="Moderator" 
                     checked={roleFilter === 'Moderator'}
-                    onChange={() => onRoleFilterChange({ target: { value: 'Moderator' } })}
+                    onChange={() => onRoleFilterChange('Moderator')}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                   />
                   <label htmlFor="role-moderator" className="ml-2 block text-sm text-gray-700">Moderator</label>
@@ -107,7 +107,7 @@ const AdvancedFilterSidebar = ({
                     name="role" 
                     value="Member" 
                     checked={roleFilter === 'Member'}
-                    onChange={() => onRoleFilterChange({ target: { value: 'Member' } })}
+                    onChange={() => onRoleFilterChange('Member')}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                   />
                   <label htmlFor="role-member" className="ml-2 block text-sm text-gray-700">Member</label>
@@ -126,7 +126,7 @@ const AdvancedFilterSidebar = ({
                     name="status" 
                     value="All" 
                     checked={statusFilter === 'All'}
-                    onChange={() => onStatusFilterChange({ target: { value: 'All' } })}
+                    onChange={() => onStatusFilterChange('All')}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                   />
                   <label htmlFor="status-all" className="ml-2 block text-sm text-gray-700">All Status</label>
@@ -138,7 +138,7 @@ const AdvancedFilterSidebar = ({
                     name="status" 
                     value="Active" 
                     checked={statusFilter === 'Active'}
-                    onChange={() => onStatusFilterChange({ target: { value: 'Active' } })}
+                    onChange={() => onStatusFilterChange('Active')}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                   />
                   <label htmlFor="status-active" className="ml-2 block text-sm text-gray-700">Active</label>
@@ -150,7 +150,7 @@ const AdvancedFilterSidebar = ({
                     name="status" 
                     value="Inactive" 
                     checked={statusFilter === 'Inactive'}
-                    onChange={() => onStatusFilterChange({ target: { value: 'Inactive' } })}
+                    onChange={() => onStatusFilterChange('Inactive')}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                   />
                   <label htmlFor="status-inactive" className="ml-2 block text-sm text-gray-700">Inactive</label>

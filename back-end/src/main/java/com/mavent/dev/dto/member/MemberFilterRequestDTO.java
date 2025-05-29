@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 /**
  * DTO for member search and filtering operations.
  */
@@ -24,6 +25,10 @@ public class MemberFilterRequestDTO {
     private String eventRole;
     
     private Integer departmentId;
+    
+    @Size(max = 100, message = "Department name must not exceed 100 characters")
+    private String departmentName;
+    
     private Boolean isActive;
     
     @Pattern(regexp = "^(MALE|FEMALE|OTHER)$", message = "Gender must be MALE, FEMALE, or OTHER")
@@ -77,6 +82,11 @@ public class MemberFilterRequestDTO {
         
         public Builder departmentId(Integer departmentId) {
             dto.departmentId = departmentId;
+            return this;
+        }
+        
+        public Builder departmentName(String departmentName) {
+            dto.departmentName = departmentName;
             return this;
         }
         

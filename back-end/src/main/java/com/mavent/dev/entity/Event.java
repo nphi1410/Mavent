@@ -8,8 +8,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.List;
-
 @Entity
 @Table(name = "events")
 @Data
@@ -49,7 +47,7 @@ public class Event {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private EventStatus status = EventStatus.PENDING;
-//
+
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "created_by_account_id")
 //    private Account createdBy;

@@ -5,6 +5,7 @@ import { faSave, faTimes } from '@fortawesome/free-solid-svg-icons';
 const EditUserModal = ({
   isOpen,
   user,
+  departments = [],
   onClose,
   onSave,
   onChange
@@ -30,8 +31,8 @@ const EditUserModal = ({
                 id="name"
                 name="name"
                 value={user.name}
-                onChange={handleInputChange}
-                className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                readOnly
+                className="w-full border rounded-lg px-3 py-2 bg-gray-100 text-gray-600 cursor-not-allowed"
               />
             </div>
             <div>
@@ -41,8 +42,8 @@ const EditUserModal = ({
                 id="email"
                 name="email"
                 value={user.email}
-                onChange={handleInputChange}
-                className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                readOnly
+                className="w-full border rounded-lg px-3 py-2 bg-gray-100 text-gray-600 cursor-not-allowed"
               />
             </div>
             <div>
@@ -54,9 +55,9 @@ const EditUserModal = ({
                 onChange={handleInputChange}
                 className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="Admin">Admin</option>
-                <option value="Moderator">Moderator</option>
-                <option value="Member">Member</option>
+                <option value="ADMIN">Admin</option>
+                <option value="DEPARTMENT_MANAGER">Department Manager</option>
+                <option value="MEMBER">Member</option>
               </select>
             </div>
             <div>
@@ -81,23 +82,13 @@ const EditUserModal = ({
                 onChange={handleInputChange}
                 className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="Marketing">Marketing</option>
-                <option value="HR">HR</option>
-                <option value="IT">IT</option>
-                <option value="Finance">Finance</option>
-                <option value="Sales">Sales</option>
+                <option value="">Select Department</option>
+                {departments.map(dept => (
+                  <option key={dept.departmentId} value={dept.name}>
+                    {dept.name}
+                  </option>
+                ))}
               </select>
-            </div>
-            <div>
-              <label htmlFor="joined" className="block text-sm font-medium text-gray-700 mb-1">Date Joined:</label>
-              <input
-                type="text"
-                id="joined"
-                name="joined"
-                value={user.joined}
-                onChange={handleInputChange}
-                className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
             </div>
           </form>
         </div>

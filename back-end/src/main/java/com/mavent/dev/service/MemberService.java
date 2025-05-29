@@ -28,4 +28,6 @@ public interface MemberService {
      * Ban or unban a member.
      */
     MemberResponseDTO banMember(BanMemberRequestDTO request);
+
+
 }

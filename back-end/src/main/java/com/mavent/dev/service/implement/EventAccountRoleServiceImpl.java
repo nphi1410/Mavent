@@ -4,7 +4,7 @@ import com.mavent.dev.entity.EventAccountRole;
 import com.mavent.dev.entity.EventAccountRoleId;
 import com.mavent.dev.repository.EventAccountRoleRepository;
 import com.mavent.dev.service.EventAccountRoleService;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,8 +15,11 @@ import java.util.Optional;
 @Service
 public class EventAccountRoleServiceImpl implements EventAccountRoleService {
 
-    @Autowired
-    private EventAccountRoleRepository eventAccountRoleRepository;
+    private final EventAccountRoleRepository eventAccountRoleRepository;
+
+    public EventAccountRoleServiceImpl(EventAccountRoleRepository eventAccountRoleRepository) {
+        this.eventAccountRoleRepository = eventAccountRoleRepository;
+    }
 
     @Override
     public List<EventAccountRole> getMembersByEventId(Integer eventId) {

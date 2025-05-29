@@ -13,6 +13,7 @@ const MemberTable = ({
   onEditUser,
   onBanUser
 }) => {
+  
   return (
     <div className="hidden lg:block">
       <table className="min-w-full">
@@ -78,7 +79,9 @@ const MemberTable = ({
                     
                     {/* Action menu */}
                     {activeMenu === member.id && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-10 border">
+                      <div
+                        className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-10 border"
+                      >
                         <div className="py-1">
                           <button 
                             onClick={() => onViewUser(member)} 

@@ -9,8 +9,17 @@ const Pagination = ({
   itemsPerPage,
   onPageChange
 }) => {
-  const indexOfFirstItem = (currentPage - 1) * itemsPerPage;
-  const indexOfLastItem = Math.min(indexOfFirstItem + itemsPerPage, totalItems);
+  // Fix pagination calculation to handle edge cases
+  const safeCurrentPage = Math.max(1, currentPage);
+  const safeTotalItems = Math.max(0, totalItems);
+  const safeItemsPerPage = Math.max(1, itemsPerPage);
+  
+  const indexOfFirstItem = (safeCurrentPage - 1) * safeItemsPerPage;
+  const indexOfLastItem = Math.min(indexOfFirstItem + safeItemsPerPage, safeTotalItems);
+
+  // console.log('Pagination props:', { currentPage, totalPages, totalItems, itemsPerPage });
+  // console.log('Safe values:', { safeCurrentPage, safeTotalItems, safeItemsPerPage });
+  // console.log('Calculated indices:', { indexOfFirstItem, indexOfLastItem });
 
   return (
     <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
@@ -44,9 +53,9 @@ const Pagination = ({
       <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
         <div>
           <p className="text-sm text-gray-700">
-            Showing <span className="font-medium">{totalItems > 0 ? indexOfFirstItem + 1 : 0}</span> to{' '}
+            Showing <span className="font-medium">{safeTotalItems > 0 ? indexOfFirstItem + 1 : 0}</span> to{' '}
             <span className="font-medium">{indexOfLastItem}</span> of{' '}
-            <span className="font-medium">{totalItems}</span> results
+            <span className="font-medium">{safeTotalItems}</span> results
           </p>
         </div>
         <div>

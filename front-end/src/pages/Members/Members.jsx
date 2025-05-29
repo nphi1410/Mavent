@@ -16,6 +16,8 @@ const Members = () => {
     currentMembers,
     filteredMembers,
     bannedUsers,
+    departments, // Add departments from the hook
+    totalElements, // Add totalElements from API
     
     // Search and filter state
     searchTerm,
@@ -74,8 +76,8 @@ const Members = () => {
             statusFilter={statusFilter}
             roleFilter={roleFilter}
             onSearchChange={handleSearch}
-            onStatusFilterChange={handleStatusFilter}
-            onRoleFilterChange={handleRoleFilter}
+            onStatusFilterChange={(value) => handleStatusFilter(value === '' ? '' : value)}
+            onRoleFilterChange={(value) => handleRoleFilter(value === '' ? '' : value)}
             onAdvancedFilterToggle={toggleAdvancedFilter}
             onAddMember={() => console.log('Add member clicked')}
           />
@@ -109,7 +111,7 @@ const Members = () => {
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
-            totalItems={filteredMembers.length}
+            totalItems={totalElements}
             itemsPerPage={itemsPerPage}
             onPageChange={paginate}
           />
@@ -145,6 +147,7 @@ const Members = () => {
         <EditUserModal
           isOpen={showEditModal}
           user={editedUser}
+          departments={departments}
           onClose={handleCancelEdit}
           onSave={handleSaveUser}
           onChange={handleEditInputChange}
