@@ -81,11 +81,11 @@ function SuperAdminManageUsers() {
                 <SuperAdminHeader />
                 <main className="flex-1 overflow-y-auto p-10 bg-gray-100">
                     <div className="py-10 w-full">
-                        <h1 className="text-3xl font-bold text-gray-800 mb-4">Users</h1>
+                        <h1 className="text-4xl font-bold text-gray-800 mb-4">Users</h1>
                         <p className="text-gray-500 mb-6">Manage your users and their permissions</p>
 
                         <div className="border border-gray-200 rounded-lg p-4 bg-white">
-                            <h2 className="text-lg font-semibold mb-1 text-black">All Users</h2>
+                            <h2 className="text-2xl font-semibold mb-1 text-black">All Users</h2>
                             <p className="text-sm text-gray-500 mb-4">View and manage all users from one place</p>
 
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">

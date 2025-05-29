@@ -30,7 +30,7 @@ function SuperAdminViewEventDetails() {
                     <div className="py-10 w-full">
                         <div className="flex items-center justify-between mb-6">
                             <div>
-                                <h1 className="text-3xl text-gray-800 font-bold">
+                                <h1 className="text-4xl text-gray-800 font-bold mb-1">
                                     {event.name}
                                     <span className={`ml-2 text-xs font-semibold px-2 py-1 rounded-full
                                         ${event.status === "RECRUITING"
@@ -54,9 +54,6 @@ function SuperAdminViewEventDetails() {
                                 </h1>
                                 <p className="text-gray-500">Event ID: {event.eventId}</p>
                             </div>
-                            <button className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded hover:bg-gray-800">
-                                <FontAwesomeIcon icon={faEdit} /> Edit Event
-                            </button>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">

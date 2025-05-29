@@ -13,11 +13,13 @@ const SuperAdminActionDropdown = ({ isOpen, onToggle, onView, onEdit, onDelete }
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 z-20 w-fit bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
-                    <div className="px-4 py-2 text-sm font-semibold text-gray-500 border-b">
+                <div
+                    className="absolute right-0 top-full mt-2 w-fit bg-white border border-gray-200 rounded-xl shadow-xl z-[99999]"
+                >
+                    <div className="px-4 py-2 text-sm font-semibold text-gray-500 border-b border-gray-300">
                         Actions
                     </div>
-                    <ul className="text-sm text-gray-700 divide-y">
+                    <ul className="text-sm text-gray-900 divide-y">
                         <li
                             className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 cursor-pointer"
                             onClick={onView}
@@ -42,6 +44,7 @@ const SuperAdminActionDropdown = ({ isOpen, onToggle, onView, onEdit, onDelete }
                     </ul>
                 </div>
             )}
+
         </div>
     );
 };
