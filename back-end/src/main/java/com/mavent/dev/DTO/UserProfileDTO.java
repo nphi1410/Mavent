@@ -21,4 +21,3 @@ public class UserProfileDTO {
     private LocalDate dateOfBirth;
     private String studentId;
 }
-

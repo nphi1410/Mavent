@@ -14,6 +14,14 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Account {
+    public enum SystemRole {
+        SUPER_ADMIN, USER
+    }
+
+    public enum Gender {
+        MALE, FEMALE, OTHER
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "account_id")
@@ -31,8 +39,9 @@ public class Account {
     @Column(name = "full_name")
     private String fullName;
 
-    @Column(name = "system_role")
-    private String systemRole;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "system_role", nullable = false)
+    private SystemRole systemRole = SystemRole.USER;
 
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
@@ -40,34 +49,22 @@ public class Account {
     @Column(name = "avatar_img")
     private String avatarImg;
 
-    @Column(name = "phone_number")
+    @Column(name = "phone_number", unique = true)
     private String phoneNumber;
 
-    private String gender;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender")
+    private Gender gender = Gender.OTHER;
+
+    @Column(name = "student_id", unique = true)
+    private String studentId;
+
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    @Column(name = "date_of_birth")
-    private LocalDate dateOfBirth;
-
-    @Column(name = "student_id")
-    private String studentId;
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-        if (this.isDeleted == null) {
-            this.isDeleted = false;
-        }
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
 }
