@@ -70,7 +70,7 @@ public class UserController {
         String username = (String) session.getAttribute("username");
         if (username == null) {
             return ResponseEntity.status(401).build();
-        }
+        }//a
         accountService.updateProfile(username, userProfileDTO);
         return ResponseEntity.ok().build();
     }
