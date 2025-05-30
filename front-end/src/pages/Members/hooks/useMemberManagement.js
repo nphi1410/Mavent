@@ -1,241 +1,137 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
+import useMemberData from './useMemberData';
+import useMemberFilters from './useMemberFilters';
+import useMemberModals from './useMemberModals';
+import useMemberActions from './useMemberActions';
 import memberService from '../../../services/memberService';
 
-// Custom hook to manage member data and related state
-export const useMemberManagement = () => {
-  // State cho member data từ API
-  const [members, setMembers] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalElements, setTotalElements] = useState(0);
-  const [departments, setDepartments] = useState([]);
+/**
+ * Main member management hook that composes all smaller hooks together.
+ * This hook provides a unified interface for the Members component.
+ * 
+ * @returns {Object} All necessary methods and state for member management
+ */
+const useMemberManagement = () => {
+  // Event ID state
+  const [eventId, setEventId] = useState(1);
 
-  // State cho filters và pagination
-  const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-  const [eventId, setEventId] = useState(1); // Mặc định event ID = 1, có thể thay đổi
+  // ------------------------
+  // 1. Initialize Hooks
+  // ------------------------
   
-  // Filter states để tương thích với Members.jsx
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [roleFilter, setRoleFilter] = useState('');
-  const [departmentFilter, setDepartmentFilter] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
-
-  // UI states để tương thích với Members.jsx
-  const [activeMenu, setActiveMenu] = useState(null);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [showUserDetail, setShowUserDetail] = useState(false);
-  const [editedUser, setEditedUser] = useState(null);
-  const [showEditModal, setShowEditModal] = useState(false);
-
-  // Modal states (alias cho tương thích)
-  const [selectedMember, setSelectedMember] = useState(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
-  // Fetch members từ API
-  const fetchMembers = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const params = {
-        search: searchTerm || undefined,
-        role: (typeof roleFilter === 'string' && roleFilter !== '') ? roleFilter : undefined,
-        department: (typeof departmentFilter === 'string' && departmentFilter !== '') ? departmentFilter : undefined,
-        status: (typeof statusFilter === 'string' && statusFilter !== '') ? statusFilter : undefined,
-        page: currentPage,
-        size: pageSize
-      };
-
-      // Remove undefined values
-      Object.keys(params).forEach(key => {
-        if (params[key] === undefined) {
-          delete params[key];
-        }
-      });
-
-      const response = await memberService.getMembers(eventId, params);
-      
-      if (response.success && response.data) {
-        // Transform API data to match front-end expectations
-        const transformedMembers = (response.data.content || []).map(member => ({
-          ...member,
-          id: member.accountId, // Add id field for UI compatibility
-          name: member.fullName, // Transform fullName to name
-          role: member.eventRole, // Transform eventRole to role
-          status: member.isActive ? 'Active' : 'Inactive', // Transform isActive to status
-          department: member.departmentName || 'N/A', // Transform departmentName to department
-          isBanned: !member.isActive, // Map inactive to banned for UI logic
-          avatarUrl: member.avatarUrl || null // Ensure avatarUrl is available
-        }));
-        
-        // Log thêm thông tin để debug
-        console.log('Filter state:', { statusFilter, roleFilter, departmentFilter });
-        console.log('Received filtered members:', response.data.content);
-        console.log('Member data with avatarUrls:', transformedMembers.map(m => ({ id: m.id, avatarUrl: m.avatarUrl })));
-        
-        setMembers(transformedMembers);
-        setTotalPages(response.data.totalPages || 0);
-        setTotalElements(response.data.totalElements || 0);
-      } else {
-        setError('Không thể tải danh sách thành viên');
-        setMembers([]);
-        setTotalPages(0);
-        setTotalElements(0);
-      }
-    } catch (err) {
-      console.error('Error fetching members:', err);
-      setError('Lỗi kết nối đến server. Vui lòng thử lại sau.');
-      setMembers([]);
-      setTotalPages(0);
-      setTotalElements(0);
-    } finally {
-      setLoading(false);
+  // Filter states - with a temporary callback that will be replaced later
+  const filterHook = useMemberFilters(() => {
+    console.log('Fetch callback called');
+    if (typeof fetchMembers === 'function') {
+      fetchMembers();
     }
-  }, [currentPage, pageSize, eventId, searchTerm, statusFilter, roleFilter, departmentFilter]); // Include all dependencies
+  });
+  
+  const {
+    searchTerm,
+    statusFilter,
+    roleFilter,
+    departmentFilter,
+    startDate,
+    endDate,
+    showAdvancedFilter,
+    currentPage,
+    pageSize,
+    handleStatusFilter,
+    handleRoleFilter,
+    handleDepartmentFilter,
+    handleStartDateChange,
+    handleEndDateChange,
+    toggleAdvancedFilter,
+    resetFilters,
+    applyFilters,
+    paginate,
+    handlePageChange,
+    handlePageSizeChange
+  } = filterHook;
 
-  // Fetch departments từ API
-  const fetchDepartments = useCallback(async () => {
-    try {
-      const response = await memberService.getDepartments(eventId);
-      if (response.success && response.data) {
-        setDepartments(response.data);
-      }
-    } catch (err) {
-      console.error('Error fetching departments:', err);
-      // Set default departments if API fails
-      setDepartments([
-        { departmentId: 1, name: 'Marketing' },
-        { departmentId: 2, name: 'HR' },
-        { departmentId: 3, name: 'IT' },
-        { departmentId: 4, name: 'Finance' },
-        { departmentId: 5, name: 'Sales' }
-      ]);
-    }
-  }, [eventId]);
+  // Current page is 0-based for API but 1-based for UI
+  const apiPage = currentPage - 1 >= 0 ? currentPage - 1 : 0;
 
-  // Single useEffect to handle all data fetching
-  useEffect(() => {
-    fetchMembers();
-  }, [fetchMembers]);
+  // Data fetching and management
+  const memberDataHook = useMemberData(eventId, {
+    searchTerm,
+    statusFilter,
+    roleFilter,
+    departmentFilter
+  }, {
+    page: apiPage,
+    size: pageSize
+  });
+  
+  const {
+    members,
+    departments,
+    loading,
+    error,
+    totalPages,
+    totalElements,
+    fetchMembers,
+    fetchDepartments,
+    clearError
+  } = memberDataHook;
 
-  // Load departments khi component mount hoặc eventId thay đổi
-  useEffect(() => {
-    fetchDepartments();
-  }, [fetchDepartments]);
+  // Modal and UI states
+  const modalHook = useMemberModals();
+  const {
+    activeMenu,
+    selectedUser,
+    showUserDetail,
+    editedUser,
+    showEditModal,
+    selectedMember,
+    isDetailModalOpen,
+    isEditModalOpen,
+    toggleMenu,
+    openUserDetailModal,
+    closeUserDetailModal,
+    openEditModal,
+    closeEditModal,
+    handleEditInputChange
+  } = modalHook;
 
-  // Add event listener for closing menus when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event) {
-      // Skip if no menu is active
-      if (activeMenu === null) return;
-      
-      // Check if click was on menu elements
-      const menuElements = document.querySelectorAll('[data-menu]');
-      const ellipsisButtons = document.querySelectorAll('[data-menu-button]');
-      
-      // Check if the click was inside a menu or button
-      let clickedInsideMenu = false;
-      
-      menuElements.forEach(menu => {
-        if (menu && menu.contains(event.target)) {
-          clickedInsideMenu = true;
-        }
-      });
-      
-      ellipsisButtons.forEach(button => {
-        if (button && button.contains(event.target)) {
-          clickedInsideMenu = true;
-        }
-      });
-      
-      // Close menu if clicked outside
-      if (!clickedInsideMenu) {
-        setActiveMenu(null);
-      }
-    }
-    
-    // Add event listener
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [activeMenu]); // Re-attach when activeMenu changes
+  // Member actions (update, ban, delete)
+  const actionHook = useMemberActions(eventId);
+  const {
+    updateMember,
+    banMember,
+    unbanMember,
+    deleteMember
+  } = actionHook;
 
-  // Computed values để tương thích với Members.jsx
-  const currentMembers = members; // Đồng bộ với members từ API
-  const filteredMembers = members; // Có thể thêm logic filter local nếu cần
+  // ------------------------
+  // 2. Derived Values
+  // ------------------------
+  
+  const currentMembers = members;
+  const filteredMembers = members;
   const bannedUsers = members.reduce((acc, member) => {
     acc[member.id] = member.isBanned || false;
     return acc;
-  }, {}); // Transform to object with member.id as key for UI compatibility
-  const itemsPerPage = pageSize; // Alias cho pageSize
+  }, {});
+  const itemsPerPage = pageSize;
 
-  // Handler functions để tương thích với Members.jsx
-  const handleStatusFilter = useCallback((status) => {
-    // Ensure status is always a string  
-    const statusValue = typeof status === 'string' ? status : '';
-    setStatusFilter(statusValue);
-    setCurrentPage(0);
-  }, []);
-
-  const handleRoleFilter = useCallback((role) => {
-    // Ensure role is always a string
-    const roleValue = typeof role === 'string' ? role : '';
-    setRoleFilter(roleValue);
-    setCurrentPage(0);
-  }, []);
-
-  const handleStartDateChange = useCallback((date) => {
-    setStartDate(date);
-    setCurrentPage(0);
-  }, []);
-
-  const handleEndDateChange = useCallback((date) => {
-    setEndDate(date);
-    setCurrentPage(0);
-  }, []);
-
-  const toggleAdvancedFilter = useCallback(() => {
-    setShowAdvancedFilter(!showAdvancedFilter);
-  }, [showAdvancedFilter]);
-
-  const applyFilters = useCallback(() => {
-    setCurrentPage(0);
-    // fetchMembers will be called automatically due to dependencies
-  }, []);
-
-  const resetFilters = useCallback(() => {
-    setSearchTerm('');
-    setStatusFilter('');
-    setRoleFilter('');
-    setDepartmentFilter('');
-    setStartDate('');
-    setEndDate('');
-    setCurrentPage(0);
-    // fetchMembers will be called automatically when dependencies change
-  }, []);
-
-  const paginate = (page) => {
-    setCurrentPage(page - 1); // Convert from 1-based to 0-based for API
-  };
-
-  const toggleMenu = (userId) => {
-    // If userId is null, we're explicitly closing the menu
-    // Otherwise toggle between the current menu and the requested one
-    setActiveMenu(userId === null ? null : (activeMenu === userId ? null : userId));
-  };
+  // ------------------------
+  // 3. Integration Methods
+  // ------------------------
+  
+  // Handler functions that integrate modals and data actions
+  const handleSearch = useCallback((term) => {
+    const searchValue = typeof term === 'string' ? term : '';
+    handleStatusFilter(searchValue);
+    handlePageChange(1); // Reset to first page (1-indexed in UI)
+    fetchMembers();
+  }, [handleStatusFilter, handlePageChange, fetchMembers]);
 
   const handleViewUser = async (user) => {
     try {
-      setLoading(true);
       // Close any open menus when viewing user details
-      setActiveMenu(null);
+      toggleMenu(null);
       
       const response = await memberService.getMemberDetails(eventId, user.accountId);
       
@@ -248,296 +144,157 @@ export const useMemberManagement = () => {
           role: response.data.eventRole,
           status: response.data.isActive ? 'Active' : 'Inactive',
           department: response.data.departmentName || 'N/A',
-          isBanned: !response.data.isActive
+          isBanned: !response.data.isActive,
+          // Format date of birth if available
+          dateOfBirth: response.data.dateOfBirth ? new Date(response.data.dateOfBirth).toLocaleDateString('vi-VN') : null,
+          // Make sure we have access to all properties
+          studentId: response.data.studentId || null,
+          gender: response.data.gender || null,
+          avatarUrl: response.data.avatarUrl || null
         };
         
-        setSelectedUser(transformedUser);
-        setSelectedMember(transformedUser);
-        setShowUserDetail(true);
-        setIsDetailModalOpen(true);
+        // Open detail modal with user data
+        openUserDetailModal(transformedUser);
       }
     } catch (err) {
       console.error('Error fetching member details:', err);
-      setError('Không thể tải chi tiết thành viên');
-    } finally {
-      setLoading(false);
     }
-  };
-
-  const closeUserDetail = () => {
-    setShowUserDetail(false);
-    setIsDetailModalOpen(false);
-    setSelectedUser(null);
-    setSelectedMember(null);
   };
 
   const handleEditUser = (user) => {
     // Close any open menus when editing
-    setActiveMenu(null);
-    setEditedUser(user);
-    setSelectedMember(user);
-    setShowEditModal(true);
-    setIsEditModalOpen(true);
-  };
-
-  const handleEditInputChange = (field, value) => {
-    // Log information for debugging
-    console.log(`Editing field: ${field}, with value: ${value}`);
-    console.log('Available departments:', departments);
-    
-    setEditedUser(prev => {
-      // When changing department, try to find the department ID as well
-      if (field === 'department' && departments.length > 0) {
-        console.log(`Looking for department match for: "${value}"`);
-        
-        // Strategy 1: Look for exact case-insensitive match
-        const exactMatch = departments.find(dept => 
-          dept.name.toLowerCase().trim() === value.toLowerCase().trim()
-        );
-        
-        if (exactMatch) {
-          console.log(`Found exact department match: ${exactMatch.name} (ID: ${exactMatch.departmentId})`);
-          return {
-            ...prev,
-            [field]: value,
-            departmentId: exactMatch.departmentId,
-            departmentName: exactMatch.name // Store normalized name for backend
-          };
-        }
-        
-        // Strategy 2: Look for partial match (contains)
-        const partialMatch = departments.find(dept => 
-          dept.name.toLowerCase().includes(value.toLowerCase()) || 
-          value.toLowerCase().includes(dept.name.toLowerCase())
-        );
-        
-        if (partialMatch) {
-          console.log(`Found partial department match: ${partialMatch.name} (ID: ${partialMatch.departmentId})`);
-          return {
-            ...prev,
-            [field]: value,
-            departmentId: partialMatch.departmentId,
-            departmentName: partialMatch.name // Store normalized name for backend
-          };
-        }
-        
-        console.log('No department match found');
-      }
-      
-      // Default behavior for other fields
-      return {
-        ...prev,
-        [field]: value
-      };
-    });
+    toggleMenu(null);
+    // Open edit modal with user data
+    openEditModal(user);
   };
 
   const handleSaveUser = async () => {
     try {
-      setLoading(true);
+      console.log('Saving edited user data:', editedUser);
+      console.log('Status value:', editedUser.status);
+      console.log('isActive value:', editedUser.isActive);
+      console.log('Available departments:', departments);
       
-      // Clear debug information
-      console.log('=== SAVING USER CHANGES ===');
-      console.log('Current departments:', departments);
-      console.log('Edited user full data:', editedUser);
+      const result = await updateMember(editedUser, departments);
       
-      // Priority 1: Use departmentId directly if it's stored in editedUser during editing
-      let departmentId = null;
-      
-      // Check if we already have departmentId from the handleEditInputChange
-      if (editedUser.departmentId) {
-        console.log(`DIRECT: Using departmentId from editedUser: ${editedUser.departmentId}`);
-        departmentId = editedUser.departmentId;
-      } 
-      // If no departmentId stored, try to match department name
-      else if (editedUser.department) {
-        console.log(`SEARCH: Looking for department match for: "${editedUser.department}"`);
+      if (result.success) {
+        console.log('Member updated successfully:', result.data);
         
-        const deptName = editedUser.department.toLowerCase().trim();
-        
-        // Try exact match first
-        const exactMatch = departments.find(dept => 
-          dept.name.toLowerCase().trim() === deptName
-        );
-        
-        if (exactMatch) {
-          console.log(`Found exact match: ${exactMatch.name} (ID: ${exactMatch.departmentId})`);
-          departmentId = exactMatch.departmentId;
-        } 
-        // Try contains match if exact match failed
-        else {
-          const partialMatch = departments.find(dept => 
-            dept.name.toLowerCase().includes(deptName) || 
-            deptName.includes(dept.name.toLowerCase())
-          );
-          
-          if (partialMatch) {
-            console.log(`Found partial match: ${partialMatch.name} (ID: ${partialMatch.departmentId})`);
-            departmentId = partialMatch.departmentId;
-          } else {
-            console.log('No department match found');
-          }
-        }
-      }
-      
-      // Transform the edited user data to match UpdateMemberRequestDTO      
-      const updateData = {
-        eventId: eventId,
-        accountId: editedUser.accountId || editedUser.id,
-        eventRole: editedUser.role || editedUser.eventRole,
-        departmentId: departmentId,
-        reason: "Updated by admin"
-      };
-      
-      console.log('Update data being sent:', updateData);
-      
-      const response = await memberService.updateMember(updateData);
-      
-      if (response.success) {
-        console.log('Update response data:', response.data);
-        // Phải fetchMembers sau khi cập nhật thành công để refresh UI
+        // Force a full refresh of the members list to ensure UI updates
+        console.log('Forcing complete refresh of member list');
         await fetchMembers();
-        setShowEditModal(false);
-        setIsEditModalOpen(false);
-        setEditedUser(null);
-        setSelectedMember(null);
+        closeEditModal();
       } else {
-        setError('Không thể cập nhật thông tin thành viên');
-        console.error('Update failed:', response);
+        console.error('Failed to update member');
       }
     } catch (err) {
       console.error('Error updating member:', err);
-      setError('Không thể cập nhật thông tin thành viên');
-    } finally {
-      setLoading(false);
     }
   };
 
-  const handleCancelEdit = () => {
-    setShowEditModal(false);
-    setIsEditModalOpen(false);
-    setEditedUser(null);
-    setSelectedMember(null);
-  };
-
-  // Handle search với debounce để tránh gọi API quá nhiều
-  const handleSearch = useCallback((term) => {
-    const searchValue = typeof term === 'string' ? term : '';
-    setSearchTerm(searchValue);
-    setCurrentPage(0);
-  }, []);
-
-  const handleBanMember = async (member, isBanned) => {
+  const handleBanUser = async (member, shouldBeBanned) => {
     try {
-      setLoading(true);
+      console.log(`Ban User called for ${member.name} with shouldBeBanned=${shouldBeBanned}`);
       // Close any open menus when banning/unbanning
-      setActiveMenu(null);
+      toggleMenu(null);
       
-      const banData = {
-        eventId: eventId,
-        accountId: member.accountId || member.id,
-        isBanned: isBanned,
-        reason: isBanned ? 'Banned by admin' : 'Unbanned by admin'
-      };
+      let success;
+      // If shouldBeBanned is true, we want to ban the user
+      // If shouldBeBanned is false, we want to unban the user
+      if (shouldBeBanned) {
+        console.log('Calling banMember for', member.name);
+        success = await banMember(member);
+      } else {
+        console.log('Calling unbanMember for', member.name);
+        success = await unbanMember(member);
+      }
       
-      const response = await memberService.banMember(banData);
-      
-      if (response.success) {
+      // Refresh member list on success
+      if (success) {
+        console.log('Ban operation successful, refreshing members list');
         await fetchMembers();
+      } else {
+        console.log('Ban operation failed, not refreshing members list');
       }
     } catch (err) {
       console.error('Error banning/unbanning member:', err);
-      setError('Không thể thực hiện hành động này');
-    } finally {
-      setLoading(false);
     }
   };
-
-  // Alias cho handleBanMember
-  const handleBanUser = handleBanMember;
 
   const handleDeleteMember = async (member) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa thành viên này?')) {
       try {
-        setLoading(true);
-        await memberService.removeMember(eventId, member.accountId);
+        await deleteMember(member);
+        // Refresh member list on success
         await fetchMembers();
       } catch (err) {
         console.error('Error deleting member:', err);
-        setError('Không thể xóa thành viên');
-      } finally {
-        setLoading(false);
       }
     }
   };
 
   // Handle filter changes (giữ lại cho tương thích)
   const handleFilterChange = (filterType, value) => {
-    setCurrentPage(0);
+    if (currentPage !== 0) {
+      handlePageChange(1);
+    }
     
     switch (filterType) {
       case 'role':
-        setRoleFilter(value);
+        handleRoleFilter(value);
         break;
       case 'department':
-        setDepartmentFilter(value);
+        handleDepartmentFilter(value);
         break;
       case 'status':
-        setStatusFilter(value);
+        handleStatusFilter(value);
         break;
       default:
         break;
     }
   };
 
-  // Handle pagination (giữ lại cho tương thích)
-  const handlePageChange = (page) => {
-    setCurrentPage(page - 1); // Convert from 1-based to 0-based for API
-  };
-
-  const handlePageSizeChange = (size) => {
-    setPageSize(size);
-    setCurrentPage(0);
-  };
-
-  // Close modals
-  const closeDetailModal = () => {
-    setIsDetailModalOpen(false);
-    setSelectedMember(null);
-    setSelectedUser(null);
-    setShowUserDetail(false);
-  };
-
-  const closeEditModal = () => {
-    setIsEditModalOpen(false);
-    setSelectedMember(null);
-    setEditedUser(null);
-    setShowEditModal(false);
-  };
-
-  // Clear error
-  const clearError = () => {
-    setError(null);
-  };
-
   // Change event
   const changeEvent = (newEventId) => {
     setEventId(newEventId);
-    setCurrentPage(0);
+    if (currentPage !== 0) {
+      handlePageChange(1);
+    }
   };
 
+  // ------------------------
+  // 4. Method Aliases
+  // ------------------------
+  
   // Alias functions để tương thích với Members.jsx
   const handleViewDetails = handleViewUser;
   const handleEditMember = handleEditUser;
   const handleUpdateMember = handleSaveUser;
+  const handleBanMember = handleBanUser;
+  const handleCancelEdit = closeEditModal;
+  
+  // Create aliases for modal functions to match expected names in Members.jsx
+  const closeUserDetail = closeUserDetailModal;
+  const closeDetailModal = closeUserDetailModal;
+  const openDetailModal = openUserDetailModal;
+
+  // ------------------------
+  // 5. Effect Hooks
+  // ------------------------
+  
+  // Initial data fetch
+  useEffect(() => {
+    fetchMembers();
+    fetchDepartments();
+  }, []);
 
   return {
     // Data - tương thích với Members.jsx
     currentMembers,
     filteredMembers,
     bannedUsers,
-    members, // Giữ lại cho các component khác
-    departments, // Add departments to the return
+    members,
+    departments,
     loading,
     error,
     totalPages,
@@ -553,10 +310,10 @@ export const useMemberManagement = () => {
     showAdvancedFilter,
     
     // Pagination state - tương thích với Members.jsx
-    currentPage: currentPage + 1, // Convert to 1-based for UI
+    currentPage,
     totalPages,
     itemsPerPage,
-    pageSize, // Giữ lại cho tương thích
+    pageSize,
     
     // UI state - tương thích với Members.jsx
     activeMenu,
@@ -608,3 +365,7 @@ export const useMemberManagement = () => {
     fetchMembers
   };
 };
+
+// Export the hook as both named and default export
+export { useMemberManagement };
+export default useMemberManagement;

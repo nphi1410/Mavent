@@ -9,9 +9,7 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@Getter
-@Setter
+@Builder(toBuilder = true)
 public class UpdateMemberRequestDTO {
 
     @NotNull(message = "Event ID is required")
@@ -29,4 +27,7 @@ public class UpdateMemberRequestDTO {
     
     @Size(max = 500, message = "Reason must not exceed 500 characters")
     private String reason;
+    
+    // Field to handle active/inactive status
+    private Boolean isActive;
 }

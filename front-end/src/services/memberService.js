@@ -52,19 +52,27 @@ const memberService = {
     }
   },
 
-  // Cập nhật thông tin member (role, department)
+  // Cập nhật thông tin member (role, department, status)
   updateMember: async (memberData) => {
     try {
       console.log('memberService.updateMember called with:', memberData);
       
       // Transform frontend data to backend DTO format
+      const isActive = memberData.isActive !== undefined ? Boolean(memberData.isActive) : (memberData.status === 'Active');
+      
+      console.log(`Status conversion: status=${memberData.status}, isActive=${memberData.isActive} → final isActive=${isActive}`);
+      
       const updateRequest = {
         eventId: memberData.eventId,
         accountId: memberData.accountId,
         eventRole: memberData.role || memberData.eventRole,
         departmentId: memberData.departmentId,
+        // Always include isActive field to ensure it's sent to backend (forcing boolean type)
+        isActive: isActive,
         reason: memberData.reason || 'Updated by admin'
       };
+      
+      console.log('Final update request with isActive:', updateRequest);
       
       console.log('Sending update request:', updateRequest);
       const response = await axiosInstance.put('/api/members', updateRequest);
@@ -79,6 +87,17 @@ const memberService = {
   // Ban/unban member
   banMember: async (banData) => {
     try {
+      console.log('memberService.banMember called with data:', banData);
+      
+      // Ensure required fields are present
+      if (!banData.eventId || !banData.accountId) {
+        console.error('Missing required fields in banData:', banData);
+        throw new Error('Missing required fields for ban operation');
+      }
+      
+      // Make sure isBanned is explicitly a boolean
+      banData.isBanned = !!banData.isBanned;
+      
       const response = await axiosInstance.patch('/api/members/ban', banData);
       return response.data;
     } catch (error) {

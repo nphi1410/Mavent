@@ -89,6 +89,12 @@ public class MemberServiceImpl implements MemberService {
             memberRole.setDepartmentId(request.getDepartmentId());
         }
         
+        // Update isActive status if provided
+        if (request.getIsActive() != null) {
+            log.info("Updating isActive status to: {}", request.getIsActive());
+            memberRole.setIsActive(request.getIsActive());
+        }
+        
         EventAccountRole updated = eventAccountRoleRepository.save(memberRole);
         log.info("Successfully updated member {} in event {}", request.getAccountId(), request.getEventId());
         

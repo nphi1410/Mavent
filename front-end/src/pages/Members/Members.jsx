@@ -1,6 +1,6 @@
 import React from 'react';
 import Layout from '../../components/layout/Layout';
-import { useMemberManagement } from './hooks/useMemberManagement';
+import useMemberManagement from './hooks/useMemberManagement';
 import MemberFilters from './components/MemberFilters';
 import AdvancedFilterSidebar from './components/AdvancedFilterSidebar';
 import MemberTable from './components/MemberTable';
