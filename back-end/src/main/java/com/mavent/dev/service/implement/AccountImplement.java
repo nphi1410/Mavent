@@ -101,7 +101,8 @@ public class AccountImplement implements AccountService {
     @Override
     public List<UserEventDTO> getUserEvents(Integer accountId) {
         String sql = """
-        SELECT e.event_id, e.name AS event_name, e.description, e.status, ear.event_role, d.name AS department_name
+        SELECT e.event_id, e.name AS event_name, e.description, e.status, ear.event_role, 
+               d.name AS department_name, e.banner_url
         FROM events e
         JOIN event_account_role ear ON e.event_id = ear.event_id
         LEFT JOIN departments d ON ear.department_id = d.department_id
@@ -121,16 +122,16 @@ public class AccountImplement implements AccountService {
             String status = (String) row[3];
             String role = (String) row[4];
             String departmentName = (String) row[5];
+            String bannerUrl = (String) row[6];
 
             if (!"MEMBER".equals(role)) {
                 departmentName = null; // Chỉ lấy department nếu role là MEMBER
             }
 
-            eventList.add(new UserEventDTO(eventId, name, description, status, role, departmentName));
+            eventList.add(new UserEventDTO(eventId, name, description, status, role, departmentName, bannerUrl));
         }
 
         return eventList;
     }
-
 }
 
