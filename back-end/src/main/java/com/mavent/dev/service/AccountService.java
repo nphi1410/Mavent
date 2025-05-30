@@ -9,5 +9,5 @@ public interface AccountService {
     UserProfileDTO getUserProfile(String username);
     void updateProfile(String username, UserProfileDTO userProfileDTO);
     boolean checkLogin(String username, String password);
-    List<Account> findAllAccount();//a
+    List<Account> findAllAccount()
 }
