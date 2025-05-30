@@ -5,7 +5,7 @@ import Header from '../components/common/Header';
 
 const ProfilePage = () => {
   return (
-      <div className="flex h-screen w-screen bg-gray-100">
+      <div className="flex h-screen w-full bg-gray-100">
         <Sidebar />
         
         <ProfileContent />
