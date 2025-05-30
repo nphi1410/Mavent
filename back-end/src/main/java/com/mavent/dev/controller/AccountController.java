@@ -1,6 +1,7 @@
 package com.mavent.dev.controller;
 
 import com.mavent.dev.DTO.LoginDTO;
+import com.mavent.dev.DTO.UserEventDTO;
 import com.mavent.dev.DTO.UserProfileDTO;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.repository.AccountRepository;
@@ -27,9 +28,6 @@ public class AccountController {
     private String bucket;
 
     @Autowired
-    private AccountRepository accountRepository;
-
-    @Autowired
     private AccountService accountService;
 
     // DTO for login request
@@ -43,8 +41,7 @@ public class AccountController {
         HttpSession session = request.getSession();
         boolean success = accountService.checkLogin(loginDTO.getUsername(), loginDTO.getPassword());
         if (success) {
-            Account acc = accountRepository.findByUsername(loginDTO.getUsername())
-                    .orElseThrow(() -> new RuntimeException("Account not found"));
+            UserProfileDTO acc = accountService.getUserProfile(loginDTO.getUsername());
             session.setAttribute("account", acc);
             session.setAttribute("username", loginDTO.getUsername());
             session.setAttribute("isSuperAdmin", acc.getSystemRole() == Account.SystemRole.SUPER_ADMIN);
@@ -107,10 +104,7 @@ public class AccountController {
 
             String imageUrl = "https://s3.us-east-005.backblazeb2.com/Mavent/" + keyName;
 
-            Account account = accountRepository.findByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("Account not found"));
-            account.setAvatarImg(imageUrl);
-            accountRepository.save(account);
+            accountService.updateAvatar(username, imageUrl);
 
             return ResponseEntity.ok().body(Map.of(
                     "avatarUrl", imageUrl,
@@ -120,6 +114,17 @@ public class AccountController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error uploading avatar: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/user/events")
+    public ResponseEntity<?> getUserEvents(HttpSession session) {
+        UserProfileDTO user = (UserProfileDTO) session.getAttribute("account");
+        if (user == null) {
+            return ResponseEntity.status(401).body("Bạn cần đăng nhập");
+        }
+
+        List<UserEventDTO> events = accountService.getUserEvents(user.getId());
+        return ResponseEntity.ok(events);
     }
 
 }
