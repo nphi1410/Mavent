@@ -1,42 +1,30 @@
-import { useEffect, useState } from 'react';
-import { getGreeting } from './services/testService';
-import SuperAdminSidebar from './components/SuperAdminSidebar';
-import SuperAdminHeader from './components/SuperAdminHeader';
-import SuperAdminDashboard from './pages/SuperAdminDashBoard';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import SuperAdminViewEvents from './pages/SuperAdminViewEvents';
 
+import {
+    BrowserRouter as Router,
+    Routes,
+    Route
+} from "react-router-dom";
+import ProfilePage from './pages/ProfilePage';
+import Login from './pages/Login';
+import HomePage from './pages/HomePage';
+import SuperAdminDashboard from './pages/SuperAdminDashBoard';
+import EventDetails from "./pages/EventDetails";
 
 
 function App() {
-
-    return (
-        <Router>
-            <div className="h-screen w-screen flex bg-amber-50">
-                <SuperAdminSidebar />
-                <div className="flex flex-col flex-1">
-                    <SuperAdminHeader />
-
-                    <main className="flex-1 overflow-y-auto p-10 bg-gray-100">
-                        <Routes>
-                            {/* Route for Dashboard */}
-                            <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
-
-                            {/* Route for view events */}
-                            <Route path="/superadmin/events" element={<SuperAdminViewEvents />} />
-
-                            <Route path="/superadmin" element={
-                                <>
-                                    <SuperAdminDashboard />
-                                </>
-                            }
-                            />
-                        </Routes>
-                    </main>
-                </div>
-            </div>
-        </Router>
-    );
+  return (
+    <Router>
+      <div className="min-h-screen w-full">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/profile/*" element={<ProfilePage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/admin" element={<SuperAdminDashboard />} />
+          <Route path="/event/1" element={<EventDetails />} />
+        </Routes>
+      </div>
+    </Router>
+  );
 }
 
 export default App;

@@ -50,7 +50,6 @@ public class Event {
     @Column(name = "status")
     private EventStatus status = EventStatus.PENDING;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
     @Column(name = "created_by_account_id")
     private Integer createdBy;
 

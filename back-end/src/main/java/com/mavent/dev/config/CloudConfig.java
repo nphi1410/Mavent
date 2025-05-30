@@ -21,15 +21,15 @@ public class CloudConfig {
     private final S3Client s3Client;
 
     public CloudConfig() {
-//        String accessKey = System.getenv("AWS_ACCESS_KEY");
-//        String secretKey = System.getenv("AWS_SECRET_KEY");
-//        String endpoint = System.getenv("AWS_ENDPOINT");
-//        String region = System.getenv("AWS_REGION");
+        String accessKey = System.getenv("AWS_ACCESS_KEY");
+        String secretKey = System.getenv("AWS_SECRET_KEY");
+        String endpoint = System.getenv("AWS_ENDPOINT");
+        String region = System.getenv("AWS_REGION");
 
-        String accessKey = "0057c6c9b9fd1c70000000002";
-        String secretKey = "K005NcntKSbKUC7EA1cAe1BY54lTRyo";
-        String endpoint = "https://s3.us-east-005.backblazeb2.com";
-        String region = "us-west-2";
+//        String accessKey = "0057c6c9b9fd1c70000000002";
+//        String secretKey = "K005NcntKSbKUC7EA1cAe1BY54lTRyo";
+//        String endpoint = "https://s3.us-east-005.backblazeb2.com";
+//        String region = "us-west-2";
         AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
 
         this.s3Client = S3Client.builder()
@@ -50,8 +50,8 @@ public class CloudConfig {
 //    }
 
     public void uploadMultipartFile(MultipartFile file, String type) throws IOException {
-//        String bucket = System.getenv("AWS_BUCKET_NAME");
-        String bucket = "Mavent";
+        String bucket = System.getenv("AWS_BUCKET_NAME");
+//        String bucket = "Mavent";
 
         String keyName = type + "/" + file.getOriginalFilename();
 
@@ -66,8 +66,8 @@ public class CloudConfig {
 
     // Download file as byte array
     public byte[] getFileBytes(String keyName) throws IOException {
-//        String bucket = System.getenv("AWS_BUCKET_NAME");
-        String bucket = "Mavent";
+        String bucket = System.getenv("AWS_BUCKET_NAME");
+//        String bucket = "Mavent";
 
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                 .bucket(bucket)

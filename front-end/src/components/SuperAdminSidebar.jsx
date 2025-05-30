@@ -14,7 +14,7 @@ function SuperAdminSidebar() {
       <div>
 
         {/* Dashboard */}
-        <Link to="/superadmin/dashboard" className="p-4 hover:bg-gray-100 cursor-pointer flex items-center gap-3 text-gray-800">
+        <Link to="/superadmin" className="p-4 hover:bg-gray-100 cursor-pointer flex items-center gap-3 text-gray-800">
           <FontAwesomeIcon icon={faGauge} />
           Dashboard
         </Link>
