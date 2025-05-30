@@ -6,10 +6,19 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import Tag from "./Tag";
+import { useNavigate } from "react-router-dom";
 
-const CardDetails = ({imageUrl}) => {
+const CardDetails = ({ imageUrl }) => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate("/event/1");
+  };
   return (
-    <div className="card flex flex-col md:flex-row border border-gray-300 rounded-xl shadow-sm my-4 p-6 hover:shadow-lg transition-shadow duration-300 gap-6 bg-white">
+    <div
+      onClick={handleClick}
+      className="card flex flex-col md:flex-row border border-gray-300 rounded-xl shadow-sm my-4 p-6 hover:shadow-lg active:shadow-xl transition-shadow duration-300 gap-6 bg-white"
+    >
       {/* Image */}
       <div className="image md:w-1/4 w-full rounded-lg overflow-hidden flex-shrink-0">
         <img
@@ -43,9 +52,9 @@ const CardDetails = ({imageUrl}) => {
           <p className="description text-gray-700 text-base leading-relaxed line-clamp-4 text-justify">
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae, nisi
             saepe. Lorem ipsum dolor sit amet consectetur adipisicing elit.
-            Quae, nisi saepe. Lorem ipsum dolor sit amet consectetur
-            adipisicing elit. Quae, nisi saepe. Lorem ipsum dolor sit amet
-            consectetur adipisicing elit. Quae, nisi saepe.
+            Quae, nisi saepe. Lorem ipsum dolor sit amet consectetur adipisicing
+            elit. Quae, nisi saepe. Lorem ipsum dolor sit amet consectetur
+            adipisicing elit. Quae, nisi saepe.
           </p>
         </div>
 

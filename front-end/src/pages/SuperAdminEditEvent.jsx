@@ -73,7 +73,7 @@ function SuperAdminEditEvent() {
                 <main className="flex-1 overflow-y-auto p-10 bg-gray-100">
                     <form onSubmit={handleSubmit} className="py-10 w-full">
                         <div className="mb-6">
-                            <h1 className="text-3xl font-bold text-gray-800 mb-4">Edit Event</h1>
+                            <h1 className="text-4xl font-bold text-gray-800 mb-4">Edit Event</h1>
                             <p className="text-gray-500">
                                 Update event details for <span className="font-bold text-black">{eventData.name}</span>
                             </p>
@@ -82,10 +82,10 @@ function SuperAdminEditEvent() {
                         {/* Basic Information */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <section className="bg-white p-6 shadow rounded-xl space-y-4 mb-4">
-                                <h2 className="text-xl font-semibold text-black mb-4">Basic Information</h2>
+                                <h2 className="text-2xl font-semibold text-black mb-4">Basic Information</h2>
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Event Title</label>
+                                        <label className="block text-md font-medium text-gray-700">Event Title</label>
                                         <input
                                             type="text"
                                             name="name"
@@ -96,7 +96,7 @@ function SuperAdminEditEvent() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Description</label>
+                                        <label className="block text-md font-medium text-gray-700">Description</label>
                                         <textarea
                                             rows="4"
                                             name="description"
@@ -107,7 +107,7 @@ function SuperAdminEditEvent() {
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Location</label>
+                                            <label className="block text-md font-medium text-gray-700">Location</label>
                                             <input
                                                 type="text"
                                                 name="location"
@@ -117,7 +117,10 @@ function SuperAdminEditEvent() {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Status</label>
+                                            <label className="block text-md font-medium text-gray-700"></label>
+                                        </div>
+                                        <div>
+                                            <label className="block text-md font-medium text-gray-700">Status</label>
                                             <select
                                                 name="status"
                                                 className="w-full mt-1 p-3 border rounded-md shadow-sm focus:ring-blue-400 focus:border-blue-400"
@@ -139,10 +142,10 @@ function SuperAdminEditEvent() {
 
                             {/* Date & Time */}
                             <section className="bg-white p-6 shadow rounded-xl space-y-4 mb-4">
-                                <h2 className="text-xl font-semibold text-black mb-4">Date & Time</h2>
+                                <h2 className="text-2xl font-semibold text-black mb-4">Date & Time</h2>
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Start Date & Time</label>
+                                        <label className="block text-md font-medium text-gray-700">Start Date & Time</label>
                                         <input
                                             type="datetime-local"
                                             name="startDatetime"
@@ -153,7 +156,7 @@ function SuperAdminEditEvent() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">End Date & Time</label>
+                                        <label className="block text-md font-medium text-gray-700">End Date & Time</label>
                                         <input
                                             type="datetime-local"
                                             name="endDatetime"
@@ -170,10 +173,10 @@ function SuperAdminEditEvent() {
                         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                             {/* Capacity */}
                             <section className="bg-white p-6 shadow rounded-xl space-y-4 mb-4">
-                                <h2 className="text-xl font-semibold text-black mb-4">Capacity</h2>
+                                <h2 className="text-2xl font-semibold text-black mb-4">Capacity</h2>
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Max Members</label>
+                                        <label className="block text-md font-medium text-gray-700">Max Members</label>
                                         <input
                                             type="number"
                                             name="maxMemberNumber"
@@ -184,7 +187,7 @@ function SuperAdminEditEvent() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Max Participants</label>
+                                        <label className="block text-md font-medium text-gray-700">Max Participants</label>
                                         <input
                                             type="number"
                                             name="maxParticipantNumber"
@@ -198,13 +201,14 @@ function SuperAdminEditEvent() {
                             </section>
                             {/* Assign Admin an each event */}
                             <section className="bg-white p-6 shadow rounded-xl space-y-4 mb-4">
-                                <h2 className="text-xl font-semibold text-black mb-4">Role of Event</h2>
+                                <h2 className="text-2xl font-semibold text-black mb-4">Role of Event</h2>
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Admin</label>
+                                        <label className="block text-md font-medium text-gray-700">Admin</label>
                                         <input
                                             type="text"
                                             name="admin"
+                                            placeholder='Enter email'
                                             className="w-full mt-1 p-3 border rounded-md shadow-sm focus:ring-blue-400 focus:border-blue-400"
                                             value={eventData.admin}
                                             onChange={handleChange}

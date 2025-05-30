@@ -1,28 +1,18 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom';
-import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom';
+import { login } from '../services/AuthService';
 
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const response = await fetch("http://localhost:8080/api/login", {
-    // const response = await fetch(`${import.meta.env.VITE_API_URL}`, {
-
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username, password }),
-      credentials: 'include', 
-    });
-
-    if (response.ok) {
-      // redirect to home page
-      window.location.href = "/profile";
+    const response = await login({username, password});
+    if (response.status === 200) {
+      navigate("/");
     } else {
       console.error("Login failed");
     }

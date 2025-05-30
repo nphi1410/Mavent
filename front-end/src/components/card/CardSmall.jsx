@@ -1,10 +1,20 @@
 import React from "react";
 import { faCalendar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useNavigate } from "react-router-dom";
 
-const CardSmall = ({imageUrl}) => {
+const CardSmall = ({ imageUrl }) => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate("/event/1");
+  };
+
   return (
-    <div className="card flex items-center border border-gray-300 rounded-lg shadow-sm p-4 my-3 gap-4 hover:shadow-md transition-shadow duration-300 bg-white max-w-md">
+    <div
+      onClick={handleClick}
+      className="card flex items-center border border-gray-300 rounded-lg shadow-sm p-4 my-3 gap-4 hover:shadow-md active:shadow-lg transition-shadow duration-300 bg-white max-w-md"
+    >
       <div className="image w-24 flex-shrink-0 rounded-md overflow-hidden">
         <img
           src={imageUrl}
