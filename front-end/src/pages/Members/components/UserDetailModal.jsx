@@ -17,9 +17,39 @@ const UserDetailModal = ({
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
       <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose}></div>
-      <div className="bg-white rounded-lg shadow-lg w-11/12 max-w-2xl relative">
-        <div className="p-6 border-b">
-          <h2 className="text-xl font-bold mb-4">User Details</h2>
+      <div className="bg-white rounded-lg shadow-lg w-11/12 max-w-2xl relative overflow-hidden">
+        <div className="relative bg-blue-600 p-6 text-white">
+          <h2 className="text-xl font-bold">User Details</h2>
+          <div className="absolute top-4 right-4">
+            <button onClick={onClose} className="text-white hover:text-gray-200">
+              <FontAwesomeIcon icon={faTimes} className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+        
+        <div className="flex items-center px-6 pt-6 pb-3">
+          <div className="flex-shrink-0 h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-4 border-white shadow">
+            {user.avatarUrl ? (
+              <img 
+                src={user.avatarUrl} 
+                alt={`${user.name}'s avatar`} 
+                className="h-full w-full object-cover"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.parentNode.innerHTML = '<div class="h-full w-full flex items-center justify-center"><svg class="h-10 w-10 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg></div>';
+                }}
+              />
+            ) : (
+              <FontAwesomeIcon icon={faUser} className="text-gray-400 h-10 w-10" />
+            )}
+          </div>
+          <div className="ml-4">
+            <h3 className={`text-xl font-semibold ${isBanned ? 'line-through text-red-500' : ''}`}>{user.name}</h3>
+            <p className="text-gray-500">{user.role} • {user.department}</p>
+          </div>
+        </div>
+        
+        <div className="p-6 border-t">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <span className="text-sm font-medium text-gray-700">Name:</span>
@@ -34,20 +64,28 @@ const UserDetailModal = ({
               </div>
             </div>
             <div>
+              <span className="text-sm font-medium text-gray-700">Student ID:</span>
+              <div className="text-sm text-gray-900">{user.studentId || 'N/A'}</div>
+            </div>
+            <div>
+              <span className="text-sm font-medium text-gray-700">Gender:</span>
+              <div className="text-sm text-gray-900">{user.gender || 'N/A'}</div>
+            </div>
+            <div>
+              <span className="text-sm font-medium text-gray-700">Date of Birth:</span>
+              <div className="text-sm text-gray-900">{user.dateOfBirth || 'N/A'}</div>
+            </div>
+            <div>
               <span className="text-sm font-medium text-gray-700">Role:</span>
               <div className="text-sm text-gray-900">{user.role}</div>
             </div>
             <div>
-              <span className="text-sm font-medium text-gray-700">Status:</span>
-              <div className="text-sm text-gray-900">{user.status}</div>
+              <span className="text-sm font-medium text-gray-700">Department:</span>
+              <div className="text-sm text-gray-900">{user.department}</div>
             </div>
             <div>
               <span className="text-sm font-medium text-gray-700">Date Joined:</span>
               <div className="text-sm text-gray-900">{user.joined}</div>
-            </div>
-            <div>
-              <span className="text-sm font-medium text-gray-700">Department:</span>
-              <div className="text-sm text-gray-900">{user.department}</div>
             </div>
             <div>
               <span className="text-sm font-medium text-gray-700">Status:</span>
@@ -60,9 +98,9 @@ const UserDetailModal = ({
             </div>
           </div>
         </div>
-        <div className="p-6 flex space-x-3">
+        <div className="p-6 flex space-x-3 bg-gray-50">
           <button 
-            className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center"
             onClick={() => {
               onEdit(user);
               onClose();
@@ -76,7 +114,7 @@ const UserDetailModal = ({
               isBanned 
                 ? 'bg-green-600 hover:bg-green-700' 
                 : 'bg-red-600 hover:bg-red-700'
-            } text-white px-4 py-2 rounded-lg`}
+            } text-white px-4 py-2 rounded-md transition-colors duration-200 flex items-center justify-center`}
             onClick={() => {
               onBan(user, !isBanned);
               onClose();
@@ -86,7 +124,7 @@ const UserDetailModal = ({
             {isBanned ? 'Unban User' : 'Ban User'}
           </button>
           <button 
-            className="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200"
+            className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors duration-200 flex items-center justify-center"
             onClick={onClose}
           >
             <FontAwesomeIcon icon={faTimes} className="mr-2" />

@@ -61,13 +61,15 @@ const MemberTable = ({
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm">
                 <span className={`px-2 py-1 text-xs rounded-full ${
-                  member.role === 'Admin' 
+                  member.role === 'ADMIN' 
                     ? 'bg-purple-100 text-purple-800' 
-                    : member.role === 'Moderator'
+                    : member.role === 'DEPARTMENT_MANAGER'
                       ? 'bg-blue-100 text-blue-800'
                       : 'bg-green-100 text-green-800'
                 }`}>
-                  {member.role}
+                  {member.role === 'ADMIN' ? 'Admin' : 
+                   member.role === 'DEPARTMENT_MANAGER' ? 'Department Manager' : 
+                   'Member'}
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
@@ -77,7 +79,15 @@ const MemberTable = ({
                   {member.status}
                 </span>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{member.department}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm">
+                {member.department && member.department !== 'N/A' ? (
+                  <span className="px-2 py-1 text-xs rounded-full bg-blue-50 text-blue-600 border border-blue-100">
+                    {member.department}
+                  </span>
+                ) : (
+                  <span className="text-gray-400">N/A</span>
+                )}
+              </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <div className="flex justify-end items-center">
                   {/* Action menu button */}

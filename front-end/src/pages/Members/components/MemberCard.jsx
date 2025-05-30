@@ -44,8 +44,14 @@ const MemberCard = ({
                   <div className={`text-sm text-gray-500 truncate ${bannedUsers[member.id] ? 'line-through text-red-500' : ''}`}>
                     {member.email}
                   </div>
-                  <div className="mt-1 text-xs text-gray-500">
-                    {member.department}
+                  <div className="mt-1 text-xs">
+                    {member.department && member.department !== 'N/A' ? (
+                      <span className="px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-100">
+                        {member.department}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">No Department</span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -112,13 +118,15 @@ const MemberCard = ({
             {/* Badges */}
             <div className="mt-3 flex items-center space-x-2">
               <span className={`px-2 py-1 text-xs rounded-full ${
-                member.role === 'Admin' 
+                member.role === 'ADMIN' 
                   ? 'bg-purple-100 text-purple-800' 
-                  : member.role === 'Moderator'
+                  : member.role === 'DEPARTMENT_MANAGER'
                     ? 'bg-blue-100 text-blue-800'
                     : 'bg-green-100 text-green-800'
               }`}>
-                {member.role}
+                {member.role === 'ADMIN' ? 'Admin' : 
+                 member.role === 'DEPARTMENT_MANAGER' ? 'Dept Manager' : 
+                 'Member'}
               </span>
               <span className={`px-2 py-1 text-xs rounded-full ${
                 member.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
