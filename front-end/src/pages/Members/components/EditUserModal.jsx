@@ -1,6 +1,6 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSave, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faSave, faTimes, faUser } from '@fortawesome/free-solid-svg-icons';
 
 const EditUserModal = ({
   isOpen,
@@ -95,12 +95,18 @@ const EditUserModal = ({
                   // Automatically set isActive based on status
                   const newIsActive = newStatus === 'Active';
                   console.log(`Setting isActive to: ${newIsActive}`);
+                  console.log('User data before update:', JSON.stringify(user));
                   
                   // First update status
                   handleInputChange(e);
                   
                   // Then explicitly update isActive field
                   onChange('isActive', newIsActive, departments);
+                  
+                  // Log after update for debugging
+                  setTimeout(() => {
+                    console.log('User data after update:', JSON.stringify(user));
+                  }, 0);
                 }}
                 className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >

@@ -85,7 +85,7 @@ const UserDetailModal = ({
             </div>
             <div>
               <span className="text-sm font-medium text-gray-700">Date Joined:</span>
-              <div className="text-sm text-gray-900">{user.joined}</div>
+              <div className="text-sm text-gray-900">{user.joinedAt ? new Date(user.joinedAt).toLocaleDateString() : 'N/A'}</div>
             </div>
             <div>
               <span className="text-sm font-medium text-gray-700">Status:</span>

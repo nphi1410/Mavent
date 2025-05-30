@@ -2,6 +2,7 @@ package com.mavent.dev.dto.member;
 
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class MemberFilterRequestDTO {
 
     @NotNull(message = "Event ID is required")
@@ -30,6 +32,9 @@ public class MemberFilterRequestDTO {
     private String departmentName;
     
     private Boolean isActive;
+    
+    // Trường status mới để sử dụng trực tiếp giá trị từ frontend
+    private String status;
     
     @Pattern(regexp = "^(MALE|FEMALE|OTHER)$", message = "Gender must be MALE, FEMALE, or OTHER")
     private String gender;
@@ -92,6 +97,11 @@ public class MemberFilterRequestDTO {
         
         public Builder isActive(Boolean isActive) {
             dto.isActive = isActive;
+            return this;
+        }
+        
+        public Builder status(String status) {
+            dto.status = status;
             return this;
         }
         

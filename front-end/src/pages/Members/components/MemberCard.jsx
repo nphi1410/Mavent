@@ -133,6 +133,9 @@ const MemberCard = ({
               }`}>
                 {member.status}
               </span>
+              <span className="px-2 py-1 text-xs text-gray-500">
+                Joined: {member.joinedAt ? new Date(member.joinedAt).toLocaleDateString() : 'N/A'}
+              </span>
             </div>
           </div>
         ))}

@@ -128,7 +128,9 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
     @Override
     public Page<EventAccountRole> getMembersWithFilters(Integer eventId, Boolean isActive, 
                                                        EventAccountRole.EventRole role, 
-                                                       Integer departmentId, Pageable pageable) {
-        return eventAccountRoleRepository.findByEventIdWithFilters(eventId, isActive, role, departmentId, pageable);
+                                                       Integer departmentId, 
+                                                       String searchTerm,
+                                                       Pageable pageable) {
+        return eventAccountRoleRepository.findByEventIdWithFilters(eventId, isActive, role, departmentId, searchTerm, pageable);
     }
 }

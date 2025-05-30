@@ -168,19 +168,29 @@ public interface EventAccountRoleRepository extends JpaRepository<EventAccountRo
      */
     @Query("SELECT COUNT(ear) FROM EventAccountRole ear " +
            "WHERE ear.id.eventId = :eventId AND ear.isActive = :isActive")
-    long countByEventIdAndActiveStatus(@Param("eventId") Integer eventId, @Param("isActive") Boolean isActive);
-
-    /**
-     * Complex query with multiple filters.
-     */
-    @Query("SELECT ear FROM EventAccountRole ear " +
+    long countByEventIdAndActiveStatus(@Param("eventId") Integer eventId, @Param("isActive") Boolean isActive);    /**
+     * Complex query with multiple filters including search term.
+     * Updated to handle isActive properly for consistent filtering behavior
+     * and to include search term functionality.
+     */      @Query("SELECT ear FROM EventAccountRole ear " +
+           "JOIN Account a ON a.accountId = ear.id.accountId " +
+           "LEFT JOIN Department d ON d.departmentId = ear.departmentId " +
            "WHERE ear.id.eventId = :eventId " +
            "AND (:isActive IS NULL OR ear.isActive = :isActive) " +
            "AND (:eventRole IS NULL OR ear.eventRole = :eventRole) " +
-           "AND (:departmentId IS NULL OR ear.departmentId = :departmentId)")
+           "AND (:departmentId IS NULL OR " + 
+           "    (ear.departmentId = :departmentId) OR " + 
+           "    (CAST(:departmentId AS string) IS NOT NULL AND " + 
+           "     d.name LIKE CONCAT('%', CAST(:departmentId AS string), '%'))) " +
+           "AND (:searchTerm IS NULL OR LENGTH(TRIM(:searchTerm)) = 0 OR " +
+           "     LOWER(a.username) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+           "     LOWER(a.fullName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+           "     LOWER(a.email) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+           "     LOWER(COALESCE(a.studentId, '')) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
     Page<EventAccountRole> findByEventIdWithFilters(@Param("eventId") Integer eventId,
                                                     @Param("isActive") Boolean isActive,
                                                     @Param("eventRole") EventAccountRole.EventRole eventRole,
                                                     @Param("departmentId") Integer departmentId,
+                                                    @Param("searchTerm") String searchTerm,
                                                     Pageable pageable);
 }

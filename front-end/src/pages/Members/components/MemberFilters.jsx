@@ -62,6 +62,8 @@ const MemberFilters = ({
               <option value="ADMIN">Admin</option>
               <option value="DEPARTMENT_MANAGER">Department Manager</option>
               <option value="MEMBER">Member</option>
+              <option value="PARTICIPANT">Participant</option>
+              <option value="GUEST">Guest</option>
             </select>
             <FontAwesomeIcon 
               icon={faChevronDown} 

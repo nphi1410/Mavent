@@ -8,11 +8,14 @@ const AdvancedFilterSidebar = ({
   endDate,
   statusFilter,
   roleFilter,
+  departmentFilter,
+  departments = [],
   onClose,
   onStartDateChange,
   onEndDateChange,
   onStatusFilterChange,
   onRoleFilterChange,
+  onDepartmentFilterChange,
   onApplyFilters,
   onResetFilters
 }) => {
@@ -33,6 +36,25 @@ const AdvancedFilterSidebar = ({
           </div>
           
           <div className="space-y-6">
+            {/* Department filter dropdown */}
+            <div>
+              <h3 className="text-sm font-medium mb-3">Department</h3>
+              <div className="relative">
+                <select 
+                  className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={departmentFilter || ''}
+                  onChange={(e) => onDepartmentFilterChange(e.target.value)}
+                >
+                  <option value="">All Departments</option>
+                  {departments.map(dept => (
+                    <option key={dept.departmentId} value={dept.departmentId}>
+                      {dept.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            
             {/* Date range filter */}
             <div>
               <h3 className="text-sm font-medium mb-3">Date Range</h3>
@@ -159,29 +181,29 @@ const AdvancedFilterSidebar = ({
             </div>
           </div>
           
-          <div className="mt-auto pt-6">
+          <div className="mt-auto pt-6 grid grid-cols-2 gap-3">
             <button 
-              className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-              onClick={onApplyFilters}
-            >
-              Apply Filters
-            </button>
-            <button 
-              className="w-full bg-gray-100 text-gray-700 px-4 py-2 rounded-lg mt-3 hover:bg-gray-200"
+              className="border border-gray-300 bg-white text-gray-700 rounded-lg py-2 hover:bg-gray-50"
               onClick={onResetFilters}
             >
-              Reset Filters
+              Reset
+            </button>
+            <button 
+              className="bg-blue-600 text-white rounded-lg py-2 hover:bg-blue-700"
+              onClick={onApplyFilters}
+            >
+              Apply
             </button>
           </div>
         </div>
       </div>
       
-      {/* Overlay when sidebar is open */}
+      {/* Backdrop - added for better UX */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-25 z-20"
+          className="fixed inset-0 bg-black bg-opacity-30 z-20"
           onClick={onClose}
-        ></div>
+        />
       )}
     </>
   );

@@ -16,13 +16,15 @@ const Members = () => {
     currentMembers,
     filteredMembers,
     bannedUsers,
-    departments, // Add departments from the hook
-    totalElements, // Add totalElements from API
+    departments,
+    totalElements,
+    loading,
     
     // Search and filter state
     searchTerm,
     statusFilter,
     roleFilter,
+    departmentFilter,
     startDate,
     endDate,
     showAdvancedFilter,
@@ -43,6 +45,7 @@ const Members = () => {
     handleSearch,
     handleStatusFilter,
     handleRoleFilter,
+    handleDepartmentFilter,
     handleStartDateChange,
     handleEndDateChange,
     toggleAdvancedFilter,
@@ -75,9 +78,11 @@ const Members = () => {
             searchTerm={searchTerm}
             statusFilter={statusFilter}
             roleFilter={roleFilter}
+            departmentFilter={departmentFilter}
             onSearchChange={handleSearch}
             onStatusFilterChange={(value) => handleStatusFilter(value === '' ? '' : value)}
             onRoleFilterChange={(value) => handleRoleFilter(value === '' ? '' : value)}
+            onDepartmentFilterChange={(value) => handleDepartmentFilter(value === '' ? '' : value)}
             onAdvancedFilterToggle={toggleAdvancedFilter}
             onAddMember={() => console.log('Add member clicked')}
           />
@@ -124,11 +129,14 @@ const Members = () => {
           endDate={endDate}
           statusFilter={statusFilter}
           roleFilter={roleFilter}
+          departmentFilter={departmentFilter}
+          departments={departments}
           onClose={toggleAdvancedFilter}
           onStartDateChange={handleStartDateChange}
           onEndDateChange={handleEndDateChange}
           onStatusFilterChange={handleStatusFilter}
           onRoleFilterChange={handleRoleFilter}
+          onDepartmentFilterChange={handleDepartmentFilter}
           onApplyFilters={applyFilters}
           onResetFilters={resetFilters}
         />

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import memberService from '../../../services/memberService';
 
 /**
@@ -14,6 +14,10 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
 
+  // AbortController for request cancellation
+  const abortControllerRef = useRef(null);
+  const fetchTimeoutRef = useRef(null);
+
   // Extract pagination params
   const { page = 0, size = 10 } = pagination;
 
@@ -27,18 +31,65 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
 
   // Fetch members với các filter và pagination
   const fetchMembers = useCallback(async () => {
+    // Cancel previous request if it exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    
+    // Clear any pending timeout
+    if (fetchTimeoutRef.current) {
+      clearTimeout(fetchTimeoutRef.current);
+    }
+
+    // Create new AbortController for this request
+    abortControllerRef.current = new AbortController();
+    
     try {
       setLoading(true);
       setError(null);
 
+      // Normalize filters before sending to API
+      const normalizedStatus = statusFilter ? 
+        (statusFilter.toLowerCase().trim() === 'active' ? 'active' : 'inactive') : undefined;
+      
+      const normalizedRole = roleFilter ? roleFilter.trim().toUpperCase() : undefined;
+      
+      // Giảm bớt logs không cần thiết
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Normalized filters before API call:', {
+          originalStatus: statusFilter,
+          normalizedStatus,
+          originalRole: roleFilter,
+          normalizedRole
+        });
+      }
+
+      // Prepare search term
+      const trimmedSearchTerm = searchTerm ? searchTerm.trim() : '';
+      
+      // Normalize department filter - resolve department name to ID if possible
+      let normalizedDepartment = undefined;
+      if (departmentFilter) {
+        normalizedDepartment = resolveDepartmentFilter(departmentFilter);
+        
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`Resolved department filter from '${departmentFilter}' to '${normalizedDepartment}'`);
+        }
+      }
+      
       const params = {
-        search: searchTerm || undefined,
-        role: (typeof roleFilter === 'string' && roleFilter !== '') ? roleFilter : undefined,
-        department: (typeof departmentFilter === 'string' && departmentFilter !== '') ? departmentFilter : undefined,
-        status: (typeof statusFilter === 'string' && statusFilter !== '') ? statusFilter : undefined,
+        search: trimmedSearchTerm || undefined, // Only add search parameter if it has content
+        role: normalizedRole,
+        department: normalizedDepartment,
+        status: normalizedStatus,
         page: page,
         size: size
       };
+      
+      // Chỉ log search term trong môi trường development
+      if (trimmedSearchTerm && process.env.NODE_ENV === 'development') {
+        console.log(`Searching for: '${trimmedSearchTerm}'`);
+      }
 
       // Remove undefined values
       Object.keys(params).forEach(key => {
@@ -47,15 +98,13 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
         }
       });
 
-      const response = await memberService.getMembers(eventId, params);
+      const response = await memberService.getMembers(eventId, params, abortControllerRef.current.signal);
       
       if (response.success && response.data) {
         // Transform API data to match front-end expectations
         const transformedMembers = (response.data.content || []).map(member => {
           // Ensure isActive value is properly converted to boolean
           const isActive = typeof member.isActive === 'boolean' ? member.isActive : member.isActive === 'true';
-          
-          console.log(`Member ${member.fullName}: isActive=${isActive}, original=${member.isActive}`);
           
           return {
             ...member,
@@ -70,10 +119,12 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
           };
         });
         
-        // Log thêm thông tin để debug
-        console.log('Filter state:', { statusFilter, roleFilter, departmentFilter });
-        console.log('Received filtered members:', response.data.content);
-        console.log('Transformed members with status:', transformedMembers.map(m => ({ name: m.name, status: m.status, isActive: m.isActive, isBanned: m.isBanned })));
+        // Giảm bớt logs debug trừ khi thực sự cần thiết
+        if (process.env.NODE_ENV === 'development' && false) { // Tắt logs này khi không cần
+          console.log('Filter state:', { statusFilter, roleFilter, departmentFilter });
+          console.log('Received filtered members:', response.data.content);
+          console.log('Transformed members with status:', transformedMembers.map(m => ({ name: m.name, status: m.status, isActive: m.isActive, isBanned: m.isBanned })));
+        }
         
         setMembers(transformedMembers);
         setTotalPages(response.data.totalPages || 0);
@@ -85,11 +136,14 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
         setTotalElements(0);
       }
     } catch (err) {
-      console.error('Error fetching members:', err);
-      setError('Lỗi kết nối đến server. Vui lòng thử lại sau.');
-      setMembers([]);
-      setTotalPages(0);
-      setTotalElements(0);
+      // Don't log abort errors as they are intentional
+      if (err.name !== 'AbortError') {
+        console.error('Error fetching members:', err);
+        setError('Lỗi kết nối đến server. Vui lòng thử lại sau.');
+        setMembers([]);
+        setTotalPages(0);
+        setTotalElements(0);
+      }
     } finally {
       setLoading(false);
     }
@@ -117,10 +171,13 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
 
   // Fetch member details
   const fetchMemberDetails = useCallback(async (accountId) => {
+    // Create a new AbortController for this request
+    const detailsAbortController = new AbortController();
+    
     try {
       setLoading(true);
       
-      const response = await memberService.getMemberDetails(eventId, accountId);
+      const response = await memberService.getMemberDetails(eventId, accountId, detailsAbortController.signal);
       
       if (response.success && response.data) {
         // Transform API data to match front-end expectations
@@ -144,33 +201,72 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
       }
       return null;
     } catch (err) {
-      console.error('Error fetching member details:', err);
-      setError('Không thể tải chi tiết thành viên');
+      // Ignore AbortError as it's intentional
+      if (err.name !== 'AbortError') {
+        console.error('Error fetching member details:', err);
+        setError('Không thể tải chi tiết thành viên');
+      }
       return null;
     } finally {
       setLoading(false);
     }
-  }, [eventId]);
+  }, [eventId, setError, setLoading]);
 
   // Load data khi component mount hoặc dependencies thay đổi
+  // Sử dụng ref để theo dõi lần render đầu tiên
+  const isInitialFetchRef = useRef(true);
+  
   useEffect(() => {
-    fetchMembers();
+    // Chỉ fetch data khi lần đầu mount hoặc khi filters/pagination thay đổi có chủ ý
+    if (isInitialFetchRef.current) {
+      fetchMembers();
+      isInitialFetchRef.current = false;
+      console.log('Initial data fetch executed');
+    }
   }, [fetchMembers]);
 
   // Load departments khi component mount hoặc eventId thay đổi
+  const isInitialDepartmentFetchRef = useRef(true);
+  
   useEffect(() => {
-    fetchDepartments();
+    if (isInitialDepartmentFetchRef.current) {
+      fetchDepartments();
+      isInitialDepartmentFetchRef.current = false;
+      console.log('Initial departments fetch executed');
+    }
   }, [fetchDepartments]);
 
-  // Helper functions cho department
+  // Helper functions cho department với caching to improve performance
+  const departmentCacheRef = useRef({});
+  
   const findDepartmentById = useCallback((departmentId) => {
-    return departments.find(dept => dept.departmentId === departmentId);
+    if (!departmentId) return null;
+    
+    // Check cache first
+    if (departmentCacheRef.current[`id-${departmentId}`]) {
+      return departmentCacheRef.current[`id-${departmentId}`];
+    }
+    
+    // Find in loaded departments
+    const dept = departments.find(dept => dept.departmentId === departmentId);
+    
+    // Cache result
+    if (dept) {
+      departmentCacheRef.current[`id-${departmentId}`] = dept;
+    }
+    
+    return dept;
   }, [departments]);
 
   const findDepartmentByName = useCallback((departmentName) => {
     if (!departmentName) return null;
     
     const deptName = departmentName.toLowerCase().trim();
+    
+    // Check cache first
+    if (departmentCacheRef.current[`name-${deptName}`]) {
+      return departmentCacheRef.current[`name-${deptName}`];
+    }
     
     // Try exact match first
     let dept = departments.find(d => 
@@ -185,8 +281,66 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
       );
     }
     
+    // Cache result
+    if (dept) {
+      departmentCacheRef.current[`name-${deptName}`] = dept;
+    }
+    
     return dept;
   }, [departments]);
+
+  // Function to normalize department filter to ID - for consistent API calls
+  const resolveDepartmentFilter = useCallback((filter) => {
+    if (!filter) return null;
+    
+    // If filter is already a number or numeric string, return it
+    if (typeof filter === 'number' || (typeof filter === 'string' && /^\d+$/.test(filter))) {
+      return Number(filter);
+    }
+    
+    // Otherwise, try to find department by name
+    const dept = findDepartmentByName(filter);
+    return dept ? dept.departmentId : filter; // Fall back to original value if not found
+  }, [findDepartmentByName]);
+
+  // Load data with improved dependency handling
+  useEffect(() => {
+    // Set a short delay to avoid multiple API calls when multiple dependencies change simultaneously
+    if (fetchTimeoutRef.current) {
+      clearTimeout(fetchTimeoutRef.current);
+    }
+
+    fetchTimeoutRef.current = setTimeout(() => {
+      fetchMembers();
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Fetching members with filters:', {
+          page,
+          size,
+          searchTerm,
+          statusFilter,
+          roleFilter,
+          departmentFilter
+        });
+      }
+    }, 50); // Small delay to batch closely-timed filter changes
+
+    return () => {
+      if (fetchTimeoutRef.current) {
+        clearTimeout(fetchTimeoutRef.current);
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [fetchMembers, page, size, searchTerm, statusFilter, roleFilter, departmentFilter]);
+
+  // Load departments khi component mount hoặc eventId thay đổi
+  useEffect(() => {
+    fetchDepartments();
+    return () => {
+      // Cleanup if needed
+    };
+  }, [fetchDepartments, eventId]);
 
   // Convert members list to bannedUsers map
   const bannedUsers = members.reduce((acc, member) => {
@@ -208,6 +362,7 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
     // Data access methods
     findDepartmentById,
     findDepartmentByName,
+    resolveDepartmentFilter,
     
     // Fetch methods
     fetchMembers,

@@ -41,9 +41,48 @@ public class MemberServiceImpl implements MemberService {
         // Build pageable
         Pageable pageable = buildPageable(filterRequest);
         
-        // Get filtered members using composite key
-        Page<EventAccountRole> memberPage = eventAccountRoleRepository.findByIdEventId(
-                filterRequest.getEventId(), pageable);
+        // Process filters
+        Boolean isActive = null;
+        if (filterRequest.getStatus() != null && !filterRequest.getStatus().isEmpty()) {
+            isActive = "active".equalsIgnoreCase(filterRequest.getStatus());
+            log.info("Filtering by status: {}, isActive: {}", filterRequest.getStatus(), isActive);
+        } else if (filterRequest.getIsActive() != null) {
+            // Fallback to isActive if status is not provided
+            isActive = filterRequest.getIsActive();
+            log.info("No status provided, using isActive: {}", isActive);
+        }
+        
+        EventAccountRole.EventRole eventRole = null;
+        if (filterRequest.getEventRole() != null && !filterRequest.getEventRole().isEmpty()) {
+            try {
+                // Normalize the role name to ensure it matches enum values
+                String normalizedRole = filterRequest.getEventRole().trim().toUpperCase();
+                eventRole = EventAccountRole.EventRole.valueOf(normalizedRole);
+                log.info("Filtering by role: {}", eventRole);
+            } catch (IllegalArgumentException e) {
+                log.warn("Invalid event role: {}", filterRequest.getEventRole());
+            }
+        }
+        
+        Integer departmentId = filterRequest.getDepartmentId();
+        
+        // Process search term
+        String searchTerm = filterRequest.getSearchTerm();
+        if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+            searchTerm = searchTerm.trim();
+            log.info("Searching with term: '{}'", searchTerm);
+        } else {
+            searchTerm = null; // Set to null if empty or only whitespace
+        }
+        
+        // Use repository method with explicit filters
+        Page<EventAccountRole> memberPage = eventAccountRoleRepository.findByEventIdWithFilters(
+                filterRequest.getEventId(), 
+                isActive,
+                eventRole,
+                departmentId,
+                searchTerm, // Add search term to the query
+                pageable);
         
         // Convert to DTOs
         List<MemberResponseDTO> memberDTOs = memberPage.getContent().stream()
@@ -73,10 +112,16 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public MemberResponseDTO updateMember(UpdateMemberRequestDTO request) {
-        log.info("Updating member {} in event {}", request.getAccountId(), request.getEventId());
+        log.info("Updating member {} in event {} with data: role={}, departmentId={}, isActive={}", 
+                 request.getAccountId(), request.getEventId(), 
+                 request.getEventRole(), request.getDepartmentId(), request.getIsActive());
         
         // Find existing member role
         EventAccountRole memberRole = findEventAccountRole(request.getEventId(), request.getAccountId());
+        
+        // Log current values before update
+        log.info("Current values before update - role: {}, departmentId: {}, isActive: {}", 
+                 memberRole.getEventRole(), memberRole.getDepartmentId(), memberRole.getIsActive());
         
         // Update role if provided
         if (request.getEventRole() != null) {
@@ -95,8 +140,12 @@ public class MemberServiceImpl implements MemberService {
             memberRole.setIsActive(request.getIsActive());
         }
         
-        EventAccountRole updated = eventAccountRoleRepository.save(memberRole);
+        // Lưu và đảm bảo dữ liệu được flush ngay lập tức đến database
+        EventAccountRole updated = eventAccountRoleRepository.saveAndFlush(memberRole);
         log.info("Successfully updated member {} in event {}", request.getAccountId(), request.getEventId());
+        
+        // Clear cache để các query tiếp theo đọc giá trị mới từ DB thay vì từ cache
+        eventAccountRoleRepository.flush();
         
         return memberMapper.toMemberResponseDTO(updated);
     }
@@ -111,7 +160,11 @@ public class MemberServiceImpl implements MemberService {
         // Update active status
         memberRole.setIsActive(!request.getIsBanned());
         
-        EventAccountRole updated = eventAccountRoleRepository.save(memberRole);
+        // Use saveAndFlush for consistency with updateMember method
+        EventAccountRole updated = eventAccountRoleRepository.saveAndFlush(memberRole);
+        
+        // Flush to ensure changes are written to DB
+        eventAccountRoleRepository.flush();
         log.info("Successfully {} member {} in event {}", 
                 request.getIsBanned() ? "banned" : "unbanned", 
                 request.getAccountId(), request.getEventId());

@@ -57,12 +57,17 @@ public class MemberController {
             MemberFilterRequestDTO filterRequest = MemberFilterRequestDTO.builder()
                     .eventId(eventId)
                     .searchTerm(search)
-                    .eventRole(role)
+                    .eventRole(role != null ? role.trim() : null)  // Trim role to avoid whitespace issues
                     .departmentName(department) // Use department name instead of parsing as ID
-                    .isActive(status != null ? "active".equalsIgnoreCase(status) : null)
+                    .status(status) // Send raw status string
+                    .isActive(status != null ? "active".equalsIgnoreCase(status.trim()) : null) // Also set isActive for backward compatibility
                     .page(page)
                     .size(size)
                     .build();
+                    
+            log.debug("Status parameter: {}, converted to isActive: {}", 
+                     status, 
+                     status != null ? "active".equalsIgnoreCase(status.trim()) : null);
 
             log.info("Filter request created: {}", filterRequest);
 
@@ -129,8 +134,8 @@ public class MemberController {
     public ResponseEntity<ApiResponseDTO<MemberResponseDTO>> updateMember(
             @Valid @RequestBody UpdateMemberRequestDTO request) {
 
-        log.info("Updating member for event: {}, account: {}",
-                request.getEventId(), request.getAccountId());
+        log.info("Updating member for event: {}, account: {}, role: {}, isActive: {}",
+                request.getEventId(), request.getAccountId(), request.getEventRole(), request.getIsActive());
 
         MemberResponseDTO member = memberService.updateMember(request);
 

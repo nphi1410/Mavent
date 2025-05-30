@@ -24,6 +24,7 @@ const MemberTable = ({
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
@@ -65,11 +66,18 @@ const MemberTable = ({
                     ? 'bg-purple-100 text-purple-800' 
                     : member.role === 'DEPARTMENT_MANAGER'
                       ? 'bg-blue-100 text-blue-800'
-                      : 'bg-green-100 text-green-800'
+                      : member.role === 'MEMBER'
+                        ? 'bg-green-100 text-green-800'
+                        : member.role === 'PARTICIPANT'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-gray-100 text-gray-800'
                 }`}>
                   {member.role === 'ADMIN' ? 'Admin' : 
                    member.role === 'DEPARTMENT_MANAGER' ? 'Department Manager' : 
-                   'Member'}
+                   member.role === 'MEMBER' ? 'Member' :
+                   member.role === 'PARTICIPANT' ? 'Participant' :
+                   member.role === 'GUEST' ? 'Guest' :
+                   member.role}
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
@@ -87,6 +95,9 @@ const MemberTable = ({
                 ) : (
                   <span className="text-gray-400">N/A</span>
                 )}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {member.joinedAt ? new Date(member.joinedAt).toLocaleDateString() : 'N/A'}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <div className="flex justify-end items-center">

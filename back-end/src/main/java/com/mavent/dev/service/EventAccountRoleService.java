@@ -39,5 +39,7 @@ public interface EventAccountRoleService {
     // Lấy member với filters
     Page<EventAccountRole> getMembersWithFilters(Integer eventId, Boolean isActive, 
                                                EventAccountRole.EventRole role, 
-                                               Integer departmentId, Pageable pageable);
+                                               Integer departmentId, 
+                                               String searchTerm,
+                                               Pageable pageable);
 }

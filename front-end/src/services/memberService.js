@@ -1,52 +1,86 @@
 import axiosInstance from '../config/axios';
 
-// Debug: Log the base URL being used
-console.log('Axios instance base URL:', axiosInstance.defaults.baseURL);
+// Debug: Log the base URL being used only in development environment
+if (process.env.NODE_ENV === 'development') {
+  console.log('Axios instance base URL:', axiosInstance.defaults.baseURL);
+}
 
 // Member API service - chỉ quản lý member, không liên quan đến event management
 const memberService = {
   // Lấy danh sách members của một event với phân trang và filter
-  getMembers: async (eventId, params = {}) => {
+  getMembers: async (eventId, params = {}, signal = undefined) => {
     try {
-      console.log('memberService.getMembers called with:', { eventId, params });
+      if (process.env.NODE_ENV === 'development') {
+        console.log('memberService.getMembers called with:', { eventId, params });
+      }
       
       const queryParams = new URLSearchParams();
       queryParams.append('eventId', eventId);
       
-      if (params.search) queryParams.append('search', params.search);
-      if (params.role) queryParams.append('role', params.role);
+      // Only append search parameter if it's not empty after trimming
+      if (params.search && params.search.trim()) {
+        const trimmedSearch = params.search.trim();
+        queryParams.append('search', trimmedSearch);
+      }
       
-      // Map department name to ID if needed (for now keep as string, backend should handle)
-      if (params.department) queryParams.append('department', params.department);
+      if (params.role) {
+        // Ensure role matches the format expected by backend enum
+        const normalizedRole = params.role.trim().toUpperCase();
+        queryParams.append('role', normalizedRole);
+      }
       
-      // Map status to backend format
+      // Handle department filter - could be ID or name
+      if (params.department) {
+        const departmentValue = params.department.toString().trim();
+        queryParams.append('department', departmentValue);
+      }
+      
+      // Map status to backend format - ensure consistent casing
       if (params.status) {
-        const statusValue = params.status.toLowerCase() === 'active' ? 'active' : 'inactive';
-        queryParams.append('status', statusValue);
+        // Normalize status to either 'active' or 'inactive' (lowercase)
+        const normalizedStatus = params.status.toLowerCase().trim() === 'active' ? 'active' : 'inactive';
+        queryParams.append('status', normalizedStatus);
       }
       
       if (params.page !== undefined) queryParams.append('page', params.page);
       if (params.size !== undefined) queryParams.append('size', params.size);
 
       const url = `/api/members?${queryParams.toString()}`;
-      console.log('Calling API URL:', url);
-      console.log('Full URL will be:', axiosInstance.defaults.baseURL + url);
       
-      const response = await axiosInstance.get(url);
-      console.log('Raw API response:', response.data);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Calling API URL:', url);
+      }
+      
+      // Pass AbortController signal to the request
+      const response = await axiosInstance.get(url, { signal });
+      
       return response.data;
     } catch (error) {
+      // Properly handle AbortError vs other errors
+      if (error.name === 'AbortError' || error.code === 'ECONNABORTED' || 
+          (error.message && error.message.includes('canceled'))) {
+        console.log('Request was cancelled');
+        throw { name: 'AbortError', message: 'Request aborted' };
+      }
+      
       console.error('Error fetching members:', error);
       throw error;
     }
   },
 
-  // Lấy chi tiết một member
-  getMemberDetails: async (eventId, accountId) => {
+  // Lấy chi tiết một member với AbortController support
+  getMemberDetails: async (eventId, accountId, signal = undefined) => {
     try {
-      const response = await axiosInstance.get(`/api/members/${eventId}/${accountId}`);
+      const response = await axiosInstance.get(`/api/members/${eventId}/${accountId}`, { signal });
       return response.data;
     } catch (error) {
+      // Handle abort error separately
+      if (error.name === 'AbortError' || error.code === 'ECONNABORTED' || 
+          (error.message && error.message.includes('canceled'))) {
+        console.log('Member details request was cancelled');
+        throw { name: 'AbortError', message: 'Request aborted' };
+      }
+      
       console.error(`Error fetching member details:`, error);
       throw error;
     }
@@ -55,12 +89,16 @@ const memberService = {
   // Cập nhật thông tin member (role, department, status)
   updateMember: async (memberData) => {
     try {
-      console.log('memberService.updateMember called with:', memberData);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('memberService.updateMember called with:', memberData);
+      }
       
       // Transform frontend data to backend DTO format
       const isActive = memberData.isActive !== undefined ? Boolean(memberData.isActive) : (memberData.status === 'Active');
       
-      console.log(`Status conversion: status=${memberData.status}, isActive=${memberData.isActive} → final isActive=${isActive}`);
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Status conversion: status=${memberData.status}, isActive=${memberData.isActive} → final isActive=${isActive}`);
+      }
       
       const updateRequest = {
         eventId: memberData.eventId,
@@ -129,27 +167,50 @@ const memberService = {
   },
 
   // Lấy danh sách departments của một event
-  getDepartments: async (eventId) => {
+  getDepartments: async (eventId, signal = undefined) => {
     try {
-      console.log('memberService.getDepartments called with eventId:', eventId);
-      const response = await axiosInstance.get(`/api/departments?eventId=${eventId}`);
-      console.log('Departments response:', response.data);
+      const response = await axiosInstance.get(`/api/departments?eventId=${eventId}`, { signal });
       return response.data;
     } catch (error) {
+      // Handle abort errors separately
+      if (error.name === 'AbortError' || error.code === 'ECONNABORTED' || 
+          (error.message && error.message.includes('canceled'))) {
+        console.log('Departments request was cancelled');
+        throw { name: 'AbortError', message: 'Request aborted' };
+      }
+      
       console.error('Error fetching departments:', error);
-      // Return mock data if API is not available
-      return {
-        success: true,
-        data: [
-          { departmentId: 1, name: 'Marketing' },
-          { departmentId: 2, name: 'HR' },
-          { departmentId: 3, name: 'IT' },
-          { departmentId: 4, name: 'Finance' },
-          { departmentId: 5, name: 'Sales' }
-        ]
-      };
+      throw error;
     }
-  }
+  },
+  
+  // Get department by ID
+  getDepartmentById: async (departmentId, signal = undefined) => {
+    try {
+      const response = await axiosInstance.get(`/api/departments/${departmentId}`, { signal });
+      return response.data;
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        throw { name: 'AbortError', message: 'Request aborted' };
+      }
+      console.error('Error fetching department by ID:', error);
+      throw error;
+    }
+  },
+  
+  // Find departments by name
+  findDepartmentsByName: async (eventId, name, signal = undefined) => {
+    try {
+      const response = await axiosInstance.get(`/api/departments/search?eventId=${eventId}&name=${encodeURIComponent(name)}`, { signal });
+      return response.data;
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        throw { name: 'AbortError', message: 'Request aborted' };
+      }
+      console.error('Error searching departments by name:', error);
+      throw error;
+    }
+  },
 };
 
 export default memberService;

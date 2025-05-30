@@ -19,16 +19,47 @@ const useMemberManagement = () => {
   // 1. Initialize Hooks
   // ------------------------
   
-  // Filter states - with a temporary callback that will be replaced later
+  // Track API call frequency to prevent spam
+  const fetchCallbackCountRef = useRef(0);
+  const lastFetchTimeRef = useRef(Date.now());
+  const minFetchIntervalMs = 300; // Minimum time between API calls (300ms)
+  
+  // Reset the counter periodically to allow new fetches after some time
+  useEffect(() => {
+    const resetIntervalId = setInterval(() => {
+      fetchCallbackCountRef.current = 0;
+    }, 3000); // Reset counter every 3 seconds
+    
+    return () => clearInterval(resetIntervalId);
+  }, []);
+  
+  // Filter states - with optimized callback to prevent excessive API calls
   const filterHook = useMemberFilters(() => {
-    console.log('Fetch callback called');
-    if (typeof fetchMembers === 'function') {
+    const now = Date.now();
+    const timeSinceLastFetch = now - lastFetchTimeRef.current;
+    
+    // Only call fetchMembers if:
+    // 1. It's been defined
+    // 2. Not called too many times in succession
+    // 3. Enough time has passed since last call
+    if (typeof fetchMembers === 'function' && 
+        fetchCallbackCountRef.current < 5 &&
+        timeSinceLastFetch > minFetchIntervalMs) {
+      
+      fetchCallbackCountRef.current += 1;
+      lastFetchTimeRef.current = now;
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Triggering fetch #${fetchCallbackCountRef.current}, interval: ${timeSinceLastFetch}ms`);
+      }
+      
       fetchMembers();
     }
   });
   
   const {
     searchTerm,
+    debouncedSearchTerm,
     statusFilter,
     roleFilter,
     departmentFilter,
@@ -37,6 +68,7 @@ const useMemberManagement = () => {
     showAdvancedFilter,
     currentPage,
     pageSize,
+    handleSearch,
     handleStatusFilter,
     handleRoleFilter,
     handleDepartmentFilter,
@@ -55,7 +87,7 @@ const useMemberManagement = () => {
 
   // Data fetching and management
   const memberDataHook = useMemberData(eventId, {
-    searchTerm,
+    searchTerm: debouncedSearchTerm, // Use debounced search term for API calls
     statusFilter,
     roleFilter,
     departmentFilter
@@ -119,14 +151,6 @@ const useMemberManagement = () => {
   // ------------------------
   // 3. Integration Methods
   // ------------------------
-  
-  // Handler functions that integrate modals and data actions
-  const handleSearch = useCallback((term) => {
-    const searchValue = typeof term === 'string' ? term : '';
-    handleStatusFilter(searchValue);
-    handlePageChange(1); // Reset to first page (1-indexed in UI)
-    fetchMembers();
-  }, [handleStatusFilter, handlePageChange, fetchMembers]);
 
   const handleViewUser = async (user) => {
     try {
@@ -170,10 +194,18 @@ const useMemberManagement = () => {
 
   const handleSaveUser = async () => {
     try {
-      console.log('Saving edited user data:', editedUser);
+      console.log('Saving edited user data:', JSON.stringify(editedUser));
       console.log('Status value:', editedUser.status);
       console.log('isActive value:', editedUser.isActive);
+      console.log('ID values:', {accountId: editedUser.accountId || editedUser.id, eventId: eventId});
       console.log('Available departments:', departments);
+      
+      // Ensure the isActive field is correctly set based on status
+      if (editedUser.isActive === undefined && editedUser.status) {
+        const isActive = editedUser.status === 'Active';
+        console.log(`Setting missing isActive to ${isActive} based on status ${editedUser.status}`);
+        editedUser.isActive = isActive;
+      }
       
       const result = await updateMember(editedUser, departments);
       
@@ -282,10 +314,19 @@ const useMemberManagement = () => {
   // 5. Effect Hooks
   // ------------------------
   
-  // Initial data fetch
+  // Sử dụng ref để theo dõi việc fetch dữ liệu ban đầu
+  const initialFetchRef = useRef(true);
+  
+  // Initial data fetch - chỉ gọi một lần khi component mount
   useEffect(() => {
-    fetchMembers();
-    fetchDepartments();
+    if (initialFetchRef.current) {
+      // Đặt timeout ngắn để đảm bảo hook initialization hoàn tất
+      setTimeout(() => {
+        fetchMembers();
+        fetchDepartments();
+      }, 100);
+      initialFetchRef.current = false;
+    }
   }, []);
 
   return {
