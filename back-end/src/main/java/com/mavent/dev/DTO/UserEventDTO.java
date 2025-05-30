@@ -14,4 +14,5 @@ public class UserEventDTO {
     private String status;
     private String role;
     private String departmentName; // Chỉ có nếu role là MEMBER
+    private String bannerUrl;
 }
