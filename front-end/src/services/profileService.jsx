@@ -1,19 +1,14 @@
-import axios from "axios";
+import Api from "../config/Api";
 
-const api = axios.create({
-    // baseURL: import.meta.env.VITE_API_URL,
-    baseURL: "http://localhost:8080/api",
-    withCredentials: true,
-});
 
-export const getUserProfile = () => api.get("/user/profile");
+export const getUserProfile = () => Api.get("/user/profile");
 
-export const updateProfile = (data) => api.put("/user/profile", data);
+export const updateProfile = (data) => Api.put("/user/profile", data);
 
-export const uploadAvatar = (formData) => api.post("/user/avatar", formData, {
+export const uploadAvatar = (formData) => Api.post("/user/avatar", formData, {
     headers: {
         'Content-Type': 'multipart/form-data'
     }
 });
 
-export const getAllAccounts = () => api.get("/accounts");
+export const getAllAccounts = () => Api.get("/accounts");

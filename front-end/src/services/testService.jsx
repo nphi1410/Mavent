@@ -1,11 +1,5 @@
-import axios from "axios";
+import Api from './../config/Api';
 
-const api = axios.create({
-    // baseURL: import.meta.env.VITE_API_URL,
-    baseURL: "http://localhost:8080/api",
-    withCredentials: true,
-});
+export const getGreeting = () => Api.get("/greeting");
 
-export const getGreeting = () => api.get("/greeting");
-
-export const submitExample = (data) => api.post("/submit", data);
+export const submitExample = (data) => Api.post("/submit", data);
