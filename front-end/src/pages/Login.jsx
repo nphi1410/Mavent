@@ -9,7 +9,7 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const response = await fetch("http://localhost:8080/api/login", {
+    const response = await axios.post("http://localhost:8080/api/login", {
     // const response = await fetch(`${import.meta.env.VITE_API_URL}`, {
 
       method: "POST",
