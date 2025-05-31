@@ -113,6 +113,7 @@ public class AccountController {
         UserProfileDTO user = accountService.getUserProfile(username);
         List<TaskDTO> tasks = accountService.getUserTasks(user.getId());
         return ResponseEntity.ok(tasks);
+    }
 
     @GetMapping("/user/events")
     public ResponseEntity<?> getUserEvents(HttpSession session) {
