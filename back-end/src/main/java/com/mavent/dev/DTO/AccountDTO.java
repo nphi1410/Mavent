@@ -14,7 +14,7 @@ public class AccountDTO {
     private String email;
     private String fullName;
     private SystemRole systemRole;
-    private String avatarImg;
+    private String avatarUrl;
     private String phoneNumber;
     private Gender gender;
     private String studentId;

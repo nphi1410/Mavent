@@ -26,7 +26,7 @@ public class AccountController {
     @Autowired
     private AccountService accountService;
 
-    @GetMapping("/account")
+    @GetMapping("/accounts")
     public ResponseEntity<List<AccountDTO>> getAllAccounts() {
         List<AccountDTO> accounts = accountService.getAllAccounts();
         return ResponseEntity.ok(accounts);
@@ -98,7 +98,7 @@ public class AccountController {
             cloudConfig.uploadMultipartFile(file, folder);
 
             Account account = accountService.getAccount(username);
-            account.setAvatarImg(keyName);
+            account.setAvatarUrl(keyName);
             accountService.save(account);
 
             return ResponseEntity.ok().body(Map.of(

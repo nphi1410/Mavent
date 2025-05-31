@@ -34,7 +34,7 @@ public class AccountImplement implements AccountService {
             dto.setEmail(account.getEmail());
             dto.setFullName(account.getFullName());
             dto.setSystemRole(account.getSystemRole());  // SystemRole enum
-            dto.setAvatarImg(account.getAvatarImg());
+            dto.setAvatarUrl(account.getAvatarUrl());
             dto.setPhoneNumber(account.getPhoneNumber());
             dto.setGender(account.getGender());  // Gender enum
             dto.setStudentId(account.getStudentId());
@@ -106,7 +106,7 @@ public class AccountImplement implements AccountService {
         dto.setUsername(account.getUsername());
         dto.setEmail(account.getEmail());
         dto.setFullName(account.getFullName());
-        dto.setAvatarImg(account.getAvatarImg());
+        dto.setAvatarUrl(account.getAvatarUrl());
         dto.setPhoneNumber(account.getPhoneNumber());
         dto.setGender(account.getGender() != null ? account.getGender().name() : null);
         dto.setDateOfBirth(account.getDateOfBirth());
