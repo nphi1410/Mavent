@@ -2,6 +2,7 @@ package com.mavent.dev.controller;
 
 import com.mavent.dev.DTO.LoginDTO;
 import com.mavent.dev.DTO.TaskDTO;
+import com.mavent.dev.DTO.UserEventDTO;
 import com.mavent.dev.DTO.UserProfileDTO;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.repository.AccountRepository;
@@ -112,6 +113,16 @@ public class AccountController {
         UserProfileDTO user = accountService.getUserProfile(username);
         List<TaskDTO> tasks = accountService.getUserTasks(user.getId());
         return ResponseEntity.ok(tasks);
+
+    @GetMapping("/user/events")
+    public ResponseEntity<?> getUserEvents(HttpSession session) {
+        UserProfileDTO user = (UserProfileDTO) session.getAttribute("account");
+        if (user == null) {
+            return ResponseEntity.status(401).body("Bạn cần đăng nhập");
+        }
+
+        List<UserEventDTO> events = accountService.getUserEvents(user.getId());
+        return ResponseEntity.ok(events);
     }
 
 }

@@ -1,6 +1,10 @@
 package com.mavent.dev.service.implement;
 
 import com.mavent.dev.DTO.TaskDTO;
+import com.mavent.dev.DTO.UserEventDTO;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import com.mavent.dev.DTO.UserProfileDTO;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.Task;
@@ -119,5 +123,51 @@ public class AccountImplement implements AccountService {
         }).toList();
     }
 
+    @Override
+    public void updateAvatar(String username, String imageUrl) {
+        Account account = accountRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Account not found with username: " + username));
+        account.setAvatarImg(imageUrl);
+        accountRepository.save(account);
+    }
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @Override
+    public List<UserEventDTO> getUserEvents(Integer accountId) {
+        String sql = """
+        SELECT e.event_id, e.name AS event_name, e.description, e.status, ear.event_role, 
+               d.name AS department_name, e.banner_url
+        FROM events e
+        JOIN event_account_role ear ON e.event_id = ear.event_id
+        LEFT JOIN departments d ON ear.department_id = d.department_id
+        WHERE ear.account_id = :accountId AND e.is_deleted = false AND ear.is_active = true
+    """;
+
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("accountId", accountId);
+
+        List<Object[]> results = query.getResultList();
+        List<UserEventDTO> eventList = new java.util.ArrayList<>();
+
+        for (Object[] row : results) {
+            Integer eventId = (Integer) row[0];
+            String name = (String) row[1];
+            String description = (String) row[2];
+            String status = (String) row[3];
+            String role = (String) row[4];
+            String departmentName = (String) row[5];
+            String bannerUrl = (String) row[6];
+
+            if (!"MEMBER".equals(role)) {
+                departmentName = null; // Chỉ lấy department nếu role là MEMBER
+            }
+
+            eventList.add(new UserEventDTO(eventId, name, description, status, role, departmentName, bannerUrl));
+        }
+
+        return eventList;
+    }
 }
 

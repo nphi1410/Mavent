@@ -10,14 +10,30 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const response = await login({username, password});
-    if (response.status === 200) {
-      navigate("/");
-    } else {
-      console.error("Login failed");
+    try {
+      const response = await axios.post(
+        "http://localhost:8080/api/login",
+        {
+          username,
+          password
+        },
+        {
+          headers: {
+            "Content-Type": "application/json"
+          },
+          withCredentials: true
+        }
+      );
+
+      if (response.status === 200) {
+        window.location.href = "/profile";
+      }
+    } catch (error) {
+      console.error("Login failed:", error);
+      // Thêm xử lý hiển thị lỗi cho người dùng
     }
   };
- 
+
 
   return (
     <div className="flex items-center justify-center min-h-screen w-full bg-blue-900">
@@ -28,7 +44,7 @@ function Login() {
           <img
             src="https://scontent.fhan2-5.fna.fbcdn.net/v/t39.30808-6/500241004_1167279355199938_6596002086529846154_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=foSz0fJFckoQ7kNvwE6hEnf&_nc_oc=Adm5W8dX4GHiM5e4sh_OLjySpiV9QVHGJ0GceqZZXKagDzagOh4stGKqJlEM-wVHC6c&_nc_zt=23&_nc_ht=scontent.fhan2-5.fna&_nc_gid=x7PXBO4qz810RpaQdUQ3uA&oh=00_AfKQrOCrJ1yNRqgI6MFQXENOMN6G-RxlyOvEydCPmYfehw&oe=6838E740"
             alt="Event"
-            className="w-full h-full object-cover rounded-l-[30px]"/>
+            className="w-full h-full object-cover rounded-l-[30px]" />
         </div>
 
         {/* Right Panel */}

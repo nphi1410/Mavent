@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 // Đổi từ getAllAccounts sang getUserProfile
-import { getUserProfile, uploadAvatar } from "../services/profileService";
+import { getUserProfile, uploadAvatar } from "../../services/profileService";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload, faUser } from '@fortawesome/free-solid-svg-icons'; // Thêm faUser icon
 
