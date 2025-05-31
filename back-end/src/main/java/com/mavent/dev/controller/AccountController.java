@@ -80,7 +80,7 @@ public class AccountController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerWithOtp(@RequestBody AccountDTO accountDTO, OtpDTO request, HttpSession session) {
+    public ResponseEntity<?> registerWithOtp(@RequestBody OtpDTO request, HttpSession session) {
         String otpSession = (String) session.getAttribute("register_otp");
         String username = (String) session.getAttribute("register_username");
         String email = (String) session.getAttribute("register_email");

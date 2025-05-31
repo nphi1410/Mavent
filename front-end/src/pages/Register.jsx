@@ -25,11 +25,7 @@ const Register = () => {
   };
 
   const sendOtp = async (e) => {
-    e.preventDefault();
-    if (password !== confirmPassword) {
-      setPasswordError("Passwords do not match");
-      return;
-    }
+    e?.preventDefault();
     try {
       const response = await axios.post("http://localhost:8080/api/send-otp", {
         username,
@@ -129,14 +125,27 @@ const Register = () => {
           </div>
 
           {otpSent && (
-            <div className="flex flex-col">
+            <div className="">
               <label className="mb-1 text-sm font-medium text-gray-700 pl-2.5">Enter OTP:</label>
-              <input
-                type="text"
-                placeholder="Enter OTP sent to email"
-                className="pl-4 p-2 border border-blue-400 rounded-full"
-                onChange={(e) => setOtp(e.target.value)}
-              />
+              <div className='flex w-full justify-between items-center gap-4'>
+                <input
+                  type="text"
+                  placeholder="Enter OTP sent to email"
+                  className="pl-4 p-2 border border-blue-400 rounded-full w-3/4"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  id='otp-input'
+                  required
+                />
+                <button
+                  type="button"
+                  className="w-fit py-3 px-6 rounded-full bg-[#f1f900] text-blue-900 font-semibold hover:bg-[#dde428] transition self-end"
+                  onClick={sendOtp}
+                >
+                  Resend OTP
+                </button>
+
+              </div>
             </div>
           )}
 
