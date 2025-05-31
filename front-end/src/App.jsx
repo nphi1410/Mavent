@@ -8,6 +8,10 @@ import ProfilePage from './pages/ProfilePage';
 import Login from './pages/Login';
 import HomePage from './pages/HomePage';
 import SuperAdminDashboard from './pages/SuperAdminDashBoard';
+import SuperAdminManageEvents from './pages/SuperAdminManageEvents';
+import SuperAdminManageUsers from './pages/SuperAdminManageUsers';
+import SuperAdminViewEventDetails from './pages/SuperAdminViewEventDetails';
+import SuperAdminEditEvent from './pages/SuperAdminEditEvent';
 import EventDetails from "./pages/EventDetails";
 import UserEventsPage from './pages/UserEventsPage';
 import React from 'react';
@@ -42,5 +46,7 @@ function App() {
             </div>
         </Router>
     );
+    
+}
 
 export default App;
