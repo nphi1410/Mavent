@@ -12,8 +12,9 @@ const Banner = ({ bannerUrls }) => {
   useEffect(() => {
     if (swiperRef.current?.swiper) {
       swiperRef.current.swiper.autoplay.start();
+      swiperRef.current.swiper.activeIndex = 0;
     }
-  }, []);
+  }, [bannerUrls]);
   return (
     <div className="max-w-full p-4 m-4 rounded-lg overflow-hidden border border-gray-300 shadow-lg">
       <Swiper
