@@ -1,8 +1,11 @@
 package com.mavent.dev.service.implement;
 
+import com.mavent.dev.DTO.TaskDTO;
 import com.mavent.dev.DTO.UserProfileDTO;
 import com.mavent.dev.entity.Account;
+import com.mavent.dev.entity.Task;
 import com.mavent.dev.repository.AccountRepository;
+import com.mavent.dev.repository.TaskRepository;
 import com.mavent.dev.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -70,6 +73,27 @@ public class AccountImplement implements AccountService {
         dto.setDateOfBirth(account.getDateOfBirth());
         dto.setStudentId(account.getStudentId());
         return dto;
+    }
+
+    @Autowired
+    private TaskRepository taskRepository;
+
+    public List<TaskDTO> getUserTasks(Integer accountId) {
+        List<Task> tasks = taskRepository.findTasksByAccountId(accountId);
+        return tasks.stream().map(task -> {
+            TaskDTO dto = new TaskDTO();
+            dto.setTaskId(task.getTaskId());
+            dto.setEventId(task.getEventId());
+            dto.setDepartmentId(task.getDepartmentId());
+            dto.setTitle(task.getTitle());
+            dto.setDescription(task.getDescription());
+            dto.setAssignedToAccountId(task.getAssignedToAccountId());
+            dto.setAssignedByAccountId(task.getAssignedByAccountId());
+            dto.setDueDate(task.getDueDate());
+            dto.setStatus(task.getStatus().name());
+            dto.setPriority(task.getPriority().name());
+            return dto;
+        }).toList();
     }
 
 }

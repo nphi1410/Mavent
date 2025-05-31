@@ -1,5 +1,6 @@
 package com.mavent.dev.service;
 
+import com.mavent.dev.DTO.TaskDTO;
 import com.mavent.dev.DTO.UserProfileDTO;
 import com.mavent.dev.entity.Account;
 import java.util.List;
@@ -10,4 +11,6 @@ public interface AccountService {
     void updateProfile(String username, UserProfileDTO userProfileDTO);
     boolean checkLogin(String username, String password);
     List<Account> findAllAccount();
+    List<TaskDTO> getUserTasks(Integer accountId);
+
 }
