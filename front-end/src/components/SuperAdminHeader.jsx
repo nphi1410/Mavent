@@ -8,7 +8,7 @@ function SuperAdminHeader() {
       {/* Left section */}
       <div className="flex items-center gap-6">
         <div className="flex items-center justify-center p-4 text-xl font-bold text-gray-800">
-          Super Admin
+          <img src="/mavent-text-logo.svg" alt="mavent" className="w-40" />
         </div>
       </div>
 

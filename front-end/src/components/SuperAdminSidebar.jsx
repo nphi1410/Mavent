@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendar, faCalendarDays, faBell, faGauge, faUsers, faChevronRight, faChevronDown, faUser, faGear, faPersonShelter } from '@fortawesome/free-solid-svg-icons';
+import { Link } from 'react-router-dom';
+
 
 function SuperAdminSidebar() {
   const [eventOpen, setEventOpen] = useState(true);
@@ -12,10 +14,10 @@ function SuperAdminSidebar() {
       <div>
 
         {/* Dashboard */}
-        <div className="p-4 hover:bg-gray-100 cursor-pointer flex items-center gap-3 text-gray-800">
+        <Link to="/superadmin" className="p-4 hover:bg-gray-100 cursor-pointer flex items-center gap-3 text-gray-800">
           <FontAwesomeIcon icon={faGauge} />
           Dashboard
-        </div>
+        </Link>
 
         {/* Manage Events */}
         <div>
@@ -31,10 +33,10 @@ function SuperAdminSidebar() {
           </div>
           {eventOpen && (
             <div className="pl-12">
-              <div className="py-2 flex items-center gap-3 hover:text-black cursor-pointer text-gray-600">
+              <Link to="/superadmin/events" className="py-2 flex items-center gap-3 hover:text-black cursor-pointer text-gray-600">
                 <FontAwesomeIcon icon={faCalendar} />
                 All Events
-              </div>
+              </Link>
               <div className="py-2 flex items-center gap-3 hover:text-black cursor-pointer text-gray-600">
                 <FontAwesomeIcon icon={faBell} />
                 Pending Events
@@ -57,10 +59,10 @@ function SuperAdminSidebar() {
           </div>
           {userOpen && (
             <div className="pl-12">
-              <div className="py-2 flex items-center gap-3 hover:text-black cursor-pointer text-gray-600">
+              <Link to="/superadmin/users" className="py-2 flex items-center gap-3 hover:text-black cursor-pointer text-gray-600">
                 <FontAwesomeIcon icon={faUsers} />
                 All Users
-              </div>
+              </Link>
               <div className="py-2 flex items-center gap-3 hover:text-black cursor-pointer text-gray-600">
                 <FontAwesomeIcon icon={faPersonShelter} />
                 Invitations

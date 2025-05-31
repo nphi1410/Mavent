@@ -21,8 +21,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(Customizer.withDefaults())  // new lambda style to disable CSRF
-                .cors(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())  // new lambda style to disable CSRF
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/**","/public/**", "/login").permitAll()
                         .anyRequest().authenticated()
@@ -35,8 +35,8 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         UserDetails user = User
-                .withUsername(System.getenv("SPRING_SECURITY_USER"))
-                .password(passwordEncoder().encode(System.getenv("SPRING_SECURITY_PASS")))
+                .withUsername("admin")
+                .password("admin123")
                 .roles("ADMIN")
                 .build();
         return new InMemoryUserDetailsManager(user);
@@ -47,4 +47,3 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
-
