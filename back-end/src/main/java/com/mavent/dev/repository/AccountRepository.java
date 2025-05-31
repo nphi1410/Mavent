@@ -12,4 +12,6 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     Account findByUsername(String username);
 
     List<Account> findAllByIsDeletedFalse();
+
+    long countByIsDeletedFalse();
 }
