@@ -1,5 +1,6 @@
 package com.mavent.dev.service.implement;
 
+import com.mavent.dev.DTO.AccountDTO;
 import com.mavent.dev.DTO.UserProfileDTO;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.repository.AccountRepository;
@@ -7,8 +8,9 @@ import com.mavent.dev.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AccountImplement implements AccountService {
@@ -22,6 +24,29 @@ public class AccountImplement implements AccountService {
     }
 
     @Override
+    public List<AccountDTO> getAllAccounts() {
+        List<Account> accounts = accountRepository.findAllByIsDeletedFalse();
+
+        return accounts.stream().map(account -> {
+            AccountDTO dto = new AccountDTO();
+            dto.setAccountId(account.getAccountId());
+            dto.setUsername(account.getUsername());
+            dto.setEmail(account.getEmail());
+            dto.setFullName(account.getFullName());
+            dto.setSystemRole(account.getSystemRole());  // SystemRole enum
+            dto.setAvatarUrl(account.getAvatarUrl());
+            dto.setPhoneNumber(account.getPhoneNumber());
+            dto.setGender(account.getGender());  // Gender enum
+            dto.setStudentId(account.getStudentId());
+            dto.setDateOfBirth(account.getDateOfBirth());
+            dto.setCreatedAt(account.getCreatedAt());
+            dto.setUpdatedAt(account.getUpdatedAt());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+
+    @Override
     public UserProfileDTO getUserProfile(String username) {
         Account account = getAccount(username);
         return mapAccountToUserProfileDTO(account);
@@ -29,20 +54,15 @@ public class AccountImplement implements AccountService {
 
     @Override
     public boolean checkLogin(String username, String password) {
-        // Find account by username
         Account account = accountRepository.findByUsername(username);
         if (account == null) return false;
-        // Compare raw password with stored hash (for demo, plain text; for real, use BCrypt)
-        // Example for plain text (NOT recommended for production):
         return account.getPasswordHash().equals(password);
-        // If using BCrypt:
-        // return passwordEncoder.matches(password, account.getPasswordHash());
     }
 
     @Override
     public UserProfileDTO updateProfile(String username, UserProfileDTO userProfileDTO) {
         Account account = getAccount(username);
-        // Update profile fields
+
         if (userProfileDTO.getFullName() != null && !userProfileDTO.getFullName().trim().isEmpty()) {
             account.setFullName(userProfileDTO.getFullName());
         }
@@ -60,11 +80,10 @@ public class AccountImplement implements AccountService {
                 account.setGender(Account.Gender.valueOf(userProfileDTO.getGender().toUpperCase()));
             } catch (IllegalArgumentException e) {
                 System.err.println("Invalid gender value. Must be one of: MALE, FEMALE, OTHER");
-                System.err.println("Error: "+ e);
+                System.err.println("Error: " + e);
             }
         }
 
-        // Save updated account
         Account updatedAccount = accountRepository.save(account);
         return mapAccountToUserProfileDTO(updatedAccount);
     }
@@ -72,9 +91,9 @@ public class AccountImplement implements AccountService {
     @Override
     public Account getAccount(String username) {
         Account account = null;
-        try{
+        try {
             account = accountRepository.findByUsername(username);
-        }catch (UsernameNotFoundException ex){
+        } catch (UsernameNotFoundException ex) {
             System.err.println("Account not found with username: " + username);
             System.err.println("Error: " + ex);
         }
@@ -87,7 +106,7 @@ public class AccountImplement implements AccountService {
         dto.setUsername(account.getUsername());
         dto.setEmail(account.getEmail());
         dto.setFullName(account.getFullName());
-        dto.setAvatarImg(account.getAvatarImg());
+        dto.setAvatarUrl(account.getAvatarUrl());
         dto.setPhoneNumber(account.getPhoneNumber());
         dto.setGender(account.getGender() != null ? account.getGender().name() : null);
         dto.setDateOfBirth(account.getDateOfBirth());
@@ -95,4 +114,3 @@ public class AccountImplement implements AccountService {
         return dto;
     }
 }
-

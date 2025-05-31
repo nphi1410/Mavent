@@ -1,5 +1,6 @@
 package com.mavent.dev.controller;
 
+import com.mavent.dev.DTO.AccountDTO;
 import com.mavent.dev.DTO.LoginDTO;
 import com.mavent.dev.DTO.UserProfileDTO;
 import com.mavent.dev.entity.Account;
@@ -13,7 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.mavent.dev.config.CloudConfig;
+
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -22,6 +25,12 @@ public class AccountController {
 
     @Autowired
     private AccountService accountService;
+
+    @GetMapping("/accounts")
+    public ResponseEntity<List<AccountDTO>> getAllAccounts() {
+        List<AccountDTO> accounts = accountService.getAllAccounts();
+        return ResponseEntity.ok(accounts);
+    }
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginDTO loginDTO, HttpServletRequest request) {
@@ -89,7 +98,7 @@ public class AccountController {
             cloudConfig.uploadMultipartFile(file, folder);
 
             Account account = accountService.getAccount(username);
-            account.setAvatarImg(keyName);
+            account.setAvatarUrl(keyName);
             accountService.save(account);
 
             return ResponseEntity.ok().body(Map.of(
