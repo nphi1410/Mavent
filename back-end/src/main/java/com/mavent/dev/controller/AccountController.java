@@ -1,6 +1,7 @@
 package com.mavent.dev.controller;
 
 import com.mavent.dev.DTO.LoginDTO;
+import com.mavent.dev.DTO.TaskDTO;
 import com.mavent.dev.DTO.UserEventDTO;
 import com.mavent.dev.DTO.UserProfileDTO;
 import com.mavent.dev.entity.Account;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.mavent.dev.config.CloudConfig;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -58,18 +60,16 @@ public class AccountController {
     }
 
     @PutMapping("/user/profile")
-    public ResponseEntity<?> updateProfile(@RequestBody UserProfileDTO userProfileDTO, HttpSession session) {
+    public ResponseEntity<UserProfileDTO> updateProfile(@RequestBody UserProfileDTO userProfileDTO, HttpSession session) {
         String username = (String) session.getAttribute("username");
         if (username == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("User must be logged in");
+            return ResponseEntity.status(401).build();
         }
         try {
             UserProfileDTO updatedProfile = accountService.updateProfile(username, userProfileDTO);
             return ResponseEntity.ok(updatedProfile);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error updating profile: " + e.getMessage());
+            return ResponseEntity.status(401).build();
         }
     }
 
@@ -102,6 +102,17 @@ public class AccountController {
                     .body("Error uploading avatar: " + e.getMessage());
         }
     }
+
+    @GetMapping("/user/tasks")
+    public ResponseEntity<List<TaskDTO>> getUserTasks(HttpSession session) {
+        String username = (String) session.getAttribute("username");
+        if (username == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        UserProfileDTO user = accountService.getUserProfile(username);
+        List<TaskDTO> tasks = accountService.getUserTasks(user.getId());
+        return ResponseEntity.ok(tasks);
 
     @GetMapping("/user/events")
     public ResponseEntity<?> getUserEvents(HttpSession session) {
