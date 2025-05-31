@@ -6,6 +6,7 @@ import axios from 'axios';
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -31,6 +32,14 @@ function Login() {
       }
     } catch (error) {
       console.error("Login failed:", error);
+      if (error.response && error.response.status === 401) {
+        setError("Invalid username or password. Please try again.");
+      }
+      else if (error.response && error.response.status === 500) {
+        setError("Server error. Please try again later.");
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
       // Thêm xử lý hiển thị lỗi cho người dùng
     }
   };
@@ -80,7 +89,7 @@ function Login() {
             <button className="px-6 py-2 rounded-full bg-blue-900 text-white hover:bg-[#2f52bc] transition">
               LOGIN
             </button>
-            {/* {error && <div className="text-red-600 text-sm mt-2">{error}</div>} */}
+            {error && <div className="text-red-600 text-sm mt-2">{error}</div>}
           </form>
 
           <Link to="/about" className="text-xs text-blue-900 hover:underline">

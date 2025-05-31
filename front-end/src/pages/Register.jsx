@@ -1,96 +1,168 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Register = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const [registerError, setRegisterError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
-    const response = await fetch("http://localhost:8080/api/register", {
-    // const response = await fetch(`${import.meta.env.VITE_API_URL}`, {
+  const navigate = useNavigate();
 
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username, email, password }),
-      credentials: 'include', 
-    });
-
-    if (response.ok) {
-      // redirect to home page
-      window.location.href = "/login";
+  const confirmPasswordChange = (e) => {
+    setConfirmPassword(e.target.value);
+    if (e.target.value !== password) {
+      setPasswordError("Passwords do not match");
     } else {
-      console.error("Login failed");
+      setPasswordError("");
     }
-  }
+  };
+
+  const sendOtp = async (e) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      setPasswordError("Passwords do not match");
+      return;
+    }
+    try {
+      const response = await axios.post("http://localhost:8080/api/send-otp", {
+        username,
+        email,
+        password
+      }, {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true
+      });
+
+      if (response.status === 200) {
+        setOtpSent(true);
+        setRegisterError("");
+      }
+    } catch (error) {
+      if (error.response?.status === 400) {
+        setRegisterError("Username or email already exists.");
+      } else {
+        setRegisterError("Failed to send OTP. Please try again.");
+      }
+    }
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post("http://localhost:8080/api/register", {
+        otp
+      }, {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true
+      });
+
+      if (response.status === 200) {
+        navigate("/login");
+      }
+    } catch (error) {
+      if (error.response?.status === 400) {
+        setRegisterError("Incorrect or expired OTP.");
+      } else {
+        setRegisterError("Registration failed. Try again later.");
+      }
+    }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-blue-900">
-
       <div className="bg-white p-10 rounded-2xl shadow-md w-full max-w-3xl">
-        
         <h2 className="text-4xl md:text-5xl font-semibold text-center mb-6 text-blue-900 pb-3">
           REGISTER NEW ACCOUNT
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-7 pb-3">
-
-          <div className="flex flex-col">
-
-            <label className="mb-1 text-sm font-medium text-gray-700 pl-2.5">Username:</label>
-            <input 
-              type="text"   
-              placeholder="Enter username..." 
-              className="pl-4 p-2 border border-blue-400 rounded-full focus:outline-none focus:ring-1 focus:ring-blue-700" 
-            />
-            
-            <label className="mb-1 mt-4 text-sm font-medium text-gray-700 pl-2.5">Email:</label>
-            <input 
-              type="email" 
-              placeholder="Enter email..." 
-              className="pl-4 p-2 border border-blue-400 rounded-full focus:outline-none focus:ring-1 focus:ring-blue-500" 
+        <form onSubmit={otpSent ? handleRegister : sendOtp} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-7 pb-3">
+            <div className="flex flex-col">
+              <label className="mb-1 text-sm font-medium text-gray-700 pl-2.5">Username:</label>
+              <input
+                type="text"
+                placeholder="Enter username..."
+                className="pl-4 p-2 border border-blue-400 rounded-full"
+                onChange={(e) => setUsername(e.target.value)}
+                value={username}
               />
+
+              <label className="mb-1 mt-4 text-sm font-medium text-gray-700 pl-2.5">Email:</label>
+              <input
+                type="email"
+                placeholder="Enter email..."
+                className="pl-4 p-2 border border-blue-400 rounded-full"
+                onChange={(e) => setEmail(e.target.value)}
+                value={email}
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <label className="mb-1 text-sm font-medium text-gray-700 pl-2.5">Password:</label>
+              <input
+                type="password"
+                placeholder="Enter password..."
+                className="pl-4 p-2 border border-blue-400 rounded-full"
+                onChange={(e) => setPassword(e.target.value)}
+                value={password}
+              />
+
+              <label className="mb-1 mt-4 text-sm font-medium text-gray-700 pl-2.5">Confirm password:</label>
+              <input
+                type="password"
+                placeholder="Confirm password..."
+                className="pl-4 p-2 border border-blue-400 rounded-full"
+                onChange={confirmPasswordChange}
+                value={confirmPassword}
+              />
+              {passwordError && (
+                <div className="text-red-600 text-sm mt-2">{passwordError}</div>
+              )}
+            </div>
           </div>
 
-          <div className="flex flex-col">
+          {otpSent && (
+            <div className="flex flex-col">
+              <label className="mb-1 text-sm font-medium text-gray-700 pl-2.5">Enter OTP:</label>
+              <input
+                type="text"
+                placeholder="Enter OTP sent to email"
+                className="pl-4 p-2 border border-blue-400 rounded-full"
+                onChange={(e) => setOtp(e.target.value)}
+              />
+            </div>
+          )}
 
-            <label className="mb-1 text-sm font-medium text-gray-700 pl-2.5">Password:</label>
-            <input 
-              type="password" 
-              placeholder="Enter password..." 
-              className="pl-4 p-2 border border-blue-400 rounded-full focus:outline-none focus:ring-1 focus:ring-blue-500" 
-            />
-
-            <label className="mb-1 mt-4 text-sm font-medium text-gray-700 pl-2.5">Confirm password:</label>
-            <input 
-            type="password" 
-            placeholder="Confirm password..." 
-            className="pl-4 p-2 border border-blue-400 rounded-full focus:outline-none focus:ring-1 focus:ring-blue-500" 
-            />
-
+          <div className="flex justify-center mt-6">
+            <button
+              type="submit"
+              className="bg-blue-900 text-white px-6 py-2 rounded-full hover:bg-blue-950 transition"
+            >
+              {otpSent ? "Register" : "Send OTP"}
+            </button>
           </div>
-        </div>
+        </form>
 
-        <div className="flex justify-center mt-6">
-
-          <button className="bg-blue-900 text-white px-6 py-2 rounded-full hover:bg-blue-950 hover:text-gray-100 transition">
-            Register
-          </button>
-
-        </div>
+        {registerError && (
+          <div className="text-red-600 text-sm mt-4 text-center">
+            {registerError}
+          </div>
+        )}
 
         <p className="text-center text-sm text-gray-600 mt-4">
-          Already had an account? {' '}
-          <Link to="/register" className="font-bold hover:underline hover:text-blue-900">Login now</Link>
+          Already had an account?{' '}
+          <Link to="/login" className="font-bold hover:underline hover:text-blue-900">
+            Login now
+          </Link>
         </p>
-
       </div>
-
     </div>
   );
 };
