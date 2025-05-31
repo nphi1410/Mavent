@@ -123,13 +123,13 @@ public class AccountImplement implements AccountService {
         }).toList();
     }
 
-    @Override
-    public void updateAvatar(String username, String imageUrl) {
-        Account account = accountRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Account not found with username: " + username));
-        account.setAvatarImg(imageUrl);
-        accountRepository.save(account);
-    }
+//    @Override
+//    public void updateAvatar(String username, String imageUrl) {
+//        Account account = accountRepository.findByUsername(username)
+//                .orElseThrow(() -> new UsernameNotFoundException("Account not found with username: " + username));
+//        account.setAvatarImg(imageUrl);
+//        accountRepository.save(account);
+//    }
 
     @PersistenceContext
     private EntityManager entityManager;
