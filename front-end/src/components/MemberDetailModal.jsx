@@ -4,7 +4,7 @@ import {
   faEdit, faBan, faUser, faTimes
 } from '@fortawesome/free-solid-svg-icons';
 
-const UserDetailModal = ({
+const MemberDetailModal = ({
   isOpen,
   user,
   isBanned,
@@ -136,4 +136,4 @@ const UserDetailModal = ({
   );
 };
 
-export default UserDetailModal;
+export default MemberDetailModal;

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import memberService from '../../../services/memberService';
+import memberService from '../services/memberService';
 
 /**
  * Hook để quản lý các hành động với member như update, ban/unban, delete.

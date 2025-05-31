@@ -3,7 +3,7 @@ import useMemberData from './useMemberData';
 import useMemberFilters from './useMemberFilters';
 import useMemberModals from './useMemberModals';
 import useMemberActions from './useMemberActions';
-import memberService from '../../../services/memberService';
+import memberService from '../services/memberService';
 
 /**
  * Main member management hook that composes all smaller hooks together.
@@ -13,7 +13,7 @@ import memberService from '../../../services/memberService';
  */
 const useMemberManagement = () => {
   // Event ID state
-  const [eventId, setEventId] = useState(1);
+  const [eventId, setEventId] = useState(9);
 
   // ------------------------
   // 1. Initialize Hooks

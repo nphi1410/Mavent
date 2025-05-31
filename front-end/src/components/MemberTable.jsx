@@ -15,17 +15,16 @@ const MemberTable = ({
 }) => {
   
   return (
-    <div className="hidden lg:block">
-      <table className="min-w-full">
+    <div className="hidden lg:block overflow-x-auto">
+      <table className="min-w-full table-fixed">
         <thead className="bg-gray-50 border-b">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
-            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">Name</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">Email</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">Role</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">Status</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">Department</th>
+            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">Actions</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
@@ -49,14 +48,14 @@ const MemberTable = ({
                     )}
                   </div>
                   <div className="ml-4">
-                    <div className={`text-sm font-medium text-blue-600 ${bannedUsers[member.id] ? 'line-through text-red-500' : ''}`}>
+                    <div className={`text-sm font-medium text-blue-600 truncate max-w-[150px] ${bannedUsers[member.id] ? 'line-through text-red-500' : ''}`}>
                       {member.name}
                     </div>
                   </div>
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                <span className={`${bannedUsers[member.id] ? 'line-through text-red-500' : ''}`}>
+                <span className={`truncate block max-w-[150px] ${bannedUsers[member.id] ? 'line-through text-red-500' : ''}`}>
                   {member.email}
                 </span>
               </td>
@@ -89,17 +88,14 @@ const MemberTable = ({
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm">
                 {member.department && member.department !== 'N/A' ? (
-                  <span className="px-2 py-1 text-xs rounded-full bg-blue-50 text-blue-600 border border-blue-100">
+                  <span className="px-2 py-1 text-xs rounded-full bg-blue-50 text-blue-600 border border-blue-100 truncate block max-w-[150px]">
                     {member.department}
                   </span>
                 ) : (
                   <span className="text-gray-400">N/A</span>
                 )}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {member.joinedAt ? new Date(member.joinedAt).toLocaleDateString() : 'N/A'}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium sticky right-0 bg-white">
                 <div className="flex justify-end items-center">
                   {/* Action menu button */}
                   <div className="relative">
@@ -140,7 +136,7 @@ const MemberTable = ({
                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
                           >
                             <FontAwesomeIcon icon={faEdit} className="mr-3 h-4 w-4" />
-                            Edit User
+                            Edit Member
                           </button>
                           <button 
                             onClick={(e) => {
@@ -152,7 +148,7 @@ const MemberTable = ({
                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
                           >
                             <FontAwesomeIcon icon={faBan} className="mr-3 h-4 w-4" />
-                            {bannedUsers[member.id] ? 'Unban' : 'Ban'} User
+                            {bannedUsers[member.id] ? 'Unban' : 'Ban'} Member
                           </button>
                         </div>
                       </div>

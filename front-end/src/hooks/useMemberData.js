@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import memberService from '../../../services/memberService';
+import memberService from '../services/memberService';
 
 /**
  * Hook để quản lý dữ liệu member và department.

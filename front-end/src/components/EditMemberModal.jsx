@@ -2,7 +2,7 @@ import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSave, faTimes, faUser } from '@fortawesome/free-solid-svg-icons';
 
-const EditUserModal = ({
+const EditMemberModal = ({
   isOpen,
   user,
   departments = [],
@@ -163,4 +163,4 @@ const EditUserModal = ({
   );
 };
 
-export default EditUserModal;
+export default EditMemberModal;

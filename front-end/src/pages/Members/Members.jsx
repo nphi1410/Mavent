@@ -1,13 +1,12 @@
 import React from 'react';
-import Layout from '../../components/layout/Layout';
-import useMemberManagement from './hooks/useMemberManagement';
-import MemberFilters from './components/MemberFilters';
-import MemberTable from './components/MemberTable';
-import MemberCard from './components/MemberCard';
-import Pagination from './components/Pagination';
-import UserDetailModal from './components/UserDetailModal';
-import EditUserModal from './components/EditUserModal';
-import NoResults from './components/NoResults';
+import useMemberManagement from '../../hooks/useMemberManagement';
+import MemberFilters from '../../components/MemberFilters';
+import MemberTable from '../../components/MemberTable';
+import MemberCard from './MemberCard';
+import Pagination from './Pagination';
+import MemberDetailModal from '../../components/MemberDetailModal';
+import EditMemberModal from '../../components/EditMemberModal';
+import NoResults from './NoResults';
 
 const Members = () => {
   const {
@@ -42,8 +41,7 @@ const Members = () => {
     handleStatusFilter,
     handleRoleFilter,
     handleDepartmentFilter,
-    applyFilters,
-    resetFilters,
+
     paginate,
     toggleMenu,
     handleBanUser,
@@ -56,14 +54,10 @@ const Members = () => {
   } = useMemberManagement();
   
   return (
-    <Layout activeItem="members">
-      <div className="container mx-auto px-2 sm:px-4 lg:px-6 relative">
-        {/* CSS Test Box
-        <div className="bg-red-500 p-4 mb-6 text-white font-medium rounded-lg">
-          Nếu bạn thấy hộp đỏ này, CSS đã hoạt động!
-        </div> */}
-        
-        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Manage Members</h1>
+    <div className="container mx-auto px-2 sm:px-4 lg:px-6 relative">
+      
+      
+      <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Manage Members</h1>
         
         <div className="bg-white rounded-lg shadow overflow-hidden">
           {/* Header Controls - Responsive */}
@@ -115,10 +109,9 @@ const Members = () => {
           />
         </div>
         
-        {/* Department Filter Sidebar removed - functionality moved inline */}
-        
-        {/* User Detail Modal */}
-        <UserDetailModal
+   
+        {/* Member Detail Modal */}
+        <MemberDetailModal
           isOpen={showUserDetail}
           user={selectedUser}
           isBanned={selectedUser ? bannedUsers[selectedUser.id] : false}
@@ -127,8 +120,8 @@ const Members = () => {
           onBan={handleBanUser}
         />
         
-        {/* Edit User Modal */}
-        <EditUserModal
+        {/* Edit Member Modal */}
+        <EditMemberModal
           isOpen={showEditModal}
           user={editedUser}
           departments={departments}
@@ -137,7 +130,6 @@ const Members = () => {
           onChange={handleEditInputChange}
         />
       </div>
-    </Layout>
   );
 };
 
