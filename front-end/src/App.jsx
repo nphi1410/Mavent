@@ -8,24 +8,39 @@ import ProfilePage from './pages/ProfilePage';
 import Login from './pages/Login';
 import HomePage from './pages/HomePage';
 import SuperAdminDashboard from './pages/SuperAdminDashBoard';
+import EventDetails from "./pages/EventDetails";
+import UserEventsPage from './pages/UserEventsPage';
+import React from 'react';
 import Register from './pages/Register';
 
 
 function App() {
-  return (
-    <Router>
-      <div className="min-h-screen w-full bg-gray-100">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/profile/*" element={<ProfilePage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/admin" element={<SuperAdminDashboard />} />
-
-        </Routes>
-      </div>
-    </Router>
-  );
-}
+    return (
+        <Router>
+            <div className="min-h-screen w-full">
+                <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/profile/*" element={<ProfilePage />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/superadmin" element={<SuperAdminDashboard />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route
+                        path="/superadmin/events"
+                        element={<SuperAdminManageEvents />}
+                    />
+                    <Route path="/superadmin/users" element={<SuperAdminManageUsers />} />
+                    <Route
+                        path="/superadmin/event-detail/:eventId"
+                        element={<SuperAdminViewEventDetails />}
+                    />
+                    <Route
+                        path="/superadmin/edit-event/:eventId"
+                        element={<SuperAdminEditEvent />}
+                    />
+                    <Route path="/event/1" element={<EventDetails />} />
+                </Routes>
+            </div>
+        </Router>
+    );
 
 export default App;

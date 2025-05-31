@@ -1,5 +1,6 @@
 package com.mavent.dev.DTO;
 
+import com.mavent.dev.entity.Account;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,5 +21,8 @@ public class UserProfileDTO {
     private String gender;
     private LocalDate dateOfBirth;
     private String studentId;
+    private Account.SystemRole systemRole;
+    public Account.SystemRole getSystemRole() {
+        return systemRole;
+    }
 }
-

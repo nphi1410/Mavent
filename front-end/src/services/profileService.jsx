@@ -1,19 +1,29 @@
-import axios from "axios";
+import axios from 'axios';
+import Api from "../config/Api";
 
-const api = axios.create({
-    // baseURL: import.meta.env.VITE_API_URL,
-    baseURL: "http://localhost:8080/api",
-    withCredentials: true,
-});
 
-export const getUserProfile = () => api.get("/user/profile");
+export const getUserProfile = () => {
+  return Api.get('/user/profile');
+};
 
-export const updateProfile = (data) => api.put("/user/profile", data);
+export const updateProfile = (data) => {
+  return Api.put('/user/profile', data);
+};
 
-export const uploadAvatar = (formData) => api.post("/user/avatar", formData, {
+export const uploadAvatar = (formData) => {
+  return Api.post('/user/avatar', formData, {
     headers: {
-        'Content-Type': 'multipart/form-data'
-    }
-});
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
 
-export const getAllAccounts = () => api.get("/accounts");
+export const getUserEvents = async () => {
+  try {
+    const response = await axiosInstance.get('/user/events');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching user events:', error);
+    throw error; // Throw error để component có thể handle
+  }
+};
