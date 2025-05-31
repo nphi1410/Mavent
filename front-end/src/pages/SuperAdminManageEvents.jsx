@@ -113,7 +113,7 @@ function SuperAdminManageEvents() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {paginatedEvents.map((event) => (
+                                        {paginatedEvents?.map((event) => (
                                             <tr key={event.eventId} className="border-b border-gray-200">
                                                 <td className="p-2 font-medium text-black whitespace-nowrap">{event.name}</td>
                                                 <td className="p-2 whitespace-nowrap text-gray-600">{event.startDatetime.slice(0, 10)}</td>

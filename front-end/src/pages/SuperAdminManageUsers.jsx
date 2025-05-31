@@ -1,78 +1,65 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown, faEllipsis, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import SuperAdminSidebar from '../components/SuperAdminSidebar';
 import SuperAdminHeader from '../components/SuperAdminHeader';
 import SuperAdminActionDropdown from '../components/SuperAdminActionDropdown';
+import { getAllAccounts } from '../services/accountService';
 
 function SuperAdminManageUsers() {
-    // Sample user data
-    const users = [
-        {
-            id: 1, name: "John Doe", role: "Admin", status: "Active", gender: "Male", dateOfBirth: "1990-05-15",
-        },
-        {
-            id: 2, name: "Jane Smith", role: "User", status: "Inactive", gender: "Female", dateOfBirth: "1985-08-22",
-        },
-        {
-            id: 3, name: "Alex Johnson", role: "User", status: "Pending", gender: "Non-binary", dateOfBirth: "1995-03-10",
-        },
-        {
-            id: 4, name: "Jane Smith", role: "User", status: "Inactive", gender: "Female", dateOfBirth: "1985-08-22",
-        },
-        {
-            id: 5, name: "Jane Smith", role: "User", status: "Inactive", gender: "Female", dateOfBirth: "1985-08-22",
-        },
-        {
-            id: 6, name: "Jane Smith", role: "User", status: "Inactive", gender: "Female", dateOfBirth: "1985-08-22",
-        },
-        {
-            id: 7, name: "Jane Smith", role: "User", status: "Inactive", gender: "Female", dateOfBirth: "1985-08-22",
-        },
-    ];
-
+    const [users, setUsers] = useState([]);
     const [openId, setOpenId] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
-    const [statusFilter, setStatusFilter] = useState("All Statuses");
-    const [roleFilter, setRoleFilter] = useState("All Roles");
-    const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
+    const [roleFilter, setRoleFilter] = useState("ALL ROLES");
+    const [genderFilter, setGenderFilter] = useState("ALL GENDERS");
     const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
+    const [genderDropdownOpen, setGenderDropdownOpen] = useState(false);
 
-    // Sample status and role options
-    const statusOptions = ["All Statuses", "Active", "Inactive", "Pending"];
-    const rolesOptions = ["All Roles", "Admin", "User"];
+    const [currentPage, setCurrentPage] = useState(1);
+    const usersPerPage = 5;
 
-    // Hàm lọc người dùng
-    const filterUsers = (users, searchTerm, filters) => {
+    const rolesOptions = ["ALL ROLES", "SUPER_ADMIN", "USER"];
+    const genderOptions = ["ALL GENDERS", "MALE", "FEMALE", "OTHER"];
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const data = await getAllAccounts();
+                setUsers(data);
+            } catch (error) {
+                console.error("Error fetching users:", error);
+            }
+        };
+
+        fetchUsers();
+    }, []);
+
+    const filterUsers = (users, searchTerm, role, gender) => {
         return users.filter((user) => {
-            // Kiểm tra tìm kiếm theo tên
-            const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase());
-            // Kiểm tra các bộ lọc (status, role)
-            const matchesFilters = Object.entries(filters).every(([filterType, filterValue]) => {
-                // Nếu filterValue là "All Statuses" hoặc "All Roles", bỏ qua bộ lọc
-                return (
-                    filterValue === (filterType === "status" ? "All Statuses" : "All Roles") ||
-                    user[filterType] === filterValue
-                );
-            });
-            return matchesSearch && matchesFilters;
+            const matchesSearch = user.fullName?.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesRole = role === "ALL ROLES" || user.systemRole === role;
+            const matchesGender = gender === "ALL GENDERS" || user.gender === gender;
+            return matchesSearch && matchesRole && matchesGender;
         });
     };
 
-    // Sử dụng useMemo để tối ưu hóa hiệu suất khi lọc
     const filteredUsers = useMemo(() => {
-        const isNoFilterApplied =
+        const noFilters =
             searchTerm.trim() === "" &&
-            statusFilter === "All Statuses" &&
-            roleFilter === "All Roles";
-
-        return isNoFilterApplied
+            roleFilter === "ALL ROLES" &&
+            genderFilter === "ALL GENDERS";
+        return noFilters
             ? users
-            : filterUsers(users, searchTerm, {
-                status: statusFilter,
-                role: roleFilter,
-            });
-    }, [users, searchTerm, statusFilter, roleFilter]);
+            : filterUsers(users, searchTerm, roleFilter, genderFilter);
+    }, [users, searchTerm, roleFilter, genderFilter]);
+
+    const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+    const currentUsers = filteredUsers.slice(
+        (currentPage - 1) * usersPerPage,
+        currentPage * usersPerPage
+    );
+
+    const handlePageChange = (page) => setCurrentPage(page);
 
     return (
         <div className="h-screen w-screen flex bg-amber-50">
@@ -93,17 +80,21 @@ function SuperAdminManageUsers() {
                                     type="text"
                                     placeholder="Search user by name..."
                                     value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    onChange={(e) => {
+                                        setSearchTerm(e.target.value);
+                                        setCurrentPage(1);
+                                    }}
                                     className="border border-gray-300 rounded px-3 py-2 sm:w-1/2 placeholder:text-gray-500"
                                 />
 
-                                <div className="relative w-full sm:w-48 border border-gray-300 rounded">
+                                {/* Role filter */}
+                                <div className="relative w-full sm:w-48">
                                     <button
                                         onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
                                         className="border border-gray-300 rounded px-3 py-2 w-full flex justify-between items-center text-black"
                                     >
                                         {roleFilter}
-                                        <FontAwesomeIcon icon={faChevronDown} className="ml-2 w-4 h-4 text-black" />
+                                        <FontAwesomeIcon icon={faChevronDown} className="ml-2 w-4 h-4" />
                                     </button>
                                     {roleDropdownOpen && (
                                         <ul className="absolute z-10 bg-white border border-gray-300 rounded mt-1 w-full shadow">
@@ -113,8 +104,9 @@ function SuperAdminManageUsers() {
                                                     onClick={() => {
                                                         setRoleFilter(role);
                                                         setRoleDropdownOpen(false);
+                                                        setCurrentPage(1);
                                                     }}
-                                                    className="px-4 py-2 text-black hover:bg-gray-100 cursor-pointer flex items-center"
+                                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center"
                                                 >
                                                     {roleFilter === role && <span className="mr-2">✓</span>}
                                                     {role}
@@ -124,27 +116,29 @@ function SuperAdminManageUsers() {
                                     )}
                                 </div>
 
-                                <div className="relative w-full sm:w-48 border border-gray-300 rounded">
+                                {/* Gender filter */}
+                                <div className="relative w-full sm:w-48">
                                     <button
-                                        onClick={() => setStatusDropdownOpen(!statusDropdownOpen)}
+                                        onClick={() => setGenderDropdownOpen(!genderDropdownOpen)}
                                         className="border border-gray-300 rounded px-3 py-2 w-full flex justify-between items-center text-black"
                                     >
-                                        {statusFilter}
-                                        <FontAwesomeIcon icon={faChevronDown} className="ml-2 w-4 h-4 text-black" />
+                                        {genderFilter}
+                                        <FontAwesomeIcon icon={faChevronDown} className="ml-2 w-4 h-4" />
                                     </button>
-                                    {statusDropdownOpen && (
+                                    {genderDropdownOpen && (
                                         <ul className="absolute z-10 bg-white border border-gray-300 rounded mt-1 w-full shadow">
-                                            {statusOptions.map((status) => (
+                                            {genderOptions.map((gender) => (
                                                 <li
-                                                    key={status}
+                                                    key={gender}
                                                     onClick={() => {
-                                                        setStatusFilter(status);
-                                                        setStatusDropdownOpen(false);
+                                                        setGenderFilter(gender);
+                                                        setGenderDropdownOpen(false);
+                                                        setCurrentPage(1);
                                                     }}
-                                                    className="px-4 py-2 text-black hover:bg-gray-100 cursor-pointer flex items-center"
+                                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center"
                                                 >
-                                                    {statusFilter === status && <span className="mr-2">✓</span>}
-                                                    {status}
+                                                    {genderFilter === gender && <span className="mr-2">✓</span>}
+                                                    {gender}
                                                 </li>
                                             ))}
                                         </ul>
@@ -156,41 +150,37 @@ function SuperAdminManageUsers() {
                                 <table className="w-full text-left border border-gray-200">
                                     <thead>
                                         <tr className="text-sm text-gray-500 border-b border-gray-200">
-                                            <th className="p-2 font-medium">Users</th>
+                                            <th className="p-2 font-medium">Full Name</th>
+                                            <th className="p-2 font-medium">Email</th>
                                             <th className="p-2 font-medium">Role</th>
-                                            <th className="p-2 font-medium">Status</th>
                                             <th className="p-2 font-medium">Gender</th>
                                             <th className="p-2 font-medium">Date Of Birth</th>
                                             <th className="p-2 font-medium">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {filteredUsers.length > 0 ? (
-                                            filteredUsers.map((user) => (
-                                                <tr key={user.id} className="border-b border-gray-200">
-                                                    <td className="p-2 font-medium text-black whitespace-nowrap">{user.name}</td>
-                                                    <td className="p-2 whitespace-nowrap text-gray-600">{user.role}</td>
-                                                    <td className="p-2 whitespace-nowrap text-gray-600">{user.status}</td>
-                                                    <td className="p-2 whitespace-nowrap text-gray-600">{user.gender}</td>
-                                                    <td className="p-2 whitespace-nowrap text-gray-600">
-                                                        <span className="text-xs font-semibold px-2 py-1 rounded-full">
-                                                            {user.dateOfBirth}
-                                                        </span>
-                                                    </td>
+                                        {currentUsers.length > 0 ? (
+                                            currentUsers.map((user) => (
+                                                <tr key={user.accountId} className="border-b border-gray-200">
+                                                    <td className="p-2 font-medium text-black whitespace-nowrap">{user.fullName}</td>
+                                                    <td className="p-2 text-gray-600 whitespace-nowrap">{user.email}</td>
+                                                    <td className="p-2 text-gray-600 whitespace-nowrap">{user.systemRole}</td>
+                                                    <td className="p-2 text-gray-600 whitespace-nowrap">{user.gender}</td>
+                                                    <td className="p-2 text-gray-600 whitespace-nowrap">{user.dateOfBirth}</td>
                                                     <td className="p-2 whitespace-nowrap text-right flex justify-start items-center">
                                                         <SuperAdminActionDropdown
-                                                            isOpen={openId === user.id}
-                                                            onToggle={() => setOpenId(openId === user.id ? null : user.id)}
+                                                            isOpen={openId === user.accountId}
+                                                            onToggle={() => setOpenId(openId === user.accountId ? null : user.accountId)}
                                                             onView={() => {
-                                                                alert(`Viewing ${user.name}`);
+                                                                alert(`Viewing ${user.fullName}`);
                                                                 setOpenId(null);
                                                             }}
                                                             onEdit={() => {
-                                                                alert(`Editing ${user.name}`);
+                                                                alert(`Editing ${user.fullName}`);
                                                                 setOpenId(null);
                                                             }}
                                                             onDelete={() => {
-                                                                alert(`Deleting ${user.name}`);
+                                                                alert(`Deleting ${user.fullName}`);
                                                                 setOpenId(null);
                                                             }}
                                                         />
@@ -207,6 +197,37 @@ function SuperAdminManageUsers() {
                                     </tbody>
                                 </table>
                             </div>
+
+                            {/* Pagination */}
+                            {totalPages > 1 && (
+                                <div className="flex justify-center items-center mt-4 space-x-2">
+                                    <button
+                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                        disabled={currentPage === 1}
+                                        className={`px-3 py-1 border rounded ${currentPage === 1 ? 'text-gray-400 border-gray-300' : 'hover:bg-gray-100 text-black'}`}
+                                    >
+                                        Previous
+                                    </button>
+
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                                        <button
+                                            key={pageNum}
+                                            onClick={() => setCurrentPage(pageNum)}
+                                            className={`px-3 py-1 border rounded ${currentPage === pageNum ? 'bg-black text-white' : 'hover:bg-gray-100 text-black'}`}
+                                        >
+                                            {pageNum}
+                                        </button>
+                                    ))}
+
+                                    <button
+                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                        disabled={currentPage === totalPages}
+                                        className={`px-3 py-1 border rounded ${currentPage === totalPages ? 'text-gray-400 border-gray-300' : 'hover:bg-gray-100 text-black'}`}
+                                    >
+                                        Next
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </main>
