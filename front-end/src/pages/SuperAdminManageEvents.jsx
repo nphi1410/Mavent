@@ -15,7 +15,7 @@ function SuperAdminManageEvents() {
     const [events, setEvents] = useState([]);
 
     const [currentPage, setCurrentPage] = useState(1);
-    const eventsPerPage = 10;
+    const eventsPerPage = 5;
 
     const statusOptions = [
         "All Statuses", "RECRUITING", "UPCOMING", "ONGOING",
