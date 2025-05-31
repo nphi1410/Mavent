@@ -1,6 +1,7 @@
 package com.mavent.dev.controller;
 
 import com.mavent.dev.DTO.LoginDTO;
+import com.mavent.dev.DTO.UserEventDTO;
 import com.mavent.dev.DTO.UserProfileDTO;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.repository.AccountRepository;
@@ -100,6 +101,17 @@ public class AccountController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error uploading avatar: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/user/events")
+    public ResponseEntity<?> getUserEvents(HttpSession session) {
+        UserProfileDTO user = (UserProfileDTO) session.getAttribute("account");
+        if (user == null) {
+            return ResponseEntity.status(401).body("Bạn cần đăng nhập");
+        }
+
+        List<UserEventDTO> events = accountService.getUserEvents(user.getId());
+        return ResponseEntity.ok(events);
     }
 
 }

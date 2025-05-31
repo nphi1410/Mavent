@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { updateProfile } from '../services/profileService';
+import { updateProfile } from '../../services/profileService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSave, faXmark } from '@fortawesome/free-solid-svg-icons';
 import DatePicker from 'react-datepicker';
