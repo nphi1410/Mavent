@@ -43,10 +43,21 @@ const AdvancedFilterSidebar = ({
                 <select 
                   className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={departmentFilter || ''}
-                  onChange={(e) => onDepartmentFilterChange(e.target.value)}
+                  onChange={(e) => {
+                    const rawValue = e.target.value;
+                    console.log("Department selected (raw):", rawValue);
+                    
+                    if (typeof onDepartmentFilterChange === 'function') {
+                      // Force numeric conversion for department IDs, empty string for "All"
+                      // Check if value is empty, use empty string, otherwise use number to ensure correct type
+                      const value = rawValue === '' ? '' : parseInt(rawValue, 10);
+                      console.log("Department value after conversion:", value, typeof value);
+                      onDepartmentFilterChange(value);
+                    }
+                  }}
                 >
                   <option value="">All Departments</option>
-                  {departments.map(dept => (
+                  {Array.isArray(departments) && departments.map(dept => (
                     <option key={dept.departmentId} value={dept.departmentId}>
                       {dept.name}
                     </option>
@@ -57,7 +68,7 @@ const AdvancedFilterSidebar = ({
             
             {/* Date range filter */}
             <div>
-              <h3 className="text-sm font-medium mb-3">Date Range</h3>
+              <h3 className="text-sm font-medium mb-3">Date Joined</h3>
               <div className="space-y-2">
                 <div>
                   <label htmlFor="start-date" className="block text-xs text-gray-500 mb-1">Start Date</label>
@@ -65,8 +76,14 @@ const AdvancedFilterSidebar = ({
                     type="date"
                     id="start-date"
                     className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={startDate}
-                    onChange={onStartDateChange}
+                    value={typeof startDate === 'string' ? startDate : ''}
+                    onChange={(e) => {
+                      const dateValue = e.target.value;
+                      console.log("Start date selected:", dateValue);
+                      if (typeof onStartDateChange === 'function') {
+                        onStartDateChange(e);
+                      }
+                    }}
                   />
                 </div>
                 <div>
@@ -75,8 +92,14 @@ const AdvancedFilterSidebar = ({
                     type="date"
                     id="end-date"
                     className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={endDate}
-                    onChange={onEndDateChange}
+                    value={typeof endDate === 'string' ? endDate : ''}
+                    onChange={(e) => {
+                      const dateValue = e.target.value;
+                      console.log("End date selected:", dateValue);
+                      if (typeof onEndDateChange === 'function') {
+                        onEndDateChange(e);
+                      }
+                    }}
                   />
                 </div>
               </div>
@@ -91,9 +114,13 @@ const AdvancedFilterSidebar = ({
                     type="radio" 
                     id="role-all" 
                     name="role" 
-                    value="All" 
-                    checked={roleFilter === 'All'}
-                    onChange={() => onRoleFilterChange('All')}
+                    value="" 
+                    checked={!roleFilter || roleFilter === ''}
+                    onChange={() => {
+                      if (typeof onRoleFilterChange === 'function') {
+                        onRoleFilterChange('');
+                      }
+                    }}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                   />
                   <label htmlFor="role-all" className="ml-2 block text-sm text-gray-700">All Roles</label>
@@ -103,9 +130,13 @@ const AdvancedFilterSidebar = ({
                     type="radio" 
                     id="role-admin" 
                     name="role" 
-                    value="Admin" 
-                    checked={roleFilter === 'Admin'}
-                    onChange={() => onRoleFilterChange('Admin')}
+                    value="ADMIN" 
+                    checked={roleFilter === 'ADMIN'}
+                    onChange={() => {
+                      if (typeof onRoleFilterChange === 'function') {
+                        onRoleFilterChange('ADMIN');
+                      }
+                    }}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                   />
                   <label htmlFor="role-admin" className="ml-2 block text-sm text-gray-700">Admin</label>
@@ -113,23 +144,31 @@ const AdvancedFilterSidebar = ({
                 <div className="flex items-center">
                   <input 
                     type="radio" 
-                    id="role-moderator" 
+                    id="role-department-manager" 
                     name="role" 
-                    value="Moderator" 
-                    checked={roleFilter === 'Moderator'}
-                    onChange={() => onRoleFilterChange('Moderator')}
+                    value="DEPARTMENT_MANAGER" 
+                    checked={roleFilter === 'DEPARTMENT_MANAGER'}
+                    onChange={() => {
+                      if (typeof onRoleFilterChange === 'function') {
+                        onRoleFilterChange('DEPARTMENT_MANAGER');
+                      }
+                    }}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                   />
-                  <label htmlFor="role-moderator" className="ml-2 block text-sm text-gray-700">Moderator</label>
+                  <label htmlFor="role-department-manager" className="ml-2 block text-sm text-gray-700">Department Manager</label>
                 </div>
                 <div className="flex items-center">
                   <input 
                     type="radio" 
                     id="role-member" 
                     name="role" 
-                    value="Member" 
-                    checked={roleFilter === 'Member'}
-                    onChange={() => onRoleFilterChange('Member')}
+                    value="MEMBER" 
+                    checked={roleFilter === 'MEMBER'}
+                    onChange={() => {
+                      if (typeof onRoleFilterChange === 'function') {
+                        onRoleFilterChange('MEMBER');
+                      }
+                    }}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                   />
                   <label htmlFor="role-member" className="ml-2 block text-sm text-gray-700">Member</label>
@@ -146,9 +185,13 @@ const AdvancedFilterSidebar = ({
                     type="radio" 
                     id="status-all" 
                     name="status" 
-                    value="All" 
-                    checked={statusFilter === 'All'}
-                    onChange={() => onStatusFilterChange('All')}
+                    value="" 
+                    checked={!statusFilter || statusFilter === ''}
+                    onChange={() => {
+                      if (typeof onStatusFilterChange === 'function') {
+                        onStatusFilterChange('');
+                      }
+                    }}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                   />
                   <label htmlFor="status-all" className="ml-2 block text-sm text-gray-700">All Status</label>
@@ -160,7 +203,11 @@ const AdvancedFilterSidebar = ({
                     name="status" 
                     value="Active" 
                     checked={statusFilter === 'Active'}
-                    onChange={() => onStatusFilterChange('Active')}
+                    onChange={() => {
+                      if (typeof onStatusFilterChange === 'function') {
+                        onStatusFilterChange('Active');
+                      }
+                    }}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                   />
                   <label htmlFor="status-active" className="ml-2 block text-sm text-gray-700">Active</label>
@@ -172,7 +219,11 @@ const AdvancedFilterSidebar = ({
                     name="status" 
                     value="Inactive" 
                     checked={statusFilter === 'Inactive'}
-                    onChange={() => onStatusFilterChange('Inactive')}
+                    onChange={() => {
+                      if (typeof onStatusFilterChange === 'function') {
+                        onStatusFilterChange('Inactive');
+                      }
+                    }}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                   />
                   <label htmlFor="status-inactive" className="ml-2 block text-sm text-gray-700">Inactive</label>
@@ -184,13 +235,24 @@ const AdvancedFilterSidebar = ({
           <div className="mt-auto pt-6 grid grid-cols-2 gap-3">
             <button 
               className="border border-gray-300 bg-white text-gray-700 rounded-lg py-2 hover:bg-gray-50"
-              onClick={onResetFilters}
+              onClick={() => {
+                if (typeof onResetFilters === 'function') {
+                  onResetFilters();
+                }
+              }}
             >
               Reset
             </button>
             <button 
               className="bg-blue-600 text-white rounded-lg py-2 hover:bg-blue-700"
-              onClick={onApplyFilters}
+              onClick={() => {
+                if (typeof onApplyFilters === 'function') {
+                  onApplyFilters();
+                }
+                if (typeof onClose === 'function') {
+                  onClose(); // Close sidebar after applying filters
+                }
+              }}
             >
               Apply
             </button>

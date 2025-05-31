@@ -172,25 +172,25 @@ public interface EventAccountRoleRepository extends JpaRepository<EventAccountRo
      * Complex query with multiple filters including search term.
      * Updated to handle isActive properly for consistent filtering behavior
      * and to include search term functionality.
-     */      @Query("SELECT ear FROM EventAccountRole ear " +
+     */    @Query("SELECT ear FROM EventAccountRole ear " +
            "JOIN Account a ON a.accountId = ear.id.accountId " +
            "LEFT JOIN Department d ON d.departmentId = ear.departmentId " +
            "WHERE ear.id.eventId = :eventId " +
            "AND (:isActive IS NULL OR ear.isActive = :isActive) " +
            "AND (:eventRole IS NULL OR ear.eventRole = :eventRole) " +
-           "AND (:departmentId IS NULL OR " + 
-           "    (ear.departmentId = :departmentId) OR " + 
-           "    (CAST(:departmentId AS string) IS NOT NULL AND " + 
-           "     d.name LIKE CONCAT('%', CAST(:departmentId AS string), '%'))) " +
-           "AND (:searchTerm IS NULL OR LENGTH(TRIM(:searchTerm)) = 0 OR " +
+           "AND (:departmentId IS NULL OR :departmentId = 0 OR ear.departmentId = :departmentId) " +           "AND (:searchTerm IS NULL OR LENGTH(TRIM(:searchTerm)) = 0 OR " +
            "     LOWER(a.username) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
            "     LOWER(a.fullName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
            "     LOWER(a.email) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-           "     LOWER(COALESCE(a.studentId, '')) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
+           "     LOWER(COALESCE(a.studentId, '')) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) " +
+           "AND (:startDate IS NULL OR DATE(ear.createdAt) >= DATE(:startDate)) " +
+           "AND (:endDate IS NULL OR DATE(ear.createdAt) <= DATE(:endDate))")
     Page<EventAccountRole> findByEventIdWithFilters(@Param("eventId") Integer eventId,
                                                     @Param("isActive") Boolean isActive,
                                                     @Param("eventRole") EventAccountRole.EventRole eventRole,
                                                     @Param("departmentId") Integer departmentId,
                                                     @Param("searchTerm") String searchTerm,
+                                                    @Param("startDate") java.util.Date startDate,
+                                                    @Param("endDate") java.util.Date endDate,
                                                     Pageable pageable);
 }

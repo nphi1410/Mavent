@@ -26,7 +26,7 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
     searchTerm = '', 
     statusFilter = '', 
     roleFilter = '', 
-    departmentFilter = '' 
+    departmentFilter = ''
   } = filters;
 
   // Fetch members với các filter và pagination
@@ -70,11 +70,20 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
       // Normalize department filter - resolve department name to ID if possible
       let normalizedDepartment = undefined;
       if (departmentFilter) {
-        normalizedDepartment = resolveDepartmentFilter(departmentFilter);
-        
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`Resolved department filter from '${departmentFilter}' to '${normalizedDepartment}'`);
+        // If it's already a number, use it directly
+        if (typeof departmentFilter === 'number') {
+          normalizedDepartment = departmentFilter;
+        } 
+        // If it's a numeric string, convert it
+        else if (typeof departmentFilter === 'string' && /^\d+$/.test(departmentFilter)) {
+          normalizedDepartment = Number(departmentFilter);
         }
+        // Otherwise try to resolve name to ID
+        else {
+          normalizedDepartment = resolveDepartmentFilter(departmentFilter);
+        }
+        
+        console.log(`Resolved department filter from '${departmentFilter}' (type: ${typeof departmentFilter}) to '${normalizedDepartment}' (type: ${typeof normalizedDepartment})`);
       }
       
       const params = {
@@ -293,14 +302,33 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
   const resolveDepartmentFilter = useCallback((filter) => {
     if (!filter) return null;
     
-    // If filter is already a number or numeric string, return it
-    if (typeof filter === 'number' || (typeof filter === 'string' && /^\d+$/.test(filter))) {
-      return Number(filter);
+    // If it's empty string, return it as is (select "All Departments")
+    if (filter === '') {
+      console.log('Department filter is empty string, returning empty');
+      return '';
+    }
+    
+    // If filter is already a number or numeric string, return it as number
+    if (typeof filter === 'number') {
+      console.log('Department filter is a number, using as is:', filter);
+      return filter;
+    }
+    
+    if (typeof filter === 'string' && /^\d+$/.test(filter)) {
+      const numValue = Number(filter);
+      console.log('Department filter is numeric string, converting to number:', numValue);
+      return numValue;
     }
     
     // Otherwise, try to find department by name
     const dept = findDepartmentByName(filter);
-    return dept ? dept.departmentId : filter; // Fall back to original value if not found
+    if (dept) {
+      console.log(`Resolved department name "${filter}" to ID: ${dept.departmentId}`);
+      return dept.departmentId;
+    } else {
+      console.log(`Could not resolve department name "${filter}", using original value`);
+      return filter; // Fall back to original value if not found
+    }
   }, [findDepartmentByName]);
 
   // Load data with improved dependency handling

@@ -1,17 +1,19 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
-  faSearch, faFilter, faPlus, faChevronDown
+  faSearch, faChevronDown
 } from '@fortawesome/free-solid-svg-icons';
 
 const MemberFilters = ({
   searchTerm,
   statusFilter,
   roleFilter,
+  departmentFilter,
+  departments = [],
   onSearchChange,
   onStatusFilterChange,
   onRoleFilterChange,
-  onAdvancedFilterToggle,
+  onDepartmentFilterChange,
   onAddMember
 }) => {
   return (
@@ -32,8 +34,8 @@ const MemberFilters = ({
           />
         </div>
         
-        {/* Filter row for mobile */}
-        <div className="grid grid-cols-2 gap-2 sm:flex sm:space-x-2">
+        {/* Filter row for filters */}
+        <div className="grid grid-cols-2 gap-2 sm:grid sm:grid-cols-3 sm:gap-2">
           {/* Status filter dropdown */}
           <div className="relative">
             <select 
@@ -70,28 +72,40 @@ const MemberFilters = ({
               className="text-gray-400 absolute right-2 top-2.5 pointer-events-none" 
             />
           </div>
+          
+          {/* Department filter dropdown */}
+          <div className="relative col-span-2 sm:col-span-1">
+            <select 
+              className="w-full border rounded-lg px-3 py-2 appearance-none pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              value={departmentFilter || ''}
+              onChange={(e) => {
+                const rawValue = e.target.value;
+                console.log("Department selected (raw):", rawValue);
+                
+                if (typeof onDepartmentFilterChange === 'function') {
+                  // Force numeric conversion for department IDs, empty string for "All"
+                  const value = rawValue === '' ? '' : parseInt(rawValue, 10);
+                  console.log("Department value after conversion:", value, typeof value);
+                  onDepartmentFilterChange(value);
+                }
+              }}
+            >
+              <option value="">All Departments</option>
+              {Array.isArray(departments) && departments.map(dept => (
+                <option key={dept.departmentId} value={dept.departmentId}>
+                  {dept.name}
+                </option>
+              ))}
+            </select>
+            <FontAwesomeIcon 
+              icon={faChevronDown} 
+              className="text-gray-400 absolute right-2 top-2.5 pointer-events-none" 
+            />
+          </div>
         </div>
-        
-        {/* Advanced filter button */}
-        <button 
-          className="w-full sm:w-auto border rounded-lg px-3 py-2 flex items-center justify-center hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-          onClick={onAdvancedFilterToggle}
-        >
-          <FontAwesomeIcon icon={faFilter} className="mr-2" />
-          <span className="hidden sm:inline">Advanced Filter</span>
-          <span className="sm:hidden">Filter</span>
-        </button>
       </div>
       
-      {/* Add member button */}
-      <button 
-        className="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center justify-center text-sm"
-        onClick={onAddMember}
-      >
-        <FontAwesomeIcon icon={faPlus} className="mr-2" />
-        <span className="hidden sm:inline">Add Member</span>
-        <span className="sm:hidden">Add</span>
-      </button>
+    
     </div>
   );
 };

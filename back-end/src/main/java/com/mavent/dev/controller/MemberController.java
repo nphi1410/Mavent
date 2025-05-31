@@ -47,23 +47,76 @@ public class MemberController {
             @RequestParam(required = false) String role,
             @RequestParam(required = false) String department,
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
         try {
             log.info("Getting members for event: {}, page: {}, size: {}", eventId, page, size);
             log.info("Search: {}, Role: {}, Department: {}, Status: {}", search, role, department, status);
+            log.info("Date range: {} to {}", startDate, endDate);
+            
+            // Log date params in detail for debugging
+            if (startDate != null && !startDate.trim().isEmpty()) {
+                log.info("Start date parameter is present: {}", startDate);
+                try {
+                    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+                    java.util.Date parsedDate = sdf.parse(startDate);
+                    log.info("Start date parsed successfully: {}", sdf.format(parsedDate));
+                } catch (Exception e) {
+                    log.warn("Could not parse start date: {}", e.getMessage());
+                }
+            }
+            
+            if (endDate != null && !endDate.trim().isEmpty()) {
+                log.info("End date parameter is present: {}", endDate);
+                try {
+                    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+                    java.util.Date parsedDate = sdf.parse(endDate);
+                    log.info("End date parsed successfully: {}", sdf.format(parsedDate));
+                } catch (Exception e) {
+                    log.warn("Could not parse end date: {}", e.getMessage());
+                }
+            }
 
+            // Convert department to Integer if it's numeric
+            Integer departmentId = null;
+            if (department != null && !department.trim().isEmpty()) {
+                try {
+                    if (department.matches("\\d+")) {
+                        departmentId = Integer.parseInt(department);
+                        log.info("Parsed department parameter as numeric ID: {}", departmentId);
+                        // Check if it's 0, set to null (this helps with our repository query)
+                        if (departmentId == 0) {
+                            departmentId = null;
+                            log.info("Department ID was 0, setting to null");
+                        }
+                    } else {
+                        log.info("Department parameter is not numeric: {}", department);
+                    }
+                } catch (NumberFormatException e) {
+                    log.warn("Could not parse department as integer: {}", department);
+                }
+            }
+            
             MemberFilterRequestDTO filterRequest = MemberFilterRequestDTO.builder()
                     .eventId(eventId)
                     .searchTerm(search)
                     .eventRole(role != null ? role.trim() : null)  // Trim role to avoid whitespace issues
-                    .departmentName(department) // Use department name instead of parsing as ID
+                    .departmentId(departmentId)  // Set department ID if parsed successfully
+                    .departmentName(department) // Also keep department name for fallback
                     .status(status) // Send raw status string
                     .isActive(status != null ? "active".equalsIgnoreCase(status.trim()) : null) // Also set isActive for backward compatibility
+                    .startDate(startDate)  // Add start date
+                    .endDate(endDate)      // Add end date
                     .page(page)
                     .size(size)
                     .build();
+                    
+            log.debug("Filter request with department info - id: {}, name: {}", 
+                     filterRequest.getDepartmentId(),
+                     filterRequest.getDepartmentName());
                     
             log.debug("Status parameter: {}, converted to isActive: {}", 
                      status, 

@@ -11,9 +11,6 @@ const useMemberFilters = (onFilterChange = () => {}) => {
   const [statusFilter, setStatusFilter] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
   
   // References for the debounce timer and tracking state changes
   const searchDebounceTimerRef = useRef(null);
@@ -83,19 +80,7 @@ const useMemberFilters = (onFilterChange = () => {}) => {
     }
   }, [onFilterChange, departmentFilter]);
 
-  const handleStartDateChange = useCallback((date) => {
-    setStartDate(date);
-    setCurrentPage(0);
-    filterChangeCountRef.current += 1;
-    onFilterChange();
-  }, [onFilterChange]);
-
-  const handleEndDateChange = useCallback((date) => {
-    setEndDate(date);
-    setCurrentPage(0);
-    filterChangeCountRef.current += 1;
-    onFilterChange();
-  }, [onFilterChange]);
+  // Date filter handlers removed as they're no longer needed
   
   // Effect to handle debounced search with improved handling
   useEffect(() => {
@@ -144,24 +129,38 @@ const useMemberFilters = (onFilterChange = () => {}) => {
     // Note: onFilterChange is not called here, it will be called by the debounce effect
   }, []);
 
-  const toggleAdvancedFilter = useCallback(() => {
-    setShowAdvancedFilter(!showAdvancedFilter);
-  }, [showAdvancedFilter]);
+  // Removed toggleAdvancedFilter as it's no longer needed
 
   const applyFilters = useCallback(() => {
+    console.log('Applying filters:', {
+      searchTerm: debouncedSearchTerm,
+      statusFilter,
+      roleFilter,
+      departmentFilter: typeof departmentFilter === 'string' && /^\d+$/.test(departmentFilter) ? 
+        parseInt(departmentFilter, 10) : departmentFilter
+    });
+    
+    // Force re-fetch data with current filters
     setCurrentPage(0);
-    onFilterChange(); // Notify parent that filters have changed
-  }, [onFilterChange]);
+    filterChangeCountRef.current += 1;
+    
+    // Ensure filter values are properly formatted before triggering API call
+    setTimeout(() => {
+      onFilterChange(); // Notify parent that filters have changed
+    }, 0);
+  }, [onFilterChange, debouncedSearchTerm, statusFilter, roleFilter, departmentFilter]);
 
   const resetFilters = useCallback(() => {
     setSearchTerm('');
+    setDebouncedSearchTerm('');
     setStatusFilter('');
     setRoleFilter('');
     setDepartmentFilter('');
-    setStartDate('');
-    setEndDate('');
     setCurrentPage(0);
-    onFilterChange(); // Notify parent that filters have changed
+    // Force update to ensure all filters are cleared
+    setTimeout(() => {
+      onFilterChange(); // Notify parent that filters have changed
+    }, 0);
   }, [onFilterChange]);
 
   // Handle generic filter changes (giữ lại cho tương thích)
@@ -210,9 +209,6 @@ const useMemberFilters = (onFilterChange = () => {}) => {
     statusFilter,
     roleFilter,
     departmentFilter,
-    startDate,
-    endDate,
-    showAdvancedFilter,
     
     // Pagination states
     currentPage: currentPage + 1, // Convert to 1-based for UI
@@ -223,9 +219,6 @@ const useMemberFilters = (onFilterChange = () => {}) => {
     handleStatusFilter,
     handleRoleFilter,
     handleDepartmentFilter,
-    handleStartDateChange,
-    handleEndDateChange,
-    toggleAdvancedFilter,
     applyFilters,
     resetFilters,
     handleFilterChange,
@@ -241,8 +234,6 @@ const useMemberFilters = (onFilterChange = () => {}) => {
       statusFilter,
       roleFilter,
       departmentFilter,
-      startDate,
-      endDate
     },
     
     paginationValues: {

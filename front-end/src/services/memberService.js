@@ -30,9 +30,14 @@ const memberService = {
       }
       
       // Handle department filter - could be ID or name
-      if (params.department) {
-        const departmentValue = params.department.toString().trim();
+      if (params.department !== undefined && params.department !== '') {
+        // Ensure department is treated as numeric if possible
+        const departmentValue = Number.isInteger(Number(params.department)) && Number(params.department) > 0 ? 
+          Number(params.department) : params.department.toString().trim();
         queryParams.append('department', departmentValue);
+        console.log('Adding department parameter:', departmentValue, 'Type:', typeof departmentValue);
+      } else {
+        console.log('No department filter applied');
       }
       
       // Map status to backend format - ensure consistent casing
@@ -40,6 +45,7 @@ const memberService = {
         // Normalize status to either 'active' or 'inactive' (lowercase)
         const normalizedStatus = params.status.toLowerCase().trim() === 'active' ? 'active' : 'inactive';
         queryParams.append('status', normalizedStatus);
+        console.log('Adding status parameter:', normalizedStatus);
       }
       
       if (params.page !== undefined) queryParams.append('page', params.page);
@@ -47,9 +53,17 @@ const memberService = {
 
       const url = `/api/members?${queryParams.toString()}`;
       
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Calling API URL:', url);
-      }
+      // Enhanced logging for easier debugging
+      console.log('Calling API with parameters:', {
+        eventId: params.eventId,
+        search: params.search,
+        role: params.role,
+        department: params.department,
+        status: params.status,
+        page: params.page,
+        size: params.size
+      });
+      console.log('Full API URL:', url);
       
       // Pass AbortController signal to the request
       const response = await axiosInstance.get(url, { signal });

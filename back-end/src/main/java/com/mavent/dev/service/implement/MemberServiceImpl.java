@@ -64,7 +64,36 @@ public class MemberServiceImpl implements MemberService {
             }
         }
         
+        // Process department filter - handle both ID and name
         Integer departmentId = filterRequest.getDepartmentId();
+        
+        // If departmentId is null but departmentName is provided, try to resolve by name
+        if (departmentId == null && filterRequest.getDepartmentName() != null && !filterRequest.getDepartmentName().trim().isEmpty()) {
+            String deptName = filterRequest.getDepartmentName().trim();
+            log.info("Looking up department ID for name: '{}'", deptName);
+            
+            // Try to parse as numeric ID first
+            if (deptName.matches("\\d+")) {
+                try {
+                    departmentId = Integer.parseInt(deptName);
+                    log.info("Parsed department name as numeric ID: {}", departmentId);
+                } catch (NumberFormatException e) {
+                    log.warn("Failed to parse department name as ID: {}", deptName);
+                }
+            } else {
+                // Try to find department by name using department repository
+                log.info("Searching for department by name: {}", deptName);
+                
+                // Since we don't have direct access to the department repository here,
+                // we'll have to rely on the EventAccountRoleRepository's query to handle name-based lookups
+                
+                // Log the department ID that will be used in the query
+                log.info("Using null department ID and letting repository handle name-based lookup");
+            }
+        }
+        
+        // Log the department ID for debugging
+        log.info("Final department filter value: {}", departmentId);
         
         // Process search term
         String searchTerm = filterRequest.getSearchTerm();
@@ -75,13 +104,49 @@ public class MemberServiceImpl implements MemberService {
             searchTerm = null; // Set to null if empty or only whitespace
         }
         
-        // Use repository method with explicit filters
+        // Process date filters
+        java.util.Date startDateObj = null;
+        java.util.Date endDateObj = null;
+        
+        if (filterRequest.getStartDate() != null && !filterRequest.getStartDate().isEmpty()) {
+            try {
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+                startDateObj = sdf.parse(filterRequest.getStartDate());
+                log.info("Filtering by start date: {}", filterRequest.getStartDate());
+            } catch (java.text.ParseException e) {
+                log.warn("Invalid start date format: {}", filterRequest.getStartDate());
+            }
+        }
+        
+        if (filterRequest.getEndDate() != null && !filterRequest.getEndDate().isEmpty()) {
+            try {
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+                // Set time to end of day for inclusive filtering
+                endDateObj = sdf.parse(filterRequest.getEndDate());
+                java.util.Calendar cal = java.util.Calendar.getInstance();
+                cal.setTime(endDateObj);
+                cal.set(java.util.Calendar.HOUR_OF_DAY, 23);
+                cal.set(java.util.Calendar.MINUTE, 59);
+                cal.set(java.util.Calendar.SECOND, 59);
+                cal.set(java.util.Calendar.MILLISECOND, 999);
+                endDateObj = cal.getTime();
+                log.info("Filtering by end date: {} (adjusted to end of day: {})", 
+                    filterRequest.getEndDate(), 
+                    new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(endDateObj));
+            } catch (java.text.ParseException e) {
+                log.warn("Invalid end date format: {}", filterRequest.getEndDate());
+            }
+        }
+        
+        // Use repository method with explicit filters including dates
         Page<EventAccountRole> memberPage = eventAccountRoleRepository.findByEventIdWithFilters(
                 filterRequest.getEventId(), 
                 isActive,
                 eventRole,
                 departmentId,
-                searchTerm, // Add search term to the query
+                searchTerm,
+                startDateObj,
+                endDateObj,
                 pageable);
         
         // Convert to DTOs

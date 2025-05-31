@@ -51,9 +51,19 @@ const useMemberManagement = () => {
       
       if (process.env.NODE_ENV === 'development') {
         console.log(`Triggering fetch #${fetchCallbackCountRef.current}, interval: ${timeSinceLastFetch}ms`);
+        console.log('Current filter values:', {
+          searchTerm: filterHook?.filterValues?.searchTerm,
+          statusFilter: filterHook?.filterValues?.statusFilter,
+          roleFilter: filterHook?.filterValues?.roleFilter,
+          departmentFilter: filterHook?.filterValues?.departmentFilter
+        });
       }
       
       fetchMembers();
+    } else {
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Filter change debounced - too many requests or too soon`);
+      }
     }
   });
   
@@ -63,18 +73,12 @@ const useMemberManagement = () => {
     statusFilter,
     roleFilter,
     departmentFilter,
-    startDate,
-    endDate,
-    showAdvancedFilter,
     currentPage,
     pageSize,
     handleSearch,
     handleStatusFilter,
     handleRoleFilter,
     handleDepartmentFilter,
-    handleStartDateChange,
-    handleEndDateChange,
-    toggleAdvancedFilter,
     resetFilters,
     applyFilters,
     paginate,
@@ -346,9 +350,6 @@ const useMemberManagement = () => {
     statusFilter,
     roleFilter,
     departmentFilter,
-    startDate,
-    endDate,
-    showAdvancedFilter,
     
     // Pagination state - tương thích với Members.jsx
     currentPage,
@@ -375,9 +376,7 @@ const useMemberManagement = () => {
     handleSearch,
     handleStatusFilter,
     handleRoleFilter,
-    handleStartDateChange,
-    handleEndDateChange,
-    toggleAdvancedFilter,
+    handleDepartmentFilter,
     applyFilters,
     resetFilters,
     paginate,

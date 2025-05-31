@@ -2,7 +2,6 @@ import React from 'react';
 import Layout from '../../components/layout/Layout';
 import useMemberManagement from './hooks/useMemberManagement';
 import MemberFilters from './components/MemberFilters';
-import AdvancedFilterSidebar from './components/AdvancedFilterSidebar';
 import MemberTable from './components/MemberTable';
 import MemberCard from './components/MemberCard';
 import Pagination from './components/Pagination';
@@ -25,9 +24,6 @@ const Members = () => {
     statusFilter,
     roleFilter,
     departmentFilter,
-    startDate,
-    endDate,
-    showAdvancedFilter,
     
     // Pagination state
     currentPage,
@@ -46,9 +42,6 @@ const Members = () => {
     handleStatusFilter,
     handleRoleFilter,
     handleDepartmentFilter,
-    handleStartDateChange,
-    handleEndDateChange,
-    toggleAdvancedFilter,
     applyFilters,
     resetFilters,
     paginate,
@@ -79,11 +72,11 @@ const Members = () => {
             statusFilter={statusFilter}
             roleFilter={roleFilter}
             departmentFilter={departmentFilter}
+            departments={departments}
             onSearchChange={handleSearch}
             onStatusFilterChange={(value) => handleStatusFilter(value === '' ? '' : value)}
             onRoleFilterChange={(value) => handleRoleFilter(value === '' ? '' : value)}
             onDepartmentFilterChange={(value) => handleDepartmentFilter(value === '' ? '' : value)}
-            onAdvancedFilterToggle={toggleAdvancedFilter}
             onAddMember={() => console.log('Add member clicked')}
           />
           
@@ -122,24 +115,7 @@ const Members = () => {
           />
         </div>
         
-        {/* Advanced Filter Sidebar */}
-        <AdvancedFilterSidebar
-          isOpen={showAdvancedFilter}
-          startDate={startDate}
-          endDate={endDate}
-          statusFilter={statusFilter}
-          roleFilter={roleFilter}
-          departmentFilter={departmentFilter}
-          departments={departments}
-          onClose={toggleAdvancedFilter}
-          onStartDateChange={handleStartDateChange}
-          onEndDateChange={handleEndDateChange}
-          onStatusFilterChange={handleStatusFilter}
-          onRoleFilterChange={handleRoleFilter}
-          onDepartmentFilterChange={handleDepartmentFilter}
-          onApplyFilters={applyFilters}
-          onResetFilters={resetFilters}
-        />
+        {/* Department Filter Sidebar removed - functionality moved inline */}
         
         {/* User Detail Modal */}
         <UserDetailModal
