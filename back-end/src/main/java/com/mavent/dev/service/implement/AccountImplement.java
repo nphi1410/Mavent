@@ -1,18 +1,14 @@
 package com.mavent.dev.service.implement;
 
-import com.mavent.dev.DTO.TaskDTO;
 import com.mavent.dev.DTO.UserProfileDTO;
 import com.mavent.dev.entity.Account;
-import com.mavent.dev.entity.Task;
 import com.mavent.dev.repository.AccountRepository;
-import com.mavent.dev.repository.TaskRepository;
 import com.mavent.dev.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AccountImplement implements AccountService {
@@ -21,34 +17,20 @@ public class AccountImplement implements AccountService {
     private AccountRepository accountRepository;
 
     @Override
-    public void register(Account accountInfo) {
+    public void save(Account accountInfo) {
         accountRepository.save(accountInfo);
     }
 
     @Override
     public UserProfileDTO getUserProfile(String username) {
-        Account account = accountRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Account not found with username: " + username));
+        Account account = getAccount(username);
         return mapAccountToUserProfileDTO(account);
-    }
-
-    @Override
-    public void updateProfile(String username, UserProfileDTO userProfileDTO) {
-        Account account = accountRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Account not found with username: " + username));
-
-        account.setEmail(userProfileDTO.getEmail());
-        account.setFullName(userProfileDTO.getFullName());
-        account.setPhoneNumber(userProfileDTO.getPhoneNumber());
-        account.setGender(userProfileDTO.getGender());
-
-        accountRepository.save(account);
     }
 
     @Override
     public boolean checkLogin(String username, String password) {
         // Find account by username
-        Account account = accountRepository.findByUsername(username).orElse(null);
+        Account account = accountRepository.findByUsername(username);
         if (account == null) return false;
         // Compare raw password with stored hash (for demo, plain text; for real, use BCrypt)
         // Example for plain text (NOT recommended for production):
@@ -56,9 +38,47 @@ public class AccountImplement implements AccountService {
         // If using BCrypt:
         // return passwordEncoder.matches(password, account.getPasswordHash());
     }
+
     @Override
-    public List<Account> findAllAccount() {
-        return accountRepository.findAll();
+    public UserProfileDTO updateProfile(String username, UserProfileDTO userProfileDTO) {
+        Account account = getAccount(username);
+        // Update profile fields
+        if (userProfileDTO.getFullName() != null && !userProfileDTO.getFullName().trim().isEmpty()) {
+            account.setFullName(userProfileDTO.getFullName());
+        }
+        if (userProfileDTO.getStudentId() != null && !userProfileDTO.getStudentId().trim().isEmpty()) {
+            account.setStudentId(userProfileDTO.getStudentId());
+        }
+        if (userProfileDTO.getPhoneNumber() != null && !userProfileDTO.getPhoneNumber().trim().isEmpty()) {
+            account.setPhoneNumber(userProfileDTO.getPhoneNumber());
+        }
+        if (userProfileDTO.getDateOfBirth() != null) {
+            account.setDateOfBirth(userProfileDTO.getDateOfBirth());
+        }
+        if (userProfileDTO.getGender() != null && !userProfileDTO.getGender().trim().isEmpty()) {
+            try {
+                account.setGender(Account.Gender.valueOf(userProfileDTO.getGender().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                System.err.println("Invalid gender value. Must be one of: MALE, FEMALE, OTHER");
+                System.err.println("Error: "+ e);
+            }
+        }
+
+        // Save updated account
+        Account updatedAccount = accountRepository.save(account);
+        return mapAccountToUserProfileDTO(updatedAccount);
+    }
+
+    @Override
+    public Account getAccount(String username) {
+        Account account = null;
+        try{
+            account = accountRepository.findByUsername(username);
+        }catch (UsernameNotFoundException ex){
+            System.err.println("Account not found with username: " + username);
+            System.err.println("Error: " + ex);
+        }
+        return account;
     }
 
     private UserProfileDTO mapAccountToUserProfileDTO(Account account) {
@@ -69,32 +89,10 @@ public class AccountImplement implements AccountService {
         dto.setFullName(account.getFullName());
         dto.setAvatarImg(account.getAvatarImg());
         dto.setPhoneNumber(account.getPhoneNumber());
-        dto.setGender(account.getGender());
+        dto.setGender(account.getGender() != null ? account.getGender().name() : null);
         dto.setDateOfBirth(account.getDateOfBirth());
         dto.setStudentId(account.getStudentId());
         return dto;
     }
-
-    @Autowired
-    private TaskRepository taskRepository;
-
-    public List<TaskDTO> getUserTasks(Integer accountId) {
-        List<Task> tasks = taskRepository.findTasksByAccountId(accountId);
-        return tasks.stream().map(task -> {
-            TaskDTO dto = new TaskDTO();
-            dto.setTaskId(task.getTaskId());
-            dto.setEventId(task.getEventId());
-            dto.setDepartmentId(task.getDepartmentId());
-            dto.setTitle(task.getTitle());
-            dto.setDescription(task.getDescription());
-            dto.setAssignedToAccountId(task.getAssignedToAccountId());
-            dto.setAssignedByAccountId(task.getAssignedByAccountId());
-            dto.setDueDate(task.getDueDate());
-            dto.setStatus(task.getStatus().name());
-            dto.setPriority(task.getPriority().name());
-            return dto;
-        }).toList();
-    }
-
 }
 
