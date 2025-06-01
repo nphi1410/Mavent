@@ -91,7 +91,7 @@ function Login() {
             {error && <div className="text-red-600 text-sm mt-2">{error}</div>}
           </form>
 
-          <Link to="/about" className="text-xs text-blue-900 hover:underline">
+          <Link to="/reset-password-request" className="text-xs text-blue-900 hover:underline">
             Forgot Password?
           </Link>
 

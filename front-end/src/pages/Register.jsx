@@ -27,7 +27,7 @@ const Register = () => {
   const sendOtp = async (e) => {
     e?.preventDefault();
     try {
-      const response = await axios.post("http://localhost:8080/api/send-otp", {
+      const response = await axios.post("http://localhost:8080/api/send-register-otp", {
         username,
         email,
         password
@@ -60,7 +60,9 @@ const Register = () => {
       });
 
       if (response.status === 200) {
-        navigate("/login");
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000); // Redirect after 2 seconds      
       }
     } catch (error) {
       if (error.response?.status === 400) {
@@ -88,6 +90,7 @@ const Register = () => {
                 className="pl-4 p-2 border border-blue-400 rounded-full"
                 onChange={(e) => setUsername(e.target.value)}
                 value={username}
+                required
               />
 
               <label className="mb-1 mt-4 text-sm font-medium text-gray-700 pl-2.5">Email:</label>
@@ -97,6 +100,7 @@ const Register = () => {
                 className="pl-4 p-2 border border-blue-400 rounded-full"
                 onChange={(e) => setEmail(e.target.value)}
                 value={email}
+                required
               />
             </div>
 
@@ -108,6 +112,7 @@ const Register = () => {
                 className="pl-4 p-2 border border-blue-400 rounded-full"
                 onChange={(e) => setPassword(e.target.value)}
                 value={password}
+                required
               />
 
               <label className="mb-1 mt-4 text-sm font-medium text-gray-700 pl-2.5">Confirm password:</label>
@@ -117,6 +122,7 @@ const Register = () => {
                 className="pl-4 p-2 border border-blue-400 rounded-full"
                 onChange={confirmPasswordChange}
                 value={confirmPassword}
+                required
               />
               {passwordError && (
                 <div className="text-red-600 text-sm mt-2">{passwordError}</div>
