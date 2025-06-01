@@ -49,6 +49,13 @@ const UpdateProfile = ({ userData, onClose, onUpdate }) => {
     setError(null);
 
     try {
+      // Add gender validation
+      if (!formData.gender) {
+        setError('Please select your gender.');
+        setLoading(false);
+        return;
+      }
+
       if (formData.fullName.length > 100) {
         setError('Full name không được quá 100 ký tự.');
         setLoading(false);
@@ -128,25 +135,36 @@ const UpdateProfile = ({ userData, onClose, onUpdate }) => {
               />
             </div>
 
-            <div className="w-full">
+            <div className="w-full relative">
               <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700 mb-1">
                 Date of Birth
               </label>
-              <DatePicker
-                id="dateOfBirth"
-                selected={formData.dateOfBirth}
-                onChange={handleDateChange}
-                dateFormat="dd/MM/yyyy"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholderText="Select date of birth"
-                maxDate={new Date()}
-                showYearDropdown
-                scrollableYearDropdown
-                yearDropdownItemNumber={100}
-                peekNextMonth
-                showMonthDropdown
-                dropdownMode="select"
-              />
+              <div className="relative z-[1000]">
+                <DatePicker
+                  id="dateOfBirth"
+                  selected={formData.dateOfBirth}
+                  onChange={handleDateChange}
+                  dateFormat="dd/MM/yyyy"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholderText="Select date of birth"
+                  maxDate={new Date()}
+                  showYearDropdown
+                  scrollableYearDropdown
+                  yearDropdownItemNumber={100}
+                  peekNextMonth
+                  showMonthDropdown
+                  dropdownMode="select"
+                  popperPlacement="bottom-start"
+                  popperModifiers={[
+                    {
+                      name: "offset",
+                      options: {
+                        offset: [0, 10]
+                      }
+                    }
+                  ]}
+                />
+              </div>
             </div>
 
             <div>
