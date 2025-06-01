@@ -16,20 +16,20 @@ const useMemberActions = (eventId = 1) => {
       setLoading(true);
       
       // Clear debug information
-      console.log('=== SAVING USER CHANGES ===');
-      console.log('Edited user full data:', editedUser);
+      // console.log('=== SAVING USER CHANGES ===');
+      // console.log('Edited user full data:', editedUser);
       
       // Priority 1: Use departmentId directly if it's stored in editedUser during editing
       let departmentId = null;
       
       // Check if we already have departmentId from the handleEditInputChange
       if (editedUser.departmentId) {
-        console.log(`DIRECT: Using departmentId from editedUser: ${editedUser.departmentId}`);
+        // console.log(`DIRECT: Using departmentId from editedUser: ${editedUser.departmentId}`);
         departmentId = editedUser.departmentId;
       } 
       // If no departmentId stored, try to match department name
       else if (editedUser.department && departments.length > 0) {
-        console.log(`SEARCH: Looking for department match for: "${editedUser.department}"`);
+        // console.log(`SEARCH: Looking for department match for: "${editedUser.department}"`);
         
         const deptName = editedUser.department.toLowerCase().trim();
         
@@ -39,7 +39,7 @@ const useMemberActions = (eventId = 1) => {
         );
         
         if (exactMatch) {
-          console.log(`Found exact match: ${exactMatch.name} (ID: ${exactMatch.departmentId})`);
+          // console.log(`Found exact match: ${exactMatch.name} (ID: ${exactMatch.departmentId})`);
           departmentId = exactMatch.departmentId;
         } 
         // Try contains match if exact match failed
@@ -50,10 +50,10 @@ const useMemberActions = (eventId = 1) => {
           );
           
           if (partialMatch) {
-            console.log(`Found partial match: ${partialMatch.name} (ID: ${partialMatch.departmentId})`);
+            // console.log(`Found partial match: ${partialMatch.name} (ID: ${partialMatch.departmentId})`);
             departmentId = partialMatch.departmentId;
           } else {
-            console.log('No department match found');
+            // console.log('No department match found');
           }
         }
       }
@@ -70,10 +70,10 @@ const useMemberActions = (eventId = 1) => {
         reason: "Updated by admin"
       };
       
-      console.log('Status being sent:', editedUser.status);
-      console.log('isActive being sent:', updateData.isActive);
+      // console.log('Status being sent:', editedUser.status);
+      // console.log('isActive being sent:', updateData.isActive);
       
-      console.log('Update data being sent:', updateData);
+      // console.log('Update data being sent:', updateData);
       
       const response = await memberService.updateMember(updateData);
       
@@ -151,7 +151,7 @@ const useMemberActions = (eventId = 1) => {
         reason: 'Unbanned by admin'
       };
       
-      console.log('Calling unbanMember with data:', banData);
+      // console.log('Calling unbanMember with data:', banData);
       const response = await memberService.banMember(banData);
       
       if (!response || !response.success) {

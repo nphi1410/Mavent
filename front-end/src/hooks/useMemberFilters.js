@@ -46,7 +46,7 @@ const useMemberFilters = (onFilterChange = () => {}) => {
     
     if (roleValue !== roleFilter) {
       if (process.env.NODE_ENV === 'development') {
-        console.log(`Setting role filter to: '${roleValue}'`);
+        // console.log(`Setting role filter to: '${roleValue}'`);
       }
       setRoleFilter(roleValue);
       setCurrentPage(0);
@@ -71,7 +71,7 @@ const useMemberFilters = (onFilterChange = () => {}) => {
     
     if (deptValue !== departmentFilter) {
       if (process.env.NODE_ENV === 'development') {
-        console.log(`Setting department filter to: '${deptValue}'`);
+        // console.log(`Setting department filter to: '${deptValue}'`);
       }
       setDepartmentFilter(deptValue);
       setCurrentPage(0);
@@ -99,7 +99,7 @@ const useMemberFilters = (onFilterChange = () => {}) => {
       // Only trigger state update and API call if the value actually changed
       if (debouncedSearchTerm !== searchTerm) {
         if (process.env.NODE_ENV === 'development') {
-          console.log(`Search debounced: '${searchTerm}'`);
+          // console.log(`Search debounced: '${searchTerm}'`);
         }
         
         setDebouncedSearchTerm(searchTerm);
@@ -122,7 +122,7 @@ const useMemberFilters = (onFilterChange = () => {}) => {
     const searchValue = typeof term === 'string' ? term : '';
     
     if (process.env.NODE_ENV === 'development') {
-      console.log(`Setting search term to: '${searchValue}'`);
+      // console.log(`Setting search term to: '${searchValue}'`);
     }
     
     setSearchTerm(searchValue);

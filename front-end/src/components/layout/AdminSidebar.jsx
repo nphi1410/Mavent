@@ -12,7 +12,7 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
     {
       name: 'Members',
       icon: <FontAwesomeIcon icon={faUsers} />,
-      link: '/members',
+      link: '/event/9/members',
     }
   ];
   // Không hiển thị phần Settings

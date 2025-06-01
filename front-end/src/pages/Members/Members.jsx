@@ -28,9 +28,7 @@ const Members = () => {
     currentPage,
     totalPages,
     itemsPerPage,
-    
-    // UI state
-    activeMenu,
+      // UI state
     selectedUser,
     showUserDetail,
     editedUser,
@@ -43,7 +41,6 @@ const Members = () => {
     handleDepartmentFilter,
 
     paginate,
-    toggleMenu,
     handleBanUser,
     handleViewUser,
     closeUserDetail,
@@ -56,8 +53,7 @@ const Members = () => {
   return (
     <div className="container mx-auto px-2 sm:px-4 lg:px-6 relative">
       
-      
-      <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Manage Members</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Manage Members</h1>
         
         <div className="bg-white rounded-lg shadow overflow-hidden">
           {/* Header Controls - Responsive */}
@@ -71,26 +67,19 @@ const Members = () => {
             onStatusFilterChange={(value) => handleStatusFilter(value === '' ? '' : value)}
             onRoleFilterChange={(value) => handleRoleFilter(value === '' ? '' : value)}
             onDepartmentFilterChange={(value) => handleDepartmentFilter(value === '' ? '' : value)}
-            onAddMember={() => console.log('Add member clicked')}
+            onAddMember={() => {/* console.log('Add member clicked') */}}
           />
-          
-          {/* Desktop Table View */}
+            {/* Desktop Table View */}
           <MemberTable
             members={currentMembers}
             bannedUsers={bannedUsers}
-            activeMenu={activeMenu}
-            onToggleMenu={toggleMenu}
             onViewUser={handleViewUser}
             onEditUser={handleEditUser}
             onBanUser={handleBanUser}
-          />
-
-          {/* Mobile & Tablet Card View */}
+          />          {/* Mobile & Tablet Card View */}
           <MemberCard
             members={currentMembers}
             bannedUsers={bannedUsers}
-            activeMenu={activeMenu}
-            onToggleMenu={toggleMenu}
             onViewUser={handleViewUser}
             onEditUser={handleEditUser}
             onBanUser={handleBanUser}
@@ -107,30 +96,64 @@ const Members = () => {
             itemsPerPage={itemsPerPage}
             onPageChange={paginate}
           />
-        </div>
-        
-   
-        {/* Member Detail Modal */}
-        <MemberDetailModal
-          isOpen={showUserDetail}
-          user={selectedUser}
-          isBanned={selectedUser ? bannedUsers[selectedUser.id] : false}
-          onClose={closeUserDetail}
-          onEdit={handleEditUser}
-          onBan={handleBanUser}
+        </div>        {/* Member Detail Modal */}        <MemberDetailModal
+          isOpen={!!showUserDetail} 
+          user={selectedUser || null} 
+          isBanned={selectedUser && selectedUser.id ? bannedUsers[selectedUser.id] || false : false}
+          onClose={() => {
+            // console.log("Close detail modal called from Members.jsx");
+            closeUserDetail();
+          }}
+          onEdit={(user) => {
+            // console.log("Edit user called from detail modal for:", user);
+            handleEditUser(user);
+          }}
+          onBan={(user, banStatus) => {
+            // console.log("Ban user called from detail modal:", user, banStatus);
+            handleBanUser(user, banStatus);
+          }}
         />
         
-        {/* Edit Member Modal */}
-        <EditMemberModal
-          isOpen={showEditModal}
-          user={editedUser}
-          departments={departments}
-          onClose={handleCancelEdit}
-          onSave={handleSaveUser}
-          onChange={handleEditInputChange}
+        {/* Edit Member Modal */}        <EditMemberModal
+          isOpen={!!showEditModal}
+          user={editedUser || null}
+          departments={departments || []}
+          onClose={() => {
+            // console.log("Close edit modal called from Members.jsx");
+            handleCancelEdit();
+          }}
+          onSave={() => {
+            // console.log("Save user called from edit modal");
+            handleSaveUser();
+          }}
+          onChange={(field, value, depts) => {
+            // console.log(`Edit field change: ${field}=${value}`);
+            handleEditInputChange(field, value, depts);
+          }}        />
+
+        {/* Debug logging with useEffect */}
+        <DebugModalStates
+          showUserDetail={showUserDetail}
+          showEditModal={showEditModal}
+          selectedUser={selectedUser}
+          editedUser={editedUser}
         />
       </div>
   );
+};
+
+// Helper component for debug logging
+const DebugModalStates = ({ showUserDetail, showEditModal, selectedUser, editedUser }) => {
+  React.useEffect(() => {
+    // console.log('Members component modal states:', { 
+    //   showUserDetail, 
+    //   showEditModal,
+    //   selectedUser: selectedUser ? `${selectedUser.name} (ID: ${selectedUser.id})` : null,
+    //   editedUser: editedUser ? `${editedUser.name} (ID: ${editedUser.id})` : null
+    // });
+  }, [showUserDetail, showEditModal, selectedUser, editedUser]);
+  
+  return null;
 };
 
 export default Members;

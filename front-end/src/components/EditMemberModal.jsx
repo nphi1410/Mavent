@@ -10,17 +10,39 @@ const EditMemberModal = ({
   onSave,
   onChange
 }) => {
-  if (!isOpen || !user) return null;
+  // console.log('EditMemberModal render with props:',
+  //    { 
+  //   isOpen, 
+  //   user: user ? `${user.name} (ID: ${user.id})` : null, 
+  //   departmentsCount: departments.length 
+  // });
+  
+  // Add a rendering flag for debugging
+  React.useEffect(() => {
+    if (isOpen && user) {
+      // console.log(`Edit Modal should be visible now for user: ${user.name}`);
+    }
+  }, [isOpen, user]);
+  
+  if (!isOpen || !user) {
+    // console.log('EditMemberModal not rendered: isOpen=', isOpen, 'user=', user ? 'exists' : 'null');
+    // For debugging: return a hidden placeholder to confirm the component is mounting
+    return <div style={{display: 'none'}}>EditModal would render here if isOpen={String(isOpen)} and user exists={String(!!user)}</div>;
+  }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     onChange(name, value, departments);
-  };
-
-  return (
-    <div className="fixed inset-0 flex items-center justify-center z-50">
-      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose}></div>
-      <div className="bg-white rounded-lg shadow-lg w-11/12 max-w-2xl relative">
+  };  return (
+    <div className="fixed inset-0 flex items-center justify-center z-[9999]" data-testid="edit-member-modal">
+      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={(e) => {
+        e.stopPropagation();
+        // console.log("Edit Modal backdrop clicked - closing modal");
+        onClose();
+      }}></div>
+      <div className="bg-white rounded-lg shadow-lg w-11/12 max-w-2xl relative" 
+           style={{zIndex: 10000}}
+           onClick={(e) => e.stopPropagation()}>
         <div className="p-6 border-b bg-blue-600">
           <h2 className="text-xl font-bold mb-2 text-white">Edit User</h2>
           <p className="text-blue-100 text-sm">Only role, status, and department can be edited</p>
@@ -91,11 +113,11 @@ const EditMemberModal = ({
                 value={user.status || 'Active'}
                 onChange={(e) => {
                   const newStatus = e.target.value;
-                  console.log(`EditUserModal: Status changed to ${newStatus} (from ${user.status})`);
+                  // console.log(`EditUserModal: Status changed to ${newStatus} (from ${user.status})`);
                   // Automatically set isActive based on status
                   const newIsActive = newStatus === 'Active';
-                  console.log(`Setting isActive to: ${newIsActive}`);
-                  console.log('User data before update:', JSON.stringify(user));
+                  // console.log(`Setting isActive to: ${newIsActive}`);
+                  // console.log('User data before update:', JSON.stringify(user));
                   
                   // First update status
                   handleInputChange(e);
@@ -105,7 +127,7 @@ const EditMemberModal = ({
                   
                   // Log after update for debugging
                   setTimeout(() => {
-                    console.log('User data after update:', JSON.stringify(user));
+                    // console.log('User data after update:', JSON.stringify(user));
                   }, 0);
                 }}
                 className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"

@@ -12,12 +12,34 @@ const MemberDetailModal = ({
   onEdit,
   onBan
 }) => {
-  if (!isOpen || !user) return null;
-
-  return (
-    <div className="fixed inset-0 flex items-center justify-center z-50">
-      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose}></div>
-      <div className="bg-white rounded-lg shadow-lg w-11/12 max-w-2xl relative overflow-hidden">
+  // console.log('MemberDetailModal render with props:', { 
+  //   isOpen, 
+  //   user: user ? `${user.name} (ID: ${user.id})` : null, 
+  //   isBanned 
+  // });
+  
+  // Add a rendering flag for debugging
+  React.useEffect(() => {
+    if (isOpen && user) {
+      // console.log(`Modal should be visible now for user: ${user.name}`);
+    }
+  }, [isOpen, user]);
+  
+  // Return a debug placeholder if the modal shouldn't be open
+  if (!isOpen || !user) {
+    // console.log('MemberDetailModal not rendered: isOpen=', isOpen, 'user=', user ? 'exists' : 'null');
+    // For debugging: return a hidden placeholder to confirm the component is mounting
+    return <div style={{display: 'none'}}>Modal would render here if isOpen={String(isOpen)} and user exists={String(!!user)}</div>;
+  }  return (
+    <div className="fixed inset-0 flex items-center justify-center z-[9999]" data-testid="member-detail-modal">
+      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={(e) => {
+        e.stopPropagation();
+        // console.log("Modal backdrop clicked - closing modal");
+        onClose();
+      }}></div>
+      <div className="bg-white rounded-lg shadow-lg w-11/12 max-w-2xl relative overflow-hidden" 
+           style={{zIndex: 10000}}
+           onClick={(e) => e.stopPropagation()}>
         <div className="relative bg-blue-600 p-6 text-white">
           <h2 className="text-xl font-bold">User Details</h2>
           <div className="absolute top-4 right-4">
@@ -97,11 +119,11 @@ const MemberDetailModal = ({
               </div>
             </div>
           </div>
-        </div>
-        <div className="p-6 flex space-x-3 bg-gray-50">
+        </div>        <div className="p-6 flex space-x-3 bg-gray-50">
           <button 
             className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center"
             onClick={() => {
+              // console.log('Edit button clicked in MemberDetailModal for user:', user.name);
               onEdit(user);
               onClose();
             }}
@@ -116,6 +138,7 @@ const MemberDetailModal = ({
                 : 'bg-red-600 hover:bg-red-700'
             } text-white px-4 py-2 rounded-md transition-colors duration-200 flex items-center justify-center`}
             onClick={() => {
+              // console.log('Ban/Unban button clicked in MemberDetailModal for user:', user.name, 'current banned status:', isBanned);
               onBan(user, !isBanned);
               onClose();
             }}

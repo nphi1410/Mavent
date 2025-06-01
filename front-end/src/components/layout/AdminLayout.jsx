@@ -1,14 +1,31 @@
 import React, { useState } from 'react';
-import Sidebar from './Sidebar';
+import { useLocation } from 'react-router-dom';
+import Sidebar from './AdminSidebar';
 import AdminNavbar from './AdminNavbar';
 
 const Layout = ({ children, activeItem }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const location = useLocation();
+
+  // Kiểm tra xem có phải đang ở trang member management không
+  const isMemberManagementPage = location.pathname.includes('/members');
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  // Nếu không phải trang member management, chỉ render children
+  if (!isMemberManagementPage) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <main className="p-3 sm:p-4 lg:p-6">
+          {children}
+        </main>
+      </div>
+    );
+  }
+
+  // Nếu là trang member management, render với Sidebar và AdminNavbar
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Mobile Sidebar Overlay */}

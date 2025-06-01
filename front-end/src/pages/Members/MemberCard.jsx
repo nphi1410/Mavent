@@ -7,8 +7,6 @@ import {
 const MemberCard = ({
   members,
   bannedUsers,
-  activeMenu,
-  onToggleMenu,
   onViewUser,
   onEditUser,
   onBanUser
@@ -19,10 +17,17 @@ const MemberCard = ({
       <div className="divide-y divide-gray-200">
         {members.map(member => (
           <div key={member.id} className="p-4 hover:bg-gray-50">
-            <div className="flex items-start justify-between">
-              {/* User Info */}
+            <div className="flex items-start justify-between">              {/* User Info */}
               <div className="flex items-center space-x-3 flex-1 min-w-0">
-                <div className="flex-shrink-0 h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                <div 
+                  className="flex-shrink-0 h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden cursor-pointer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // console.log("Mobile - Avatar clicked for:", member.name);
+                    onViewUser(member);
+                  }}
+                >
                   {member.avatarUrl ? (
                     <img 
                       src={member.avatarUrl} 
@@ -38,7 +43,15 @@ const MemberCard = ({
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className={`text-sm font-medium text-blue-600 truncate ${bannedUsers[member.id] ? 'line-through text-red-500' : ''}`}>
+                  <div 
+                    className={`text-sm font-medium text-blue-600 truncate cursor-pointer ${bannedUsers[member.id] ? 'line-through text-red-500' : ''}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log("Mobile - Name clicked for:", member.name);
+                      onViewUser(member);
+                    }}
+                  >
                     {member.name}
                   </div>
                   <div className={`text-sm text-gray-500 truncate ${bannedUsers[member.id] ? 'line-through text-red-500' : ''}`}>
@@ -54,64 +67,47 @@ const MemberCard = ({
                     )}
                   </div>
                 </div>
-              </div>
-              
-              {/* Action button */}
-              <div className="relative flex-shrink-0 ml-2">
+              </div>                {/* Action buttons */}              <div className="flex flex-shrink-0 ml-2 items-center">
+                {/* Direct action buttons */}
                 <button 
-                  data-menu-button={`menu-button-mobile-${member.id}`}
-                  onClick={() => onToggleMenu(member.id)} 
-                  className="text-gray-500 hover:text-gray-700 focus:outline-none p-2"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log("Mobile - Direct view button clicked for:", member.name);
+                    onViewUser(member);
+                  }}
+                  className="p-1 mr-2 text-blue-600 hover:text-blue-800"
+                  title="View Details"
                 >
-                  <FontAwesomeIcon icon={faEllipsisV} className="h-5 w-5" />
+                  <FontAwesomeIcon icon={faEye} className="h-5 w-5" />
+                </button>
+                  {/* Direct edit button */}
+                <button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log("Mobile - Direct edit button clicked for:", member.name);
+                    onEditUser(member);
+                  }}
+                  className="p-1 mr-2 text-green-600 hover:text-green-800"
+                  title="Edit Member"
+                >
+                  <FontAwesomeIcon icon={faEdit} className="h-5 w-5" />
                 </button>
                 
-                {/* Action menu */}
-                {activeMenu === member.id && (
-                  <div 
-                    data-menu={`menu-mobile-${member.id}`}
-                    className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-10 border"
-                  >
-                    <div className="py-1">
-                      <button 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          console.log('Mobile - View user clicked for:', member.name);
-                          onViewUser(member);
-                        }} 
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                      >
-                        <FontAwesomeIcon icon={faEye} className="mr-3 h-4 w-4" />
-                        View Details
-                      </button>
-                      <button 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          console.log('Mobile - Edit user clicked for:', member.name);
-                          onEditUser(member);
-                        }} 
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                      >
-                        <FontAwesomeIcon icon={faEdit} className="mr-3 h-4 w-4" />
-                        Edit User
-                      </button>
-                      <button 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          console.log('Mobile - Ban/unban clicked for:', member.name);
-                          onBanUser(member, !bannedUsers[member.id]);
-                        }} 
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                      >
-                        <FontAwesomeIcon icon={faBan} className="mr-3 h-4 w-4" />
-                        {bannedUsers[member.id] ? 'Unban' : 'Ban'} User
-                      </button>
-                    </div>
-                  </div>
-                )}
+                {/* Direct ban/unban button */}
+                <button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log("Mobile - Direct ban/unban button clicked for:", member.name);
+                    onBanUser(member, !bannedUsers[member.id]);
+                  }}
+                  className={`p-1 ${bannedUsers[member.id] ? 'text-green-600 hover:text-green-800' : 'text-red-600 hover:text-red-800'}`}
+                  title={bannedUsers[member.id] ? 'Unban User' : 'Ban User'}
+                >
+                  <FontAwesomeIcon icon={faBan} className="h-5 w-5" />
+                </button>
               </div>
             </div>
             

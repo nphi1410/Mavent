@@ -56,12 +56,12 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
       
       // Giảm bớt logs không cần thiết
       if (process.env.NODE_ENV === 'development') {
-        console.log('Normalized filters before API call:', {
-          originalStatus: statusFilter,
-          normalizedStatus,
-          originalRole: roleFilter,
-          normalizedRole
-        });
+        // console.log('Normalized filters before API call:', {
+        //   originalStatus: statusFilter,
+        //   normalizedStatus,
+        //   originalRole: roleFilter,
+        //   normalizedRole
+        // });
       }
 
       // Prepare search term
@@ -83,7 +83,7 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
           normalizedDepartment = resolveDepartmentFilter(departmentFilter);
         }
         
-        console.log(`Resolved department filter from '${departmentFilter}' (type: ${typeof departmentFilter}) to '${normalizedDepartment}' (type: ${typeof normalizedDepartment})`);
+        // console.log(`Resolved department filter from '${departmentFilter}' (type: ${typeof departmentFilter}) to '${normalizedDepartment}' (type: ${typeof normalizedDepartment})`);
       }
       
       const params = {
@@ -97,7 +97,7 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
       
       // Chỉ log search term trong môi trường development
       if (trimmedSearchTerm && process.env.NODE_ENV === 'development') {
-        console.log(`Searching for: '${trimmedSearchTerm}'`);
+        // console.log(`Searching for: '${trimmedSearchTerm}'`);
       }
 
       // Remove undefined values
@@ -130,9 +130,9 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
         
         // Giảm bớt logs debug trừ khi thực sự cần thiết
         if (process.env.NODE_ENV === 'development' && false) { // Tắt logs này khi không cần
-          console.log('Filter state:', { statusFilter, roleFilter, departmentFilter });
-          console.log('Received filtered members:', response.data.content);
-          console.log('Transformed members with status:', transformedMembers.map(m => ({ name: m.name, status: m.status, isActive: m.isActive, isBanned: m.isBanned })));
+          // console.log('Filter state:', { statusFilter, roleFilter, departmentFilter });
+          // console.log('Received filtered members:', response.data.content);
+          // console.log('Transformed members with status:', transformedMembers.map(m => ({ name: m.name, status: m.status, isActive: m.isActive, isBanned: m.isBanned })));
         }
         
         setMembers(transformedMembers);
@@ -230,7 +230,7 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
     if (isInitialFetchRef.current) {
       fetchMembers();
       isInitialFetchRef.current = false;
-      console.log('Initial data fetch executed');
+      // console.log('Initial data fetch executed');
     }
   }, [fetchMembers]);
 
@@ -241,7 +241,7 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
     if (isInitialDepartmentFetchRef.current) {
       fetchDepartments();
       isInitialDepartmentFetchRef.current = false;
-      console.log('Initial departments fetch executed');
+      // console.log('Initial departments fetch executed');
     }
   }, [fetchDepartments]);
 
@@ -304,13 +304,13 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
     
     // If it's empty string, return it as is (select "All Departments")
     if (filter === '') {
-      console.log('Department filter is empty string, returning empty');
+      // console.log('Department filter is empty string, returning empty');
       return '';
     }
     
     // If filter is already a number or numeric string, return it as number
     if (typeof filter === 'number') {
-      console.log('Department filter is a number, using as is:', filter);
+      // console.log('Department filter is a number, using as is:', filter);
       return filter;
     }
     
@@ -323,7 +323,7 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
     // Otherwise, try to find department by name
     const dept = findDepartmentByName(filter);
     if (dept) {
-      console.log(`Resolved department name "${filter}" to ID: ${dept.departmentId}`);
+      // console.log(`Resolved department name "${filter}" to ID: ${dept.departmentId}`);
       return dept.departmentId;
     } else {
       console.log(`Could not resolve department name "${filter}", using original value`);
@@ -341,14 +341,14 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
     fetchTimeoutRef.current = setTimeout(() => {
       fetchMembers();
       if (process.env.NODE_ENV === 'development') {
-        console.log('Fetching members with filters:', {
-          page,
-          size,
-          searchTerm,
-          statusFilter,
-          roleFilter,
-          departmentFilter
-        });
+        // console.log('Fetching members with filters:', {
+        //   page,
+        //   size,
+        //   searchTerm,
+        //   statusFilter,
+        //   roleFilter,
+        //   departmentFilter
+        // });
       }
     }, 50); // Small delay to batch closely-timed filter changes
 
