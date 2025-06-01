@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Route, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import SuperAdminSidebar from '../components/SuperAdminSidebar';
 import SuperAdminHeader from '../components/SuperAdminHeader';
-import { getEventById, updateEvent } from '../services/eventService'; // giả sử bạn export axios funcs từ api.js
+import { getEventById, updateEvent } from '../services/eventService';
 
 function SuperAdminEditEvent() {
-    const { eventId } = useParams();  // <-- lấy param eventId từ URL
+    const { eventId } = useParams();
 
     const [eventData, setEventData] = useState({
         name: '',
@@ -16,21 +16,26 @@ function SuperAdminEditEvent() {
         status: 'PENDING',
         maxMemberNumber: 0,
         maxParticipantNumber: 0,
-        // các trường khác...
+        admin: '',
+        bannerFile: null, // file ảnh
     });
 
+    const [previewBanner, setPreviewBanner] = useState('');
+
     useEffect(() => {
-        if (!eventId) return;  // tránh gọi khi eventId undefined
+        if (!eventId) return;
 
         async function fetchEvent() {
             try {
                 const data = await getEventById(eventId);
                 if (data) {
-                    setEventData({
+                    setEventData(prev => ({
+                        ...prev,
                         ...data,
                         startDatetime: data.startDatetime ? data.startDatetime.substring(0, 16) : '',
                         endDatetime: data.endDatetime ? data.endDatetime.substring(0, 16) : '',
-                    });
+                    }));
+                    setPreviewBanner(data.bannerUrl || '');
                 }
             } catch (error) {
                 console.error('Failed to fetch event:', error);
@@ -39,7 +44,6 @@ function SuperAdminEditEvent() {
         fetchEvent();
     }, [eventId]);
 
-    // Xử lý khi người dùng nhập form
     const handleChange = (e) => {
         const { name, value } = e.target;
         setEventData((prev) => ({
@@ -48,19 +52,42 @@ function SuperAdminEditEvent() {
         }));
     };
 
-    // Gộp ngày và giờ thành 1 datetime-local string (nếu bạn có tách riêng date/time inputs)
-    // Ở đây UI bạn hiện dùng input date + input time riêng, mình khuyên bạn chuyển sang input type="datetime-local" để đơn giản.
+    const handleBannerChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setPreviewBanner(URL.createObjectURL(file));
+            setEventData(prev => ({
+                ...prev,
+                bannerFile: file,
+            }));
+        }
+    };
 
-    // Submit form update event
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Gọi API update
-        const updatedEvent = await updateEvent(eventId, eventData);
-        if (updatedEvent) {
-            alert('Cập nhật sự kiện thành công!');
-            // Có thể redirect hoặc refresh dữ liệu tại đây
-        } else {
+        const formData = new FormData();
+        formData.append('name', eventData.name);
+        formData.append('description', eventData.description);
+        formData.append('startDatetime', eventData.startDatetime);
+        formData.append('endDatetime', eventData.endDatetime);
+        formData.append('location', eventData.location);
+        formData.append('status', eventData.status);
+        formData.append('maxMemberNumber', eventData.maxMemberNumber);
+        formData.append('maxParticipantNumber', eventData.maxParticipantNumber);
+        formData.append('admin', eventData.admin);
+        if (eventData.bannerFile) {
+            formData.append('banner', eventData.bannerFile); // tùy thuộc backend cần tên gì
+        }
+
+        try {
+            const updatedEvent = await updateEvent(eventId, formData);
+            if (updatedEvent) {
+                alert('Cập nhật sự kiện thành công!');
+                window.location.href = '/superadmin/events';
+            }
+        } catch (err) {
+            console.error(err);
             alert('Cập nhật sự kiện thất bại, vui lòng thử lại.');
         }
     };
@@ -79,7 +106,6 @@ function SuperAdminEditEvent() {
                             </p>
                         </div>
 
-                        {/* Basic Information */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <section className="bg-white p-6 shadow rounded-xl space-y-4 mb-4">
                                 <h2 className="text-2xl font-semibold text-black mb-4">Basic Information</h2>
@@ -107,17 +133,20 @@ function SuperAdminEditEvent() {
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-md font-medium text-gray-700">Location</label>
+                                            <label className="block text-md font-medium text-gray-700">Banner Image</label>
+                                            {previewBanner && (
+                                                <img
+                                                    src={previewBanner}
+                                                    alt="Event Banner"
+                                                    className="w-full h-48 object-cover rounded-md mb-3 shadow"
+                                                />
+                                            )}
                                             <input
-                                                type="text"
-                                                name="location"
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleBannerChange}
                                                 className="w-full mt-1 p-3 border rounded-md shadow-sm focus:ring-blue-400 focus:border-blue-400"
-                                                value={eventData.location}
-                                                onChange={handleChange}
                                             />
-                                        </div>
-                                        <div>
-                                            <label className="block text-md font-medium text-gray-700"></label>
                                         </div>
                                         <div>
                                             <label className="block text-md font-medium text-gray-700">Status</label>
@@ -140,10 +169,19 @@ function SuperAdminEditEvent() {
                                 </div>
                             </section>
 
-                            {/* Date & Time */}
                             <section className="bg-white p-6 shadow rounded-xl space-y-4 mb-4">
-                                <h2 className="text-2xl font-semibold text-black mb-4">Date & Time</h2>
+                                <h2 className="text-2xl font-semibold text-black mb-4">Location & Date & Time</h2>
                                 <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-md font-medium text-gray-700">Location</label>
+                                        <input
+                                            type="text"
+                                            name="location"
+                                            className="w-full mt-1 p-3 border rounded-md shadow-sm focus:ring-blue-400 focus:border-blue-400"
+                                            value={eventData.location}
+                                            onChange={handleChange}
+                                        />
+                                    </div>
                                     <div>
                                         <label className="block text-md font-medium text-gray-700">Start Date & Time</label>
                                         <input
@@ -171,7 +209,6 @@ function SuperAdminEditEvent() {
                         </div>
 
                         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                            {/* Capacity */}
                             <section className="bg-white p-6 shadow rounded-xl space-y-4 mb-4">
                                 <h2 className="text-2xl font-semibold text-black mb-4">Capacity</h2>
                                 <div className="space-y-4">
@@ -199,7 +236,6 @@ function SuperAdminEditEvent() {
                                     </div>
                                 </div>
                             </section>
-                            {/* Assign Admin an each event */}
                             <section className="bg-white p-6 shadow rounded-xl space-y-4 mb-4">
                                 <h2 className="text-2xl font-semibold text-black mb-4">Role of Event</h2>
                                 <div className="space-y-4">
@@ -218,7 +254,6 @@ function SuperAdminEditEvent() {
                             </section>
                         </div>
 
-                        {/* Buttons */}
                         <div className="flex justify-end gap-4 mt-6">
                             <button
                                 type="button"
@@ -229,7 +264,6 @@ function SuperAdminEditEvent() {
                             </button>
                             <button
                                 type="submit"
-                                onClick={handleSubmit}
                                 className="cursor-pointer px-5 py-2 rounded-lg bg-teal-600 text-white hover:bg-teal-700"
                             >
                                 Save Changes

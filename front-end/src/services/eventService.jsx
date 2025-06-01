@@ -4,6 +4,7 @@ import Api from "../config/Api";
 export const getEvents = async () => {
     try {
         const response = await Api.get('/events');
+        
         return response.data; // array of EventDTO
     } catch (error) {
         console.error('Error fetching events:', error);
@@ -26,6 +27,7 @@ export const getEventById = async (id) => {
 export const updateEvent = async (id, eventData) => {
     try {
         const response = await Api.put(`/events/${id}`, eventData);
+
         return response.data; // updated EventDTO
     } catch (error) {
         console.error(`Error updating event with ID ${id}:`, error);
