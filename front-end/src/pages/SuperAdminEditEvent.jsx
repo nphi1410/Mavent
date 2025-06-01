@@ -59,7 +59,7 @@ function SuperAdminEditEvent() {
         const updatedEvent = await updateEvent(eventId, eventData);
         if (updatedEvent) {
             alert('Cập nhật sự kiện thành công!');
-            // Có thể redirect hoặc refresh dữ liệu tại đây
+            window.location.href = '/events';
         } else {
             alert('Cập nhật sự kiện thất bại, vui lòng thử lại.');
         }
