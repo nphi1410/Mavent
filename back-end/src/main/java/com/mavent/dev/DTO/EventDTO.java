@@ -25,4 +25,5 @@ public class EventDTO {
     private Boolean isDeleted;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String bannerUrl;
 }

@@ -46,6 +46,9 @@ public class Event {
     @Column(name = "max_participant_number")
     private Integer maxParticipantNumber = 0;
 
+    @Column(name = "banner_url")
+    private String bannerUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private EventStatus status = EventStatus.PENDING;

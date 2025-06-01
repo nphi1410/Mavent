@@ -48,6 +48,7 @@ public class EventImplement implements EventService {
         if (eventDTO.getStatus() != null) event.setStatus(eventDTO.getStatus());
         if (eventDTO.getCreatedBy() != null) event.setCreatedBy(eventDTO.getCreatedBy());
         if (eventDTO.getIsDeleted() != null) event.setIsDeleted(eventDTO.getIsDeleted());
+        if(eventDTO.getBannerUrl() != null) event.setBannerUrl(eventDTO.getBannerUrl());
 
         // Save entity
         Event updatedEvent = eventRepository.save(event);
@@ -82,7 +83,8 @@ public class EventImplement implements EventService {
                 event.getCreatedBy(),
                 event.getIsDeleted(),
                 event.getCreatedAt(),
-                event.getUpdatedAt()
+                event.getUpdatedAt(),
+                event.getBannerUrl()
         );
     }
 }
