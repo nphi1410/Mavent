@@ -1,6 +1,6 @@
 package com.mavent.dev.service;
 
-import com.mavent.dev.DTO.AccountDTO;
+import com.mavent.dev.DTO.superadmin.AccountDTO;
 import com.mavent.dev.DTO.UserProfileDTO;
 import com.mavent.dev.entity.Account;
 

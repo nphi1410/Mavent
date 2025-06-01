@@ -1,10 +1,9 @@
 package com.mavent.dev.service.implement;
 
-import com.mavent.dev.DTO.EventDTO;
+import com.mavent.dev.DTO.superadmin.EventDTO;
 import com.mavent.dev.entity.Event;
 import com.mavent.dev.repository.EventRepository;
 import com.mavent.dev.service.EventService;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
