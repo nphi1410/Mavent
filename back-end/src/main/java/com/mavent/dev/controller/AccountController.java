@@ -1,7 +1,7 @@
 package com.mavent.dev.controller;
 
-
 import com.mavent.dev.DTO.*;
+import com.mavent.dev.config.MailConfig;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.service.AccountService;
@@ -23,27 +23,88 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 public class AccountController {
+
     @Autowired
     private AccountService accountService;
 
+    @Autowired
+    AccountRepository accountRepository;
+
+    @Autowired
+    private MailConfig mailConfig;
+
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginDTO loginDTO, HttpServletRequest request) {
+    public ResponseEntity<String> login(@RequestBody AccountDTO loginDTO, HttpServletRequest request) {
         HttpSession session = request.getSession();
         boolean success = accountService.checkLogin(loginDTO.getUsername(), loginDTO.getPassword());
         if (success) {
             Account acc = accountService.getAccount(loginDTO.getUsername());
+            Account accByEmail = accountService.getAccountByEmail(loginDTO.getUsername());
+            if (acc == null && accByEmail != null) {
+                acc = accByEmail; // Use account found by email if username not found
+            }
             session.setAttribute("account", acc);
             session.setAttribute("username", loginDTO.getUsername());
+            assert acc != null;
             session.setAttribute("isSuperAdmin", acc.getSystemRole() == Account.SystemRole.SUPER_ADMIN);
 
             String username = (String) session.getAttribute("username");
             System.out.println("Username from session: " + username);
             System.out.println("Session ID: " + session.getId());
 
-            return ResponseEntity.ok("Login successful as " + acc.getSystemRole());
+            return ResponseEntity.ok("Login successful as " + acc.getUsername() +" with role of " + acc.getSystemRole());
         } else {
             return ResponseEntity.status(401).body("Invalid username or password");
         }
+    }
+
+    @PostMapping("/send-otp")
+    public ResponseEntity<?> sendOtp(@RequestBody AccountDTO request, HttpSession session) {
+        if (accountRepository.findByUsername(request.getUsername()) != null) {
+            return ResponseEntity.badRequest().body("Username already exists!");
+        }
+        // Check if email already exists
+        if (accountRepository.findByEmail(request.getEmail()) != null) {
+            return ResponseEntity.badRequest().body("Email already exists!");
+        }
+
+        String otp = accountService.getRandomOTP();
+        mailConfig.sendMail(request.getEmail(), "Your OTP Code", "Your OTP code is: " + otp);
+
+        // Lưu vào session
+        session.setAttribute("register_username", request.getUsername());
+        session.setAttribute("register_email", request.getEmail());
+//        session.setAttribute("register_password", passwordEncoder.encode(request.getPassword()));
+        session.setAttribute("register_password", request.getPassword());
+        session.setAttribute("register_otp", otp);
+        session.setAttribute("register_time", System.currentTimeMillis());
+
+        return ResponseEntity.ok("OTP was sent to email " + request.getEmail());
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> registerWithOtp(@RequestBody OtpDTO request, HttpSession session) {
+        String otpSession = (String) session.getAttribute("register_otp");
+        String username = (String) session.getAttribute("register_username");
+        String email = (String) session.getAttribute("register_email");
+        String encodedPassword = (String) session.getAttribute("register_password");
+//        String email = request.getEmail();
+//        String username = accountDTO.getUsername();
+//        String encodedPassword = accountDTO.getPassword();
+        System.out.println("Username from session: " + username);
+        System.out.println("Email from session: " + email);
+        System.out.println("Encoded Password from session: " + encodedPassword);
+        Long time = (Long) session.getAttribute("register_time");
+        if (accountService.isOtpTrue(otpSession, time, request.getOtp()) != null) {;
+            return ResponseEntity.badRequest().body(accountService.isOtpTrue(otpSession, time, request.getOtp()));
+        }
+
+        Account newAccount = new Account(username, email, encodedPassword);
+        accountRepository.save(newAccount);
+
+        session.invalidate();
+
+        return ResponseEntity.ok("Registration successful! You can now log in with your new account.");
     }
 
     @GetMapping("/user/profile")
