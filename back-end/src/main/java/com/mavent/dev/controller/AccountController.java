@@ -52,7 +52,10 @@ public class AccountController {
             System.out.println("Username from session: " + username);
             System.out.println("Session ID: " + session.getId());
 
-            return ResponseEntity.ok("Login successful as " + acc.getUsername() +" with role of " + acc.getSystemRole());
+            boolean isSuperAdmin = acc.getSystemRole() == Account.SystemRole.SUPER_ADMIN;
+            String redirectUrl = isSuperAdmin ? "/superadmin" : "/profile";
+            System.out.println("Redirect URL: " + redirectUrl);
+            return ResponseEntity.ok(redirectUrl);
         } else {
             return ResponseEntity.status(401).body("Invalid username or password");
         }
@@ -203,5 +206,4 @@ public class AccountController {
     }
 
 }
-
 
