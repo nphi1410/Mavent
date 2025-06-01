@@ -145,10 +145,6 @@ function SuperAdminManageEvents() {
                                                             navigate(`/superadmin/edit-event/${event.eventId}`);
                                                             setOpenId(null);
                                                         }}
-                                                        onDelete={() => {
-                                                            alert(`Deleting ${event.name}`);
-                                                            setOpenId(null);
-                                                        }}
                                                     />
                                                 </td>
                                             </tr>

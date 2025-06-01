@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEllipsis, faEye, faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faEllipsis, faEye, faPen } from '@fortawesome/free-solid-svg-icons';
 
 const SuperAdminActionDropdown = ({ isOpen, onToggle, onView, onEdit, onDelete }) => {
     return (
@@ -33,13 +33,6 @@ const SuperAdminActionDropdown = ({ isOpen, onToggle, onView, onEdit, onDelete }
                         >
                             <FontAwesomeIcon icon={faPen} className="w-4 h-4" />
                             Edit
-                        </li>
-                        <li
-                            className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 cursor-pointer"
-                            onClick={onDelete}
-                        >
-                            <FontAwesomeIcon icon={faTrash} className="w-4 h-4" />
-                            Delete
                         </li>
                     </ul>
                 </div>
