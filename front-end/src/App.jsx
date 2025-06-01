@@ -1,3 +1,4 @@
+
 import {
     BrowserRouter as Router,
     Routes,
@@ -9,13 +10,15 @@ import Login from './pages/Login';
 import HomePage from './pages/HomePage';
 import SuperAdminDashboard from './pages/SuperAdminDashBoard';
 import EventDetails from "./pages/EventDetails";
+import SuperAdminManageEvents from './pages/SuperAdminManageEvents';
 import SuperAdminManageUsers from './pages/SuperAdminManageUsers';
 import SuperAdminViewEventDetails from './pages/SuperAdminViewEventDetails';
 import SuperAdminEditEvent from './pages/SuperAdminEditEvent';
-import SuperAdminManageEvents from './pages/SuperAdminManageEvents';
-import UserEventsPage from "./pages/UserEventsPage";
+import UserEventsPage from './pages/UserEventsPage';
+import React from 'react';
+import Register from './pages/Register';
+
 import UserTasksPage from "./pages/UserTasksPage";
-import React from "react";
 
 function App() {
     return (
@@ -29,6 +32,7 @@ function App() {
                     <Route path="/profile/tasks" element={<UserTasksPage />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/superadmin" element={<SuperAdminDashboard />} />
+                    <Route path="/register" element={<Register />} />
                     <Route
                         path="/superadmin/events"
                         element={<SuperAdminManageEvents />}

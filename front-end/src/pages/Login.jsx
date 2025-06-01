@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
+import { login } from '../services/AuthService';
 import axios from 'axios';
 
 function Login() {
@@ -15,9 +16,14 @@ function Login() {
     try {
       const response = await axios.post(
         "http://localhost:8080/api/login",
-        { username, password },
         {
-          headers: { "Content-Type": "application/json" },
+          username,
+          password
+        },
+        {
+          headers: {
+            "Content-Type": "application/json"
+          },
           withCredentials: true
         }
       );
@@ -26,9 +32,10 @@ function Login() {
         // Lưu minimal info vào sessionStorage
         sessionStorage.setItem('isLoggedIn', 'true');
         sessionStorage.setItem('username', username);
-        
+
         // Sử dụng navigate thay vì window.location để chuyển trang mượt hơn
-        navigate('/profile');
+        console.log("Login successful:", response.data);
+        navigate(`${response.data}`);
       }
     } catch (error) {
       console.error("Login failed:", error);
@@ -51,7 +58,7 @@ function Login() {
 
         {/* Right Panel */}
         <div className="w-1/2 flex flex-col items-center justify-center p-8 space-y-5">
-          <h1 className="text-xl font-semibold text-center pb-4 text-blue-900">WELCOME TO MAVENT</h1>
+          <h1 className="text-5xl font-semibold text-center pb-4 text-blue-900">WELCOME TO MAVENT</h1>
 
           <form onSubmit={handleSubmit} className="flex flex-col items-center space-y-4 w-full">
             <input
@@ -90,7 +97,7 @@ function Login() {
 
           <p className="text-[0.9rem]">
             Don’t have an account? Click{' '}
-            <Link to="/about" className="hover:underline hover:text-blue-900 text-xs">HERE</Link>
+            <Link to="/register" className="font-bold hover:underline hover:text-blue-900 text-xs">HERE</Link>
           </p>
         </div>
       </div>
