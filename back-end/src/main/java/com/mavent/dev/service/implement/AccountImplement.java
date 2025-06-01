@@ -49,10 +49,14 @@ public class AccountImplement implements AccountService {
             if (account == null && accountRepository.findByEmail(UsernameOrEmail) != null) {
                 account = accountRepository.findByEmail(UsernameOrEmail);
             }
+            if (account == null) {
+                System.err.println("Account not found with username or email: " + UsernameOrEmail);
+                return false; // Account not found
+            }
 //            System.out.println("Account found by username: " + accountFoundByUsername.getUsername());
 //            System.out.println("Account found by email: " + accountFoundByEmail.getEmail());
-//            System.out.println(passwordEncoder.matches(password, accountFoundByEmail.getPasswordHash()));
-            return account != null && passwordEncoder.matches(password, account.getPasswordHash());
+            System.out.println(passwordEncoder.matches(password, account.getPasswordHash()));
+            return passwordEncoder.matches(password, account.getPasswordHash());
         } catch (Exception e) {
             System.err.println("Error during login check: " + e.getMessage());
             return false; // Login failed
