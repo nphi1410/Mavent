@@ -14,6 +14,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Account {
+    public Account(String username, String email, String encodedPassword) {
+        this.username = username;
+        this.email = email;
+        this.passwordHash = encodedPassword;
+    }
+
     public enum SystemRole {
         SUPER_ADMIN, USER
     }

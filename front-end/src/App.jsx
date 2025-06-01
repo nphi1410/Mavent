@@ -1,13 +1,25 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import ProfilePage from "./pages/ProfilePage";
-import Login from "./pages/Login";
-import HomePage from "./pages/HomePage";
-import SuperAdminDashboard from "./pages/SuperAdminDashBoard";
+
+import {
+    BrowserRouter as Router,
+    Routes,
+    Route
+} from "react-router-dom";
+import 'leaflet/dist/leaflet.css';  // Add this line
+import ProfilePage from './pages/ProfilePage';
+import Login from './pages/Login';
+import HomePage from './pages/HomePage';
+import SuperAdminDashboard from './pages/SuperAdminDashBoard';
 import EventDetails from "./pages/EventDetails";
+import SuperAdminManageEvents from './pages/SuperAdminManageEvents';
 import SuperAdminManageUsers from './pages/SuperAdminManageUsers';
 import SuperAdminViewEventDetails from './pages/SuperAdminViewEventDetails';
 import SuperAdminEditEvent from './pages/SuperAdminEditEvent';
-import SuperAdminManageEvents from './pages/SuperAdminManageEvents';
+import UserEventsPage from './pages/UserEventsPage';
+import React from 'react';
+import Register from './pages/Register';
+
+import UserTasksPage from "./pages/UserTasksPage";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
     return (
@@ -15,9 +27,14 @@ function App() {
             <div className="min-h-screen w-full">
                 <Routes>
                     <Route path="/" element={<HomePage />} />
-                    <Route path="/profile/*" element={<ProfilePage />} />
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/profile/account" element={<ProfilePage />} />
+                    <Route path="/profile/events" element={<UserEventsPage />} />
+                    <Route path="/profile/tasks" element={<UserTasksPage />} />
                     <Route path="/login" element={<Login />} />
+                    <Route path="/reset-password-request" element={<ResetPassword />} />
                     <Route path="/superadmin" element={<SuperAdminDashboard />} />
+                    <Route path="/register" element={<Register />} />
                     <Route
                         path="/superadmin/events"
                         element={<SuperAdminManageEvents />}
