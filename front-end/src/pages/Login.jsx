@@ -1,36 +1,38 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
-import { login } from '../services/AuthService';
+import axios from 'axios';
 
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
     try {
       const response = await axios.post(
         "http://localhost:8080/api/login",
+        { username, password },
         {
-          username,
-          password
-        },
-        {
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           withCredentials: true
         }
       );
 
       if (response.status === 200) {
-        window.location.href = "/profile";
+        // Lưu minimal info vào sessionStorage
+        sessionStorage.setItem('isLoggedIn', 'true');
+        sessionStorage.setItem('username', username);
+        
+        // Sử dụng navigate thay vì window.location để chuyển trang mượt hơn
+        navigate('/profile');
       }
     } catch (error) {
       console.error("Login failed:", error);
-      // Thêm xử lý hiển thị lỗi cho người dùng
+      setError(error.response?.data || "Login failed. Please try again.");
     }
   };
 
@@ -79,7 +81,7 @@ function Login() {
             <button className="px-6 py-2 rounded-full bg-blue-900 text-white hover:bg-[#2f52bc] transition">
               LOGIN
             </button>
-            {/* {error && <div className="text-red-600 text-sm mt-2">{error}</div>} */}
+            {error && <div className="text-red-600 text-sm mt-2">{error}</div>}
           </form>
 
           <Link to="/about" className="text-xs text-blue-900 hover:underline">
