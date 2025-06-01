@@ -19,6 +19,7 @@ import React from 'react';
 import Register from './pages/Register';
 
 import UserTasksPage from "./pages/UserTasksPage";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
     return (
@@ -31,6 +32,7 @@ function App() {
                     <Route path="/profile/events" element={<UserEventsPage />} />
                     <Route path="/profile/tasks" element={<UserTasksPage />} />
                     <Route path="/login" element={<Login />} />
+                    <Route path="/reset-password-request" element={<ResetPassword />} />
                     <Route path="/superadmin" element={<SuperAdminDashboard />} />
                     <Route path="/register" element={<Register />} />
                     <Route
