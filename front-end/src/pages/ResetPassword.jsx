@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { faL } from '@fortawesome/free-solid-svg-icons';
 
 function ResetPassword() {
     const [email, setEmail] = useState("");
@@ -14,14 +13,14 @@ function ResetPassword() {
         e.preventDefault();
 
         try {
-            const response = await axios.post("http://localhost:8080/api/reset-password-request", 
-            {
-                email
-            }, 
-            {
-                headers: { "Content-Type": "application/json" },
-                withCredentials: true
-            });
+            const response = await axios.post("http://localhost:8080/api/reset-password-request",
+                {
+                    email
+                },
+                {
+                    headers: { "Content-Type": "application/json" },
+                    withCredentials: true
+                });
 
             if (response.status === 200) {
                 setOtpSent(true);
@@ -31,7 +30,7 @@ function ResetPassword() {
         } catch (err) {
             setError(response?.data || "Failed to send OTP. Please try again.");
             console.error("Error sending OTP:", error);
-            
+
             // setOtpSent("Failed to send OTP. Email may not be registered.");
         }
     };
@@ -39,7 +38,7 @@ function ResetPassword() {
     const resetPassword = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post("http://localhost:8080/api/verify-reset-otp", 
+            const response = await axios.post("http://localhost:8080/api/verify-reset-otp",
                 { email, otp },
                 {
                     headers: { "Content-Type": "application/json" },
@@ -62,7 +61,9 @@ function ResetPassword() {
         <div className="min-h-screen flex items-center justify-center bg-blue-900">
             <div className="bg-white p-8 rounded-2xl w-5/12 text-center shadow-lg">
                 <p className="text-left text-sm text-gray-600 mb-2 cursor-pointer hover:underline">
-                    ← Back to Login
+                    <NavLink to="/login" className="font-bold hover:underline hover:text-blue-900">
+                        ← Back to Login
+                    </NavLink>
                 </p>
                 <h1 className="text-4xl font-bold mb-4 text-blue-900">RESET PASSWORD</h1>
                 <form className="mb-6" onSubmit={otpSent ? resetPassword : handleSendOtp}>
