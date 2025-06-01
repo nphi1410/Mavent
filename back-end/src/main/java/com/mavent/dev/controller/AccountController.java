@@ -61,7 +61,7 @@ public class AccountController {
         }
     }
 
-    @PostMapping("/send-otp")
+    @PostMapping("/send-register-otp")
     public ResponseEntity<?> sendOtp(@RequestBody AccountDTO request, HttpSession session) {
         if (accountRepository.findByUsername(request.getUsername()) != null) {
             return ResponseEntity.badRequest().body("Username already exists!");
@@ -72,7 +72,7 @@ public class AccountController {
         }
 
         String otp = accountService.getRandomOTP();
-        mailConfig.sendMail(request.getEmail(), "Your OTP Code", "Your OTP code is: " + otp);
+        mailConfig.sendMail(request.getEmail(), "Your OTP Code for Account Registration at Mavent", "Your OTP code for Account Registration at Mavent is: " + otp);
 
         // Lưu vào session
         session.setAttribute("register_username", request.getUsername());
@@ -109,6 +109,46 @@ public class AccountController {
 
         return ResponseEntity.ok("Registration successful! You can now log in with your new account.");
     }
+
+    @PostMapping("/reset-password-request")
+    public ResponseEntity<?> resetPasswordRequest(@RequestBody AccountDTO request, HttpSession session) {
+        Account account = accountRepository.findByEmail(request.getEmail());
+        if (account == null) {
+            return ResponseEntity.badRequest().body("Email not found");
+        }
+
+        String otp = accountService.getRandomOTP();
+        mailConfig.sendMail(request.getEmail(), "Your OTP Code for Reset Password at Mavent", "Your OTP code for Reset Password at Mavent is: " + otp);
+
+        session.setAttribute("reset_email", request.getEmail());
+        session.setAttribute("reset_otp", otp);
+        session.setAttribute("reset_time", System.currentTimeMillis());
+
+        return ResponseEntity.ok("OTP was sent to email " + request.getEmail());
+    }
+
+    @PostMapping("/verify-reset-otp")
+    public ResponseEntity<?> verifyResetOtp(@RequestBody OtpDTO request, HttpSession session) {
+        String otpSession = (String) session.getAttribute("reset_otp");
+        String email = (String) session.getAttribute("reset_email");
+        Long time = (Long) session.getAttribute("reset_time");
+
+        if (accountService.isOtpTrue(otpSession, time, request.getOtp()) != null) {
+            return ResponseEntity.badRequest().body(accountService.isOtpTrue(otpSession, time, request.getOtp()));
+        }
+
+        String newPassword = accountService.getRandomPassword(10);
+        Account account = accountRepository.findByEmail(email);
+        if (account == null) {
+            return ResponseEntity.badRequest().body("Email not found");
+        }
+        account.setPasswordHash(newPassword);
+        accountRepository.save(account);
+        mailConfig.sendMail(email, "Your New Password for Mavent", "Your new password is: " + newPassword);
+
+        return ResponseEntity.ok("Account password is reset successfully. You can now reset your password.");
+    }
+
 
     @GetMapping("/user/profile")
     public ResponseEntity<UserProfileDTO> getUserProfile(HttpServletRequest request) {
@@ -206,4 +246,6 @@ public class AccountController {
     }
 
 }
+
+
 

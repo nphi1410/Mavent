@@ -27,7 +27,7 @@ const Register = () => {
   const sendOtp = async (e) => {
     e?.preventDefault();
     try {
-      const response = await axios.post("http://localhost:8080/api/send-otp", {
+      const response = await axios.post("http://localhost:8080/api/send-register-otp", {
         username,
         email,
         password
@@ -60,7 +60,9 @@ const Register = () => {
       });
 
       if (response.status === 200) {
-        navigate("/login");
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000); // Redirect after 2 seconds      
       }
     } catch (error) {
       if (error.response?.status === 400) {

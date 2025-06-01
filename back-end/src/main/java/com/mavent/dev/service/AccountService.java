@@ -18,5 +18,6 @@ public interface AccountService {
     List<TaskDTO> getUserTasks(Integer accountId, String status, String priority,
                                String keyword, String sortOrder, String eventName);
 
+    String getRandomPassword(int length);
 }
 
