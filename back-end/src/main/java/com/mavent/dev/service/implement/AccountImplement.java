@@ -38,17 +38,21 @@ public class AccountImplement implements AccountService {
     @Override
     public boolean checkLogin(String UsernameOrEmail, String password) {
         // Find account by username
-        Account accountFoundByUsername = accountRepository.findByUsername(UsernameOrEmail);
-        Account accountFoundByEmail = accountRepository.findByEmail(UsernameOrEmail);
-        if (accountFoundByUsername != null && accountFoundByUsername.getPasswordHash().equals(password)) {
-            return true; // Login successful with username
-        } else return accountFoundByEmail != null && accountFoundByEmail.getPasswordHash().equals(password); // Login successful with email
+        System.out.println("Checking login for: " + UsernameOrEmail);
+        try {
+            Account accountFoundByUsername = accountRepository.findByUsername(UsernameOrEmail);
+            Account accountFoundByEmail = accountRepository.findByEmail(UsernameOrEmail);
+//            System.out.println("Account found by username: " + accountFoundByUsername.getUsername());
+//            System.out.println("Account found by email: " + accountFoundByEmail.getEmail());
+            if (accountFoundByUsername != null && accountFoundByUsername.getPasswordHash().equals(password)) {
+                return true; // Login successful with username
+            } else
+                return accountFoundByEmail != null && accountFoundByEmail.getPasswordHash().equals(password); // Login successful with email
+        } catch (Exception e) {
+            System.err.println("Error during login check: " + e.getMessage());
+            return false; // Login failed
+        }
     }
-
-//    @Async
-//    public void sendOtpAsync(String to, String otp) {
-//        mailConfig.sendMail(to, "Your OTP Code", "Your OTP code is: " + otp);
-//    }
 
     @Override
     public String isOtpTrue(String originOTP, long otpCreatedTime, String requestOtp) {
