@@ -15,7 +15,7 @@ function SuperAdminManageEvents() {
     const [events, setEvents] = useState([]);
 
     const [currentPage, setCurrentPage] = useState(1);
-    const eventsPerPage = 10;
+    const eventsPerPage = 5;
 
     const statusOptions = [
         "All Statuses", "RECRUITING", "UPCOMING", "ONGOING",
@@ -113,7 +113,7 @@ function SuperAdminManageEvents() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {paginatedEvents.map((event) => (
+                                        {paginatedEvents?.map((event) => (
                                             <tr key={event.eventId} className="border-b border-gray-200">
                                                 <td className="p-2 font-medium text-black whitespace-nowrap">{event.name}</td>
                                                 <td className="p-2 whitespace-nowrap text-gray-600">{event.startDatetime.slice(0, 10)}</td>
@@ -143,10 +143,6 @@ function SuperAdminManageEvents() {
                                                         }}
                                                         onEdit={() => {
                                                             navigate(`/superadmin/edit-event/${event.eventId}`);
-                                                            setOpenId(null);
-                                                        }}
-                                                        onDelete={() => {
-                                                            alert(`Deleting ${event.name}`);
                                                             setOpenId(null);
                                                         }}
                                                     />

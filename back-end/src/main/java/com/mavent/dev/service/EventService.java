@@ -1,6 +1,6 @@
 package com.mavent.dev.service;
 
-import com.mavent.dev.DTO.EventDTO;
+import com.mavent.dev.DTO.superadmin.EventDTO;
 import java.util.List;
 
 public interface EventService {

@@ -13,6 +13,7 @@ import EventDetails from "./pages/EventDetails";
 import SuperAdminManageEvents from './pages/SuperAdminManageEvents';
 import SuperAdminManageUsers from './pages/SuperAdminManageUsers';
 import SuperAdminViewEventDetails from './pages/SuperAdminViewEventDetails';
+import SuperAdminViewUserDetails from './pages/SuperAdminViewUserDetails';
 import SuperAdminEditEvent from './pages/SuperAdminEditEvent';
 import UserEventsPage from './pages/UserEventsPage';
 import React from 'react';
@@ -46,6 +47,7 @@ function App() {
                         path="/superadmin/event-detail/:eventId"
                         element={<SuperAdminViewEventDetails />}
                     />
+                    <Route path="/superadmin/user-detail/:id" element={<SuperAdminViewUserDetails />} />
                     <Route
                         path="/superadmin/edit-event/:eventId"
                         element={<SuperAdminEditEvent />}

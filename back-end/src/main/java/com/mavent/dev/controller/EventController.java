@@ -1,6 +1,6 @@
 package com.mavent.dev.controller;
 
-import com.mavent.dev.DTO.EventDTO;
+import com.mavent.dev.DTO.superadmin.EventDTO;
 import com.mavent.dev.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

@@ -1,9 +1,10 @@
 package com.mavent.dev.controller;
 
-import com.mavent.dev.DTO.*;
+import com.mavent.dev.DTO.superadmin.AccountDTO;
+import com.mavent.dev.DTO.LoginDTO;
+import com.mavent.dev.DTO.UserProfileDTO;
 import com.mavent.dev.config.MailConfig;
 import com.mavent.dev.entity.Account;
-import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.service.AccountService;
 import com.mavent.dev.service.EventService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,8 +17,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.multipart.MultipartFile;
-import com.mavent.dev.config.CloudConfig;  // Adjust the package path based on your project structure
+import com.mavent.dev.config.CloudConfig;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -29,7 +31,7 @@ public class AccountController {
 
     @Autowired
     private AccountService accountService;
-
+  
     @Autowired
     private EventService eventService;
 
@@ -41,6 +43,23 @@ public class AccountController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @GetMapping("/accounts")
+    public ResponseEntity<List<AccountDTO>> getAllAccounts() {
+        List<AccountDTO> accounts = accountService.getAllAccounts();
+        return ResponseEntity.ok(accounts);
+    }
+
+    @GetMapping("/accounts/{id}")
+    public ResponseEntity<?> getAccountById(@PathVariable Integer id) {
+        try {
+            AccountDTO accountDTO = accountService.getAccountById(id);
+            return ResponseEntity.ok(accountDTO);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Account not found with ID: " + id);
+        }
+    }
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody AccountDTO loginDTO, HttpServletRequest request) {
