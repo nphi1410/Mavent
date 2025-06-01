@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from 'react-router-dom';
+
 import SuperAdminSidebar from '../components/SuperAdminSidebar';
 import SuperAdminHeader from '../components/SuperAdminHeader';
 import SuperAdminActionDropdown from '../components/SuperAdminActionDropdown';
@@ -14,9 +16,10 @@ function SuperAdminManageUsers() {
     const [genderFilter, setGenderFilter] = useState("ALL GENDERS");
     const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
     const [genderDropdownOpen, setGenderDropdownOpen] = useState(false);
-
     const [currentPage, setCurrentPage] = useState(1);
     const usersPerPage = 5;
+
+    const navigate = useNavigate();
 
     const rolesOptions = ["ALL ROLES", "SUPER_ADMIN", "USER"];
     const genderOptions = ["ALL GENDERS", "MALE", "FEMALE", "OTHER"];
@@ -58,8 +61,6 @@ function SuperAdminManageUsers() {
         (currentPage - 1) * usersPerPage,
         currentPage * usersPerPage
     );
-
-    const handlePageChange = (page) => setCurrentPage(page);
 
     return (
         <div className="h-screen w-screen flex bg-amber-50">
@@ -172,7 +173,7 @@ function SuperAdminManageUsers() {
                                                             isOpen={openId === user.accountId}
                                                             onToggle={() => setOpenId(openId === user.accountId ? null : user.accountId)}
                                                             onView={() => {
-                                                                alert(`Viewing ${user.fullName}`);
+                                                                navigate(`/superadmin/user-detail/${user.accountId}`);
                                                                 setOpenId(null);
                                                             }}
                                                             onEdit={() => {

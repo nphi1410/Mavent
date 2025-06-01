@@ -11,3 +11,16 @@ export const getAllAccounts = async () => {
         return [];
     }
 };
+
+export const getAccountById = async (id) => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/${id}`);
+
+        console.log(response.data);
+        
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching account with ID ${id}:`, error);
+        return null;
+    }
+};
