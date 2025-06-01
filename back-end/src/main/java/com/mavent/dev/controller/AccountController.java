@@ -1,9 +1,7 @@
 package com.mavent.dev.controller;
 
-import com.mavent.dev.DTO.LoginDTO;
-import com.mavent.dev.DTO.TaskDTO;
-import com.mavent.dev.DTO.UserEventDTO;
-import com.mavent.dev.DTO.UserProfileDTO;
+
+import com.mavent.dev.DTO.*;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.service.AccountService;
@@ -13,16 +11,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.multipart.MultipartFile;
-import com.mavent.dev.config.CloudConfig;
+import com.mavent.dev.config.CloudConfig;  // Adjust the package path based on your project structure
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
 public class AccountController {
-
     @Autowired
     private AccountService accountService;
 
@@ -60,16 +60,19 @@ public class AccountController {
     }
 
     @PutMapping("/user/profile")
-    public ResponseEntity<UserProfileDTO> updateProfile(@RequestBody UserProfileDTO userProfileDTO, HttpSession session) {
+    public ResponseEntity<?> updateProfile(@RequestBody UserProfileDTO userProfileDTO, HttpSession session) {
         String username = (String) session.getAttribute("username");
         if (username == null) {
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("User must be logged in");
         }
+
         try {
             UserProfileDTO updatedProfile = accountService.updateProfile(username, userProfileDTO);
             return ResponseEntity.ok(updatedProfile);
         } catch (Exception e) {
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error updating profile: " + e.getMessage());
         }
     }
 
@@ -90,7 +93,7 @@ public class AccountController {
             cloudConfig.uploadMultipartFile(file, folder);
 
             Account account = accountService.getAccount(username);
-            account.setAvatarImg(keyName);
+            account.setAvatarUrl(keyName);
             accountService.save(account);
 
             return ResponseEntity.ok().body(Map.of(
@@ -104,24 +107,37 @@ public class AccountController {
     }
 
     @GetMapping("/user/tasks")
-    public ResponseEntity<List<TaskDTO>> getUserTasks(HttpSession session) {
-        String username = (String) session.getAttribute("username");
-        if (username == null) {
+    public ResponseEntity<List<TaskDTO>> getUserTasks(
+            HttpSession session,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String priority,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String sortOrder,
+            @RequestParam(required = false) String eventName) {  // Add this line
+        Account account = (Account) session.getAttribute("account");
+        if (account == null) {
             return ResponseEntity.status(401).build();
         }
 
-        UserProfileDTO user = accountService.getUserProfile(username);
-        List<TaskDTO> tasks = accountService.getUserTasks(user.getId());
+        List<TaskDTO> tasks = accountService.getUserTasks(
+                account.getAccountId(),
+                status,
+                priority,
+                keyword,
+                sortOrder,
+                eventName);
         return ResponseEntity.ok(tasks);
+    }
 
     @GetMapping("/user/events")
     public ResponseEntity<?> getUserEvents(HttpSession session) {
-        UserProfileDTO user = (UserProfileDTO) session.getAttribute("account");
-        if (user == null) {
+        Account account = (Account) session.getAttribute("account");
+        if (account == null) {
             return ResponseEntity.status(401).body("Bạn cần đăng nhập");
         }
 
-        List<UserEventDTO> events = accountService.getUserEvents(user.getId());
+        List<UserEventDTO> events = accountService.getUserEvents(account.getAccountId());
+        System.out.println("accid" + account.getAccountId());
         return ResponseEntity.ok(events);
     }
 

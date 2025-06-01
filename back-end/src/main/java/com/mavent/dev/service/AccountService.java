@@ -6,7 +6,6 @@ import com.mavent.dev.DTO.UserEventDTO;
 import com.mavent.dev.DTO.UserProfileDTO;
 import com.mavent.dev.entity.Account;
 import java.util.List;
-import java.util.Optional;
 
 public interface AccountService {
     void save(Account accountInfo);
@@ -15,7 +14,9 @@ public interface AccountService {
     UserProfileDTO updateProfile(String username, UserProfileDTO userProfileDTO);
     List<UserEventDTO> getUserEvents(Integer accountId);
     Account getAccount(String username);
-    List<TaskDTO> getUserTasks(Integer accountId);
+    void updateAvatar(String username, String imageUrl);
+    List<TaskDTO> getUserTasks(Integer accountId, String status, String priority,
+                               String keyword, String sortOrder, String eventName);
 
 }
 

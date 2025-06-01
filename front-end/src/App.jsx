@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import {
     BrowserRouter as Router,
     Routes,
@@ -10,36 +9,13 @@ import Login from './pages/Login';
 import HomePage from './pages/HomePage';
 import SuperAdminDashboard from './pages/SuperAdminDashBoard';
 import EventDetails from "./pages/EventDetails";
-import UserEventsPage from './pages/UserEventsPage';
-import React from 'react';
-
-
-function App() {
-  return (
-    <Router>
-      <div className="min-h-screen w-full">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/profile/events" element={<UserEventsPage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/admin" element={<SuperAdminDashboard />} />
-          <Route path="/event/1" element={<EventDetails />} />
-        </Routes>
-      </div>
-    </Router>
-  );
-=======
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import ProfilePage from "./pages/ProfilePage";
-import Login from "./pages/Login";
-import HomePage from "./pages/HomePage";
-import SuperAdminDashboard from "./pages/SuperAdminDashBoard";
-import EventDetails from "./pages/EventDetails";
 import SuperAdminManageUsers from './pages/SuperAdminManageUsers';
 import SuperAdminViewEventDetails from './pages/SuperAdminViewEventDetails';
 import SuperAdminEditEvent from './pages/SuperAdminEditEvent';
 import SuperAdminManageEvents from './pages/SuperAdminManageEvents';
+import UserEventsPage from "./pages/UserEventsPage";
+import UserTasksPage from "./pages/UserTasksPage";
+import React from "react";
 
 function App() {
     return (
@@ -47,7 +23,10 @@ function App() {
             <div className="min-h-screen w-full">
                 <Routes>
                     <Route path="/" element={<HomePage />} />
-                    <Route path="/profile/*" element={<ProfilePage />} />
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/profile/account" element={<ProfilePage />} />
+                    <Route path="/profile/events" element={<UserEventsPage />} />
+                    <Route path="/profile/tasks" element={<UserTasksPage />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/superadmin" element={<SuperAdminDashboard />} />
                     <Route
@@ -68,7 +47,6 @@ function App() {
             </div>
         </Router>
     );
->>>>>>> 95c3764a17e8b73790bbff53c9bea9d1f9104904
 }
 
 export default App;
