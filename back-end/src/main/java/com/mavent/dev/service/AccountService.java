@@ -1,5 +1,7 @@
 package com.mavent.dev.service;
 
+import com.mavent.dev.DTO.TaskDTO;
+import com.mavent.dev.DTO.UserEventDTO;
 import com.mavent.dev.DTO.superadmin.AccountDTO;
 import com.mavent.dev.DTO.UserProfileDTO;
 import com.mavent.dev.entity.Account;
@@ -22,9 +24,9 @@ public interface AccountService {
                                String keyword, String sortOrder, String eventName);
 
     String getRandomPassword(int length);
-}
 
-    // Sửa trả về List<AccountDTO> thay vì List<Account>
     List<AccountDTO> getAllAccounts();
+
     AccountDTO getAccountById(Integer id);
 }
+

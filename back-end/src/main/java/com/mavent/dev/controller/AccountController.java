@@ -1,10 +1,10 @@
 package com.mavent.dev.controller;
 
-import com.mavent.dev.DTO.superadmin.AccountDTO;
-import com.mavent.dev.DTO.LoginDTO;
-import com.mavent.dev.DTO.UserProfileDTO;
+import com.mavent.dev.DTO.*;
+import com.mavent.dev.DTO.superadmin.*;
 import com.mavent.dev.config.MailConfig;
 import com.mavent.dev.entity.Account;
+import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.service.AccountService;
 import com.mavent.dev.service.EventService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -68,29 +68,44 @@ public class AccountController {
         HttpSession session = request.getSession();
         boolean success = accountService.checkLogin(loginDTO.getUsername(), loginDTO.getPassword());
         if (success) {
-            Account acc = accountService.getAccount(loginDTO.getUsername());
-//            if (acc != null) System.out.println("Account found by username: " + acc.getUsername());
+//            System.out.println("Login successful for username/email: " + loginDTO.getUsername());
+            try {
+                Account acc = null;
+                if (accountService.getAccount(loginDTO.getUsername()) == null) {
+                    acc = accountService.getAccountByEmail(loginDTO.getUsername());
+                } else {
+                    acc = accountService.getAccount(loginDTO.getUsername());
+                }
 
-            Account accByEmail = accountService.getAccountByEmail(loginDTO.getUsername());
-//            if (accByEmail != null) System.out.println("Account found by email: " + (accByEmail != null ? accByEmail.getUsername() : "null"));
-            if (acc == null && accByEmail != null) {
-                acc = accByEmail; // Use account found by email if username not found
+//                if (acc == null) {
+//                    System.out.println("Account not found by username, trying to find by email: " + loginDTO.getUsername());
+//                    acc = accountByEmail;
+//                }
+//            if (acc == null) {
+//                System.out.println("Invalid login attempt for username/email: " + loginDTO.getUsername());
+//                return ResponseEntity.status(401).body("Invalid username or password");
+//            } else {
+//                System.out.println("Account found by email: " + acc.getEmail());
+//            }
                 session.setAttribute("email", acc.getEmail());
-            }
-            assert acc != null;
-            session.setAttribute("username", acc.getUsername());
+//            if (accByEmail != null) System.out.println("Account found by email: " + (accByEmail != null ? accByEmail.getUsername() : "null"));
+                session.setAttribute("username", acc.getUsername());
 //            session.setAttribute("account", acc);
-            session.setAttribute("isSuperAdmin", acc.getSystemRole() == Account.SystemRole.SUPER_ADMIN);
+                session.setAttribute("isSuperAdmin", acc.getSystemRole() == Account.SystemRole.SUPER_ADMIN);
 
-            String username = (String) session.getAttribute("username");
-            System.out.println("Username from session: " + username);
-            System.out.println("Session ID: " + session.getId());
-            System.out.println("encoded password: " + acc.getPasswordHash());
+                String username = (String) session.getAttribute("username");
+                System.out.println("Username from session: " + username);
+                System.out.println("Session ID: " + session.getId());
+                System.out.println("encoded password: " + acc.getPasswordHash());
 
-            boolean isSuperAdmin = acc.getSystemRole() == Account.SystemRole.SUPER_ADMIN;
-            String redirectUrl = isSuperAdmin ? "/superadmin" : "/profile";
-            System.out.println("Redirect URL: " + redirectUrl);
-            return ResponseEntity.ok(redirectUrl);
+                boolean isSuperAdmin = acc.getSystemRole() == Account.SystemRole.SUPER_ADMIN;
+                String redirectUrl = isSuperAdmin ? "/superadmin" : "/profile";
+                System.out.println("Redirect URL: " + redirectUrl);
+                return ResponseEntity.ok(redirectUrl);
+            } catch (Exception e) {
+                System.out.println("Error during login: " + e.getMessage());
+                return ResponseEntity.status(500).body("Internal server error");
+            }
         } else {
             return ResponseEntity.status(401).body("Invalid username or password");
         }

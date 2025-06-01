@@ -51,7 +51,7 @@ function Login() {
         <div className="w-1/2 flex items-center justify-center border-r border-black">
           {/* <p className="text-center text-sm">Ảnh sự kiện gần nhất hiện tại</p> */}
           <img
-            src="https://scontent.fhan2-5.fna.fbcdn.net/v/t39.30808-6/500241004_1167279355199938_6596002086529846154_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=foSz0fJFckoQ7kNvwE6hEnf&_nc_oc=Adm5W8dX4GHiM5e4sh_OLjySpiV9QVHGJ0GceqZZXKagDzagOh4stGKqJlEM-wVHC6c&_nc_zt=23&_nc_ht=scontent.fhan2-5.fna&_nc_gid=x7PXBO4qz810RpaQdUQ3uA&oh=00_AfKQrOCrJ1yNRqgI6MFQXENOMN6G-RxlyOvEydCPmYfehw&oe=6838E740"
+            src="https://scontent.fhan14-3.fna.fbcdn.net/v/t39.30808-6/499857471_1170114354916438_4660292432338571278_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeHYTTPlktTR4FdzJnJjy9Pi2dSJO6aupZnZ1Ik7pq6lmbAmBjR6XmY846Tf_bRuYK9MgczptyLGPW9IrHC9vCgR&_nc_ohc=0p9NhTngh7kQ7kNvwExdHr0&_nc_oc=AdlxtlBAAj1CELK7BTdhs0s3ckP2CYMuJ4AX2ZCUonXLKuO2axXB8QYmswSgwcsb8s4&_nc_zt=23&_nc_ht=scontent.fhan14-3.fna&_nc_gid=dAMXTM1ULYRzq3DWQqg7oA&oh=00_AfL0ZtGNZM6mt9uUdC1fbIahqZx-d6vlujsC8g7btd7tHw&oe=68426820"
             alt="Event"
             className="w-full h-full object-cover rounded-l-[30px]" />
         </div>

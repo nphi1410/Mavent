@@ -14,11 +14,13 @@ const Header = () => {
 
   const fetchUserProfile = async () => {
     try {
-      const response = await getUserProfile();
-      console.log(response.data);
+      const response = await getUserProfile({ requireAuth: false });
+      if (response) {
+        console.log(response.data);
 
-      setUserData(response.data);
-      setLoading(false);
+        setUserData(response.data);
+        setLoading(false);
+      }
     } catch (err) {
       console.error("Error fetching user profile:", err); // Cập nhật log
       setError(err.response?.data?.message || "Failed to load user profile"); // Cập nhật lỗi

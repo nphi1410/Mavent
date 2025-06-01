@@ -29,17 +29,34 @@ const handleAuthError = (error) => {
   throw error;
 };
 
-export const getUserProfile = async () => {
+// export const getUserProfile = async () => {
+//   try {
+//     console.log('Fetching user profile...');
+//     const response = await Api.get('/user/profile');
+//     console.log('Profile response:', response.data);
+//     return response.data;
+//   } catch (error) {
+//     console.error('Error in getUserProfile:', error);
+//     handleAuthError(error);
+//   }
+// };
+export const getUserProfile = async ({ requireAuth = true } = {}) => {
   try {
     console.log('Fetching user profile...');
     const response = await Api.get('/user/profile');
-    console.log('Profile response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error in getUserProfile:', error);
-    handleAuthError(error);
+
+    if (requireAuth) {
+      handleAuthError(error); // will redirect
+    }
+
+    // return null instead of throwing to prevent crash
+    return null;
   }
 };
+
 
 export const updateProfile = async (data) => {
   try {
