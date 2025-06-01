@@ -8,6 +8,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
 @Entity
 @Table(name = "events")
 @Data
@@ -48,9 +50,8 @@ public class Event {
     @Column(name = "status")
     private EventStatus status = EventStatus.PENDING;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "created_by_account_id")
-//    private Account createdBy;
+    @Column(name = "created_by_account_id")
+    private Integer createdBy;
 
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
@@ -62,13 +63,6 @@ public class Event {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-//    // Relationships
-//    @OneToMany(mappedBy = "event", fetch = FetchType.LAZY)
-//    private List<EventAccountRole> eventAccountRoles;
-//
-//    @OneToMany(mappedBy = "event", fetch = FetchType.LAZY)
-//    private List<Department> departments;
 
     public enum EventStatus {
         RECRUITING, UPCOMING, ONGOING, ENDED, CANCELLED, PENDING, REVIEWING

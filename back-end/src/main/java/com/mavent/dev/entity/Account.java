@@ -23,6 +23,13 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class Account {
+
+        public Account(String username, String email, String encodedPassword) {
+        this.username = username;
+        this.email = email;
+        this.passwordHash = encodedPassword;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "account_id")

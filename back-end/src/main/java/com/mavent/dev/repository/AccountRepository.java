@@ -20,6 +20,10 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
      */
     Optional<Account> findByUsername(String username);
 
+     List<Account> findAllByIsDeletedFalse();
+
+     long countByIsDeletedFalse();
+
     /**
      * Find account by email.
      * @param email the email to search for
