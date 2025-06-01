@@ -4,19 +4,27 @@ import com.mavent.dev.DTO.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import com.mavent.dev.DTO.TaskDTO;
+import com.mavent.dev.DTO.UserEventDTO;
+import com.mavent.dev.DTO.UserProfileDTO;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.Task;
 import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.repository.TaskRepository;
 import com.mavent.dev.service.AccountService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import com.mavent.dev.config.MailConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class AccountImplement implements AccountService {
@@ -99,7 +107,6 @@ public class AccountImplement implements AccountService {
 
         // Save updated account
         Account updatedAccount = accountRepository.save(account);
-
         return mapAccountToUserProfileDTO(updatedAccount);
     }
 
@@ -144,31 +151,65 @@ public class AccountImplement implements AccountService {
     @Autowired
     private TaskRepository taskRepository;
 
-    public List<TaskDTO> getUserTasks(Integer accountId) {
-        List<Task> tasks = taskRepository.findTasksByAccountId(accountId);
-        return tasks.stream().map(task -> {
-            TaskDTO dto = new TaskDTO();
-            dto.setTaskId(task.getTaskId());
-            dto.setEventId(task.getEventId());
-            dto.setDepartmentId(task.getDepartmentId());
-            dto.setTitle(task.getTitle());
-            dto.setDescription(task.getDescription());
-            dto.setAssignedToAccountId(task.getAssignedToAccountId());
-            dto.setAssignedByAccountId(task.getAssignedByAccountId());
-            dto.setDueDate(task.getDueDate());
-            dto.setStatus(task.getStatus().name());
-            dto.setPriority(task.getPriority().name());
-            return dto;
-        }).toList();
+    @Override
+    public List<TaskDTO> getUserTasks(Integer accountId, String status, String priority,
+                                      String keyword, String sortOrder, String eventName) {
+        List<TaskDTO> tasks = taskRepository.findTasksWithEventAndDepartment(accountId);
+
+        // Filter by status
+        if (status != null && !status.isBlank()) {
+            tasks = tasks.stream()
+                    .filter(t -> t.getStatus().equalsIgnoreCase(status))
+                    .toList();
+        }
+
+        // Filter by priority
+        if (priority != null && !priority.isBlank()) {
+            tasks = tasks.stream()
+                    .filter(t -> t.getPriority().equalsIgnoreCase(priority))
+                    .toList();
+        }
+
+        // Filter by event name
+        if (eventName != null && !eventName.isBlank()) {
+            String lowerEventName = eventName.toLowerCase();
+            tasks = tasks.stream()
+                    .filter(t -> t.getEventName() != null &&
+                            t.getEventName().toLowerCase().contains(lowerEventName))
+                    .toList();
+        }
+
+        // Search by keyword (in title)
+        if (keyword != null && !keyword.isBlank()) {
+            String lowerKeyword = keyword.toLowerCase();
+            tasks = tasks.stream()
+                    .filter(t -> t.getTitle().toLowerCase().contains(lowerKeyword))
+                    .toList();
+        }
+
+        // Sort by dueDate
+        if (sortOrder != null && !sortOrder.isBlank()) {
+            Comparator<TaskDTO> comparator = Comparator.comparing(TaskDTO::getDueDate);
+            if ("desc".equalsIgnoreCase(sortOrder)) {
+                comparator = comparator.reversed();
+            }
+            tasks = tasks.stream().sorted(comparator).toList();
+        }
+
+        return tasks;
     }
 
-//    @Override
-//    public void updateAvatar(String username, String imageUrl) {
-//        Account account = accountRepository.findByUsername(username)
-//                .orElseThrow(() -> new UsernameNotFoundException("Account not found with username: " + username));
-//        account.setAvatarImg(imageUrl);
-//        accountRepository.save(account);
-//    }
+
+
+    @Override
+    public void updateAvatar(String username, String imageUrl) {
+        Account account = accountRepository.findByUsername(username);
+        if (account == null) {
+            throw new UsernameNotFoundException(username);
+        }
+        account.setAvatarUrl(imageUrl);
+        accountRepository.save(account);
+    }
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -181,14 +222,14 @@ public class AccountImplement implements AccountService {
         FROM events e
         JOIN event_account_role ear ON e.event_id = ear.event_id
         LEFT JOIN departments d ON ear.department_id = d.department_id
-        WHERE ear.account_id = :accountId AND e.is_deleted = false AND ear.is_active = true
+        WHERE ear.account_id = ? AND e.is_deleted = false AND ear.is_active = true
     """;
 
         Query query = entityManager.createNativeQuery(sql);
-        query.setParameter("accountId", accountId);
+        query.setParameter(1, accountId);
 
         List<Object[]> results = query.getResultList();
-        List<UserEventDTO> eventList = new java.util.ArrayList<>();
+        List<UserEventDTO> eventList = new ArrayList<>();
 
         for (Object[] row : results) {
             Integer eventId = (Integer) row[0];
@@ -200,7 +241,7 @@ public class AccountImplement implements AccountService {
             String bannerUrl = (String) row[6];
 
             if (!"MEMBER".equals(role)) {
-                departmentName = null; // Chỉ lấy department nếu role là MEMBER
+                departmentName = null;
             }
 
             eventList.add(new UserEventDTO(eventId, name, description, status, role, departmentName, bannerUrl));
@@ -208,7 +249,6 @@ public class AccountImplement implements AccountService {
 
         return eventList;
     }
+
 }
-
-
 

@@ -11,6 +11,7 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
     try {
       const response = await axios.post(
@@ -28,19 +29,16 @@ function Login() {
       );
 
       if (response.status === 200) {
-        window.location.href = "/profile";
+        // Lưu minimal info vào sessionStorage
+        sessionStorage.setItem('isLoggedIn', 'true');
+        sessionStorage.setItem('username', username);
+
+        // Sử dụng navigate thay vì window.location để chuyển trang mượt hơn
+        navigate('/profile');
       }
     } catch (error) {
       console.error("Login failed:", error);
-      if (error.response && error.response.status === 401) {
-        setError("Invalid username or password. Please try again.");
-      }
-      else if (error.response && error.response.status === 500) {
-        setError("Server error. Please try again later.");
-      } else {
-        setError("An unexpected error occurred. Please try again.");
-      }
-      // Thêm xử lý hiển thị lỗi cho người dùng
+      setError(error.response?.data || "Login failed. Please try again.");
     }
   };
 

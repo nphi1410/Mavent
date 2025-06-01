@@ -4,7 +4,6 @@ package com.mavent.dev.service;
 import com.mavent.dev.DTO.*;
 import com.mavent.dev.entity.Account;
 import java.util.List;
-import java.util.Optional;
 
 public interface AccountService {
     void save(Account accountInfo);
@@ -17,5 +16,9 @@ public interface AccountService {
     List<TaskDTO> getUserTasks(Integer accountId);
     String isOtpTrue(String originalOTP, long otpCreatedTime, String requestOtp);
     String getRandomOTP();
+    void updateAvatar(String username, String imageUrl);
+    List<TaskDTO> getUserTasks(Integer accountId, String status, String priority,
+                               String keyword, String sortOrder, String eventName);
+
 }
 

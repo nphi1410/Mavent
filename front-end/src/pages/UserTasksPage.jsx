@@ -1,14 +1,15 @@
 import React from 'react';
-import UserEventsContent from '../components/usercenter/UserEventsContent';
+import UserTasksContent from '../components/usercenter/UserTasksContent';
 import Sidebar from '../components/usercenter/SidebarSettings';
 
-const UserEventsPage = () => {
+const UserTasksPage = () => {
   return (
     <div className="flex h-full w-full bg-gray-100">
+      
       <Sidebar />
-      <UserEventsContent />
+      <UserTasksContent />
     </div>
   );
 };
 
-export default UserEventsPage;
+export default UserTasksPage;
