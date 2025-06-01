@@ -51,6 +51,7 @@ const UserEventsContent = () => {
   // Add filter effect
   useEffect(() => {
     filterEvents();
+    setCurrentPage(1);
   }, [events, filters]);
 
   const filterEvents = () => {
