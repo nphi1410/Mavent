@@ -122,14 +122,6 @@ public class AccountImplement implements AccountService {
     }
 
     @Override
-    public boolean checkLogin(String username, String password) {
-        Account account = accountRepository.findByUsername(username);
-        if (account == null) return false;
-        return account.getPasswordHash().equals(password);
-    }
-
-    @Override
-
     public UserProfileDTO updateProfile(String username, UserProfileDTO userProfileDTO) {
         Account account = getAccount(username);
 
@@ -160,9 +152,13 @@ public class AccountImplement implements AccountService {
 
     @Override
     public Account getAccount(String username) {
-        Account account = accountRepository.findByUsername(username);
-        if (account == null) {
-            throw new UsernameNotFoundException("Account not found with username: " + username);
+        Account account = null;
+//                accountRepository.findByUsername(username);
+        try {
+            account = accountRepository.findByUsername(username);
+        } catch (UsernameNotFoundException ex) {
+            System.err.println("Account not found with username: " + username);
+            System.err.println("Error: " + ex);
         }
         return account;
     }
@@ -295,7 +291,6 @@ public class AccountImplement implements AccountService {
         return eventList;
     }
 
-}
     private AccountDTO mapAccountToDTO(Account account) {
         AccountDTO dto = new AccountDTO();
         dto.setAccountId(account.getAccountId());

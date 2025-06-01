@@ -24,7 +24,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())  // new lambda style to disable CSRF
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/**","/public/**", "/login", "/").permitAll()
+                        .requestMatchers("/api/**","/public/**", "/login", "/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
