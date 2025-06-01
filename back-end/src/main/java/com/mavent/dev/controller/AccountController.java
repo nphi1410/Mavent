@@ -5,6 +5,7 @@ import com.mavent.dev.config.MailConfig;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.service.AccountService;
+import com.mavent.dev.service.EventService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ public class AccountController {
 
     @Autowired
     private AccountService accountService;
+
+    @Autowired
+    private EventService eventService;
 
     @Autowired
     AccountRepository accountRepository;
@@ -182,14 +186,28 @@ public class AccountController {
         if (account == null) {
             return ResponseEntity.status(401).build();
         }
+        EventDTO event = null;
+        String evName = null;
 
+        if (eventName != null && !eventName.isEmpty()) {
+            try {
+                event = eventService.getEventById(Integer.parseInt(eventName));
+                if (event != null) {
+                    evName = event.getName();
+                    System.out.println("Event Name: " + evName);
+                }
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid event ID format: " + eventName);
+                return ResponseEntity.badRequest().build(); // hoặc trả về danh sách rỗng
+            }
+        }
         List<TaskDTO> tasks = accountService.getUserTasks(
                 account.getAccountId(),
                 status,
                 priority,
                 keyword,
                 sortOrder,
-                eventName);
+                evName);
         return ResponseEntity.ok(tasks);
     }
 

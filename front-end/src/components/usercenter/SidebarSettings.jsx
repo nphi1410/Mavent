@@ -8,7 +8,7 @@ const Sidebar = () => {
     `block py-[15px] px-5 no-underline rounded-lg mb-2.5 text-lg font-medium transition-all ${
       isActive
         ? 'bg-blue-100 text-[#0d2c5a] font-bold'
-        : 'text-gray-700 hover:bg-blue-50 hover:text-[#0d2c5a] transition'
+        : 'text-gray-700 hover:text-[#0d2c5a] transition'
     }`;
 
   return (
@@ -34,7 +34,7 @@ const Sidebar = () => {
                 `block py-[15px] px-5 no-underline rounded-lg mb-2.5 text-lg font-medium transition-all ${
                   isActive
                     ? 'bg-blue-100 text-[#0d2c5a] font-bold'
-                    : 'text-gray-700 hover:bg-yellow-300 hover:text-black transition'
+                    : 'text-gray-700 hover:text-black transition'
                 }`
               }
             >
@@ -48,7 +48,7 @@ const Sidebar = () => {
                 `block py-[15px] px-5 no-underline rounded-lg mb-2.5 text-lg font-medium transition-all ${
                   isActive
                     ? 'bg-blue-100 text-[#0d2c5a] font-bold'
-                    : 'text-gray-700 hover:bg-yellow-300 hover:text-black transition'
+                    : 'text-gray-700 hover:text-black transition'
                 }`
               }
             >
