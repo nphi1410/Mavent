@@ -27,24 +27,18 @@ public class AccountImplement implements AccountService {
     public List<AccountDTO> getAllAccounts() {
         List<Account> accounts = accountRepository.findAllByIsDeletedFalse();
 
-        return accounts.stream().map(account -> {
-            AccountDTO dto = new AccountDTO();
-            dto.setAccountId(account.getAccountId());
-            dto.setUsername(account.getUsername());
-            dto.setEmail(account.getEmail());
-            dto.setFullName(account.getFullName());
-            dto.setSystemRole(account.getSystemRole());  // SystemRole enum
-            dto.setAvatarUrl(account.getAvatarUrl());
-            dto.setPhoneNumber(account.getPhoneNumber());
-            dto.setGender(account.getGender());  // Gender enum
-            dto.setStudentId(account.getStudentId());
-            dto.setDateOfBirth(account.getDateOfBirth());
-            dto.setCreatedAt(account.getCreatedAt());
-            dto.setUpdatedAt(account.getUpdatedAt());
-            return dto;
-        }).collect(Collectors.toList());
+        return accounts.stream()
+                .map(this::mapAccountToDTO)
+                .collect(Collectors.toList());
     }
 
+    @Override
+    public AccountDTO getAccountById(Integer id) {
+        Account account = accountRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("Account not found with ID: " + id));
+
+        return mapAccountToDTO(account);
+    }
 
     @Override
     public UserProfileDTO getUserProfile(String username) {
@@ -90,12 +84,9 @@ public class AccountImplement implements AccountService {
 
     @Override
     public Account getAccount(String username) {
-        Account account = null;
-        try {
-            account = accountRepository.findByUsername(username);
-        } catch (UsernameNotFoundException ex) {
-            System.err.println("Account not found with username: " + username);
-            System.err.println("Error: " + ex);
+        Account account = accountRepository.findByUsername(username);
+        if (account == null) {
+            throw new UsernameNotFoundException("Account not found with username: " + username);
         }
         return account;
     }
@@ -111,6 +102,23 @@ public class AccountImplement implements AccountService {
         dto.setGender(account.getGender() != null ? account.getGender().name() : null);
         dto.setDateOfBirth(account.getDateOfBirth());
         dto.setStudentId(account.getStudentId());
+        return dto;
+    }
+
+    private AccountDTO mapAccountToDTO(Account account) {
+        AccountDTO dto = new AccountDTO();
+        dto.setAccountId(account.getAccountId());
+        dto.setUsername(account.getUsername());
+        dto.setEmail(account.getEmail());
+        dto.setFullName(account.getFullName());
+        dto.setSystemRole(account.getSystemRole());
+        dto.setAvatarUrl(account.getAvatarUrl());
+        dto.setPhoneNumber(account.getPhoneNumber());
+        dto.setGender(account.getGender());
+        dto.setStudentId(account.getStudentId());
+        dto.setDateOfBirth(account.getDateOfBirth());
+        dto.setCreatedAt(account.getCreatedAt());
+        dto.setUpdatedAt(account.getUpdatedAt());
         return dto;
     }
 }

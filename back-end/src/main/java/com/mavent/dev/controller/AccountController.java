@@ -32,6 +32,17 @@ public class AccountController {
         return ResponseEntity.ok(accounts);
     }
 
+    @GetMapping("/accounts/{id}")
+    public ResponseEntity<?> getAccountById(@PathVariable Integer id) {
+        try {
+            AccountDTO accountDTO = accountService.getAccountById(id);
+            return ResponseEntity.ok(accountDTO);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Account not found with ID: " + id);
+        }
+    }
+
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginDTO loginDTO, HttpServletRequest request) {
         HttpSession session = request.getSession();

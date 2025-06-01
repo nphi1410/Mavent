@@ -15,4 +15,5 @@ public interface AccountService {
 
     // Sửa trả về List<AccountDTO> thay vì List<Account>
     List<AccountDTO> getAllAccounts();
+    AccountDTO getAccountById(Integer id);
 }
