@@ -43,7 +43,7 @@ public class AccountController {
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody AccountDTO loginDTO, HttpServletRequest request) {
+    public ResponseEntity<String> login(@RequestBody LoginDTO loginDTO, HttpServletRequest request) {
         System.out.println("Login attempt with username/email: " + loginDTO.getUsername());
         System.out.println("Password: " + loginDTO.getPassword());
         HttpSession session = request.getSession();
@@ -78,7 +78,7 @@ public class AccountController {
     }
 
     @PostMapping("/send-register-otp")
-    public ResponseEntity<?> sendOtp(@RequestBody AccountDTO request, HttpSession session) {
+    public ResponseEntity<?> sendOtp(@RequestBody RegisterDTO request, HttpSession session) {
         if (accountRepository.findByUsername(request.getUsername()) != null) {
             return ResponseEntity.badRequest().body("Username already exists!");
         }
@@ -128,7 +128,7 @@ public class AccountController {
     }
 
     @PostMapping("/reset-password-request")
-    public ResponseEntity<?> resetPasswordRequest(@RequestBody AccountDTO request, HttpSession session) {
+    public ResponseEntity<?> resetPasswordRequest(@RequestBody ResetPasswordDTO request, HttpSession session) {
         Account account = accountRepository.findByEmail(request.getEmail());
         if (account == null) {
             return ResponseEntity.badRequest().body("Email not found");

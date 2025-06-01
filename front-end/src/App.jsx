@@ -17,6 +17,7 @@ import SuperAdminEditEvent from './pages/SuperAdminEditEvent';
 import UserEventsPage from './pages/UserEventsPage';
 import React from 'react';
 import Register from './pages/Register';
+import Logout from './components/Logout';
 
 import UserTasksPage from "./pages/UserTasksPage";
 import ResetPassword from "./pages/ResetPassword";
@@ -33,6 +34,7 @@ function App() {
                     <Route path="/profile/events" element={<UserEventsPage />} />
                     <Route path="/profile/tasks" element={<UserTasksPage />} />
                     <Route path="/login" element={<Login />} />
+                    <Route path="/logout" element={<Logout />} />
                     <Route path="/reset-password-request" element={<ResetPassword />} />
                     <Route path="/change-password" element={<ChangePassword />} />
                     <Route path="/superadmin" element={<SuperAdminDashboard />} />
