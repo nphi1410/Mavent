@@ -34,7 +34,8 @@ function Login() {
         sessionStorage.setItem('username', username);
 
         // Sử dụng navigate thay vì window.location để chuyển trang mượt hơn
-        navigate('/profile');
+        console.log("Login successful:", response.data);
+        navigate(`${response.data}`);
       }
     } catch (error) {
       console.error("Login failed:", error);
