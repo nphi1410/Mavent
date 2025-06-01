@@ -1,23 +1,48 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import { login } from '../services/AuthService';
+import axios from 'axios';
 
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
-    const response = await login({username, password});
-    if (response.status === 200) {
-      navigate("/");
-    } else {
-      console.error("Login failed");
+    try {
+      const response = await axios.post(
+        "http://localhost:8080/api/login",
+        {
+          username,
+          password
+        },
+        {
+          headers: {
+            "Content-Type": "application/json"
+          },
+          withCredentials: true
+        }
+      );
+
+      if (response.status === 200) {
+        // Lưu minimal info vào sessionStorage
+        sessionStorage.setItem('isLoggedIn', 'true');
+        sessionStorage.setItem('username', username);
+
+        // Sử dụng navigate thay vì window.location để chuyển trang mượt hơn
+        console.log("Login successful:", response.data);
+        navigate(`${response.data}`);
+      }
+    } catch (error) {
+      console.error("Login failed:", error);
+      setError(error.response?.data || "Login failed. Please try again.");
     }
   };
- 
+
 
   return (
     <div className="flex items-center justify-center min-h-screen w-full bg-blue-900">
@@ -28,12 +53,12 @@ function Login() {
           <img
             src="https://scontent.fhan2-5.fna.fbcdn.net/v/t39.30808-6/500241004_1167279355199938_6596002086529846154_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=foSz0fJFckoQ7kNvwE6hEnf&_nc_oc=Adm5W8dX4GHiM5e4sh_OLjySpiV9QVHGJ0GceqZZXKagDzagOh4stGKqJlEM-wVHC6c&_nc_zt=23&_nc_ht=scontent.fhan2-5.fna&_nc_gid=x7PXBO4qz810RpaQdUQ3uA&oh=00_AfKQrOCrJ1yNRqgI6MFQXENOMN6G-RxlyOvEydCPmYfehw&oe=6838E740"
             alt="Event"
-            className="w-full h-full object-cover rounded-l-[30px]"/>
+            className="w-full h-full object-cover rounded-l-[30px]" />
         </div>
 
         {/* Right Panel */}
         <div className="w-1/2 flex flex-col items-center justify-center p-8 space-y-5">
-          <h1 className="text-xl font-semibold text-center pb-4 text-blue-900">WELCOME TO MAVENT</h1>
+          <h1 className="text-5xl font-semibold text-center pb-4 text-blue-900">WELCOME TO MAVENT</h1>
 
           <form onSubmit={handleSubmit} className="flex flex-col items-center space-y-4 w-full">
             <input
@@ -63,16 +88,16 @@ function Login() {
             <button className="px-6 py-2 rounded-full bg-blue-900 text-white hover:bg-[#2f52bc] transition">
               LOGIN
             </button>
-            {/* {error && <div className="text-red-600 text-sm mt-2">{error}</div>} */}
+            {error && <div className="text-red-600 text-sm mt-2">{error}</div>}
           </form>
 
-          <Link to="/about" className="text-xs text-blue-900 hover:underline">
+          <Link to="/reset-password-request" className="text-xs text-blue-900 hover:underline">
             Forgot Password?
           </Link>
 
           <p className="text-[0.9rem]">
             Don’t have an account? Click{' '}
-            <Link to="/about" className="hover:underline hover:text-blue-900 text-xs">HERE</Link>
+            <Link to="/register" className="font-bold hover:underline hover:text-blue-900 text-xs">HERE</Link>
           </p>
         </div>
       </div>

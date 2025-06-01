@@ -11,7 +11,18 @@ public interface AccountService {
     boolean checkLogin(String username, String password);
     UserProfileDTO getUserProfile(String username);
     UserProfileDTO updateProfile(String username, UserProfileDTO userProfileDTO);
+    List<UserEventDTO> getUserEvents(Integer accountId);
     Account getAccount(String username);
+
+    Account getAccountByEmail(String email);
+    String isOtpTrue(String originalOTP, long otpCreatedTime, String requestOtp);
+    String getRandomOTP();
+    void updateAvatar(String username, String imageUrl);
+    List<TaskDTO> getUserTasks(Integer accountId, String status, String priority,
+                               String keyword, String sortOrder, String eventName);
+
+    String getRandomPassword(int length);
+}
 
     // Sửa trả về List<AccountDTO> thay vì List<Account>
     List<AccountDTO> getAllAccounts();
