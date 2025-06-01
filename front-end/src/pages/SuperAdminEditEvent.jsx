@@ -59,7 +59,7 @@ function SuperAdminEditEvent() {
         const updatedEvent = await updateEvent(eventId, eventData);
         if (updatedEvent) {
             alert('Cập nhật sự kiện thành công!');
-            window.location.href = '/events';
+            window.location.href = "/superadmin/events";
         } else {
             alert('Cập nhật sự kiện thất bại, vui lòng thử lại.');
         }
