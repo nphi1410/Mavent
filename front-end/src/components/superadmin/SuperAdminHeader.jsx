@@ -1,6 +1,6 @@
 import React from 'react'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBell, faBars, faCalendar, faUserTie } from "@fortawesome/free-solid-svg-icons";
+import { faBell, faBars, faCalendar } from "@fortawesome/free-solid-svg-icons";
 
 function SuperAdminHeader() {
   return (
@@ -8,15 +8,15 @@ function SuperAdminHeader() {
       {/* Left section */}
       <div className="flex items-center gap-6">
         <div className="flex items-center justify-center p-4 text-xl font-bold text-gray-800">
-          <img src="../assets/mavent-text-logo.svg" alt="mavent" className="w-40" />
+          <img src="/mavent-text-logo.svg" alt="mavent" className="w-40" />
         </div>
       </div>
 
       {/* Right section */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <FontAwesomeIcon icon={faUserTie} className="text-gray-600 text-xl" />
-          <span className="text-xl font-medium text-gray-700">
+          <div className="w-10 h-10 bg-gray-500 rounded-full"></div>
+          <span className="text-xl font-medium text-gray-900">
             <span className="text-black">Super</span> Admin
           </span>
         </div>
