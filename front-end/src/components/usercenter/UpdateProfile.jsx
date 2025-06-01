@@ -1,34 +1,25 @@
-<<<<<<< Updated upstream:front-end/src/components/UpdateProfile.jsx
-import React, { useState } from 'react';
-import { updateProfile } from '../services/profileService';
-=======
 import React, { useState, useEffect } from 'react';
 // Giả sử profileService.updateProfile đã được import ở ProfileContent và truyền xuống qua props
 // Hoặc nếu bạn muốn gọi trực tiếp từ đây, bạn cần import:
 // import { updateProfile } from '../../services/profileService'; 
->>>>>>> Stashed changes:front-end/src/components/usercenter/UpdateProfile.jsx
+import { updateProfile } from '../../services/profileService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSave, faXmark } from '@fortawesome/free-solid-svg-icons';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 
 const UpdateProfile = ({ userData, onClose, onUpdate }) => {
-  // State cho dữ liệu form, khởi tạo với giá trị từ userData
   const [formData, setFormData] = useState({
     fullName: userData?.fullName || '',
     studentId: userData?.studentId || '',
     gender: userData?.gender || '',
     email: userData?.email || '', // Email thường không cho sửa
-    // Đảm bảo key ở đây khớp với key trong userData và key backend mong đợi
-    phoneNumber: userData?.phoneNumber || '', // Đổi 'phone' thành 'phoneNumber' nếu userData dùng 'phoneNumber'
-    // Hoặc nếu backend mong đợi 'phone' và userData là 'phoneNumber':
-    // phone: userData?.phoneNumber || '', 
+    phoneNumber: userData?.phoneNumber || '', 
     dateOfBirth: userData?.dateOfBirth ? new Date(userData.dateOfBirth) : null
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null); // Lỗi cục bộ cho form này
 
-  // Đồng bộ formData nếu userData prop thay đổi từ bên ngoài (hiếm khi cần nếu modal được render mới mỗi lần)
   useEffect(() => {
     setFormData({
         fullName: userData?.fullName || '',
@@ -62,48 +53,26 @@ const UpdateProfile = ({ userData, onClose, onUpdate }) => {
     setError(null); // Xóa lỗi cũ
 
     try {
-      // Chuẩn bị dữ liệu để gửi đi, đảm bảo định dạng dateOfBirth là ISO string
       const dataToSubmit = {
         ...formData,
-        // Nếu backend không nhận 'email' hoặc không cho phép cập nhật email, hãy loại bỏ nó khỏi dataToSubmit
-        // delete dataToSubmit.email; 
         dateOfBirth: formData.dateOfBirth ? formData.dateOfBirth.toISOString().split('T')[0] : null // Gửi YYYY-MM-DD
       };
-      // Kiểm tra xem key 'phone' hay 'phoneNumber' được backend sử dụng
-      // Nếu backend dùng 'phone' nhưng formData dùng 'phoneNumber':
-      // if (dataToSubmit.phoneNumber !== undefined) {
-      //   dataToSubmit.phone = dataToSubmit.phoneNumber;
-      //   delete dataToSubmit.phoneNumber;
-      // }
+      
 
 
       console.log('UpdateProfile.jsx: Đang gửi dữ liệu lên service:', dataToSubmit);
-      
-      // Gọi service updateProfile (đã được import ở ProfileContent và truyền xuống)
-      // Hoặc nếu bạn import trực tiếp ở đây:
-      // const resultFromService = await updateProfileService(dataToSubmit);
-      // Vì onUpdate trong ProfileContent sẽ gọi service, nên ở đây chúng ta chỉ cần gọi onUpdate với dataToSubmit
-      // **CHỈNH SỬA QUAN TRỌNG THEO THẢO LUẬN CUỐI:**
-      // UpdateProfile sẽ KHÔNG gọi service updateProfile nữa.
-      // Nó chỉ chuẩn bị dữ liệu và gọi onUpdate của cha.
-      
-      // Gọi prop onUpdate của cha và truyền dữ liệu form đã chuẩn bị
       onUpdate(dataToSubmit); 
       // onClose(); // Cha sẽ quyết định đóng modal sau khi onUpdate của nó xử lý xong
 
     } catch (err) {
-      // Lỗi này thường là lỗi chuẩn bị dữ liệu (ví dụ: toISOString trên null)
-      // Lỗi gọi API sẽ được xử lý ở component cha (ProfileContent)
       console.error('UpdateProfile.jsx: Lỗi khi chuẩn bị dữ liệu hoặc gọi onUpdate:', err);
       setError(err.message || 'Lỗi không xác định khi chuẩn bị dữ liệu.');
       setLoading(false); // Dừng loading nếu có lỗi ở đây
     }
-    // setLoading sẽ được quản lý bởi onUpdate của cha nếu API call được chuyển lên đó
+    
   };
 
   return (
-    // Lớp CSS ngoài cùng của modal (fixed inset-0 ...) nên nằm ở ProfileContent
-    // để UpdateProfile chỉ là nội dung form. Tuy nhiên, giữ nguyên theo code bạn cung cấp.
     <div className="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50 overflow-y-auto p-4">
       <div className="my-8 bg-white rounded-xl p-6 sm:p-8 max-w-2xl w-full shadow-[0_0_15px_rgba(0,0,0,0.1)] border border-gray-100">
         <div className="flex justify-between items-center mb-6">

@@ -1,9 +1,15 @@
 package com.mavent.dev.service.implement;
 
+import com.mavent.dev.DTO.TaskDTO;
+import com.mavent.dev.DTO.UserEventDTO;
 import com.mavent.dev.DTO.UserProfileDTO;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.repository.AccountRepository;
+import com.mavent.dev.repository.TaskRepository;
 import com.mavent.dev.service.AccountService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -19,21 +25,19 @@ public class AccountImplement implements AccountService {
     private AccountRepository accountRepository;
 
     @Override
-    public void register(Account accountInfo) {
+    public void save(Account accountInfo) {
         accountRepository.save(accountInfo);
     }
-
     @Override
     public UserProfileDTO getUserProfile(String username) {
-        Account account = accountRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Account not found with username: " + username));
+        Account account = getAccount(username);
         return mapAccountToUserProfileDTO(account);
     }
 
     @Override
     public boolean checkLogin(String username, String password) {
         // Find account by username
-        Account account = accountRepository.findByUsername(username).orElse(null);
+        Account account = accountRepository.findByUsername(username);
         if (account == null) return false;
         // Compare raw password with stored hash (for demo, plain text; for real, use BCrypt)
         // Example for plain text (NOT recommended for production):
@@ -44,9 +48,7 @@ public class AccountImplement implements AccountService {
 
     @Override
     public UserProfileDTO updateProfile(String username, UserProfileDTO userProfileDTO) {
-        Account account = accountRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Account not found with username: " + username));
-
+        Account account = getAccount(username);
         // Update profile fields
         if (userProfileDTO.getFullName() != null && !userProfileDTO.getFullName().trim().isEmpty()) {
             account.setFullName(userProfileDTO.getFullName());
@@ -64,7 +66,8 @@ public class AccountImplement implements AccountService {
             try {
                 account.setGender(Account.Gender.valueOf(userProfileDTO.getGender().toUpperCase()));
             } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Invalid gender value. Must be one of: MALE, FEMALE, OTHER");
+                System.err.println("Invalid gender value. Must be one of: MALE, FEMALE, OTHER");
+                System.err.println("Error: "+ e);
             }
         }
 
@@ -86,8 +89,18 @@ public class AccountImplement implements AccountService {
         dto.setStudentId(account.getStudentId());
         return dto;
     }
-<<<<<<< Updated upstream
-=======
+
+    @Override
+    public Account getAccount(String username) {
+        Account account = null;
+        try{
+            account = accountRepository.findByUsername(username);
+        }catch (UsernameNotFoundException ex){
+            System.err.println("Account not found with username: " + username);
+            System.err.println("Error: " + ex);
+        }
+        return account;
+    }
 
     @Autowired
     private TaskRepository taskRepository;
@@ -191,7 +204,5 @@ public class AccountImplement implements AccountService {
         return eventList;
     }
 
-
->>>>>>> Stashed changes
 }
 

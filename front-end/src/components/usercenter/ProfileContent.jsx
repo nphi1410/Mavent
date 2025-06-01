@@ -1,10 +1,5 @@
 import React, { useEffect, useState } from "react";
-<<<<<<< Updated upstream:front-end/src/components/ProfileContent.jsx
-// Đổi từ getAllAccounts sang getUserProfile
-import { getUserProfile, uploadAvatar } from "../services/profileService";
-=======
 import { getUserProfile, uploadAvatar, updateProfile as updateProfileService } from "../../services/profileService"; // Đổi tên updateProfile để tránh trùng
->>>>>>> Stashed changes:front-end/src/components/usercenter/ProfileContent.jsx
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload, faUser } from '@fortawesome/free-solid-svg-icons';
 import UpdateProfile from "./UpdateProfile"; 

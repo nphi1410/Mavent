@@ -27,15 +27,13 @@ public class EventImplement implements EventService {
 
     @Override
     public EventDTO getEventById(Integer eventId) {
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new EntityNotFoundException("Event not found with ID: " + eventId));
+        Event event = getEventEntityById(eventId);
         return mapToDTO(event);
     }
 
     @Override
     public EventDTO updateEvent(Integer eventId, EventDTO eventDTO) {
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new EntityNotFoundException("Event not found with ID: " + eventId));
+        Event event = getEventEntityById(eventId);
 
         // cập nhật từng trường khi eventDTO không null
         if (eventDTO.getName() != null) event.setName(eventDTO.getName());
@@ -55,6 +53,18 @@ public class EventImplement implements EventService {
         Event updatedEvent = eventRepository.save(event);
 
         return mapToDTO(updatedEvent);
+    }
+
+    private Event getEventEntityById(Integer eventId){
+        Event event = null;
+        try {
+            event = eventRepository.findByEventId(eventId);
+        } catch (Exception e){
+            System.err.println("Event not found with ID: " + eventId);
+            System.err.println("Error: "+ e);
+        }
+
+        return event;
     }
 
     private EventDTO mapToDTO(Event event) {

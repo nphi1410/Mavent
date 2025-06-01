@@ -1,6 +1,6 @@
 import React from 'react';
-import Sidebar from '../components/SidebarSettings';
-import ProfileContent from '../components/ProfileContent';
+import Sidebar from '../components/usercenter/SidebarSettings';
+import ProfileContent from '../components/usercenter/ProfileContent';
 import Header from '../components/common/Header';
 
 const ProfilePage = () => {

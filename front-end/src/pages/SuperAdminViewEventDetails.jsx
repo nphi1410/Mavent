@@ -1,7 +1,7 @@
 import { React, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarAlt, faUser, faClock, faLocationDot, faEdit } from "@fortawesome/free-solid-svg-icons";
+import { faCalendarAlt, faUser, faClock, faLocationDot } from "@fortawesome/free-solid-svg-icons";
 import SuperAdminSidebar from "../components/SuperAdminSidebar";
 import SuperAdminHeader from "../components/SuperAdminHeader";
 import { getEventById } from "../services/eventService";

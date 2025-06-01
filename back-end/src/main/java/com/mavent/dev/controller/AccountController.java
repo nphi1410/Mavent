@@ -1,11 +1,7 @@
 package com.mavent.dev.controller;
 
-<<<<<<< Updated upstream
-import com.mavent.dev.DTO.LoginDTO;
-import com.mavent.dev.DTO.UserProfileDTO;
-=======
+
 import com.mavent.dev.DTO.*;
->>>>>>> Stashed changes
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.service.AccountService;
@@ -27,28 +23,15 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 public class AccountController {
-    @Value("${aws.bucket}")
-    private String bucket;
-
-    @Autowired
-    private AccountRepository accountRepository;
-
     @Autowired
     private AccountService accountService;
-
-    // DTO for login request
-    public static class LoginRequest {
-        public String username;
-        public String password;
-    }
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginDTO loginDTO, HttpServletRequest request) {
         HttpSession session = request.getSession();
         boolean success = accountService.checkLogin(loginDTO.getUsername(), loginDTO.getPassword());
         if (success) {
-            Account acc = accountRepository.findByUsername(loginDTO.getUsername())
-                    .orElseThrow(() -> new RuntimeException("Account not found"));
+            Account acc = accountService.getAccount(loginDTO.getUsername());
             session.setAttribute("account", acc);
             session.setAttribute("username", loginDTO.getUsername());
             session.setAttribute("isSuperAdmin", acc.getSystemRole() == Account.SystemRole.SUPER_ADMIN);
@@ -109,21 +92,12 @@ public class AccountController {
 
             cloudConfig.uploadMultipartFile(file, folder);
 
-<<<<<<< Updated upstream
-            String imageUrl = "https://s3.us-east-005.backblazeb2.com/Mavent/" + keyName;
-
-            Account account = accountRepository.findByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("Account not found"));
-            account.setAvatarImg(imageUrl);
-            accountRepository.save(account);
-=======
             Account account = accountService.getAccount(username);
             account.setAvatarUrl(keyName);
             accountService.save(account);
->>>>>>> Stashed changes
 
             return ResponseEntity.ok().body(Map.of(
-                    "avatarUrl", imageUrl,
+                    "avatarUrl", keyName,
                     "message", "Avatar updated successfully"
             ));
         } catch (IOException e) {
@@ -132,8 +106,6 @@ public class AccountController {
         }
     }
 
-<<<<<<< Updated upstream
-=======
     @GetMapping("/user/tasks")
     public ResponseEntity<List<TaskDTO>> getUserTasks(
             HttpSession session,
@@ -169,8 +141,6 @@ public class AccountController {
         return ResponseEntity.ok(events);
     }
 
-
->>>>>>> Stashed changes
 }
 
 
