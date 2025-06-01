@@ -44,6 +44,7 @@ export const getUserProfile = async ({ requireAuth = true } = {}) => {
   try {
     console.log('Fetching user profile...');
     const response = await Api.get('/user/profile');
+    console.log('Profile response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error in getUserProfile:', error);

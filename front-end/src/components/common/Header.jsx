@@ -16,9 +16,9 @@ const Header = () => {
     try {
       const response = await getUserProfile({ requireAuth: false });
       if (response) {
-        console.log(response.data);
+        console.log(response);
 
-        setUserData(response.data);
+        setUserData(response);
         setLoading(false);
       }
     } catch (err) {
@@ -64,6 +64,11 @@ const Header = () => {
                   className="w-full h-full object-cover"
                 />
               </div>
+            <span
+              onClick={() => navigate("/logout")}
+              className="ml-4 px-4 py-2 bg-red-500 text-white rounded-full cursor-pointer hover:bg-blue-800 transition">
+              Logout
+            </span>
             </>
           ) : (
             <span
