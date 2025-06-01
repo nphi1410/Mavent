@@ -10,5 +10,15 @@ public interface AccountService {
     boolean checkLogin(String username, String password);
     UserProfileDTO getUserProfile(String username);
     UserProfileDTO updateProfile(String username, UserProfileDTO userProfileDTO);
+<<<<<<< Updated upstream
+=======
+    List<UserEventDTO> getUserEvents(Integer accountId);
+    Account getAccount(String username);
+//    List<TaskDTO> getUserTasks(Integer accountId);
+    void updateAvatar(String username, String imageUrl);
+    List<TaskDTO> getUserTasks(Integer accountId, String status, String priority,
+                               String keyword, String sortOrder, String eventName);
+
+>>>>>>> Stashed changes
 }
 

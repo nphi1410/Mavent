@@ -1,7 +1,11 @@
 package com.mavent.dev.controller;
 
+<<<<<<< Updated upstream
 import com.mavent.dev.DTO.LoginDTO;
 import com.mavent.dev.DTO.UserProfileDTO;
+=======
+import com.mavent.dev.DTO.*;
+>>>>>>> Stashed changes
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.service.AccountService;
@@ -105,12 +109,18 @@ public class AccountController {
 
             cloudConfig.uploadMultipartFile(file, folder);
 
+<<<<<<< Updated upstream
             String imageUrl = "https://s3.us-east-005.backblazeb2.com/Mavent/" + keyName;
 
             Account account = accountRepository.findByUsername(username)
                     .orElseThrow(() -> new RuntimeException("Account not found"));
             account.setAvatarImg(imageUrl);
             accountRepository.save(account);
+=======
+            Account account = accountService.getAccount(username);
+            account.setAvatarUrl(keyName);
+            accountService.save(account);
+>>>>>>> Stashed changes
 
             return ResponseEntity.ok().body(Map.of(
                     "avatarUrl", imageUrl,
@@ -122,6 +132,45 @@ public class AccountController {
         }
     }
 
+<<<<<<< Updated upstream
+=======
+    @GetMapping("/user/tasks")
+    public ResponseEntity<List<TaskDTO>> getUserTasks(
+            HttpSession session,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String priority,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String sortOrder,
+            @RequestParam(required = false) String eventName) {  // Add this line
+        Account account = (Account) session.getAttribute("account");
+        if (account == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        List<TaskDTO> tasks = accountService.getUserTasks(
+                account.getAccountId(),
+                status,
+                priority,
+                keyword,
+                sortOrder,
+                eventName);
+        return ResponseEntity.ok(tasks);
+    }
+
+    @GetMapping("/user/events")
+    public ResponseEntity<?> getUserEvents(HttpSession session) {
+        Account account = (Account) session.getAttribute("account");
+        if (account == null) {
+            return ResponseEntity.status(401).body("Bạn cần đăng nhập");
+        }
+
+        List<UserEventDTO> events = accountService.getUserEvents(account.getAccountId());
+        System.out.println("accid" + account.getAccountId());
+        return ResponseEntity.ok(events);
+    }
+
+
+>>>>>>> Stashed changes
 }
 
 

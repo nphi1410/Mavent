@@ -13,7 +13,7 @@ const Sidebar = () => {
 
   return (
     <aside className="w-64 bg-white px-4 py-8 border-r border-gray-100 box-border flex-shrink-0">
-      <h2 className="text-3xl font-bold text-[#0d2c5a] mt-0 mb-10 pl-4">Settings</h2>
+      <h2 className="text-3xl font-bold text-[#0d2c5a] mt-0 mb-10 pl-4">User Center</h2>
       <nav>
         <ul className="list-none p-0 m-0">
           <li>
@@ -29,7 +29,7 @@ const Sidebar = () => {
           </li>
           <li>
             <NavLink
-              to="/profile/oldevents"
+              to="/profile/events"
               className={({ isActive }) =>
                 `block py-[15px] px-5 no-underline rounded-lg mb-2.5 text-lg font-medium transition-all ${
                   isActive
@@ -38,12 +38,12 @@ const Sidebar = () => {
                 }`
               }
             >
-              Old Events
+              Past Events
             </NavLink>
           </li>
           <li>
             <NavLink
-              to="/profile/notifications"
+              to="/profile/tasks"
               className={({ isActive }) =>
                 `block py-[15px] px-5 no-underline rounded-lg mb-2.5 text-lg font-medium transition-all ${
                   isActive
@@ -52,7 +52,7 @@ const Sidebar = () => {
                 }`
               }
             >
-              Notifications
+              Tasks
             </NavLink>
           </li>
         </ul>

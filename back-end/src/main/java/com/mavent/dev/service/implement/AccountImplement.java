@@ -7,6 +7,9 @@ import com.mavent.dev.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -76,12 +79,119 @@ public class AccountImplement implements AccountService {
         dto.setUsername(account.getUsername());
         dto.setEmail(account.getEmail());
         dto.setFullName(account.getFullName());
-        dto.setAvatarImg(account.getAvatarImg());
+        dto.setAvatarImg(account.getAvatarUrl());
         dto.setPhoneNumber(account.getPhoneNumber());
         dto.setGender(account.getGender() != null ? account.getGender().name() : null);
         dto.setDateOfBirth(account.getDateOfBirth());
         dto.setStudentId(account.getStudentId());
         return dto;
     }
+<<<<<<< Updated upstream
+=======
+
+    @Autowired
+    private TaskRepository taskRepository;
+
+    @Override
+    public List<TaskDTO> getUserTasks(Integer accountId, String status, String priority,
+                                      String keyword, String sortOrder, String eventName) {
+        List<TaskDTO> tasks = taskRepository.findTasksWithEventAndDepartment(accountId);
+
+        // Filter by status
+        if (status != null && !status.isBlank()) {
+            tasks = tasks.stream()
+                    .filter(t -> t.getStatus().equalsIgnoreCase(status))
+                    .toList();
+        }
+
+        // Filter by priority
+        if (priority != null && !priority.isBlank()) {
+            tasks = tasks.stream()
+                    .filter(t -> t.getPriority().equalsIgnoreCase(priority))
+                    .toList();
+        }
+
+        // Filter by event name
+        if (eventName != null && !eventName.isBlank()) {
+            String lowerEventName = eventName.toLowerCase();
+            tasks = tasks.stream()
+                    .filter(t -> t.getEventName() != null &&
+                            t.getEventName().toLowerCase().contains(lowerEventName))
+                    .toList();
+        }
+
+        // Search by keyword (in title)
+        if (keyword != null && !keyword.isBlank()) {
+            String lowerKeyword = keyword.toLowerCase();
+            tasks = tasks.stream()
+                    .filter(t -> t.getTitle().toLowerCase().contains(lowerKeyword))
+                    .toList();
+        }
+
+        // Sort by dueDate
+        if (sortOrder != null && !sortOrder.isBlank()) {
+            Comparator<TaskDTO> comparator = Comparator.comparing(TaskDTO::getDueDate);
+            if ("desc".equalsIgnoreCase(sortOrder)) {
+                comparator = comparator.reversed();
+            }
+            tasks = tasks.stream().sorted(comparator).toList();
+        }
+
+        return tasks;
+    }
+
+
+
+    @Override
+    public void updateAvatar(String username, String imageUrl) {
+        Account account = accountRepository.findByUsername(username);
+        if (account == null) {
+            throw new UsernameNotFoundException(username);
+        }
+        account.setAvatarUrl(imageUrl);
+        accountRepository.save(account);
+    }
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @Override
+    public List<UserEventDTO> getUserEvents(Integer accountId) {
+        String sql = """
+        SELECT e.event_id, e.name AS event_name, e.description, e.status, ear.event_role, 
+               d.name AS department_name, e.banner_url
+        FROM events e
+        JOIN event_account_role ear ON e.event_id = ear.event_id
+        LEFT JOIN departments d ON ear.department_id = d.department_id
+        WHERE ear.account_id = ? AND e.is_deleted = false AND ear.is_active = true
+    """;
+
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter(1, accountId);
+
+        List<Object[]> results = query.getResultList();
+        List<UserEventDTO> eventList = new ArrayList<>();
+
+        for (Object[] row : results) {
+            Integer eventId = (Integer) row[0];
+            String name = (String) row[1];
+            String description = (String) row[2];
+            String status = (String) row[3];
+            String role = (String) row[4];
+            String departmentName = (String) row[5];
+            String bannerUrl = (String) row[6];
+
+            if (!"MEMBER".equals(role)) {
+                departmentName = null;
+            }
+
+            eventList.add(new UserEventDTO(eventId, name, description, status, role, departmentName, bannerUrl));
+        }
+
+        return eventList;
+    }
+
+
+>>>>>>> Stashed changes
 }
 
