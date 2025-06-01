@@ -8,6 +8,8 @@ import com.mavent.dev.service.AccountService;
 import com.mavent.dev.service.EventService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +39,9 @@ public class AccountController {
     @Autowired
     private MailConfig mailConfig;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody AccountDTO loginDTO, HttpServletRequest request) {
         System.out.println("Login attempt with username/email: " + loginDTO.getUsername());
@@ -61,6 +66,7 @@ public class AccountController {
             String username = (String) session.getAttribute("username");
             System.out.println("Username from session: " + username);
             System.out.println("Session ID: " + session.getId());
+            System.out.println("encoded password: " + acc.getPasswordHash());
 
             boolean isSuperAdmin = acc.getSystemRole() == Account.SystemRole.SUPER_ADMIN;
             String redirectUrl = isSuperAdmin ? "/superadmin" : "/profile";
@@ -88,7 +94,8 @@ public class AccountController {
         session.setAttribute("register_username", request.getUsername());
         session.setAttribute("register_email", request.getEmail());
 //        session.setAttribute("register_password", passwordEncoder.encode(request.getPassword()));
-        session.setAttribute("register_password", request.getPassword());
+        session.setAttribute("register_password", passwordEncoder.encode(request.getPassword()));
+        System.out.println("Encoded Password: " + passwordEncoder.encode(request.getPassword()));
         session.setAttribute("register_otp", otp);
         session.setAttribute("register_time", System.currentTimeMillis());
 
@@ -152,7 +159,7 @@ public class AccountController {
         if (account == null) {
             return ResponseEntity.badRequest().body("Email not found");
         }
-        account.setPasswordHash(newPassword);
+        account.setPasswordHash(passwordEncoder.encode(newPassword));
         accountRepository.save(account);
         mailConfig.sendMail(email, "Your New Password for Mavent", "Your new password is: " + newPassword);
 
@@ -176,7 +183,7 @@ public class AccountController {
                     .body("Account not found");
         }
 
-        if (!account.getPasswordHash().equals(changePasswordDTO.getOldPassword())) {
+        if (!passwordEncoder.matches(changePasswordDTO.getOldPassword(), account.getPasswordHash())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Old password is incorrect");
         }
@@ -189,7 +196,7 @@ public class AccountController {
         String username = (String) session.getAttribute("username");
         try {
             Account account = accountService.getAccount(username);
-            account.setPasswordHash(changePasswordDTO.getNewPassword());
+            account.setPasswordHash(passwordEncoder.encode(changePasswordDTO.getNewPassword()));
             accountService.save(account);
 
             return ResponseEntity.ok("Password changed successfully");

@@ -19,8 +19,9 @@ import com.mavent.dev.config.MailConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -35,19 +36,23 @@ public class AccountImplement implements AccountService {
     @Autowired
     private MailConfig mailConfig;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Override
     public boolean checkLogin(String UsernameOrEmail, String password) {
         // Find account by username
         System.out.println("Checking login for: " + UsernameOrEmail);
+//        System.out.println("Encoded password: " + passwordEncoder.encode(password));
         try {
-            Account accountFoundByUsername = accountRepository.findByUsername(UsernameOrEmail);
-            Account accountFoundByEmail = accountRepository.findByEmail(UsernameOrEmail);
+            Account account = accountRepository.findByUsername(UsernameOrEmail);
+            if (account == null && accountRepository.findByEmail(UsernameOrEmail) != null) {
+                account = accountRepository.findByEmail(UsernameOrEmail);
+            }
 //            System.out.println("Account found by username: " + accountFoundByUsername.getUsername());
 //            System.out.println("Account found by email: " + accountFoundByEmail.getEmail());
-            if (accountFoundByUsername != null && accountFoundByUsername.getPasswordHash().equals(password)) {
-                return true; // Login successful with username
-            } else
-                return accountFoundByEmail != null && accountFoundByEmail.getPasswordHash().equals(password); // Login successful with email
+//            System.out.println(passwordEncoder.matches(password, accountFoundByEmail.getPasswordHash()));
+            return account != null && passwordEncoder.matches(password, account.getPasswordHash());
         } catch (Exception e) {
             System.err.println("Error during login check: " + e.getMessage());
             return false; // Login failed
