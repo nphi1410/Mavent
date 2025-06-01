@@ -5,9 +5,9 @@ import {
     faEnvelope, faPhone, faIdCard, faVenusMars,
     faBirthdayCake, faHashtag
 } from '@fortawesome/free-solid-svg-icons';
-import SuperAdminSidebar from '../components/SuperAdminSidebar';
-import SuperAdminHeader from '../components/SuperAdminHeader';
-import { getAccountById } from '../services/accountService';
+import SuperAdminSidebar from '../../components/superadmin/SuperAdminSidebar';
+import SuperAdminHeader from '../../components/superadmin/SuperAdminHeader';
+import { getAccountById } from '../../services/accountService';
 
 const SuperAdminViewUserDetails = () => {
     const { id } = useParams();

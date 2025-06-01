@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarAlt, faUser, faClock, faArrowTrendUp } from "@fortawesome/free-solid-svg-icons";
-import SuperAdminSidebar from '../components/SuperAdminSidebar';
-import SuperAdminHeader from '../components/SuperAdminHeader';
-import { getDashboardMetrics } from '../services/dashboardService'; // Import hàm service của bạn
+import SuperAdminSidebar from '../../components/superadmin/SuperAdminSidebar';
+import SuperAdminHeader from '../../components/superadmin/SuperAdminHeader';
+import { getDashboardMetrics } from '../../services/dashboardService'; // Import hàm service của bạn
 
 const SuperAdminDashboard = () => {
     // Sử dụng useState để lưu trữ trạng thái của các chỉ số, loading và lỗi

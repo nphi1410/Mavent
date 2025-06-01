@@ -2,9 +2,9 @@ import { React, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarAlt, faUser, faClock, faLocationDot } from "@fortawesome/free-solid-svg-icons";
-import SuperAdminSidebar from "../components/SuperAdminSidebar";
-import SuperAdminHeader from "../components/SuperAdminHeader";
-import { getEventById } from "../services/eventService";
+import SuperAdminSidebar from "../../components/superadmin/SuperAdminSidebar";
+import SuperAdminHeader from "../../components/superadmin/SuperAdminHeader";
+import { getEventById } from "../../services/eventService";
 
 function SuperAdminViewEventDetails() {
     const { eventId } = useParams(); //lấy eventId từ URL

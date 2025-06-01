@@ -3,10 +3,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from 'react-router-dom';
 
-import SuperAdminSidebar from '../components/SuperAdminSidebar';
-import SuperAdminHeader from '../components/SuperAdminHeader';
-import SuperAdminActionDropdown from '../components/SuperAdminActionDropdown';
-import { getAllAccounts } from '../services/accountService';
+import SuperAdminSidebar from '../../components/superadmin/SuperAdminSidebar';
+import SuperAdminHeader from '../../components/superadmin/SuperAdminHeader';
+import SuperAdminActionDropdown from '../../components/superadmin/SuperAdminActionDropdown';
+import { getAllAccounts } from '../../services/accountService';
 
 function SuperAdminManageUsers() {
     const [users, setUsers] = useState([]);

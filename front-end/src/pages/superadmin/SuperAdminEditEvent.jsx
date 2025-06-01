@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Route, useParams } from 'react-router-dom';
-import SuperAdminSidebar from '../components/SuperAdminSidebar';
-import SuperAdminHeader from '../components/SuperAdminHeader';
-import { getEventById, updateEvent } from '../services/eventService'; // giả sử bạn export axios funcs từ api.js
+import SuperAdminSidebar from '../../components/superadmin/SuperAdminSidebar';
+import SuperAdminHeader from '../../components/superadmin/SuperAdminHeader';
+import { getEventById, updateEvent } from '../../services/eventService'; // giả sử bạn export axios funcs từ api.js
 
 function SuperAdminEditEvent() {
     const { eventId } = useParams();  // <-- lấy param eventId từ URL
@@ -16,7 +16,6 @@ function SuperAdminEditEvent() {
         status: 'PENDING',
         maxMemberNumber: 0,
         maxParticipantNumber: 0,
-        // các trường khác...
     });
 
     useEffect(() => {
@@ -47,9 +46,6 @@ function SuperAdminEditEvent() {
             [name]: value,
         }));
     };
-
-    // Gộp ngày và giờ thành 1 datetime-local string (nếu bạn có tách riêng date/time inputs)
-    // Ở đây UI bạn hiện dùng input date + input time riêng, mình khuyên bạn chuyển sang input type="datetime-local" để đơn giản.
 
     // Submit form update event
     const handleSubmit = async (e) => {

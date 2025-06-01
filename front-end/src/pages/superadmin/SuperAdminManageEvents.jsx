@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
-import { getEvents } from '../services/eventService';
-import SuperAdminSidebar from '../components/SuperAdminSidebar';
-import SuperAdminHeader from '../components/SuperAdminHeader';
-import SuperAdminActionDropdown from '../components/SuperAdminActionDropdown';
+import { getEvents } from '../../services/eventService';
+import SuperAdminSidebar from '../../components/superadmin/SuperAdminSidebar';
+import SuperAdminHeader from '../../components/superadmin/SuperAdminHeader';
+import SuperAdminActionDropdown from '../../components/superadmin/SuperAdminActionDropdown';
 import { useNavigate } from 'react-router-dom';
 
 function SuperAdminManageEvents() {
