@@ -1,12 +1,11 @@
 import React from "react";
-import CardRelevant from "./card/CardRelevant";
+import CardRelevant from "./card/CardMedium";
 
 const events = Array.from({ length: 6 }, (_, i) => ({
   id: i + 1,
   title: "CODE FEST 2025",
-  date: "25",
-  month: "May",
-  rating: 4.24,
+  startDatetime: "2025-09-01T00:00:00Z",
+  avgRating: 4.24,
   description:
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor...",
   imageUrl: "/images/f-camp.png",
