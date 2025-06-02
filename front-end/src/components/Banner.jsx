@@ -21,14 +21,13 @@ const Banner = ({ bannerUrls }) => {
         ref={swiperRef}
         modules={[Navigation, Pagination, Autoplay]}
         spaceBetween={20}
-        slidesPerView={1}
-        autoplay={{
+        slidesPerView={1}        autoplay={{
           delay: 5000,
           disableOnInteraction: false,
         }}
         navigation
         pagination={{ clickable: true }}
-        loop
+        loop={bannerUrls.length > 1}
         className="h-64 sm:h-96 md:h-[400px] lg:h-[600px]"
       >
         {bannerUrls.map((bannerUrl, index) => (

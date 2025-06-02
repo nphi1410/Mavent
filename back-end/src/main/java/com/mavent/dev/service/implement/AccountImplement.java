@@ -1,6 +1,7 @@
 package com.mavent.dev.service.implement;
 
-import com.mavent.dev.DTO.superadmin.AccountDTO;
+import com.mavent.dev.dto.superadmin.AccountDTO;
+import com.mavent.dev.mapper.AccountMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
@@ -8,6 +9,7 @@ import com.mavent.dev.DTO.TaskDTO;
 import com.mavent.dev.DTO.UserEventDTO;
 import com.mavent.dev.DTO.UserProfileDTO;
 import com.mavent.dev.entity.Account;
+
 import com.mavent.dev.entity.Task;
 import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.repository.TaskRepository;
@@ -17,6 +19,8 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import com.mavent.dev.config.MailConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -24,8 +28,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.ArrayList;
 import java.util.Comparator;
+
+
 
 @Service
 public class AccountImplement implements AccountService {
@@ -37,7 +45,12 @@ public class AccountImplement implements AccountService {
     private MailConfig mailConfig;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;    @Override
+    @Transactional(readOnly = true)
+    public Page<AccountDTO> getAllActiveAccounts(Pageable pageable) {
+        return accountRepository.findActiveAccounts(pageable)
+                .map(this::mapAccountToDTO);
+    }
 
     @Override
     public boolean checkLogin(String UsernameOrEmail, String password) {
@@ -121,7 +134,9 @@ public class AccountImplement implements AccountService {
         return mapAccountToUserProfileDTO(account);
     }
 
+
     @Override
+
     public UserProfileDTO updateProfile(String username, UserProfileDTO userProfileDTO) {
         Account account = getAccount(username);
 
@@ -308,3 +323,4 @@ public class AccountImplement implements AccountService {
         return dto;
     }
 }
+

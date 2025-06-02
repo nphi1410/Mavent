@@ -20,9 +20,13 @@ import React from 'react';
 import Register from './pages/Register';
 import Logout from './components/Logout';
 
+
 import UserTasksPage from "./pages/UserTasksPage";
 import ResetPassword from "./pages/ResetPassword";
 import ChangePassword from "./pages/ChangePassword";
+import Members from './pages/Members/Members';
+import Layout from './components/layout/AdminLayout';
+
 
 function App() {
     return (
@@ -55,6 +59,8 @@ function App() {
                         element={<SuperAdminEditEvent />}
                     />
                     <Route path="/event/1" element={<EventDetails />} />
+
+                     <Route path="/event/9/members" element={<Members />} />
                 </Routes>
             </div>
         </Router>

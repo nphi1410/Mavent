@@ -47,11 +47,10 @@ function Login() {
   return (
     <div className="flex items-center justify-center min-h-screen w-full bg-blue-900">
       <div className="flex w-8/12 h-9/12 bg-white rounded-[40px] overflow-hidden">
-        {/* Left Panel */}
-        <div className="w-1/2 flex items-center justify-center border-r border-black">
+        {/* Left Panel */}        <div className="w-1/2 flex items-center justify-center border-r border-black">
           {/* <p className="text-center text-sm">Ảnh sự kiện gần nhất hiện tại</p> */}
           <img
-            src="https://scontent.fhan14-3.fna.fbcdn.net/v/t39.30808-6/499857471_1170114354916438_4660292432338571278_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeHYTTPlktTR4FdzJnJjy9Pi2dSJO6aupZnZ1Ik7pq6lmbAmBjR6XmY846Tf_bRuYK9MgczptyLGPW9IrHC9vCgR&_nc_ohc=0p9NhTngh7kQ7kNvwExdHr0&_nc_oc=AdlxtlBAAj1CELK7BTdhs0s3ckP2CYMuJ4AX2ZCUonXLKuO2axXB8QYmswSgwcsb8s4&_nc_zt=23&_nc_ht=scontent.fhan14-3.fna&_nc_gid=dAMXTM1ULYRzq3DWQqg7oA&oh=00_AfL0ZtGNZM6mt9uUdC1fbIahqZx-d6vlujsC8g7btd7tHw&oe=68426820"
+            src="/images/fptu-showcase.png"
             alt="Event"
             className="w-full h-full object-cover rounded-l-[30px]" />
         </div>
