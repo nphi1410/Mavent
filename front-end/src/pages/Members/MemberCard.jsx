@@ -9,7 +9,11 @@ const MemberCard = ({
   bannedUsers,
   onViewUser,
   onEditUser,
-  onBanUser
+  onBanUser,
+  canEdit,
+  canBan,
+  canView,
+  userRole
 }) => {
   
   return (
@@ -67,47 +71,60 @@ const MemberCard = ({
                     )}
                   </div>
                 </div>
-              </div>                {/* Action buttons */}              <div className="flex flex-shrink-0 ml-2 items-center">
-                {/* Direct action buttons */}
-                <button 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log("Mobile - Direct view button clicked for:", member.name);
-                    onViewUser(member);
-                  }}
-                  className="p-1 mr-2 text-blue-600 hover:text-blue-800"
-                  title="View Details"
-                >
-                  <FontAwesomeIcon icon={faEye} className="h-5 w-5" />
-                </button>
-                  {/* Direct edit button */}
-                <button 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log("Mobile - Direct edit button clicked for:", member.name);
-                    onEditUser(member);
-                  }}
-                  className="p-1 mr-2 text-green-600 hover:text-green-800"
-                  title="Edit Member"
-                >
-                  <FontAwesomeIcon icon={faEdit} className="h-5 w-5" />
-                </button>
+              </div>              {/* Action buttons */}
+              <div className="flex flex-shrink-0 ml-2 items-center">
+                {/* View button - always visible if user has view permission */}
+                {canView && canView(member.role) && (
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log("Mobile - Direct view button clicked for:", member.name);
+                      onViewUser(member);
+                    }}
+                    className="p-1 mr-2 text-blue-600 hover:text-blue-800"
+                    title="View Details"
+                  >
+                    <FontAwesomeIcon icon={faEye} className="h-5 w-5" />
+                  </button>
+                )}
                 
-                {/* Direct ban/unban button */}
-                <button 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log("Mobile - Direct ban/unban button clicked for:", member.name);
-                    onBanUser(member, !bannedUsers[member.id]);
-                  }}
-                  className={`p-1 ${bannedUsers[member.id] ? 'text-green-600 hover:text-green-800' : 'text-red-600 hover:text-red-800'}`}
-                  title={bannedUsers[member.id] ? 'Unban User' : 'Ban User'}
-                >
-                  <FontAwesomeIcon icon={faBan} className="h-5 w-5" />
-                </button>
+                {/* Edit button - only visible if user has edit permission */}
+                {canEdit && canEdit(member.role) && (
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log("Mobile - Direct edit button clicked for:", member.name);
+                      onEditUser(member);
+                    }}
+                    className="p-1 mr-2 text-green-600 hover:text-green-800"
+                    title="Edit Member"
+                  >
+                    <FontAwesomeIcon icon={faEdit} className="h-5 w-5" />
+                  </button>
+                )}
+                
+                {/* Ban/unban button - only visible if user has ban permission */}
+                {canBan && canBan(member.role) && (
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log("Mobile - Direct ban/unban button clicked for:", member.name);
+                      onBanUser(member, !bannedUsers[member.id]);
+                    }}
+                    className={`p-1 ${bannedUsers[member.id] ? 'text-green-600 hover:text-green-800' : 'text-red-600 hover:text-red-800'}`}
+                    title={bannedUsers[member.id] ? 'Unban User' : 'Ban User'}
+                  >
+                    <FontAwesomeIcon icon={faBan} className="h-5 w-5" />
+                  </button>
+                )}
+                
+                {/* Show message if no actions are available */}
+                {(!canView || !canView(member.role)) && (!canEdit || !canEdit(member.role)) && (!canBan || !canBan(member.role)) && (
+                  <span className="text-xs text-gray-400 px-2">No actions available</span>
+                )}
               </div>
             </div>
             

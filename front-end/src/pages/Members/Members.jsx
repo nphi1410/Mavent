@@ -1,5 +1,6 @@
 import React from 'react';
 import useMemberManagement from '../../hooks/useMemberManagement';
+import useUserPermissions from '../../hooks/useUserPermissions';
 import MemberFilters from '../../components/MemberFilters';
 import MemberTable from '../../components/MemberTable';
 import MemberCard from './MemberCard';
@@ -7,8 +8,20 @@ import Pagination from './Pagination';
 import MemberDetailModal from '../../components/MemberDetailModal';
 import EditMemberModal from '../../components/EditMemberModal';
 import NoResults from './NoResults';
+import Layout from '../../components/layout/AdminLayout';
 
 const Members = () => {
+  // Get user permissions for the current event
+  const {
+    userRole,
+    loading: permissionsLoading,
+    error: permissionsError,
+    canEdit,
+    canBan,
+    canView,
+    isAdminOrManager
+  } = useUserPermissions();
+
   const {
     // Data
     currentMembers,
@@ -49,9 +62,9 @@ const Members = () => {
     handleSaveUser,
     handleCancelEdit
   } = useMemberManagement();
-  
-  return (
-    <div className="container mx-auto px-2 sm:px-4 lg:px-6 relative">
+    return (
+    <Layout activeItem="members">
+      <div className="container mx-auto px-2 sm:px-4 lg:px-6 relative">
       
         <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Manage Members</h1>
         
@@ -68,14 +81,17 @@ const Members = () => {
             onRoleFilterChange={(value) => handleRoleFilter(value === '' ? '' : value)}
             onDepartmentFilterChange={(value) => handleDepartmentFilter(value === '' ? '' : value)}
             onAddMember={() => {/* console.log('Add member clicked') */}}
-          />
-            {/* Desktop Table View */}
+          />          {/* Desktop Table View */}
           <MemberTable
             members={currentMembers}
             bannedUsers={bannedUsers}
             onViewUser={handleViewUser}
             onEditUser={handleEditUser}
             onBanUser={handleBanUser}
+            canEdit={canEdit}
+            canBan={canBan}
+            canView={canView}
+            userRole={userRole}
           />          {/* Mobile & Tablet Card View */}
           <MemberCard
             members={currentMembers}
@@ -83,6 +99,10 @@ const Members = () => {
             onViewUser={handleViewUser}
             onEditUser={handleEditUser}
             onBanUser={handleBanUser}
+            canEdit={canEdit}
+            canBan={canBan}
+            canView={canView}
+            userRole={userRole}
           />
           
           {/* No results message */}
@@ -112,6 +132,9 @@ const Members = () => {
             // console.log("Ban user called from detail modal:", user, banStatus);
             handleBanUser(user, banStatus);
           }}
+          canEdit={canEdit}
+          canBan={canBan}
+          userRole={userRole}
         />
         
         {/* Edit Member Modal */}        <EditMemberModal
@@ -129,16 +152,19 @@ const Members = () => {
           onChange={(field, value, depts) => {
             // console.log(`Edit field change: ${field}=${value}`);
             handleEditInputChange(field, value, depts);
-          }}        />
+          }}
+          canEdit={canEdit}
+          userRole={userRole}
+        />
 
         {/* Debug logging with useEffect */}
         <DebugModalStates
           showUserDetail={showUserDetail}
           showEditModal={showEditModal}
           selectedUser={selectedUser}
-          editedUser={editedUser}
-        />
+          editedUser={editedUser}        />
       </div>
+    </Layout>
   );
 };
 

@@ -34,10 +34,11 @@ export const getUserProfile = async () => {
     console.log('Fetching user profile...');
     const response = await Api.get('/user/profile');
     console.log('Profile response:', response.data);
-    return response.data;
+    return { data: response.data };  // Return in expected format with data property
   } catch (error) {
     console.error('Error in getUserProfile:', error);
     handleAuthError(error);
+    throw error; // Re-throw the error so it can be caught by the caller
   }
 };
 
