@@ -13,6 +13,7 @@ function ResetPassword() {
         e.preventDefault();
 
         try {
+            setError(""); // Reset error message
             const response = await axios.post("http://localhost:8080/api/reset-password-request",
                 {
                     email
@@ -26,9 +27,12 @@ function ResetPassword() {
                 setOtpSent(true);
                 console.log("OTP sent successfully to:", email);
                 // console.log(otpSent);
+            } else if (response.status === 400) {
+                setError("Email not registered or invalid.");
+                console.error("Error sending OTP:", response.data);
             }
         } catch (err) {
-            setError(response?.data || "Failed to send OTP. Please try again.");
+            setError(err.data || "Failed to send OTP. Please check your email again.");
             console.error("Error sending OTP:", error);
 
             // setOtpSent("Failed to send OTP. Email may not be registered.");
@@ -38,6 +42,7 @@ function ResetPassword() {
     const resetPassword = async (e) => {
         e.preventDefault();
         try {
+            setError(""); // Reset error message
             const response = await axios.post("http://localhost:8080/api/verify-reset-otp",
                 { email, otp },
                 {
@@ -53,7 +58,9 @@ function ResetPassword() {
                 }, 2000); // Redirect after 2 seconds
             }
         } catch (err) {
-            setOtpSent("Failed to reset password. Please try again.");
+            // setOtpSent(false);
+            setError(err.response?.data || "Failed to verify OTP. Please try again.");
+            console.error("Error verifying OTP:", err);
         }
     }
 
@@ -76,6 +83,7 @@ function ResetPassword() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
+                        disabled={otpSent}
                     />
 
                     {otpSent && (
@@ -110,7 +118,7 @@ function ResetPassword() {
                         {otpSent ? 'Reset password' : 'Send OTP'}
                     </button>
                 </form>
-                {otpSent && <p className="mt-4 text-sm text-red-500">{otpSent}</p>}
+                {error && (<p className="mt-4 text-sm text-red-500">{error}</p>)}
             </div>
         </div>
     );

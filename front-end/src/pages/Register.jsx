@@ -9,6 +9,7 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(false);
 
   const [registerError, setRegisterError] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -60,6 +61,7 @@ const Register = () => {
       });
 
       if (response.status === 200) {
+        setIsRegistered(true);
         setTimeout(() => {
           navigate("/login");
         }, 2000); // Redirect after 2 seconds      
@@ -91,6 +93,7 @@ const Register = () => {
                 onChange={(e) => setUsername(e.target.value)}
                 value={username}
                 required
+                disabled={otpSent}
               />
 
               <label className="mb-1 mt-4 text-sm font-medium text-gray-700 pl-2.5">Email:</label>
@@ -101,6 +104,7 @@ const Register = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 value={email}
                 required
+                disabled={otpSent}
               />
             </div>
 
@@ -159,6 +163,8 @@ const Register = () => {
             <button
               type="submit"
               className="bg-blue-900 text-white px-6 py-2 rounded-full hover:bg-blue-950 transition"
+              // onClick={isRegistered ? `disabled` : ""}
+              id='register-button'
             >
               {otpSent ? "Register" : "Send OTP"}
             </button>
