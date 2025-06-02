@@ -14,6 +14,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
+/**
+ * Simplified Security Configuration for frontend integration.
+ * No authentication/authorization - just basic CORS and security setup.
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
