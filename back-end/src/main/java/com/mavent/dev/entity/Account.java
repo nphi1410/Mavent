@@ -46,7 +46,7 @@ public class Account {
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
 
-    @Column(name = "avatar_img")
+    @Column(name = "avatar_url")
     private String avatarImg;
 
     @Column(name = "phone_number", unique = true)

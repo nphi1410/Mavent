@@ -43,11 +43,11 @@ const HomePage = () => {
   return (
     <div className="w-full">
       <Header />
-      <Banner bannerUrls={bannerUrls} />
+      <Banner bannerUrls={images} />
       <NavBar />
-      <Content imageUrl={bannerUrls[0]}/>
+      <Content imageUrl={images[0]}/>
       <Video />
-      <Gallery imageUrls={bannerUrls}/>
+      <Gallery imageUrls={images}/>
       <Footer />
     </div>
   );

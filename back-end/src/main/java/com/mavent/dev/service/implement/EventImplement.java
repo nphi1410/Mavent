@@ -1,11 +1,15 @@
 package com.mavent.dev.service.implement;
 
 import com.mavent.dev.DTO.EventDTO;
+import com.mavent.dev.DTO.FilterEventDTO;
 import com.mavent.dev.entity.Event;
 import com.mavent.dev.repository.EventRepository;
 import com.mavent.dev.service.EventService;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +20,28 @@ public class EventImplement implements EventService {
 
     @Autowired
     private EventRepository eventRepository;
+
+    @Override
+    public Page<FilterEventDTO> getFilterEvents(String name, String status, List<Integer> tagIds, String sortType, int page, int size) {
+        Sort sort = switch (sortType) {
+            case "START_DATE_ASC" -> Sort.by("start_datetime").ascending();
+            case "START_DATE_DESC" -> Sort.by("start_datetime").descending();
+            case "SCALE_ASC" -> Sort.by("max_participant_number").ascending();
+            case "SCALE_DESC" -> Sort.by("max_participant_number").descending();
+            case "RATING_ASC" -> Sort.by("avgRating").ascending();
+            case "RATING_DESC" -> Sort.by("avgRating").descending();
+            default -> Sort.unsorted();
+        };
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        if (tagIds == null || tagIds.isEmpty()) {
+            return eventRepository.findAllFilteredNoTags(name, status, pageable);
+        }
+
+        return eventRepository.findAllFiltered(name, status, tagIds, pageable);
+    }
+
 
     @Override
     public List<EventDTO> getAllEvents() {

@@ -125,8 +125,7 @@ public class AccountImplement implements AccountService {
 
     @Override
     public void updateAvatar(String username, String imageUrl) {
-        Account account = accountRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Account not found with username: " + username));
+        Account account = getAccount(username);
         account.setAvatarImg(imageUrl);
         accountRepository.save(account);
     }

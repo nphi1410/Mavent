@@ -7,7 +7,7 @@ const CardSmall = ({ imageUrl }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate("/event/1");
+    navigate(`/events/${1}`);
   };
 
   return (

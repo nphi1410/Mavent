@@ -16,6 +16,7 @@ public interface AccountService {
     List<UserEventDTO> getUserEvents(Integer accountId);
     Account getAccount(String username);
     List<TaskDTO> getUserTasks(Integer accountId);
+    void updateAvatar(String username, String imageUrl);
 
 }
 

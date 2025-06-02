@@ -113,17 +113,18 @@ public class AccountController {
         UserProfileDTO user = accountService.getUserProfile(username);
         List<TaskDTO> tasks = accountService.getUserTasks(user.getId());
         return ResponseEntity.ok(tasks);
-
-    @GetMapping("/user/events")
-    public ResponseEntity<?> getUserEvents(HttpSession session) {
-        UserProfileDTO user = (UserProfileDTO) session.getAttribute("account");
-        if (user == null) {
-            return ResponseEntity.status(401).body("Bạn cần đăng nhập");
-        }
-
-        List<UserEventDTO> events = accountService.getUserEvents(user.getId());
-        return ResponseEntity.ok(events);
     }
+
+        @GetMapping("/user/events")
+        public ResponseEntity<?> getUserEvents (HttpSession session){
+            UserProfileDTO user = (UserProfileDTO) session.getAttribute("account");
+            if (user == null) {
+                return ResponseEntity.status(401).body("Bạn cần đăng nhập");
+            }
+
+            List<UserEventDTO> events = accountService.getUserEvents(user.getId());
+            return ResponseEntity.ok(events);
+        }
 
 }
 
