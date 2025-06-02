@@ -10,7 +10,10 @@ const MemberDetailModal = ({
   isBanned,
   onClose,
   onEdit,
-  onBan
+  onBan,
+  canEdit,
+  canBan: canBanUser,
+  userRole
 }) => {
   // console.log('MemberDetailModal render with props:', { 
   //   isOpen, 
@@ -32,7 +35,7 @@ const MemberDetailModal = ({
     return <div style={{display: 'none'}}>Modal would render here if isOpen={String(isOpen)} and user exists={String(!!user)}</div>;
   }  return (
     <div className="fixed inset-0 flex items-center justify-center z-[9999]" data-testid="member-detail-modal">
-      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={(e) => {
+      <div className="absolute inset-0  bg-opacity-40" onClick={(e) => {
         e.stopPropagation();
         // console.log("Modal backdrop clicked - closing modal");
         onClose();
@@ -120,32 +123,41 @@ const MemberDetailModal = ({
             </div>
           </div>
         </div>        <div className="p-6 flex space-x-3 bg-gray-50">
-          <button 
-            className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center"
-            onClick={() => {
-              // console.log('Edit button clicked in MemberDetailModal for user:', user.name);
-              onEdit(user);
-              onClose();
-            }}
-          >
-            <FontAwesomeIcon icon={faEdit} className="mr-2" />
-            Edit User
-          </button>
-          <button 
-            className={`flex-1 ${
-              isBanned 
-                ? 'bg-green-600 hover:bg-green-700' 
-                : 'bg-red-600 hover:bg-red-700'
-            } text-white px-4 py-2 rounded-md transition-colors duration-200 flex items-center justify-center`}
-            onClick={() => {
-              // console.log('Ban/Unban button clicked in MemberDetailModal for user:', user.name, 'current banned status:', isBanned);
-              onBan(user, !isBanned);
-              onClose();
-            }}
-          >
-            <FontAwesomeIcon icon={isBanned ? faUser : faBan} className="mr-2" />
-            {isBanned ? 'Unban User' : 'Ban User'}
-          </button>
+          {/* Edit button - only show if user has edit permission */}
+          {canEdit && canEdit(user.role) && (
+            <button 
+              className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center"
+              onClick={() => {
+                // console.log('Edit button clicked in MemberDetailModal for user:', user.name);
+                onEdit(user);
+                onClose();
+              }}
+            >
+              <FontAwesomeIcon icon={faEdit} className="mr-2" />
+              Edit User
+            </button>
+          )}
+          
+          {/* Ban/Unban button - only show if user has ban permission */}
+          {canBanUser && canBanUser(user.role) && (
+            <button 
+              className={`flex-1 ${
+                isBanned 
+                  ? 'bg-green-600 hover:bg-green-700' 
+                  : 'bg-red-600 hover:bg-red-700'
+              } text-white px-4 py-2 rounded-md transition-colors duration-200 flex items-center justify-center`}
+              onClick={() => {
+                // console.log('Ban/Unban button clicked in MemberDetailModal for user:', user.name, 'current banned status:', isBanned);
+                onBan(user, !isBanned);
+                onClose();
+              }}
+            >
+              <FontAwesomeIcon icon={isBanned ? faUser : faBan} className="mr-2" />
+              {isBanned ? 'Unban User' : 'Ban User'}
+            </button>
+          )}
+          
+          {/* Close button - always visible */}
           <button 
             className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors duration-200 flex items-center justify-center"
             onClick={onClose}

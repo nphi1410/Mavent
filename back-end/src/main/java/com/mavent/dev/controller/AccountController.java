@@ -1,10 +1,19 @@
 package com.mavent.dev.controller;
 
-import com.mavent.dev.DTO.superadmin.AccountDTO;
+import com.mavent.dev.dto.superadmin.AccountDTO;
 import com.mavent.dev.DTO.LoginDTO;
 import com.mavent.dev.DTO.UserProfileDTO;
+import com.mavent.dev.DTO.OtpDTO;
+import com.mavent.dev.DTO.ChangePasswordDTO;
+import com.mavent.dev.DTO.TaskDTO;
+import com.mavent.dev.DTO.superadmin.EventDTO;
+import com.mavent.dev.DTO.UserEventDTO;
 import com.mavent.dev.config.MailConfig;
+
 import com.mavent.dev.entity.Account;
+import com.mavent.dev.entity.EventAccountRole;
+import com.mavent.dev.repository.AccountRepository;
+import com.mavent.dev.repository.EventAccountRoleRepository;
 import com.mavent.dev.service.AccountService;
 import com.mavent.dev.service.EventService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,21 +31,20 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Optional;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-public class AccountController {
-
-    @Autowired
+public class AccountController {    @Autowired
     private AccountService accountService;
-  
     @Autowired
-    private EventService eventService;
+    private EventService eventService;@Autowired
+    AccountRepository accountRepository;
 
     @Autowired
-    AccountRepository accountRepository;
+    private EventAccountRoleRepository eventAccountRoleRepository;
 
     @Autowired
     private MailConfig mailConfig;
@@ -97,7 +105,7 @@ public class AccountController {
     }
 
     @PostMapping("/send-register-otp")
-    public ResponseEntity<?> sendOtp(@RequestBody RegisterDTO request, HttpSession session) {
+    public ResponseEntity<?> sendOtp(@RequestBody com.mavent.dev.DTO.RegisterDTO request, HttpSession session) {
         if (accountRepository.findByUsername(request.getUsername()) != null) {
             return ResponseEntity.badRequest().body("Username already exists!");
         }
@@ -122,7 +130,7 @@ public class AccountController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerWithOtp(@RequestBody OtpDTO request, HttpSession session) {
+    public ResponseEntity<?> registerWithOtp(@RequestBody com.mavent.dev.DTO.OtpDTO request, HttpSession session) {
         String otpSession = (String) session.getAttribute("register_otp");
         String username = (String) session.getAttribute("register_username");
         String email = (String) session.getAttribute("register_email");
@@ -147,7 +155,7 @@ public class AccountController {
     }
 
     @PostMapping("/reset-password-request")
-    public ResponseEntity<?> resetPasswordRequest(@RequestBody ResetPasswordDTO request, HttpSession session) {
+    public ResponseEntity<?> resetPasswordRequest(@RequestBody com.mavent.dev.DTO.ResetPasswordDTO request, HttpSession session) {
         Account account = accountRepository.findByEmail(request.getEmail());
         if (account == null) {
             return ResponseEntity.badRequest().body("Email not found");
@@ -322,9 +330,7 @@ public class AccountController {
                 sortOrder,
                 evName);
         return ResponseEntity.ok(tasks);
-    }
-
-    @GetMapping("/user/events")
+    }    @GetMapping("/user/events")
     public ResponseEntity<?> getUserEvents(HttpSession session) {
         Account account = (Account) session.getAttribute("account");
         if (account == null) {
@@ -334,6 +340,54 @@ public class AccountController {
         List<UserEventDTO> events = accountService.getUserEvents(account.getAccountId());
         System.out.println("accid" + account.getAccountId());
         return ResponseEntity.ok(events);
+    }
+
+    /**
+     * Get the current user's role in a specific event.
+     * This endpoint is used by the frontend role-based permission system.
+     * 
+     * @param eventId the event ID
+     * @param session the HTTP session
+     * @return the user's role in the event or 401 if not authenticated
+     */
+    @GetMapping("/user/role/{eventId}")
+    public ResponseEntity<?> getUserRoleInEvent(@PathVariable Integer eventId, HttpSession session) {
+        // Get current user from session
+        String username = (String) session.getAttribute("username");
+        if (username == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("User must be logged in");
+        }
+
+        try {
+            // Get account by username
+            Account account = accountService.getAccount(username);
+            if (account == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Account not found");
+            }            // Find user's role in the event
+            Optional<EventAccountRole> userRole = eventAccountRoleRepository
+                    .findByEventIdAndAccountId(eventId, account.getAccountId());
+
+            if (userRole.isPresent() && userRole.get().getIsActive()) {
+                // Return the role as a string
+                Map<String, Object> response = new HashMap<>();
+                response.put("role", userRole.get().getEventRole().name());
+                response.put("eventId", eventId);
+                response.put("accountId", account.getAccountId());
+                response.put("isActive", userRole.get().getIsActive());
+                return ResponseEntity.ok(response);
+            } else {
+                // User is not a member of this event or is inactive
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("User is not authorized to access this event");
+            }
+        } catch (Exception e) {
+            System.err.println("Error getting user role in event: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error retrieving user role: " + e.getMessage());
+        }
     }
 
 }

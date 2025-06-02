@@ -18,27 +18,56 @@ const HomePage = () => {
     "/images/soul-note.png",
   ];
 
-  const [bannerUrls, setBannerUrls] = useState([]);
-
-  useEffect(() => {
+  const [bannerUrls, setBannerUrls] = useState([]);  useEffect(() => {
+    // Just use local images directly since the API is not working
+    setBannerUrls([
+      '/images/fptu-showcase.png',
+      '/images/f-camp.png',
+      '/images/codefest.png',
+      '/images/gameshow.png',
+    ]);
+    
+    // This code is commented out until the backend API is fixed
+    /*
     const fetchImages = async () => {
       try {
-        const response = await getImages(); // [{ content, contentType }]
-        const urls = response.data.map((img) =>
-          convertToUrl(img.content, img.contentType)
-        );
-        setBannerUrls(urls);
+        const response = await getImages();
+        
+        if (response.data && response.data.length > 0 && response.data.some(img => img.content)) {
+          const urls = response.data.map((img) => 
+            convertToUrl(img.content, img.contentType)
+          );
+          setBannerUrls(urls);
+        } else {
+          useLocalImages();
+        }
       } catch (error) {
         console.error("Error fetching image:", error);
+        useLocalImages();
       }
     };
-
+    
+    // Helper function to use local images
+    const useLocalImages = () => {
+      setBannerUrls([
+        '/images/fptu-showcase.png',
+        '/images/f-camp.png',
+        '/images/codefest.png',
+        '/images/gameshow.png',
+      ]);
+    };
+    
     fetchImages();
-  }, []);
-
+    */
+  }, []);  // This function is temporarily commented out as we're using local images directly
+  /*
   const convertToUrl = (base64Content, contentType) => {
+    if (!base64Content || base64Content.trim() === '') {
+      return '/images/fptu-showcase.png';
+    }
     return `data:${contentType};base64,${base64Content}`;
   };
+  */
 
   return (
     <div className="w-full">

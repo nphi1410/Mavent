@@ -61,11 +61,10 @@ public class AccountDTO {
     
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
-    
-    /**
+      /**
      * Constructor used by AccountMapper
      */
-    public AccountDTO(Integer accountId, String username, String email, String fullName, 
+    public AccountDTO(Integer accountId, String username, String email, String fullName,
                      String phoneNumber, String systemRole, String avatarUrl, Boolean isDeleted) {
         this.accountId = accountId;
         this.username = username;

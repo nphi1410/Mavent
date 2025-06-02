@@ -36,10 +36,8 @@ public class MemberMapper {
     public MemberResponseDTO toMemberResponseDTO(EventAccountRole eventAccountRole) {
         if (eventAccountRole == null) {
             return null;
-        }
-
-        // Fetch related entities using IDs
-        Account account = accountRepository.findById(eventAccountRole.getId().getAccountId()).orElse(null);
+        }        // Fetch related entities using IDs
+        Account account = accountRepository.findById(eventAccountRole.getAccountId()).orElse(null);
         Department department = eventAccountRole.getDepartmentId() != null ? 
                                departmentRepository.findById(eventAccountRole.getDepartmentId()).orElse(null) : null;
         Account assignedBy = eventAccountRole.getAssignedByAccountId() != null ? 
@@ -57,9 +55,8 @@ public class MemberMapper {
                 .gender(account != null && account.getGender() != null ? account.getGender().name() : null)
                 .avatarUrl(account != null ? account.getAvatarUrl() : null)
                 .systemRole(account != null && account.getSystemRole() != null ? account.getSystemRole().name() : null)
-                
-                // Event Role Information
-                .eventId(eventAccountRole.getId().getEventId())
+                  // Event Role Information
+                .eventId(eventAccountRole.getEventId())
                 .eventRole(eventAccountRole.getEventRole().name())
                 .departmentId(eventAccountRole.getDepartmentId())
                 .departmentName(department != null ? department.getName() : null)

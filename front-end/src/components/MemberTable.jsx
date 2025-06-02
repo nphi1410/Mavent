@@ -9,7 +9,11 @@ const MemberTable = ({
   bannedUsers,
   onViewUser,
   onEditUser,
-  onBanUser
+  onBanUser,
+  canEdit,
+  canBan,
+  canView,
+  userRole
 }) => {
   const tableRef = useRef(null);
   
@@ -125,42 +129,55 @@ const MemberTable = ({
                 {/* Actions cell */}
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex justify-end items-center space-x-2">
-                    <button 
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        // console.log("Direct view button clicked for:", member.name);
-                        onViewUser(member);
-                      }}
-                      className="p-1 text-blue-600 hover:text-blue-800 transition-colors duration-200"
-                      title="View Details"
-                    >
-                      <FontAwesomeIcon icon={faEye} className="h-4 w-4" />
-                    </button>
-                    <button 
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        // console.log("Direct edit button clicked for:", member.name);
-                        onEditUser(member);
-                      }}
-                      className="p-1 text-green-600 hover:text-green-800 transition-colors duration-200"
-                      title="Edit Member"
-                    >
-                      <FontAwesomeIcon icon={faEdit} className="h-4 w-4" />
-                    </button>
-                    <button 
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        // console.log("Direct ban/unban button clicked for:", member.name);
-                        onBanUser(member, !bannedUsers[member.id]);
-                      }}
-                      className={`p-1 transition-colors duration-200 ${bannedUsers[member.id] ? 'text-green-600 hover:text-green-800' : 'text-red-600 hover:text-red-800'}`}
-                      title={bannedUsers[member.id] ? 'Unban Member' : 'Ban Member'}
-                    >
-                      <FontAwesomeIcon icon={faBan} className="h-4 w-4" />
-                    </button>
+                    {/* View button - always visible if user has view permission */}
+                    {canView && canView(member.role) && (
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onViewUser(member);
+                        }}
+                        className="p-1 text-blue-600 hover:text-blue-800 transition-colors duration-200"
+                        title="View Details"
+                      >
+                        <FontAwesomeIcon icon={faEye} className="h-4 w-4" />
+                      </button>
+                    )}
+                    
+                    {/* Edit button - only visible if user can edit this member */}
+                    {canEdit && canEdit(member.role) && (
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onEditUser(member);
+                        }}
+                        className="p-1 text-green-600 hover:text-green-800 transition-colors duration-200"
+                        title="Edit Member"
+                      >
+                        <FontAwesomeIcon icon={faEdit} className="h-4 w-4" />
+                      </button>
+                    )}
+                    
+                    {/* Ban/Unban button - only visible if user can ban this member */}
+                    {canBan && canBan(member.role) && (
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onBanUser(member, !bannedUsers[member.id]);
+                        }}
+                        className={`p-1 transition-colors duration-200 ${bannedUsers[member.id] ? 'text-green-600 hover:text-green-800' : 'text-red-600 hover:text-red-800'}`}
+                        title={bannedUsers[member.id] ? 'Unban Member' : 'Ban Member'}
+                      >
+                        <FontAwesomeIcon icon={faBan} className="h-4 w-4" />
+                      </button>
+                    )}
+                    
+                    {/* Show message if no actions available */}
+                    {(!canView || !canView(member.role)) && (!canEdit || !canEdit(member.role)) && (!canBan || !canBan(member.role)) && (
+                      <span className="text-gray-400 text-xs">No actions available</span>
+                    )}
                   </div>
                 </td>
               </tr>

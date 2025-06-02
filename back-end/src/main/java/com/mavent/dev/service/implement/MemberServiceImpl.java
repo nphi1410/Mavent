@@ -235,12 +235,9 @@ public class MemberServiceImpl implements MemberService {
                 request.getAccountId(), request.getEventId());
         
         return memberMapper.toMemberResponseDTO(updated);
-    }
-
-    // Private helper methods
+    }    // Private helper methods
     private EventAccountRole findEventAccountRole(Integer eventId, Integer accountId) {
-        EventAccountRoleId roleId = new EventAccountRoleId(eventId, accountId);
-        return eventAccountRoleRepository.findById(roleId)
+        return eventAccountRoleRepository.findByEventIdAndAccountId(eventId, accountId)
                 .orElseThrow(() -> new MemberNotFoundException(eventId, accountId));
     }
 

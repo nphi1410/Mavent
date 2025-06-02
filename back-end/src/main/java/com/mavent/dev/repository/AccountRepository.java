@@ -18,7 +18,7 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
      * @param username the username to search for
      * @return Optional containing the account if found
      */
-    Optional<Account> findByUsername(String username);
+    Account findByUsername(String username);
 
      List<Account> findAllByIsDeletedFalse();
 
@@ -29,7 +29,7 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
      * @param email the email to search for
      * @return Optional containing the account if found
      */
-    Optional<Account> findByEmail(String email);
+    Account findByEmail(String email);
 
     /**
      * Check if username exists.

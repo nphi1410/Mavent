@@ -19,80 +19,72 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
 
     public EventAccountRoleServiceImpl(EventAccountRoleRepository eventAccountRoleRepository) {
         this.eventAccountRoleRepository = eventAccountRoleRepository;
-    }
-
-    @Override
+    }    @Override
     public List<EventAccountRole> getMembersByEventId(Integer eventId) {
-        return eventAccountRoleRepository.findByIdEventId(eventId);
+        return eventAccountRoleRepository.findByEventId(eventId);
     }
 
     @Override
     public Page<EventAccountRole> getMembersByEventIdWithPagination(Integer eventId, Pageable pageable) {
-        return eventAccountRoleRepository.findByIdEventId(eventId, pageable);
+        return eventAccountRoleRepository.findByEventId(eventId, pageable);
     }
 
     @Override
     public List<EventAccountRole> getMembersByAccountId(Integer accountId) {
-        return eventAccountRoleRepository.findByIdAccountId(accountId);
+        return eventAccountRoleRepository.findByAccountId(accountId);
     }
 
     @Override
     public Page<EventAccountRole> searchMembersInEvent(Integer eventId, String searchTerm, Pageable pageable) {
         return eventAccountRoleRepository.findByEventIdWithSearch(eventId, searchTerm, pageable);
-    }
-
-    @Override
+    }    @Override
     public List<EventAccountRole> getMembersByEventIdAndRole(Integer eventId, EventAccountRole.EventRole role) {
-        return eventAccountRoleRepository.findByIdEventIdAndEventRole(eventId, role);
+        return eventAccountRoleRepository.findByEventIdAndEventRole(eventId, role);
     }
 
     @Override
     public List<EventAccountRole> getActiveMembersByEventId(Integer eventId) {
-        return eventAccountRoleRepository.findByIdEventIdAndIsActive(eventId, true);
+        return eventAccountRoleRepository.findByEventIdAndIsActive(eventId, true);
     }
 
     @Override
     public EventAccountRole addMemberToEvent(EventAccountRole eventAccountRole) {
         return eventAccountRoleRepository.save(eventAccountRole);
-    }
-
-    @Override
+    }    @Override
     public EventAccountRole updateMemberRole(EventAccountRoleId id, EventAccountRole updatedRole) {
-        Optional<EventAccountRole> existingRole = eventAccountRoleRepository.findById(id);
+        Optional<EventAccountRole> existingRole = eventAccountRoleRepository.findByEventIdAndAccountId(id.getEventId(), id.getAccountId());
         if (existingRole.isPresent()) {
             EventAccountRole roleToUpdate = existingRole.get();
             roleToUpdate.setEventRole(updatedRole.getEventRole());
             roleToUpdate.setDepartmentId(updatedRole.getDepartmentId());
             roleToUpdate.setIsActive(updatedRole.getIsActive());
             return eventAccountRoleRepository.save(roleToUpdate);
-        }
-        return null;
+        }        return null;
     }
-
+    
     @Override
     public boolean removeMemberFromEvent(EventAccountRoleId id) {
-        if (eventAccountRoleRepository.existsById(id)) {
-            eventAccountRoleRepository.deleteById(id);
+        Optional<EventAccountRole> member = eventAccountRoleRepository.findByEventIdAndAccountId(id.getEventId(), id.getAccountId());
+        if (member.isPresent()) {
+            eventAccountRoleRepository.delete(member.get());
             return true;
-        }
-        return false;
+        }        return false;
     }
-
+    
     @Override
     public boolean activateDeactivateMember(EventAccountRoleId id, boolean isActive) {
-        Optional<EventAccountRole> member = eventAccountRoleRepository.findById(id);
+        Optional<EventAccountRole> member = eventAccountRoleRepository.findByEventIdAndAccountId(id.getEventId(), id.getAccountId());
         if (member.isPresent()) {
             EventAccountRole memberToUpdate = member.get();
             memberToUpdate.setIsActive(isActive);
             eventAccountRoleRepository.save(memberToUpdate);
             return true;
-        }
-        return false;
+        }        return false;
     }
-
+    
     @Override
     public long countMembersByEventId(Integer eventId) {
-        return eventAccountRoleRepository.findByIdEventId(eventId).size();
+        return eventAccountRoleRepository.findByEventId(eventId).size();
     }
 
     @Override
@@ -102,12 +94,11 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
 
     @Override
     public long countActiveMembersByEventId(Integer eventId) {
-        return eventAccountRoleRepository.countByEventIdAndActiveStatus(eventId, true);
-    }
-
+        return eventAccountRoleRepository.countByEventIdAndActiveStatus(eventId, true);    }
+    
     @Override
     public boolean isMemberInEvent(Integer eventId, Integer accountId) {
-        return eventAccountRoleRepository.existsByIdEventIdAndIdAccountId(eventId, accountId);
+        return eventAccountRoleRepository.existsByEventIdAndAccountId(eventId, accountId);
     }
 
     @Override

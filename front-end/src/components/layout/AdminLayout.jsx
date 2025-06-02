@@ -6,9 +6,8 @@ import AdminNavbar from './AdminNavbar';
 const Layout = ({ children, activeItem }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
-
   // Kiểm tra xem có phải đang ở trang member management không
-  const isMemberManagementPage = location.pathname.includes('/members');
+  const isMemberManagementPage = location.pathname.includes('/members') || location.pathname.includes('/event') && location.pathname.includes('/members');
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);

@@ -8,7 +8,9 @@ const EditMemberModal = ({
   departments = [],
   onClose,
   onSave,
-  onChange
+  onChange,
+  canEdit,
+  userRole
 }) => {
   // console.log('EditMemberModal render with props:',
   //    { 
@@ -32,10 +34,9 @@ const EditMemberModal = ({
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    onChange(name, value, departments);
-  };  return (
+    onChange(name, value, departments);  };  return (
     <div className="fixed inset-0 flex items-center justify-center z-[9999]" data-testid="edit-member-modal">
-      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={(e) => {
+      <div className="absolute inset-0 bg-gray-600 bg-opacity-40" onClick={(e) => {
         e.stopPropagation();
         // console.log("Edit Modal backdrop clicked - closing modal");
         onClose();
