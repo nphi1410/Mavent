@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
-import { getEvents } from '../services/eventService';
-import SuperAdminSidebar from '../components/SuperAdminSidebar';
-import SuperAdminHeader from '../components/SuperAdminHeader';
-import SuperAdminActionDropdown from '../components/SuperAdminActionDropdown';
+import { getEvents } from '../../services/eventService';
+import SuperAdminSidebar from '../../components/superadmin/SuperAdminSidebar';
+import SuperAdminHeader from '../../components/superadmin/SuperAdminHeader';
+import SuperAdminActionDropdown from '../../components/superadmin/SuperAdminActionDropdown';
 import { useNavigate } from 'react-router-dom';
+import { exportEventsToExcel } from '../../services/export/eventExportService';
 
 function SuperAdminManageEvents() {
     const [openId, setOpenId] = useState(null);
@@ -15,7 +16,8 @@ function SuperAdminManageEvents() {
     const [events, setEvents] = useState([]);
 
     const [currentPage, setCurrentPage] = useState(1);
-    const eventsPerPage = 10;
+    const [exporting, setExporting] = useState(false);
+    const eventsPerPage = 5;
 
     const statusOptions = [
         "All Statuses", "RECRUITING", "UPCOMING", "ONGOING",
@@ -47,6 +49,17 @@ function SuperAdminManageEvents() {
     const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
     const startIndex = (currentPage - 1) * eventsPerPage;
     const paginatedEvents = filteredEvents.slice(startIndex, startIndex + eventsPerPage);
+
+    const handleExport = async () => {
+        setExporting(true);
+        try {
+            await exportEventsToExcel();
+        } catch (error) {
+            console.error("Export error:", error);
+        } finally {
+            setExporting(false);
+        }
+    };
 
     return (
         <div className="h-screen w-screen flex bg-amber-50">
@@ -113,7 +126,7 @@ function SuperAdminManageEvents() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {paginatedEvents.map((event) => (
+                                        {paginatedEvents?.map((event) => (
                                             <tr key={event.eventId} className="border-b border-gray-200">
                                                 <td className="p-2 font-medium text-black whitespace-nowrap">{event.name}</td>
                                                 <td className="p-2 whitespace-nowrap text-gray-600">{event.startDatetime.slice(0, 10)}</td>
@@ -145,10 +158,6 @@ function SuperAdminManageEvents() {
                                                             navigate(`/superadmin/edit-event/${event.eventId}`);
                                                             setOpenId(null);
                                                         }}
-                                                        onDelete={() => {
-                                                            alert(`Deleting ${event.name}`);
-                                                            setOpenId(null);
-                                                        }}
                                                     />
                                                 </td>
                                             </tr>
@@ -157,36 +166,49 @@ function SuperAdminManageEvents() {
                                 </table>
                             </div>
 
-                            {/* Pagination */}
-                            {totalPages > 1 && (
-                                <div className="flex justify-center items-center mt-4 space-x-2">
-                                    <button
-                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                        disabled={currentPage === 1}
-                                        className={`px-3 py-1 border rounded ${currentPage === 1 ? 'text-gray-400 border-gray-300' : 'hover:bg-gray-100 text-black'}`}
-                                    >
-                                        Previous
-                                    </button>
-
-                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                            <div className="flex relative w-full">
+                                {/* Pagination */}
+                                {totalPages > 1 && (
+                                    <div className="flex items-center mt-4 space-x-2">
                                         <button
-                                            key={pageNum}
-                                            onClick={() => setCurrentPage(pageNum)}
-                                            className={`px-3 py-1 border rounded ${currentPage === pageNum ? 'bg-black text-white' : 'hover:bg-gray-100 text-black'}`}
+                                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                            disabled={currentPage === 1}
+                                            className={`hover:cursor-pointer px-3 py-1 border rounded ${currentPage === 1 ? 'text-gray-400 border-gray-300' : 'hover:bg-gray-100 text-black'}`}
                                         >
-                                            {pageNum}
+                                            Previous
                                         </button>
-                                    ))}
 
+                                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                                            <button
+                                                key={pageNum}
+                                                onClick={() => setCurrentPage(pageNum)}
+                                                className={`px-3 py-1 border rounded ${currentPage === pageNum ? 'bg-black text-white' : 'hover:bg-gray-100 text-black'}`}
+                                            >
+                                                {pageNum}
+                                            </button>
+                                        ))}
+
+                                        <button
+                                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                            disabled={currentPage === totalPages}
+                                            className={`hover:cursor-pointer px-3 py-1 border rounded ${currentPage === totalPages ? 'text-gray-400 border-gray-300' : 'hover:bg-gray-100 text-black'}`}
+                                        >
+                                            Next
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* Button export to excel */}
+                                <div className="ml-auto mt-4">
                                     <button
-                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                        disabled={currentPage === totalPages}
-                                        className={`px-3 py-1 border rounded ${currentPage === totalPages ? 'text-gray-400 border-gray-300' : 'hover:bg-gray-100 text-black'}`}
+                                        className={`hover:scale-105 hover:cursor-pointer bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-2 px-4 rounded text-sm sm:text-base ${exporting ? "opacity-70 cursor-not-allowed" : ""}`}
+                                        onClick={handleExport}
+                                        disabled={exporting}
                                     >
-                                        Next
+                                        {exporting ? "Exporting..." : "Export to Excel"}
                                     </button>
                                 </div>
-                            )}
+                            </div>
                         </div>
                     </div>
                 </main>

@@ -22,7 +22,7 @@ const CardDetails = ({ imageUrl }) => {
       {/* Image */}
       <div className="image md:w-1/4 w-full rounded-lg overflow-hidden flex-shrink-0">
         <img
-          src={imageUrl}
+          src={imageUrl || '/images/fptu-showcase.png'}
           alt="upcoming event"
           className="w-full h-48 md:h-full object-cover"
         />

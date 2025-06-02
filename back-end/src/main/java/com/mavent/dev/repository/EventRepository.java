@@ -15,7 +15,8 @@ import java.util.List;
 @Repository
 public interface EventRepository extends JpaRepository<Event, Integer> {
     Event findByEventId(Integer eventId);
-
+    long countByIsDeletedFalse(); //Dem tong so event dang hoat dong
+    long countByStatusAndIsDeletedFalse(Event.EventStatus status);
     @Query(
             value = """
     SELECT 

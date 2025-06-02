@@ -14,10 +14,9 @@ const CardSmall = ({ imageUrl }) => {
     <div
       onClick={handleClick}
       className="card flex items-center border border-gray-300 rounded-lg shadow-sm p-4 my-3 gap-4 hover:shadow-md active:shadow-lg transition-shadow duration-300 bg-white max-w-md"
-    >
-      <div className="image w-24 flex-shrink-0 rounded-md overflow-hidden">
+    >      <div className="image w-24 flex-shrink-0 rounded-md overflow-hidden">
         <img
-          src={imageUrl}
+          src={imageUrl || '/images/fptu-showcase.png'}
           alt="upcoming event"
           className="w-full h-24 object-cover"
         />

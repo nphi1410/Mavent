@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { updateProfile } from '../../services/profileService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSave, faXmark } from '@fortawesome/free-solid-svg-icons';
@@ -10,12 +10,23 @@ const UpdateProfile = ({ userData, onClose, onUpdate }) => {
     fullName: userData?.fullName || '',
     studentId: userData?.studentId || '',
     gender: userData?.gender || '',
-    email: userData?.email || '', // Giữ lại email nhưng không cho edit
-    phone: userData?.phone || '',
+    email: userData?.email || '',
+    phoneNumber: userData?.phoneNumber || '',
     dateOfBirth: userData?.dateOfBirth ? new Date(userData.dateOfBirth) : null
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    setFormData({
+      fullName: userData?.fullName || '',
+      studentId: userData?.studentId || '',
+      gender: userData?.gender || '',
+      email: userData?.email || '',
+      phoneNumber: userData?.phoneNumber || '',
+      dateOfBirth: userData?.dateOfBirth ? new Date(userData.dateOfBirth) : null
+    });
+  }, [userData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -38,141 +49,186 @@ const UpdateProfile = ({ userData, onClose, onUpdate }) => {
     setError(null);
 
     try {
+      // Add gender validation
+      if (!formData.gender) {
+        setError('Please select your gender.');
+        setLoading(false);
+        return;
+      }
+
+      if (formData.fullName.length > 100) {
+        setError('Full name không được quá 100 ký tự.');
+        setLoading(false);
+        return;
+      }
+
+      if (!/^0\d{9}$/.test(formData.phoneNumber)) {
+        setError('Số điện thoại phải bắt đầu bằng số 0 và có đúng 10 chữ số.');
+        setLoading(false);
+        return;
+      }
+
+      if (!/^[A-Za-z]{2}\d{6}$/.test(formData.studentId)) {
+        setError('Mã số sinh viên phải gồm 2 chữ cái và 6 chữ số, ví dụ: SE123456.');
+        setLoading(false);
+        return;
+      }
+
       const dataToSubmit = {
         ...formData,
-        dateOfBirth: formData.dateOfBirth ? formData.dateOfBirth.toISOString() : null
+        dateOfBirth: formData.dateOfBirth ? formData.dateOfBirth.toISOString().split('T')[0] : null
       };
 
-      const response = await updateProfile(dataToSubmit);
-      onUpdate(response.data);
-      onClose();
+      console.log('UpdateProfile.jsx: Đang gửi dữ liệu lên service:', dataToSubmit);
+      onUpdate(dataToSubmit);
     } catch (err) {
-      console.error('Error updating profile:', err);
-      setError(err.response?.data?.message || 'Failed to update profile');
-    } finally {
+      console.error('UpdateProfile.jsx: Lỗi khi chuẩn bị dữ liệu hoặc gọi onUpdate:', err);
+      setError(err.message || 'Lỗi không xác định khi chuẩn bị dữ liệu.');
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50 overflow-y-auto">
-      <div className="my-8 bg-white rounded-xl p-8 max-w-3xl w-full shadow-[0_0_15px_rgba(0,0,0,0.1)] border border-gray-100">
-        <h2 className="text-2xl font-bold mb-6">Update Profile</h2>
-        
+    <div className="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50 overflow-y-auto p-4">
+      <div className="my-8 bg-white rounded-xl p-6 sm:p-8 max-w-2xl w-full shadow-[0_0_15px_rgba(0,0,0,0.1)] border border-gray-100">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Update Profile</h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700" disabled={loading}>
+            <FontAwesomeIcon icon={faXmark} size="lg" />
+          </button>
+        </div>
+
         {error && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
                 Full Name
               </label>
               <input
+                id="fullName"
                 type="text"
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="studentId" className="block text-sm font-medium text-gray-700 mb-1">
                 Student ID
               </label>
               <input
+                id="studentId"
                 type="text"
                 name="studentId"
                 value={formData.studentId}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="w-full relative">
+              <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700 mb-1">
                 Date of Birth
               </label>
-              <DatePicker
-                selected={formData.dateOfBirth}
-                onChange={handleDateChange}
-                dateFormat="MMMM d, yyyy"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholderText="Select date of birth"
-                maxDate={new Date()}
-                showYearDropdown
-                scrollableYearDropdown
-                yearDropdownItemNumber={100}
-              />
+              <div className="relative z-[1000]">
+                <DatePicker
+                  id="dateOfBirth"
+                  selected={formData.dateOfBirth}
+                  onChange={handleDateChange}
+                  dateFormat="dd/MM/yyyy"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholderText="Select date of birth"
+                  maxDate={new Date()}
+                  showYearDropdown
+                  scrollableYearDropdown
+                  yearDropdownItemNumber={100}
+                  peekNextMonth
+                  showMonthDropdown
+                  dropdownMode="select"
+                  popperPlacement="bottom-start"
+                  popperModifiers={[
+                    {
+                      name: "offset",
+                      options: {
+                        offset: [0, 10]
+                      }
+                    }
+                  ]}
+                />
+              </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">
                 Gender
               </label>
               <select
+                id="gender"
                 name="gender"
                 value={formData.gender}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Select gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
+                <option value="OTHER">Other</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                 Email
               </label>
               <input
+                id="email"
                 type="email"
                 name="email"
                 value={formData.email}
-                className="w-full px-3 py-2 border border-gray-200 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed"
+                className="w-full px-3 py-2 border border-gray-200 rounded-md shadow-sm bg-gray-100 text-gray-500 cursor-not-allowed"
                 disabled
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
                 Phone
               </label>
               <input
+                id="phoneNumber"
                 type="tel"
-                name="phone"
-                value={formData.phone}
+                name="phoneNumber"
+                value={formData.phoneNumber}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>
 
-          <div className="mt-6 flex justify-end gap-4">
+          <div className="mt-8 flex justify-end gap-3 sm:gap-4">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors flex items-center gap-2"
+              className="px-4 py-2 border border-gray-300 text-sm font-medium text-gray-700 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-colors flex items-center gap-2"
               disabled={loading}
             >
-              <FontAwesomeIcon icon={faXmark} className="w-4 h-4" /> Cancel
+              <FontAwesomeIcon icon={faXmark} className="w-3 h-3 sm:w-4 sm:h-4" /> Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-[#00157be1] text-white rounded-md hover:bg-[#00147b93] transition-colors flex items-center gap-2 disabled:bg-blue-400"
+              className="px-4 py-2 bg-[#00157be1] text-sm font-medium text-white rounded-md shadow-sm hover:bg-[#001168] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00157be1] transition-colors flex items-center gap-2 disabled:opacity-70"
               disabled={loading}
             >
-              <FontAwesomeIcon icon={faSave} className="w-4 h-4" /> {loading ? 'Updating...' : 'Save Changes'}
+              <FontAwesomeIcon icon={faSave} className="w-3 h-3 sm:w-4 sm:h-4" /> {loading ? 'Updating...' : 'Save Changes'}
             </button>
           </div>
         </form>
