@@ -98,7 +98,7 @@ public class AccountController {    @Autowired
                 session.setAttribute("email", acc.getEmail());
 //            if (accByEmail != null) System.out.println("Account found by email: " + (accByEmail != null ? accByEmail.getUsername() : "null"));
                 session.setAttribute("username", acc.getUsername());
-//            session.setAttribute("account", acc);
+                session.setAttribute("account", acc);
                 session.setAttribute("isSuperAdmin", acc.getSystemRole() == Account.SystemRole.SUPER_ADMIN);
 
                 String username = (String) session.getAttribute("username");

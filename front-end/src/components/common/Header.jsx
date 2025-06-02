@@ -54,7 +54,10 @@ const Header = () => {
           {userData ? (
             <>
               <span className="font-semibold text-lg text-gray-800">
-                Hello, {userData.fullName}
+                Hello,{" "}
+                {userData.fullName?.length > 15
+                  ? `${userData.fullName.substring(0, 15)}...`
+                  : userData.fullName}
               </span>
               <div className="w-12 h-12 rounded-full border-2 border-gray-300 overflow-hidden">
                 <img
@@ -64,11 +67,12 @@ const Header = () => {
                   className="w-full h-full object-cover"
                 />
               </div>
-            <span
-              onClick={() => navigate("/logout")}
-              className="ml-4 px-4 py-2 bg-red-500 text-white rounded-full cursor-pointer hover:bg-blue-800 transition">
-              Logout
-            </span>
+              <span
+                onClick={() => navigate("/logout")}
+                className="ml-4 px-4 py-2 bg-red-500 text-white rounded-full cursor-pointer hover:bg-blue-800 transition"
+              >
+                Logout
+              </span>
             </>
           ) : (
             <span

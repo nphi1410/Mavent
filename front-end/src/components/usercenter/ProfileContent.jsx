@@ -160,8 +160,12 @@ const ProfileContent = () => {
               />
             </label>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold mt-4 text-gray-800">{userData?.fullName || "User Profile"}</h1>
-          <p className="text-sm text-gray-500">@{userData?.username}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold mt-4 text-gray-800 truncate max-w-[250px]">
+            @{userData?.username?.length > 15 
+              ? `${userData.username.substring(0, 15)}...` 
+              : userData?.username || "User Profile"}
+          </h1>
+          {/* <p className="text-sm text-gray-500">@{userData?.username}</p> */}
         </div>
 
         {/* Phần Thông Tin Chi Tiết */}
@@ -172,7 +176,7 @@ const ProfileContent = () => {
               ["Full Name", "fullName"],
               ["Student ID", "studentId"],
               ["Email", "email"], // Email vẫn hiển thị dù không sửa được
-              ["Phone", "phoneNumber"], // Đảm bảo key này khớp với userData
+              ["Phone", "phoneNumber"],
               ["Date of Birth", "dateOfBirth"], 
               ["Gender", "gender"]
             ].map(([label, field]) => {
