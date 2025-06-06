@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface TagService {
     List<Tag> getAllTags();
+
+    List<Tag> getTagsByEventId(Integer eventId);
 }

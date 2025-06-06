@@ -19,6 +19,9 @@ public interface FilterEventDTO {
     LocalDateTime getCreatedAt();
     LocalDateTime getUpdatedAt();
     Double getAvgRating();
+    String getBannerUrl();
+    String getPosterUrl();
+    Integer getTotalParticipants();
 }
 
 

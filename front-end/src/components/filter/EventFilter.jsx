@@ -1,33 +1,35 @@
 import React, { useEffect, useState } from "react";
-import Pagination from "./Pagination";
 import SelectStatus from "./SelectStatus";
 import Sorting from "./Sorting";
 import SelectTags from "./SelectTags";
 import Search from "./Search";
+import Pagination from "./Pagination";
 
-const EventFilter = ({ onFilter, totalPagesFromApi }) => {
+const EventFilter = ({
+  onFilter,
+  totalPagesFromApi,
+  currentPage,
+  setCurrentPage,
+}) => {
   const [searchTitle, setSearchTitle] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
-  const [sortOption, setSortOption] = useState(""); // e.g. "START_DATE_ASC"
-  const [currentPage, setCurrentPage] = useState(0); // zero-based for backend
+  const [sortOption, setSortOption] = useState("");
   const size = 10;
 
-  // Call onFilter whenever filter/sort/page changes
   useEffect(() => {
-    const tagIds = selectedTags.map(tag => (typeof tag === "object" ? tag.id : tag));
-
+    const tagIds = selectedTags.map((tag) => tag.tagId);
     const filters = {
       name: searchTitle || undefined,
       status: statusFilter || undefined,
-      tagIds,
+      tagIds: tagIds,
       sortType: sortOption || undefined,
       page: currentPage,
       size,
     };
 
     console.log("Filters:", filters);
-    onFilter(filters); // pass query string to onFilter
+    onFilter(filters);
   }, [
     searchTitle,
     statusFilter,
@@ -44,18 +46,15 @@ const EventFilter = ({ onFilter, totalPagesFromApi }) => {
   };
 
   return (
-    <div className="sticky top-16 z-10 bg-white border border-gray-300 p-4 m-6 shadow-sm rounded-md">
-      <div className="grid grid-cols-4 items-center gap-3 justify-between">
-        {/* Search */}
+    <div className="sticky top-16 z-10 bg-white border border-gray-300 p-4 shadow-sm rounded-md mb-4">
+      <div className="grid grid-cols-4 items-center gap-3">
         <Search
           searchTitle={searchTitle}
           setSearchTitle={(value) => {
             setSearchTitle(value);
+            setCurrentPage(0);
           }}
-          setCurrentPage={setCurrentPage}
         />
-
-        {/* Tags Selection */}
         <SelectTags
           selectedTags={selectedTags}
           onChange={(newTags) => {
@@ -64,7 +63,6 @@ const EventFilter = ({ onFilter, totalPagesFromApi }) => {
           }}
         />
 
-        {/* Sorting */}
         <Sorting
           value={sortOption}
           onChange={(e) => {
@@ -73,15 +71,12 @@ const EventFilter = ({ onFilter, totalPagesFromApi }) => {
           }}
           className="col-span-2"
         />
-
-        {/* Pagination */}
+        {/* PAGINATION */}
         <Pagination
-          currentPage={currentPage + 1} // UI 1-based
-          totalPages={totalPagesFromApi || 1}
-          onPageChange={(page) => goToPage(page - 1)} // convert UI to zero-based
+          currentPage={currentPage + 1} // display as 1-based
+          totalPages={totalPagesFromApi || 0}
+          onPageChange={(page) => goToPage(page - 1)} // convert to 0-based
         />
-
-        {/* Status selection */}
         <SelectStatus
           value={statusFilter}
           onChange={(e) => {

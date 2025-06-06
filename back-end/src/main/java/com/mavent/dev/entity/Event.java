@@ -36,6 +36,9 @@ public class Event {
 
     @Column(name = "location")
     private String location;
+    
+    @Column(name = "location_id")
+    private Integer locationId;
 
     @Column(name = "dday_info", columnDefinition = "TEXT")
     private String ddayInfo;
@@ -63,6 +66,12 @@ public class Event {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "banner_url")
+    private String bannerUrl;
+
+    @Column(name = "poster_url")
+    private String posterUrl;
 
     public enum EventStatus {
         RECRUITING, UPCOMING, ONGOING, ENDED, CANCELLED, PENDING, REVIEWING

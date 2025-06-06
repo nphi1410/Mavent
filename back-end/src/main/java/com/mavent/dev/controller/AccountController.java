@@ -1,6 +1,6 @@
 package com.mavent.dev.controller;
 
-import com.mavent.dev.dto.superadmin.AccountDTO;
+import com.mavent.dev.DTO.superadmin.AccountDTO;
 import com.mavent.dev.DTO.LoginDTO;
 import com.mavent.dev.DTO.UserProfileDTO;
 import com.mavent.dev.DTO.OtpDTO;
@@ -121,11 +121,11 @@ public class AccountController {    @Autowired
 
     @PostMapping("/send-register-otp")
     public ResponseEntity<?> sendOtp(@RequestBody com.mavent.dev.DTO.RegisterDTO request, HttpSession session) {
-        if (accountRepository.findByUsername(request.getUsername()) != null) {
+        if (accountService.getAccount(request.getUsername()) != null) {
             return ResponseEntity.badRequest().body("Username already exists!");
         }
         // Check if email already exists
-        if (accountRepository.findByEmail(request.getEmail()) != null) {
+        if (accountService.getAccountByEmail(request.getEmail()) != null) {
             return ResponseEntity.badRequest().body("Email already exists!");
         }
 

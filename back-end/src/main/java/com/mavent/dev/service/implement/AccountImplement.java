@@ -1,6 +1,6 @@
 package com.mavent.dev.service.implement;
 
-import com.mavent.dev.dto.superadmin.AccountDTO;
+import com.mavent.dev.DTO.superadmin.AccountDTO;
 import com.mavent.dev.mapper.AccountMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;

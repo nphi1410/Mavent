@@ -5,13 +5,12 @@ import com.mavent.dev.DTO.superadmin.EventDTO;
 import com.mavent.dev.entity.Event;
 import com.mavent.dev.repository.EventRepository;
 import com.mavent.dev.service.EventService;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,24 +21,16 @@ public class EventImplement implements EventService {
     private EventRepository eventRepository;
 
     @Override
-    public Page<FilterEventDTO> getFilterEvents(String name, String status, List<Integer> tagIds, String sortType, int page, int size) {
-        Sort sort = switch (sortType) {
-            case "START_DATE_ASC" -> Sort.by("start_datetime").ascending();
-            case "START_DATE_DESC" -> Sort.by("start_datetime").descending();
-            case "SCALE_ASC" -> Sort.by("max_participant_number").ascending();
-            case "SCALE_DESC" -> Sort.by("max_participant_number").descending();
-            case "RATING_ASC" -> Sort.by("avgRating").ascending();
-            case "RATING_DESC" -> Sort.by("avgRating").descending();
-            default -> Sort.unsorted();
-        };
+    public Page<FilterEventDTO> getFilterEvents(String name, String status, List<Integer> tagIds, String sortType, int page, int size, String type, boolean isTrending) {
+        Pageable pageable = PageRequest.of(page, size);
+        boolean tagCheck = tagIds != null && !tagIds.isEmpty();
+        return eventRepository.findAllUnified(name, status, type, tagCheck, tagIds, isTrending, sortType, pageable);
+    }
 
-        Pageable pageable = PageRequest.of(page, size, sort);
-
-        if (tagIds == null || tagIds.isEmpty()) {
-            return eventRepository.findAllFilteredNoTags(name, status, pageable);
-        }
-
-        return eventRepository.findAllFiltered(name, status, tagIds, pageable);
+    public static String toString(FilterEventDTO dto) {
+        return "eventId=" + dto.getEventId() +
+                ", startDatetime=" + dto.getStartDatetime() +
+                ", endDatetime=" + dto.getEndDatetime() ;
     }
 
 
@@ -81,7 +72,13 @@ public class EventImplement implements EventService {
         return mapToDTO(updatedEvent);
     }
 
-    private Event getEventEntityById(Integer eventId){
+    @Override
+    public Page<T> getEventByDateRange(String type, Boolean isTrending) {
+        return null;
+    }
+
+    @Override
+    public Event getEventEntityById(Integer eventId){
         Event event = null;
         try {
             event = eventRepository.findByEventId(eventId);

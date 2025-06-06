@@ -2,14 +2,14 @@ import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { separateDayMonthYear } from "../../utils/SeparateDayMonthYear";
 
 const CardRelevant = ({ event }) => {
   const navigate = useNavigate();
 
-  const date = new Date(event.startDatetime);
-  const day = date.getDate(); // returns 1–31
-  const month = date.toLocaleString("default", { month: "short" }); // e.g., "Sep"
-  const year = date.getFullYear();
+  const [day, month, year] = separateDayMonthYear(
+    new Date(event.startDatetime)
+  );
 
   const handleClick = () => {
     navigate(`/events/${event.eventId}`);
@@ -23,7 +23,7 @@ const CardRelevant = ({ event }) => {
       {/* Image with gradient overlay */}
       <div className="relative h-36">
         <img
-          src={event.imageUrl}
+          src={event.bannerUrl}
           alt={event.name}
           className="w-full h-full object-cover"
         />
@@ -41,8 +41,10 @@ const CardRelevant = ({ event }) => {
       <div className="p-4">
         <div className="flex items-center gap-2 mb-2">
           <div className="flex gap-1 items-center bg-blue-100 text-blue-800 font-semibold text-sm px-2 py-1 rounded">
-            <span>{year} - { month}</span>
-            <span className="font-bold">{day}</span>
+            <span>
+              {year}
+            </span>
+            <span className="font-bold"> {month}-{day}</span>
           </div>
           <h3 className="text-md font-bold truncate">{event.name}</h3>
         </div>

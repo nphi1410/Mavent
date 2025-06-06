@@ -1,15 +1,12 @@
-import React from 'react';
+import React from "react";
+import { useNavigate } from "react-router-dom";
 
-const Gallery = ({imageUrls}) => {
-  // Use default local images if no imageUrls are provided or if the array is empty
-  const images = imageUrls?.length > 0 ? imageUrls : [
-    '/images/fptu-showcase.png',
-    '/images/f-camp.png',
-    '/images/codefest.png',
-    '/images/gameshow.png',
-    '/images/petty-gone.png',
-    '/images/soul-note.png',
-  ];
+const Gallery = ({ imageUrls }) => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate("/events");
+  };
 
   return (
     <div className="w-full bg-gradient-to-b from-white to-gray-100 py-16 px-6 flex flex-col items-center">
@@ -18,7 +15,7 @@ const Gallery = ({imageUrls}) => {
       </h1>
 
       <div className="w-full max-w-7xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-        {images.map((src, index) => (
+        {imageUrls.map((src, index) => (
           <div
             key={index}
             className="overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300"
@@ -33,7 +30,10 @@ const Gallery = ({imageUrls}) => {
       </div>
 
       <div className="mt-12">
-        <button className="px-6 py-3 bg-blue-600 text-white text-lg font-semibold rounded-full shadow-md hover:bg-blue-700 transition duration-300">
+        <button
+          onClick={handleClick}
+          className="px-6 py-3 bg-blue-600 text-white text-lg font-semibold rounded-full shadow-md hover:bg-blue-700 transition duration-300"
+        >
           Explore More
         </button>
       </div>
