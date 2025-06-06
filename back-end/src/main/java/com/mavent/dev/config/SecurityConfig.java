@@ -54,8 +54,8 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
         UserDetails user = User
-                .withUsername("admin")
-                .password(passwordEncoder.encode("admin123"))
+                .withUsername(System.getenv("SPRING_SECURITY_USER"))
+                .password(passwordEncoder.encode(System.getenv("SPRING_SECURITY_PASS")))
                 .roles("ADMIN")
                 .build();
         return new InMemoryUserDetailsManager(user);

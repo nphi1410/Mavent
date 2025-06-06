@@ -17,15 +17,6 @@ const EventDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const imageUrls = [
-    "/images/codefest.png",
-    "/images/f-camp.png",
-    "/images/fptu-showcase.png",
-    "/images/gameshow.png",
-    "/images/petty-gone.png",
-    "/images/soul-note.png",
-  ];
-
   useEffect(() => {
     if (id) {
       const fetchData = async () => {
@@ -42,7 +33,7 @@ const EventDetails = () => {
 
       fetchData();
     }
-  }, [id]); // <--- Important!
+  }, [id]);
 
   if (loading) return <p className="text-center mt-10">Loading...</p>;
   if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
@@ -51,15 +42,15 @@ const EventDetails = () => {
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-grow">
-        <EventBanner bannerUrl={imageUrls[1]} eventData={eventData}/>
+        <EventBanner eventData={eventData}/>
 
         <section className="flex flex-col lg:flex-row justify-between gap-8 px-4 sm:px-6 lg:px-12 py-8">
           <div className="w-full lg:w-1/2">
             <Description eventData={eventData} />
           </div>
           <div className="w-full lg:w-1/2 flex flex-col gap-6">
-            <EventTime data={eventData.startDatetime} />
-            <MapGuide location={eventData?.location} />
+            <EventTime eventData={eventData} />
+            <MapGuide eventData={eventData} />
           </div>
         </section>
 
@@ -68,10 +59,10 @@ const EventDetails = () => {
             <OrganizerContact contact={eventData?.organizer} />
           </div>
           <div className="w-full lg:w-1/2">
-            {/* <TagsList tags={eventData?.tags} /> */}
+            <TagsList eventData={eventData} />
           </div>
         </section>
-        <RelevantEvent />
+        <RelevantEvent eventData={eventData} />
       </main>
       <Footer />
     </div>

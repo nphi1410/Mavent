@@ -2,7 +2,7 @@ package com.mavent.dev.service;
 
 import com.mavent.dev.DTO.TaskDTO;
 import com.mavent.dev.DTO.UserEventDTO;
-import com.mavent.dev.dto.superadmin.AccountDTO;
+import com.mavent.dev.DTO.superadmin.AccountDTO;
 import com.mavent.dev.DTO.UserProfileDTO; // Updated import with correct case
 
 import com.mavent.dev.entity.Account;

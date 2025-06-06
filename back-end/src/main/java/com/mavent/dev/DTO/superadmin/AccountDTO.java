@@ -1,4 +1,4 @@
-package com.mavent.dev.dto.superadmin;
+package com.mavent.dev.DTO.superadmin;
 
 import com.mavent.dev.entity.Account.Gender;
 import com.mavent.dev.entity.Account.SystemRole;

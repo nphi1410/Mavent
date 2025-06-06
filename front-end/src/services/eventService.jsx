@@ -1,5 +1,6 @@
 import Api from "../config/Api";
 
+//lọc sự kiện theo name,status,tags; sort, paging
 export const getFilterEvents = async ({
   name,
   status,
@@ -7,6 +8,8 @@ export const getFilterEvents = async ({
   sortType,
   page,
   size,
+  type,
+  isTrending,
 }) => {
   try {
     const body = {
@@ -16,17 +19,17 @@ export const getFilterEvents = async ({
       sortType,
       page,
       size,
+      type,
+      isTrending,
     };
 
     const res = await Api.post("/events/filter", body); // sending as JSON in body
-    console.log(res.data);
     return res.data;
   } catch (err) {
     console.error(err);
     return null;
   }
 };
-
 
 //Lấy toàn bộ danh sách sự kiện
 export const getEvents = async () => {
@@ -44,7 +47,6 @@ export const getEventById = async (id) => {
   try {
     const response = await Api.get(`/events/${id}`);
     console.log(response.data);
-    
     return response.data; // single EventDTO
   } catch (error) {
     console.error(`Error fetching event with ID ${id}:`, error);
@@ -60,5 +62,15 @@ export const updateEvent = async (id, eventData) => {
   } catch (error) {
     console.error(`Error updating event with ID ${id}:`, error);
     return null;
+  }
+};
+
+export const getTrendingEvents = async (type) => {
+  try {
+    const response = await Api.get(`/events/trending/${type}`);
+    return response.data; // array of EventDTO
+  } catch (error) {
+    console.error("Error fetching trending events:", error);
+    return [];
   }
 };

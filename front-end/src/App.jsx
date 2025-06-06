@@ -16,9 +16,9 @@ import SuperAdminViewEventDetails from './pages/superadmin/SuperAdminViewEventDe
 import SuperAdminViewUserDetails from './pages/superadmin/SuperAdminViewUserDetails';
 import SuperAdminEditEvent from './pages/superadmin/SuperAdminEditEvent';
 import UserEventsPage from './pages/UserEventsPage';
-import React from 'react';
 import Register from './pages/Register';
 import Logout from './components/Logout';
+import AllEvents from './pages/AllEvents';
 
 
 import UserTasksPage from "./pages/UserTasksPage";
@@ -58,7 +58,8 @@ function App() {
                         path="/superadmin/edit-event/:eventId"
                         element={<SuperAdminEditEvent />}
                     />
-                    <Route path="/event/1" element={<EventDetails />} />
+                    <Route path="/events/:id" element={<EventDetails />} />
+                    <Route path="/events/" element={<AllEvents />} />
 
                      <Route path="/event/9/members" element={<Members />} />
                 </Routes>

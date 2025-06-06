@@ -22,14 +22,14 @@ public class DocumentImplement implements DocumentService {
     public List<ImageDTO> getFiveImage() {
         List<Document> images = documentRepository.findTop5ByOrderByCreatedAtDesc();
         CloudConfig cloud = new CloudConfig();
-        List<ImageDTO> imagefiles = new ArrayList<>();
+        List<ImageDTO> imageFiles = new ArrayList<>();
         for(Document image : images){
             try {
-                imagefiles.add(new ImageDTO( cloud.getFileBytes(image.getFilePath()),image.getFileType()));
+                imageFiles.add(new ImageDTO( cloud.getFileBytes(image.getFilePath()),image.getFileType()));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
-        return imagefiles;
+        return imageFiles;
     }
 }

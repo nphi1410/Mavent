@@ -1,21 +1,17 @@
 package com.mavent.dev.controller;
 
 import com.mavent.dev.DTO.FilterEventDTO;
+import com.mavent.dev.DTO.FilterRequestDTO;
 import com.mavent.dev.DTO.superadmin.EventDTO;
 import com.mavent.dev.entity.Event;
 import com.mavent.dev.service.EventService;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/events")
@@ -31,37 +27,23 @@ public class EventController {
     }
 
     @PostMapping("/filter")
-    public Page<FilterEventDTO> getFilterEvents(@RequestBody FilterRequest request) {
-        System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"+request.getName());
+    public Page<FilterEventDTO> getFilterEvents(@RequestBody FilterRequestDTO request) {
         return eventService.getFilterEvents(
                 request.getName(),
                 request.getStatus(),
                 request.getTagIds(),
                 request.getSortType(),
                 request.getPage(),
-                request.getSize()
+                request.getSize(),
+                request.getType(),
+                request.isTrending()
         );
     }
 
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    public static class FilterRequest {
-        private String name;
-        private String status;
-        private List<Integer> tagIds;
-        private String sortType = "START_DATE_ASC";
-        private int page;
-        private int size = 10;
-    }
-
-
-
-
     //Get Event By ID
     @GetMapping("/{id}")
-    public EventDTO getEventById(@PathVariable("id") Integer eventId) {
-        return eventService.getEventById(eventId);
+    public Event getEventById(@PathVariable("id") Integer eventId) {
+        return eventService.getEventEntityById(eventId);
     }
 
     // Update Event
