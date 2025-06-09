@@ -9,6 +9,7 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(false);
 
   const [registerError, setRegisterError] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -41,6 +42,7 @@ const Register = () => {
         setRegisterError("");
       }
     } catch (error) {
+      console.log(error)
       if (error.response?.status === 400) {
         setRegisterError("Username or email already exists.");
       } else {
@@ -60,6 +62,7 @@ const Register = () => {
       });
 
       if (response.status === 200) {
+        setIsRegistered(true);
         setTimeout(() => {
           navigate("/login");
         }, 2000); // Redirect after 2 seconds      
@@ -90,6 +93,8 @@ const Register = () => {
                 className="pl-4 p-2 border border-blue-400 rounded-full"
                 onChange={(e) => setUsername(e.target.value)}
                 value={username}
+                required
+                disabled={otpSent}
               />
 
               <label className="mb-1 mt-4 text-sm font-medium text-gray-700 pl-2.5">Email:</label>
@@ -99,6 +104,8 @@ const Register = () => {
                 className="pl-4 p-2 border border-blue-400 rounded-full"
                 onChange={(e) => setEmail(e.target.value)}
                 value={email}
+                required
+                disabled={otpSent}
               />
             </div>
 
@@ -110,6 +117,7 @@ const Register = () => {
                 className="pl-4 p-2 border border-blue-400 rounded-full"
                 onChange={(e) => setPassword(e.target.value)}
                 value={password}
+                required
               />
 
               <label className="mb-1 mt-4 text-sm font-medium text-gray-700 pl-2.5">Confirm password:</label>
@@ -119,6 +127,7 @@ const Register = () => {
                 className="pl-4 p-2 border border-blue-400 rounded-full"
                 onChange={confirmPasswordChange}
                 value={confirmPassword}
+                required
               />
               {passwordError && (
                 <div className="text-red-600 text-sm mt-2">{passwordError}</div>
@@ -155,6 +164,8 @@ const Register = () => {
             <button
               type="submit"
               className="bg-blue-900 text-white px-6 py-2 rounded-full hover:bg-blue-950 transition"
+              // onClick={isRegistered ? `disabled` : ""}
+              id='register-button'
             >
               {otpSent ? "Register" : "Send OTP"}
             </button>

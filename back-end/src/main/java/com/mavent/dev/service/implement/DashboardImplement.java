@@ -1,6 +1,6 @@
 package com.mavent.dev.service.implement;
 
-import com.mavent.dev.DTO.DashboardDTO;
+import com.mavent.dev.DTO.superadmin.DashboardDTO;
 import com.mavent.dev.entity.Event;
 import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.repository.EventRepository;

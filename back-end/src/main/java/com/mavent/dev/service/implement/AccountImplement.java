@@ -1,16 +1,15 @@
 package com.mavent.dev.service.implement;
 
-
-import com.mavent.dev.DTO.AccountDTO;
-import com.mavent.dev.DTO.*;
+import com.mavent.dev.DTO.superadmin.AccountDTO;
+import com.mavent.dev.mapper.AccountMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import com.mavent.dev.DTO.TaskDTO;
 import com.mavent.dev.DTO.UserEventDTO;
-
 import com.mavent.dev.DTO.UserProfileDTO;
 import com.mavent.dev.entity.Account;
+
 import com.mavent.dev.entity.Task;
 import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.repository.TaskRepository;
@@ -20,16 +19,21 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import com.mavent.dev.config.MailConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
-
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.ArrayList;
 import java.util.Comparator;
+
+
 
 @Service
 public class AccountImplement implements AccountService {
@@ -40,20 +44,37 @@ public class AccountImplement implements AccountService {
     @Autowired
     private MailConfig mailConfig;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;    @Override
+    @Transactional(readOnly = true)
+    public Page<AccountDTO> getAllActiveAccounts(Pageable pageable) {
+        return accountRepository.findActiveAccounts(pageable)
+                .map(this::mapAccountToDTO);
+    }
+
     @Override
     public boolean checkLogin(String UsernameOrEmail, String password) {
         // Find account by username
-        Account accountFoundByUsername = accountRepository.findByUsername(UsernameOrEmail);
-        Account accountFoundByEmail = accountRepository.findByEmail(UsernameOrEmail);
-        if (accountFoundByUsername != null && accountFoundByUsername.getPasswordHash().equals(password)) {
-            return true; // Login successful with username
-        } else return accountFoundByEmail != null && accountFoundByEmail.getPasswordHash().equals(password); // Login successful with email
+        System.out.println("Checking login for: " + UsernameOrEmail);
+//        System.out.println("Encoded password: " + passwordEncoder.encode(password));
+        try {
+            Account account = accountRepository.findByUsername(UsernameOrEmail);
+            if (account == null && accountRepository.findByEmail(UsernameOrEmail) != null) {
+                account = accountRepository.findByEmail(UsernameOrEmail);
+            }
+            if (account == null) {
+                System.err.println("Account not found with username or email: " + UsernameOrEmail);
+                return false; // Account not found
+            }
+//            System.out.println("Account found by username: " + accountFoundByUsername.getUsername());
+//            System.out.println("Account found by email: " + accountFoundByEmail.getEmail());
+            System.out.println(passwordEncoder.matches(password, account.getPasswordHash()));
+            return passwordEncoder.matches(password, account.getPasswordHash());
+        } catch (Exception e) {
+            System.err.println("Error during login check: " + e.getMessage());
+            return false; // Login failed
+        }
     }
-
-//    @Async
-//    public void sendOtpAsync(String to, String otp) {
-//        mailConfig.sendMail(to, "Your OTP Code", "Your OTP code is: " + otp);
-//    }
 
     @Override
     public String isOtpTrue(String originOTP, long otpCreatedTime, String requestOtp) {
@@ -91,24 +112,18 @@ public class AccountImplement implements AccountService {
     public List<AccountDTO> getAllAccounts() {
         List<Account> accounts = accountRepository.findAllByIsDeletedFalse();
 
-        return accounts.stream().map(account -> {
-            AccountDTO dto = new AccountDTO();
-            dto.setAccountId(account.getAccountId());
-            dto.setUsername(account.getUsername());
-            dto.setEmail(account.getEmail());
-            dto.setFullName(account.getFullName());
-            dto.setSystemRole(account.getSystemRole());  // SystemRole enum
-            dto.setAvatarUrl(account.getAvatarUrl());
-            dto.setPhoneNumber(account.getPhoneNumber());
-            dto.setGender(account.getGender());  // Gender enum
-            dto.setStudentId(account.getStudentId());
-            dto.setDateOfBirth(account.getDateOfBirth());
-            dto.setCreatedAt(account.getCreatedAt());
-            dto.setUpdatedAt(account.getUpdatedAt());
-            return dto;
-        }).collect(Collectors.toList());
+        return accounts.stream()
+                .map(this::mapAccountToDTO)
+                .collect(Collectors.toList());
     }
 
+    @Override
+    public AccountDTO getAccountById(Integer id) {
+        Account account = accountRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("Account not found with ID: " + id));
+
+        return mapAccountToDTO(account);
+    }
 
     @Override
     public UserProfileDTO getUserProfile(String username) {
@@ -119,14 +134,9 @@ public class AccountImplement implements AccountService {
         return mapAccountToUserProfileDTO(account);
     }
 
-    @Override
-    public boolean checkLogin(String username, String password) {
-        Account account = accountRepository.findByUsername(username);
-        if (account == null) return false;
-        return account.getPasswordHash().equals(password);
-    }
 
     @Override
+
     public UserProfileDTO updateProfile(String username, UserProfileDTO userProfileDTO) {
         Account account = getAccount(username);
 
@@ -158,6 +168,7 @@ public class AccountImplement implements AccountService {
     @Override
     public Account getAccount(String username) {
         Account account = null;
+//                accountRepository.findByUsername(username);
         try {
             account = accountRepository.findByUsername(username);
         } catch (UsernameNotFoundException ex) {
@@ -295,4 +306,21 @@ public class AccountImplement implements AccountService {
         return eventList;
     }
 
+    private AccountDTO mapAccountToDTO(Account account) {
+        AccountDTO dto = new AccountDTO();
+        dto.setAccountId(account.getAccountId());
+        dto.setUsername(account.getUsername());
+        dto.setEmail(account.getEmail());
+        dto.setFullName(account.getFullName());
+        dto.setSystemRole(account.getSystemRole());
+        dto.setAvatarUrl(account.getAvatarUrl());
+        dto.setPhoneNumber(account.getPhoneNumber());
+        dto.setGender(account.getGender());
+        dto.setStudentId(account.getStudentId());
+        dto.setDateOfBirth(account.getDateOfBirth());
+        dto.setCreatedAt(account.getCreatedAt());
+        dto.setUpdatedAt(account.getUpdatedAt());
+        return dto;
+    }
 }
+
