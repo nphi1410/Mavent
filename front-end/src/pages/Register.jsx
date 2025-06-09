@@ -22,10 +22,14 @@ const Register = () => {
     } else {
       setPasswordError("");
     }
-  };
+  }
 
   const sendOtp = async (e) => {
     e?.preventDefault();
+    if (password !== confirmPassword) {
+      setPasswordError("Passwords do not match");
+      return;
+    }
     try {
       const response = await axios.post("http://localhost:8080/api/send-register-otp", {
         username,
@@ -42,7 +46,7 @@ const Register = () => {
       }
     } catch (error) {
       if (error.response?.status === 400) {
-        setRegisterError("Username or email already exists.");
+        setRegisterError(response?.data);
       } else {
         setRegisterError("Failed to send OTP. Please try again.");
       }
@@ -73,6 +77,7 @@ const Register = () => {
     }
   };
 
+  
   return (
     <div className="flex items-center justify-center min-h-screen bg-blue-900">
       <div className="bg-white p-10 rounded-2xl shadow-md w-full max-w-3xl">
