@@ -9,7 +9,7 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
-  const [isRegistered, setIsRegistered] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [registerError, setRegisterError] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -32,6 +32,8 @@ const Register = () => {
       return;
     }
     try {
+      setIsLoading(true);
+      setRegisterError("");
       const response = await axios.post("http://localhost:8080/api/send-register-otp", {
         username,
         email,
@@ -53,11 +55,13 @@ const Register = () => {
         setRegisterError("Failed to send OTP. Please try again.");
       }
     }
+    setIsLoading(false);
   };
 
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
+      setIsLoading(true);
       const response = await axios.post("http://localhost:8080/api/register", {
         otp
       }, {
@@ -78,6 +82,7 @@ const Register = () => {
         setRegisterError("Registration failed. Try again later.");
       }
     }
+    setIsLoading(false);
   };
 
   
@@ -162,6 +167,12 @@ const Register = () => {
                 </button>
 
               </div>
+            </div>
+          )}
+
+          { isLoading && (
+            <div className="text-blue-600 text-sm text-center mt-4">
+              {otpSent ? "Registering..." : "Sending OTP..."}
             </div>
           )}
 
