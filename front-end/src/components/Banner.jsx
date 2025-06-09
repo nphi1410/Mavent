@@ -4,10 +4,29 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { getFilterEvents } from "../services/eventService";
 
 const Banner = ({ bannerUrls }) => {
   const swiperRef = useRef(null);
+  const [trendingOnGoingEvents, setTrendingOnGoingEvents] = useState([]);
+
+  useEffect(() => {
+    async function fetchTrendingOngoing() {
+      const data = await getFilterEvents({
+        page: 0,
+        size: 5,
+        isTrending: true,
+        type: "ongoing",
+        sortType: "END_DATE_ASC",
+      });
+      if (data) {
+        setTrendingOnGoingEvents(data.content || []);
+      }
+    }
+
+    fetchTrendingOngoing();
+  }, []);
 
   useEffect(() => {
     if (swiperRef.current?.swiper) {
@@ -28,15 +47,15 @@ const Banner = ({ bannerUrls }) => {
         }}
         navigation
         pagination={{ clickable: true }}
-        loop
+        loop={trendingOnGoingEvents.length > 1}
         className="h-64 sm:h-96 md:h-[400px] lg:h-[600px]"
       >
-        {bannerUrls.map((bannerUrl, index) => (
+        {trendingOnGoingEvents.map((event, index) => (
           <SwiperSlide key={index}>
             <div className="relative h-full w-full">
               <img
-                src={bannerUrl}
-                alt={`slide-${index}`}
+                src={event.bannerUrl}
+                alt={event.name}
                 className="w-full h-full object-cover rounded-lg"
               />
               {/* Overlay for subtle darkening */}

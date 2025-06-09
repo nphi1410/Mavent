@@ -18,7 +18,7 @@ const ProfileContent = () => {
       console.log('ProfileContent: Fetching user profile...');
       const profileData = await getUserProfile(); // Service đã trả về response.data
       console.log('ProfileContent: Received user profile:', profileData);
-      setUserData(profileData);
+      setUserData(profileData.data);
     } catch (err) {
       console.error('ProfileContent: Error fetching profile:', err);
       setError(err.message || err.response?.data?.message || 'Failed to load user profile');
@@ -38,13 +38,12 @@ const ProfileContent = () => {
       const formData = new FormData();
       formData.append('file', file);
       // Cân nhắc thêm state loading cho avatar upload nếu cần
-      try {
-        const response = await uploadAvatar(formData); // Service trả về response.data
+      try {        const response = await uploadAvatar(formData); // Service trả về response.data
         console.log('ProfileContent: Avatar upload response:', response);
         if (response && response.avatarUrl) { // Kiểm tra response và avatarUrl
           setUserData(prev => ({
             ...prev,
-            avatarImg: response.avatarUrl
+            avatarUrl: response.avatarUrl
           }));
            alert('Avatar updated successfully!');
         } else {
@@ -138,12 +137,11 @@ const ProfileContent = () => {
   return (
     <main className="flex-grow p-6 sm:p-10 bg-gray-50 flex flex-col items-center">
       <div className="w-full max-w-4xl">
-        {/* Phần Avatar */}
-        <div className="flex flex-col items-center mb-8 sm:mb-10 relative">
+        {/* Phần Avatar */}        <div className="flex flex-col items-center mb-8 sm:mb-10 relative">
           <div className="relative group w-32 h-32 sm:w-40 sm:h-40">
-            {userData?.avatarImg ? (
+            {userData?.avatarUrl ? (
               <img
-                src={userData.avatarImg} 
+                src={userData.avatarUrl} 
                 alt="Profile"
                 className="w-full h-full rounded-full object-cover border-4 border-white shadow-lg"
               />
@@ -162,8 +160,12 @@ const ProfileContent = () => {
               />
             </label>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold mt-4 text-gray-800">{userData?.fullName || "User Profile"}</h1>
-          <p className="text-sm text-gray-500">@{userData?.username}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold mt-4 text-gray-800 truncate max-w-[250px]">
+            @{userData?.username?.length > 15 
+              ? `${userData.username.substring(0, 15)}...` 
+              : userData?.username || "User Profile"}
+          </h1>
+          {/* <p className="text-sm text-gray-500">@{userData?.username}</p> */}
         </div>
 
         {/* Phần Thông Tin Chi Tiết */}
@@ -174,7 +176,7 @@ const ProfileContent = () => {
               ["Full Name", "fullName"],
               ["Student ID", "studentId"],
               ["Email", "email"], // Email vẫn hiển thị dù không sửa được
-              ["Phone", "phoneNumber"], // Đảm bảo key này khớp với userData
+              ["Phone", "phoneNumber"],
               ["Date of Birth", "dateOfBirth"], 
               ["Gender", "gender"]
             ].map(([label, field]) => {

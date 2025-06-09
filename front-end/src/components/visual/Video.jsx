@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 const Video = () => {
   return (
@@ -9,10 +9,10 @@ const Video = () => {
       <div className="w-full max-w-5xl aspect-video border-2 border-gray-200 p-4 rounded-2xl shadow-xl overflow-hidden">
         <iframe
           className="w-full h-full rounded-xl"
-          src="https://www.youtube.com/embed/pZ0hy0Eu2MA?si=FCNSrpUgc2gRvtHH"
           title="Remarkable Event"
+          src="https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2Ffu.jsclub%2Fvideos%2F1329638691433044%2F&show_text=false&width=560&t=0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
+          allowfullscreen
         ></iframe>
       </div>
     </div>

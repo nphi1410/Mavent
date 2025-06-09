@@ -21,21 +21,16 @@ public class CloudConfig {
     private final S3Client s3Client;
 
     public CloudConfig() {
-//        String accessKey = System.getenv("AWS_ACCESS_KEY");
-//        String secretKey = System.getenv("AWS_SECRET_KEY");
-//        String endpoint = System.getenv("AWS_ENDPOINT");
-//        String region = System.getenv("AWS_REGION");
-
-        String accessKey = "0057c6c9b9fd1c70000000002";
-        String secretKey = "K005NcntKSbKUC7EA1cAe1BY54lTRyo";
-        String endpoint = "https://s3.us-east-005.backblazeb2.com";
-        String region = "us-west-2";
+        String accessKey = System.getenv("AWS_ACCESS_KEY");
+        String secretKey = System.getenv("AWS_SECRET_KEY");
+        String endpoint = System.getenv("AWS_ENDPOINT");
+        String region = System.getenv("AWS_REGION");
         AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
 
         this.s3Client = S3Client.builder()
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
                 .endpointOverride(URI.create(endpoint))
-                .region(Region.of(region)) // Use any dummy region; Backblaze doesn't validate it
+                .region(Region.of(region))
                 .requestChecksumCalculation(RequestChecksumCalculation.WHEN_REQUIRED)
                 .build();
     }
@@ -50,9 +45,7 @@ public class CloudConfig {
 //    }
 
     public void uploadMultipartFile(MultipartFile file, String type) throws IOException {
-//        String bucket = System.getenv("AWS_BUCKET_NAME");
-        String bucket = "Mavent";
-
+        String bucket = System.getenv("AWS_BUCKET_NAME");
         String keyName = type + "/" + file.getOriginalFilename();
 
         PutObjectRequest request = PutObjectRequest.builder()
@@ -66,9 +59,7 @@ public class CloudConfig {
 
     // Download file as byte array
     public byte[] getFileBytes(String keyName) throws IOException {
-//        String bucket = System.getenv("AWS_BUCKET_NAME");
-        String bucket = "Mavent";
-
+        String bucket = System.getenv("AWS_BUCKET_NAME");
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                 .bucket(bucket)
                 .key(keyName)
@@ -80,5 +71,7 @@ public class CloudConfig {
             // Handle exceptions (file not found, access denied, etc.)
             throw new IOException("Failed to get file from S3: " + e.awsErrorDetails().errorMessage(), e);
         }
+
+        
     }
 }

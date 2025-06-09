@@ -5,8 +5,6 @@ import { getUserProfile } from "../../services/profileService";
 const Header = () => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchUserProfile();
@@ -14,59 +12,90 @@ const Header = () => {
 
   const fetchUserProfile = async () => {
     try {
-      const response = await getUserProfile();
-      console.log(response.data);
-
-      setUserData(response.data);
-      setLoading(false);
+      const response = await getUserProfile({ requireAuth: false });
+      if (response) {
+        setUserData(response);
+      }
     } catch (err) {
-      console.error("Error fetching user profile:", err); // Cập nhật log
-      setError(err.response?.data?.message || "Failed to load user profile"); // Cập nhật lỗi
-      setLoading(false);
+      console.error("Error fetching user profile:", err);
     }
+  };
+
+  const navigateAllEvents = (type, isTrending) => {
+    const searchParams = new URLSearchParams();
+    if (type) searchParams.set("type", type);
+    if (isTrending) searchParams.set("isTrending", "true");
+
+    navigate(`/events?${searchParams.toString()}`);
   };
 
   return (
     <header className="sticky top-0 z-9999 w-full bg-white shadow-sm px-6 py-3">
       <div className="flex items-center justify-between">
-        {/* Logo */}
         <div className="flex items-center w-40">
           <img
             onClick={() => navigate("/")}
             src="/mavent-text-logo.svg"
             alt="Mavent Logo"
-            className="w-full"
+            className="w-full cursor-pointer"
           />
         </div>
 
-        {/* Navigation Labels */}
         <nav className="hidden md:flex items-center gap-6 text-gray-600 font-medium text-base">
-          <span className="hover:text-black cursor-pointer">Upcoming</span>
-          <span className="hover:text-black cursor-pointer">Trending</span>
-          <span className="hover:text-black cursor-pointer">Featured</span>
-          <span className="hover:text-black cursor-pointer">Explore more</span>
+          <span
+            onClick={() => navigateAllEvents("upcoming", true)}
+            className="hover:text-black cursor-pointer"
+          >
+            Upcoming
+          </span>
+          <span
+            onClick={() => navigateAllEvents("recently", true)}
+            className="hover:text-black cursor-pointer"
+          >
+            Recently
+          </span>
+          <span
+            onClick={() => navigateAllEvents("ongoing", true)}
+            className="hover:text-black cursor-pointer"
+          >
+            Ongoing
+          </span>
+          <span
+            onClick={() => navigateAllEvents("", true)}
+            className="hover:text-black cursor-pointer"
+          >
+            Trending
+          </span>
         </nav>
 
-        {/* Greeting + Avatar */}
         <div className="flex items-center gap-6">
           {userData ? (
             <>
               <span className="font-semibold text-lg text-gray-800">
-                Hello, {userData.fullName}
+                Hello,{" "}
+                {userData.fullName?.length > 15
+                  ? `${userData.fullName.substring(0, 15)}...`
+                  : userData.fullName}
               </span>
               <div className="w-12 h-12 rounded-full border-2 border-gray-300 overflow-hidden">
                 <img
                   onClick={() => navigate("/profile/")}
                   src="/avatar.jpg"
                   alt="User Avatar"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover cursor-pointer"
                 />
               </div>
+              <span
+                onClick={() => navigate("/logout")}
+                className="ml-4 px-4 py-2 bg-red-500 text-white rounded-full cursor-pointer hover:bg-blue-800 transition"
+              >
+                Logout
+              </span>
             </>
           ) : (
             <span
               onClick={() => navigate("/login")}
-              className="font-semibold text-lg text-gray-800"
+              className="font-semibold text-lg text-gray-800 cursor-pointer"
             >
               Login
             </span>

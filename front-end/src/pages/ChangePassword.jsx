@@ -77,6 +77,7 @@ function ChangePassword() {
             value={oldPassword}
             onChange={(e) => setOldPassword(e.target.value)}
             required
+            disabled={isCorrectPassword}
           />
           {isCorrectPassword && (
             <div>

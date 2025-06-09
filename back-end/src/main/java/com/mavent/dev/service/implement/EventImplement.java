@@ -1,13 +1,16 @@
 package com.mavent.dev.service.implement;
 
-import com.mavent.dev.DTO.EventDTO;
+import com.mavent.dev.DTO.FilterEventDTO;
+import com.mavent.dev.DTO.superadmin.EventDTO;
 import com.mavent.dev.entity.Event;
 import com.mavent.dev.repository.EventRepository;
 import com.mavent.dev.service.EventService;
-import jakarta.persistence.EntityNotFoundException;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,6 +19,20 @@ public class EventImplement implements EventService {
 
     @Autowired
     private EventRepository eventRepository;
+
+    @Override
+    public Page<FilterEventDTO> getFilterEvents(String name, String status, List<Integer> tagIds, String sortType, int page, int size, String type, boolean isTrending) {
+        Pageable pageable = PageRequest.of(page, size);
+        boolean tagCheck = tagIds != null && !tagIds.isEmpty();
+        return eventRepository.findAllUnified(name, status, type, tagCheck, tagIds, isTrending, sortType, pageable);
+    }
+
+    public static String toString(FilterEventDTO dto) {
+        return "eventId=" + dto.getEventId() +
+                ", startDatetime=" + dto.getStartDatetime() +
+                ", endDatetime=" + dto.getEndDatetime() ;
+    }
+
 
     @Override
     public List<EventDTO> getAllEvents() {
@@ -55,7 +72,13 @@ public class EventImplement implements EventService {
         return mapToDTO(updatedEvent);
     }
 
-    private Event getEventEntityById(Integer eventId){
+    @Override
+    public Page<T> getEventByDateRange(String type, Boolean isTrending) {
+        return null;
+    }
+
+    @Override
+    public Event getEventEntityById(Integer eventId){
         Event event = null;
         try {
             event = eventRepository.findByEventId(eventId);
