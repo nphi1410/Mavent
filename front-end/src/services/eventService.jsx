@@ -35,6 +35,8 @@ export const getFilterEvents = async ({
 export const getEvents = async () => {
   try {
     const response = await Api.get("/events");
+    console.log(response.data);
+    
     return response.data; // array of EventDTO
   } catch (error) {
     console.error("Error fetching events:", error);
@@ -46,7 +48,6 @@ export const getEvents = async () => {
 export const getEventById = async (id) => {
   try {
     const response = await Api.get(`/events/${id}`);
-    console.log(response.data);
     return response.data; // single EventDTO
   } catch (error) {
     console.error(`Error fetching event with ID ${id}:`, error);
