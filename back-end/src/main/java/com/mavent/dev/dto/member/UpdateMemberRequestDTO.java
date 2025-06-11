@@ -4,7 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 
 /**
- * DTO for updating member role and department.
+ * dto for updating member role and department.
  */
 @Data
 @NoArgsConstructor

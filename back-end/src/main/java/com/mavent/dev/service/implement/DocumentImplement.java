@@ -1,6 +1,6 @@
 package com.mavent.dev.service.implement;
 
-import com.mavent.dev.DTO.ImageDTO;
+import com.mavent.dev.dto.ImageDTO;
 import com.mavent.dev.config.CloudConfig;
 import com.mavent.dev.entity.Document;
 import com.mavent.dev.repository.DocumentRepository;

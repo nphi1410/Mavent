@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * Base DTO for Account operations.
+ * Base dto for Account operations.
  * Used for account profile management and basic information display.
  */
 @Data

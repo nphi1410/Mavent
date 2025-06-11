@@ -4,7 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 
 /**
- * DTO for member ban/unban operations.
+ * dto for member ban/unban operations.
  */
 @Data
 @NoArgsConstructor

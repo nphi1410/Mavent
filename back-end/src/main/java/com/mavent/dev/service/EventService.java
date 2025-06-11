@@ -1,7 +1,7 @@
 package com.mavent.dev.service;
 
-import com.mavent.dev.DTO.FilterEventDTO;
-import com.mavent.dev.DTO.superadmin.EventDTO;
+import com.mavent.dev.dto.FilterEventDTO;
+import com.mavent.dev.dto.superadmin.EventDTO;
 import com.mavent.dev.entity.Event;
 import org.apache.poi.ss.formula.functions.T;
 import org.springframework.data.domain.Page;

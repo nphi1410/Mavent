@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * DTO for Member response data.
+ * dto for Member response data.
  * Combines Account and EventAccountRole information for member listing.
  */
 @Data

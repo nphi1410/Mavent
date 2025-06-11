@@ -1,4 +1,4 @@
-package com.mavent.dev.DTO.superadmin;
+package com.mavent.dev.dto.superadmin;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

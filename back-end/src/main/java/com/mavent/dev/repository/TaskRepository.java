@@ -1,6 +1,6 @@
 package com.mavent.dev.repository;
 
-import com.mavent.dev.DTO.TaskDTO;
+import com.mavent.dev.dto.TaskDTO;
 import com.mavent.dev.entity.Task;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

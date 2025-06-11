@@ -1,7 +1,7 @@
 package com.mavent.dev.service.implement;
 
-import com.mavent.dev.DTO.FilterEventDTO;
-import com.mavent.dev.DTO.superadmin.EventDTO;
+import com.mavent.dev.dto.FilterEventDTO;
+import com.mavent.dev.dto.superadmin.EventDTO;
 import com.mavent.dev.entity.Event;
 import com.mavent.dev.repository.EventRepository;
 import com.mavent.dev.service.EventService;

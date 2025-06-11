@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 
 /**
- * DTO for member search and filtering operations.
+ * dto for member search and filtering operations.
  */
 @Data
 @NoArgsConstructor

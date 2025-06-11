@@ -1,4 +1,4 @@
-package com.mavent.dev.DTO.superadmin;
+package com.mavent.dev.dto.superadmin;
 
 import com.mavent.dev.entity.Event.EventStatus;
 import lombok.AllArgsConstructor;

@@ -33,7 +33,7 @@ public class AccountMapper {
     /**
      * Convert AccountDTO to Account entity (for creation).
      * Note: This does not set ID, password, timestamps as they are handled separately.
-     * @param accountDTO the account DTO
+     * @param accountDTO the account dto
      * @return Account entity
      */
     public Account toEntity(AccountDTO accountDTO) {
@@ -62,7 +62,7 @@ public class AccountMapper {
     /**
      * Update existing Account entity with data from AccountDTO.
      * @param account the existing account entity
-     * @param accountDTO the account DTO with updated data
+     * @param accountDTO the account dto with updated data
      */
     public void updateEntityFromDTO(Account account, AccountDTO accountDTO) {
         if (account == null || accountDTO == null) {

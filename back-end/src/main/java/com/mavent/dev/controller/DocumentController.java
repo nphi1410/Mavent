@@ -1,6 +1,6 @@
 package com.mavent.dev.controller;
 
-import com.mavent.dev.DTO.ImageDTO;
+import com.mavent.dev.dto.ImageDTO;
 import com.mavent.dev.service.DocumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

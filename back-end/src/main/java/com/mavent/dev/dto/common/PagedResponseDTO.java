@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * Generic DTO for paginated responses.
+ * Generic dto for paginated responses.
  */
 @Data
 @NoArgsConstructor

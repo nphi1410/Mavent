@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * DTO for Account response data.
+ * dto for Account response data.
  * Used for displaying account information.
  */
 @Data
