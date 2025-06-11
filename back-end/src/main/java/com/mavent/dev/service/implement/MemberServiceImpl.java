@@ -37,10 +37,10 @@ public class MemberServiceImpl implements MemberService {
     @Transactional(readOnly = true)
     public PagedResponseDTO<MemberResponseDTO> getMembers(MemberFilterRequestDTO filterRequest) {
         log.info("Getting members for event {} with filters", filterRequest.getEventId());
-        
+
         // Build pageable
         Pageable pageable = buildPageable(filterRequest);
-        
+
         // Process filters
         Boolean isActive = null;
         if (filterRequest.getStatus() != null && !filterRequest.getStatus().isEmpty()) {
@@ -51,7 +51,7 @@ public class MemberServiceImpl implements MemberService {
             isActive = filterRequest.getIsActive();
             log.info("No status provided, using isActive: {}", isActive);
         }
-        
+
         EventAccountRole.EventRole eventRole = null;
         if (filterRequest.getEventRole() != null && !filterRequest.getEventRole().isEmpty()) {
             try {
@@ -63,15 +63,15 @@ public class MemberServiceImpl implements MemberService {
                 log.warn("Invalid event role: {}", filterRequest.getEventRole());
             }
         }
-        
+
         // Process department filter - handle both ID and name
         Integer departmentId = filterRequest.getDepartmentId();
-        
+
         // If departmentId is null but departmentName is provided, try to resolve by name
         if (departmentId == null && filterRequest.getDepartmentName() != null && !filterRequest.getDepartmentName().trim().isEmpty()) {
             String deptName = filterRequest.getDepartmentName().trim();
             log.info("Looking up department ID for name: '{}'", deptName);
-            
+
             // Try to parse as numeric ID first
             if (deptName.matches("\\d+")) {
                 try {
@@ -83,18 +83,18 @@ public class MemberServiceImpl implements MemberService {
             } else {
                 // Try to find department by name using department repository
                 log.info("Searching for department by name: {}", deptName);
-                
+
                 // Since we don't have direct access to the department repository here,
                 // we'll have to rely on the EventAccountRoleRepository's query to handle name-based lookups
-                
+
                 // Log the department ID that will be used in the query
                 log.info("Using null department ID and letting repository handle name-based lookup");
             }
         }
-        
+
         // Log the department ID for debugging
         log.info("Final department filter value: {}", departmentId);
-        
+
         // Process search term
         String searchTerm = filterRequest.getSearchTerm();
         if (searchTerm != null && !searchTerm.trim().isEmpty()) {
@@ -103,11 +103,11 @@ public class MemberServiceImpl implements MemberService {
         } else {
             searchTerm = null; // Set to null if empty or only whitespace
         }
-        
+
         // Process date filters
         java.util.Date startDateObj = null;
         java.util.Date endDateObj = null;
-        
+
         if (filterRequest.getStartDate() != null && !filterRequest.getStartDate().isEmpty()) {
             try {
                 java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
@@ -117,7 +117,7 @@ public class MemberServiceImpl implements MemberService {
                 log.warn("Invalid start date format: {}", filterRequest.getStartDate());
             }
         }
-        
+
         if (filterRequest.getEndDate() != null && !filterRequest.getEndDate().isEmpty()) {
             try {
                 java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
@@ -130,17 +130,17 @@ public class MemberServiceImpl implements MemberService {
                 cal.set(java.util.Calendar.SECOND, 59);
                 cal.set(java.util.Calendar.MILLISECOND, 999);
                 endDateObj = cal.getTime();
-                log.info("Filtering by end date: {} (adjusted to end of day: {})", 
-                    filterRequest.getEndDate(), 
-                    new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(endDateObj));
+                log.info("Filtering by end date: {} (adjusted to end of day: {})",
+                        filterRequest.getEndDate(),
+                        new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(endDateObj));
             } catch (java.text.ParseException e) {
                 log.warn("Invalid end date format: {}", filterRequest.getEndDate());
             }
         }
-        
+
         // Use repository method with explicit filters including dates
         Page<EventAccountRole> memberPage = eventAccountRoleRepository.findByEventIdWithFilters(
-                filterRequest.getEventId(), 
+                filterRequest.getEventId(),
                 isActive,
                 eventRole,
                 departmentId,
@@ -148,12 +148,12 @@ public class MemberServiceImpl implements MemberService {
                 startDateObj,
                 endDateObj,
                 pageable);
-        
+
         // Convert to DTOs
         List<MemberResponseDTO> memberDTOs = memberPage.getContent().stream()
                 .map(memberMapper::toMemberResponseDTO)
                 .collect(Collectors.toList());
-        
+
         return PagedResponseDTO.<MemberResponseDTO>builder()
                 .content(memberDTOs)
                 .page(memberPage.getNumber())
@@ -170,79 +170,80 @@ public class MemberServiceImpl implements MemberService {
     @Transactional(readOnly = true)
     public MemberResponseDTO getMemberDetails(Integer eventId, Integer accountId) {
         log.info("Getting member details for event {} and account {}", eventId, accountId);
-        
+
         EventAccountRole memberRole = findEventAccountRole(eventId, accountId);
         return memberMapper.toMemberResponseDTO(memberRole);
     }
 
     @Override
     public MemberResponseDTO updateMember(UpdateMemberRequestDTO request) {
-        log.info("Updating member {} in event {} with data: role={}, departmentId={}, isActive={}", 
-                 request.getAccountId(), request.getEventId(), 
-                 request.getEventRole(), request.getDepartmentId(), request.getIsActive());
-        
+        log.info("Updating member {} in event {} with data: role={}, departmentId={}, isActive={}",
+                request.getAccountId(), request.getEventId(),
+                request.getEventRole(), request.getDepartmentId(), request.getIsActive());
+
         // Find existing member role
         EventAccountRole memberRole = findEventAccountRole(request.getEventId(), request.getAccountId());
-        
+
         // Log current values before update
-        log.info("Current values before update - role: {}, departmentId: {}, isActive: {}", 
-                 memberRole.getEventRole(), memberRole.getDepartmentId(), memberRole.getIsActive());
-        
+        log.info("Current values before update - role: {}, departmentId: {}, isActive: {}",
+                memberRole.getEventRole(), memberRole.getDepartmentId(), memberRole.getIsActive());
+
         // Update role if provided
         if (request.getEventRole() != null) {
             memberRole.setEventRole(EventAccountRole.EventRole.valueOf(request.getEventRole()));
         }
-        
+
         // Update department if provided
         if (request.getDepartmentId() != null) {
             log.info("Updating department ID to: {}", request.getDepartmentId());
             memberRole.setDepartmentId(request.getDepartmentId());
         }
-        
+
         // Update isActive status if provided
         if (request.getIsActive() != null) {
             log.info("Updating isActive status to: {}", request.getIsActive());
             memberRole.setIsActive(request.getIsActive());
         }
-        
+
         // Lưu và đảm bảo dữ liệu được flush ngay lập tức đến database
         EventAccountRole updated = eventAccountRoleRepository.saveAndFlush(memberRole);
         log.info("Successfully updated member {} in event {}", request.getAccountId(), request.getEventId());
-        
+
         // Clear cache để các query tiếp theo đọc giá trị mới từ DB thay vì từ cache
         eventAccountRoleRepository.flush();
-        
+
         return memberMapper.toMemberResponseDTO(updated);
     }
 
     @Override
     public MemberResponseDTO banMember(BanMemberRequestDTO request) {
         log.info("Banning/unbanning member {} in event {}", request.getAccountId(), request.getEventId());
-        
+
         // Find existing member role
         EventAccountRole memberRole = findEventAccountRole(request.getEventId(), request.getAccountId());
-        
+
         // Update active status
         memberRole.setIsActive(!request.getIsBanned());
-        
+
         // Use saveAndFlush for consistency with updateMember method
         EventAccountRole updated = eventAccountRoleRepository.saveAndFlush(memberRole);
-        
+
         // Flush to ensure changes are written to DB
         eventAccountRoleRepository.flush();
-        log.info("Successfully {} member {} in event {}", 
-                request.getIsBanned() ? "banned" : "unbanned", 
+        log.info("Successfully {} member {} in event {}",
+                request.getIsBanned() ? "banned" : "unbanned",
                 request.getAccountId(), request.getEventId());
-        
+
         return memberMapper.toMemberResponseDTO(updated);
     }    // Private helper methods
+
     private EventAccountRole findEventAccountRole(Integer eventId, Integer accountId) {
         return eventAccountRoleRepository.findByEventIdAndAccountId(eventId, accountId)
                 .orElseThrow(() -> new MemberNotFoundException(eventId, accountId));
     }
 
     private Pageable buildPageable(MemberFilterRequestDTO filterRequest) {
-        Sort.Direction direction = "desc".equalsIgnoreCase(filterRequest.getSortDirection()) 
+        Sort.Direction direction = "desc".equalsIgnoreCase(filterRequest.getSortDirection())
                 ? Sort.Direction.DESC : Sort.Direction.ASC;
         Sort sort = Sort.by(direction, mapSortField(filterRequest.getSortBy()));
         return PageRequest.of(filterRequest.getPage(), filterRequest.getSize(), sort);

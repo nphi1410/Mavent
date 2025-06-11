@@ -25,6 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.mavent.dev.config.CloudConfig;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -33,10 +34,12 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
-public class AccountController {    @Autowired
+public class AccountController {
+    @Autowired
     private AccountService accountService;
     @Autowired
-    private EventService eventService;@Autowired
+    private EventService eventService;
+    @Autowired
     AccountRepository accountRepository;
 
     @Autowired
@@ -153,7 +156,8 @@ public class AccountController {    @Autowired
         System.out.println("Email from session: " + email);
         System.out.println("Encoded Password from session: " + encodedPassword);
         Long time = (Long) session.getAttribute("register_time");
-        if (accountService.isOtpTrue(otpSession, time, request.getOtp()) != null) {;
+        if (accountService.isOtpTrue(otpSession, time, request.getOtp()) != null) {
+            ;
             return ResponseEntity.badRequest().body(accountService.isOtpTrue(otpSession, time, request.getOtp()));
         }
 
@@ -341,7 +345,9 @@ public class AccountController {    @Autowired
                 sortOrder,
                 evName);
         return ResponseEntity.ok(tasks);
-    }    @GetMapping("/user/events")
+    }
+
+    @GetMapping("/user/events")
     public ResponseEntity<?> getUserEvents(HttpSession session) {
         Account account = (Account) session.getAttribute("account");
         if (account == null) {
@@ -356,7 +362,7 @@ public class AccountController {    @Autowired
     /**
      * Get the current user's role in a specific event.
      * This endpoint is used by the frontend role-based permission system.
-     * 
+     *
      * @param eventId the event ID
      * @param session the HTTP session
      * @return the user's role in the event or 401 if not authenticated

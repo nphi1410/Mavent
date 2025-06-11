@@ -24,19 +24,19 @@ public class AccountResponseDTO {
     private String email;
     private String fullName;
     private String studentId;
-    
+
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateOfBirth;
-    
+
     private String phoneNumber;
     private String gender;
     private String systemRole;
     private String avatarUrl;
     private Boolean isActive;
-    
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
-    
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
 }

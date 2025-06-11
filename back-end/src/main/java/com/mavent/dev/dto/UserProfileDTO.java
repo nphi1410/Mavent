@@ -22,6 +22,7 @@ public class UserProfileDTO {
     private LocalDate dateOfBirth;
     private String studentId;
     private Account.SystemRole systemRole;
+
     public Account.SystemRole getSystemRole() {
         return systemRole;
     }

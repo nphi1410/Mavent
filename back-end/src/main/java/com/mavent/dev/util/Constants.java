@@ -50,13 +50,13 @@ public final class Constants {
     public static final class Permissions {
         // Roles that can manage members
         public static final String[] MEMBER_MANAGER_ROLES = {"ADMIN", "DEPARTMENT_MANAGER"};
-        
+
         // Roles that can ban members
         public static final String[] MEMBER_BAN_ROLES = {"ADMIN"};
-        
+
         // Roles that can remove members
         public static final String[] MEMBER_REMOVE_ROLES = {"ADMIN", "DEPARTMENT_MANAGER"};
-        
+
         // Roles that can perform bulk operations
         public static final String[] BULK_OPERATION_ROLES = {"ADMIN"};
     }

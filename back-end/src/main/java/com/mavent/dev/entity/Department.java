@@ -32,7 +32,7 @@ public class Department {
     // @JoinColumn(name = "event_id", nullable = false)
     // @NotNull(message = "Event is required")
     // private Event event;
-    
+
     // Use event_id field instead
     @Column(name = "event_id", nullable = false)
     @NotNull(message = "Event ID is required")

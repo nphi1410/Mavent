@@ -25,15 +25,15 @@ public class MemberResponseDTO {
     private String email;
     private String fullName;
     private String studentId;
-    
+
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateOfBirth;
-    
+
     private String phoneNumber;
     private String gender;
     private String avatarUrl;
     private String systemRole;
-    
+
     // Event Role Information
     private Integer eventId;
     private String eventRole;
@@ -42,10 +42,10 @@ public class MemberResponseDTO {
     private Boolean isActive;
     private Integer assignedByAccountId;
     private String assignedByName;
-    
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime joinedAt;
-    
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
 }
