@@ -2,6 +2,7 @@ package com.mavent.dev.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.time.LocalDateTime;
 
 @Entity

@@ -24,7 +24,7 @@ import java.util.List;
 @Builder
 public class Account {
 
-        public Account(String username, String email, String encodedPassword) {
+    public Account(String username, String email, String encodedPassword) {
         this.username = username;
         this.email = email;
         this.passwordHash = encodedPassword;
@@ -87,7 +87,7 @@ public class Account {
 //    @OneToMany(mappedBy = "createdBy", fetch = FetchType.LAZY)
 //    private List<Event> createdEvents;
 
-//    @OneToMany(mappedBy = "assignedBy", fetch = FetchType.LAZY)
+    //    @OneToMany(mappedBy = "assignedBy", fetch = FetchType.LAZY)
 //    private List<EventAccountRole> assignedRoles;    // Enums
     public enum SystemRole {
         SUPER_ADMIN, USER

@@ -18,7 +18,7 @@ public class DocumentController {
     private DocumentService documentService;
 
     @GetMapping
-    public ResponseEntity<List<ImageDTO>> getFiveImage(){
+    public ResponseEntity<List<ImageDTO>> getFiveImage() {
         return ResponseEntity.ok(documentService.getFiveImage());
     }
 }

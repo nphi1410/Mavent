@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,7 +31,7 @@ public class EventImplement implements EventService {
     public static String toString(FilterEventDTO dto) {
         return "eventId=" + dto.getEventId() +
                 ", startDatetime=" + dto.getStartDatetime() +
-                ", endDatetime=" + dto.getEndDatetime() ;
+                ", endDatetime=" + dto.getEndDatetime();
     }
 
 
@@ -78,13 +79,13 @@ public class EventImplement implements EventService {
     }
 
     @Override
-    public Event getEventEntityById(Integer eventId){
+    public Event getEventEntityById(Integer eventId) {
         Event event = null;
         try {
             event = eventRepository.findByEventId(eventId);
-        } catch (Exception e){
+        } catch (Exception e) {
             System.err.println("Event not found with ID: " + eventId);
-            System.err.println("Error: "+ e);
+            System.err.println("Error: " + e);
         }
 
         return event;

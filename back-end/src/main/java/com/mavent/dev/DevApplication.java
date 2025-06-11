@@ -8,8 +8,8 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 @SpringBootApplication
 public class DevApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(DevApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(DevApplication.class, args);
+    }
 
 }

@@ -36,7 +36,7 @@ public class Event {
 
     @Column(name = "location")
     private String location;
-    
+
     @Column(name = "location_id")
     private Integer locationId;
 

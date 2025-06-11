@@ -17,12 +17,12 @@ public class LocationController {
     private LocationService locationService;
 
     @GetMapping
-    public List<Location> getAllLocations(){
+    public List<Location> getAllLocations() {
         return locationService.getAllLocations();
     }
 
     @GetMapping("/{locationId}")
-    public Location getLocation(@PathVariable Integer locationId){
+    public Location getLocation(@PathVariable Integer locationId) {
         return locationService.getLocationById(locationId);
     }
 
