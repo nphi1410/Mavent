@@ -44,7 +44,7 @@ const SelectTags = ({ selectedTags = [], onChange }) => {
           )}
           {selectedTags.map((tag) => (
             <div
-              key={tag.id}
+              key={tag.tagId}
               className="bg-blue-600 text-white px-3 py-1 rounded-full flex items-center space-x-2 whitespace-nowrap shadow-sm"
             >
               <span className="truncate max-w-xs">{tag.name}</span>
@@ -70,7 +70,7 @@ const SelectTags = ({ selectedTags = [], onChange }) => {
               </div>
             ) : (
               availableTags.map((tag) => (
-                <MenuItem key={tag.id}>
+                <MenuItem key={tag.tagId}>
                   {({ active }) => (
                     <button
                       onClick={() => addTag(tag)}

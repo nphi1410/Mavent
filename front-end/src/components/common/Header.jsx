@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUserProfile } from "../../services/profileService";
+import SideBar from "./SideBar";
 
 const Header = () => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
+  const [showSideBar, setShowSideBar] = useState(false);
 
   useEffect(() => {
     fetchUserProfile();
@@ -21,6 +23,9 @@ const Header = () => {
     }
   };
 
+  const handleShowSideBar = () => {
+    setShowSideBar(!showSideBar);
+  };
   const navigateAllEvents = (type, isTrending) => {
     const searchParams = new URLSearchParams();
     if (type) searchParams.set("type", type);
@@ -79,18 +84,12 @@ const Header = () => {
               </span>
               <div className="w-12 h-12 rounded-full border-2 border-gray-300 overflow-hidden">
                 <img
-                  onClick={() => navigate("/profile/")}
+                  onClick={() => handleShowSideBar()}
                   src="/avatar.jpg"
                   alt="User Avatar"
                   className="w-full h-full object-cover cursor-pointer"
                 />
               </div>
-              <span
-                onClick={() => navigate("/logout")}
-                className="ml-4 px-4 py-2 bg-red-500 text-white rounded-full cursor-pointer hover:bg-blue-800 transition"
-              >
-                Logout
-              </span>
             </>
           ) : (
             <span
@@ -100,6 +99,8 @@ const Header = () => {
               Login
             </span>
           )}
+
+          <SideBar isOpen={showSideBar} setIsOpen={setShowSideBar} />
         </div>
       </div>
     </header>

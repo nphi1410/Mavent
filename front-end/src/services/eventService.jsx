@@ -22,8 +22,10 @@ export const getFilterEvents = async ({
       type,
       isTrending,
     };
-
-    const res = await Api.post("/events/filter", body); // sending as JSON in body
+    
+    const res = await Api.post("/events/filter", body);
+    console.log("filter", body,"res",res.data);
+    
     return res.data;
   } catch (err) {
     console.error(err);

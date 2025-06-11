@@ -4,6 +4,7 @@ import Sorting from "./Sorting";
 import SelectTags from "./SelectTags";
 import Search from "./Search";
 import Pagination from "./Pagination";
+import { useSearchParams } from "react-router-dom";
 
 const EventFilter = ({
   onFilter,
@@ -11,36 +12,60 @@ const EventFilter = ({
   currentPage,
   setCurrentPage,
 }) => {
+  const [searchParams] = useSearchParams();
   const [searchTitle, setSearchTitle] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
   const [sortOption, setSortOption] = useState("");
   const size = 10;
 
+  // Load initial tagIds and filter state from URL
   useEffect(() => {
-    const tagIds = selectedTags.map((tag) => tag.tagId);
+    const paramTagIds = searchParams.getAll("tagIds").map(Number);
+    if (paramTagIds.length > 0) {
+      setSelectedTags(paramTagIds.map((id) => ({ tagId: id })));
+    }
+
+    const type = searchParams.get("type") || "";
+    const isTrending = searchParams.get("isTrending") === "true";
+
     const filters = {
       name: searchTitle || undefined,
       status: statusFilter || undefined,
-      tagIds: tagIds,
+      tagIds: paramTagIds,
       sortType: sortOption || undefined,
       page: currentPage,
+      type,
+      isTrending,
       size,
     };
 
-    console.log("Filters:", filters);
     onFilter(filters);
-  }, [
-    searchTitle,
-    statusFilter,
-    selectedTags,
-    sortOption,
-    currentPage,
-    onFilter,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  useEffect(() => {
+    const tagIds = selectedTags.map((tag) => tag.tagId);
+    const type = searchParams.get("type") || "";
+    const isTrending = searchParams.get("isTrending") === "true";
+
+    const filters = {
+      name: searchTitle || undefined,
+      status: statusFilter || undefined,
+      tagIds,
+      sortType: sortOption || undefined,
+      page: currentPage,
+      type,
+      isTrending,
+      size,
+    };
+
+    onFilter(filters);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTitle, statusFilter, selectedTags, sortOption, currentPage]);
 
   const goToPage = (page) => {
-    if (page >= 0 && (totalPagesFromApi == null || page < totalPagesFromApi)) {
+    if (page >= 0 && (!totalPagesFromApi || page < totalPagesFromApi)) {
       setCurrentPage(page);
     }
   };
@@ -62,7 +87,6 @@ const EventFilter = ({
             setCurrentPage(0);
           }}
         />
-
         <Sorting
           value={sortOption}
           onChange={(e) => {
@@ -71,11 +95,10 @@ const EventFilter = ({
           }}
           className="col-span-2"
         />
-        {/* PAGINATION */}
         <Pagination
-          currentPage={currentPage + 1} // display as 1-based
+          currentPage={currentPage + 1}
           totalPages={totalPagesFromApi || 0}
-          onPageChange={(page) => goToPage(page - 1)} // convert to 0-based
+          onPageChange={(page) => goToPage(page - 1)}
         />
         <SelectStatus
           value={statusFilter}
