@@ -17,8 +17,12 @@ const HomePage = () => {
       try {
         const data = await getImages();
         if (data) {
-          const urls = data.map((img) =>
-            convertToUrl(img.content, img.contentType)
+          console.log("document:", data);
+
+          const urls = data.map(
+            (img) =>
+              // convertToUrl(img.content, img.contentType)
+              img.filePath
           );
           setBannerUrls(urls);
         }

@@ -18,7 +18,7 @@ const ProfileContent = () => {
       console.log('ProfileContent: Fetching user profile...');
       const profileData = await getUserProfile(); // Service đã trả về response.data
       console.log('ProfileContent: Received user profile:', profileData);
-      setUserData(profileData.data);
+      setUserData(profileData);
     } catch (err) {
       console.error('ProfileContent: Error fetching profile:', err);
       setError(err.message || err.response?.data?.message || 'Failed to load user profile');
