@@ -12,7 +12,7 @@ const Video = () => {
           title="Remarkable Event"
           src="https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2Ffu.jsclub%2Fvideos%2F1329638691433044%2F&show_text=false&width=560&t=0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowfullscreen
+          allowFullScreen
         ></iframe>
       </div>
     </div>

@@ -1,24 +1,8 @@
-import React, { useEffect, useState } from "react";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { getTags } from "../../services/tagService";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowDown } from "@fortawesome/free-solid-svg-icons";
 
-const SelectTags = ({ selectedTags = [], onChange }) => {
-  const [tags, setTags] = useState([]);
-
-  useEffect(() => {
-    const fetchTags = async () => {
-      try {
-        const data = await getTags({ eventId: null });
-        setTags(data);
-      } catch (error) {
-        console.error("Error fetching tags:", error);
-      }
-    };
-    fetchTags();
-  }, []);
-
+const SelectTags = ({ selectedTags = [], onChange, tags = [] }) => {
   const addTag = (tag) => {
     if (!selectedTags.find((t) => t.tagId === tag.tagId)) {
       onChange([...selectedTags, tag]);
@@ -44,7 +28,7 @@ const SelectTags = ({ selectedTags = [], onChange }) => {
           )}
           {selectedTags.map((tag) => (
             <div
-              key={tag.id}
+              key={tag.tagId}
               className="bg-blue-600 text-white px-3 py-1 rounded-full flex items-center space-x-2 whitespace-nowrap shadow-sm"
             >
               <span className="truncate max-w-xs">{tag.name}</span>
@@ -61,7 +45,8 @@ const SelectTags = ({ selectedTags = [], onChange }) => {
 
         <Menu as="div" className="relative inline-block text-left">
           <MenuButton className="ml-2 shrink-0 text-blue-600 font-semibold hover:text-blue-700 transition">
-            Add Tag <FontAwesomeIcon icon={faArrowDown} className="w-4 h-4 inline" />
+            Add Tag{" "}
+            <FontAwesomeIcon icon={faArrowDown} className="w-4 h-4 inline" />
           </MenuButton>
           <MenuItems className="absolute right-0 z-50 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none max-h-56 overflow-y-auto">
             {availableTags.length === 0 ? (
@@ -70,7 +55,7 @@ const SelectTags = ({ selectedTags = [], onChange }) => {
               </div>
             ) : (
               availableTags.map((tag) => (
-                <MenuItem key={tag.id}>
+                <MenuItem key={tag.tagId}>
                   {({ active }) => (
                     <button
                       onClick={() => addTag(tag)}

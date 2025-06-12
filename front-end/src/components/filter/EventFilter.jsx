@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import SelectStatus from "./SelectStatus";
 import Sorting from "./Sorting";
 import SelectTags from "./SelectTags";
 import Search from "./Search";
 import Pagination from "./Pagination";
+import { useSearchParams } from "react-router-dom";
+import { getTags } from "../../services/tagService";
 
 const EventFilter = ({
   onFilter,
@@ -15,20 +17,64 @@ const EventFilter = ({
   const [statusFilter, setStatusFilter] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
   const [sortOption, setSortOption] = useState("");
+  const [tags, setTags] = useState([]);
+  const [searchParams] = useSearchParams();
   const size = 10;
 
+  const didInitRef = useRef(false); // <-- 👈 track if first load has been done
+
+  // Fetch tags once
   useEffect(() => {
-    const tagIds = selectedTags.map((tag) => tag.tagId);
+    const fetchTags = async () => {
+      try {
+        const data = await getTags({ eventId: null });
+        setTags(data);
+      } catch (error) {
+        console.error("Error fetching tags:", error);
+      }
+    };
+    fetchTags();
+  }, []);
+
+  // Load filters from URL on first load after tags are fetched
+  useEffect(() => {
+    if (tags.length === 0 || didInitRef.current) return;
+
+    const tagFromUrl = searchParams.get("tagId");
+    const type = searchParams.get("type");
+
+    const matchingTag = tags.find((t) => String(t.tagId) === String(tagFromUrl));
+    if (matchingTag) {
+      setSelectedTags([matchingTag]);
+    }
+
+    const filters = {
+      type: type || undefined,
+      tagIds: matchingTag ? [matchingTag.tagId || matchingTag.id] : [],
+      isTrending: true,
+      page: currentPage ?? 0,
+      size,
+    };
+
+    onFilter(filters);
+    didInitRef.current = true; // mark as initialized
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tags]);
+
+  // Handle filter updates by user interaction
+  useEffect(() => {
+    if (!didInitRef.current) return; // skip first auto call
+
+    const tagIds = selectedTags.map((tag) => tag.tagId || tag);
     const filters = {
       name: searchTitle || undefined,
       status: statusFilter || undefined,
-      tagIds: tagIds,
+      tagIds,
       sortType: sortOption || undefined,
       page: currentPage,
       size,
     };
 
-    console.log("Filters:", filters);
     onFilter(filters);
   }, [
     searchTitle,
@@ -56,13 +102,13 @@ const EventFilter = ({
           }}
         />
         <SelectTags
+          tags={tags}
           selectedTags={selectedTags}
           onChange={(newTags) => {
             setSelectedTags(newTags);
             setCurrentPage(0);
           }}
         />
-
         <Sorting
           value={sortOption}
           onChange={(e) => {
@@ -71,11 +117,10 @@ const EventFilter = ({
           }}
           className="col-span-2"
         />
-        {/* PAGINATION */}
         <Pagination
-          currentPage={currentPage + 1} // display as 1-based
+          currentPage={currentPage + 1}
           totalPages={totalPagesFromApi || 0}
-          onPageChange={(page) => goToPage(page - 1)} // convert to 0-based
+          onPageChange={(page) => goToPage(page - 1)}
         />
         <SelectStatus
           value={statusFilter}

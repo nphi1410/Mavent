@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
+import React, { useState, useCallback } from "react";
 import EventFilter from "../components/filter/EventFilter";
 import CardMedium from "../components/card/CardMedium";
 import Footer from "../components/common/Footer";
@@ -10,7 +9,6 @@ const Events = () => {
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
-  const [searchParams] = useSearchParams();
 
   const fetchFilteredEvents = useCallback(async (filters) => {
     const data = await getFilterEvents(filters);
@@ -20,23 +18,6 @@ const Events = () => {
       setCurrentPage(filters.page || 0);
     }
   }, []);
-
-  useEffect(() => {
-    const type = searchParams.get("type") || "";
-    const tag = searchParams.get("tag") || "";
-    const isTrending = searchParams.get("isTrending") === "true";
-    const page = parseInt(searchParams.get("page") || "0", 10);
-
-    const filters = {
-      type,
-      tag,
-      isTrending,
-      page,
-      size: 10,
-    };
-
-    fetchFilteredEvents(filters);
-  }, [searchParams, fetchFilteredEvents]);
 
   return (
     <div className="min-h-screen flex flex-col">
