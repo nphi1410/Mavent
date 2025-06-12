@@ -1,6 +1,6 @@
 package com.mavent.dev.controller;
 
-import com.mavent.dev.DTO.superadmin.DashboardDTO;
+import com.mavent.dev.dto.superadmin.DashboardDTO;
 import com.mavent.dev.service.DashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

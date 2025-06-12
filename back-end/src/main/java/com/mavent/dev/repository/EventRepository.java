@@ -1,6 +1,6 @@
 package com.mavent.dev.repository;
 
-import com.mavent.dev.DTO.FilterEventDTO;
+import com.mavent.dev.dto.FilterEventDTO;
 import com.mavent.dev.entity.Event;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

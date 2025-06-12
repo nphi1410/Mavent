@@ -24,20 +24,20 @@ import java.time.LocalDateTime;
 @RequestMapping("/api/members")
 @RequiredArgsConstructor
 public class MemberController {
-    
+
     private static final Logger log = LoggerFactory.getLogger(MemberController.class);
     private final MemberService memberService;
 
     /**
      * Get paginated and filtered list of members for an event.
      *
-     * @param eventId Event ID
-     * @param search Search term (optional)
-     * @param role Filter by role (optional)
+     * @param eventId    Event ID
+     * @param search     Search term (optional)
+     * @param role       Filter by role (optional)
      * @param department Filter by department (optional)
-     * @param status Filter by status (optional)
-     * @param page Page number (default: 0)
-     * @param size Page size (default: 10)
+     * @param status     Filter by status (optional)
+     * @param page       Page number (default: 0)
+     * @param size       Page size (default: 10)
      * @return Paginated list of members
      */
     @GetMapping
@@ -56,7 +56,7 @@ public class MemberController {
             log.info("Getting members for event: {}, page: {}, size: {}", eventId, page, size);
             log.info("Search: {}, Role: {}, Department: {}, Status: {}", search, role, department, status);
             log.info("Date range: {} to {}", startDate, endDate);
-            
+
             // Log date params in detail for debugging
             if (startDate != null && !startDate.trim().isEmpty()) {
                 log.info("Start date parameter is present: {}", startDate);
@@ -68,7 +68,7 @@ public class MemberController {
                     log.warn("Could not parse start date: {}", e.getMessage());
                 }
             }
-            
+
             if (endDate != null && !endDate.trim().isEmpty()) {
                 log.info("End date parameter is present: {}", endDate);
                 try {
@@ -99,7 +99,7 @@ public class MemberController {
                     log.warn("Could not parse department as integer: {}", department);
                 }
             }
-            
+
             MemberFilterRequestDTO filterRequest = MemberFilterRequestDTO.builder()
                     .eventId(eventId)
                     .searchTerm(search)
@@ -113,14 +113,14 @@ public class MemberController {
                     .page(page)
                     .size(size)
                     .build();
-                    
-            log.debug("Filter request with department info - id: {}, name: {}", 
-                     filterRequest.getDepartmentId(),
-                     filterRequest.getDepartmentName());
-                    
-            log.debug("Status parameter: {}, converted to isActive: {}", 
-                     status, 
-                     status != null ? "active".equalsIgnoreCase(status.trim()) : null);
+
+            log.debug("Filter request with department info - id: {}, name: {}",
+                    filterRequest.getDepartmentId(),
+                    filterRequest.getDepartmentName());
+
+            log.debug("Status parameter: {}, converted to isActive: {}",
+                    status,
+                    status != null ? "active".equalsIgnoreCase(status.trim()) : null);
 
             log.info("Filter request created: {}", filterRequest);
 
@@ -138,7 +138,7 @@ public class MemberController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error getting members for event: {}", eventId, e);
-            
+
             ApiResponseDTO<PagedResponseDTO<MemberResponseDTO>> errorResponse = ApiResponseDTO.<PagedResponseDTO<MemberResponseDTO>>builder()
                     .success(false)
                     .message("Error retrieving members: " + e.getMessage())
@@ -153,7 +153,7 @@ public class MemberController {
     /**
      * Get member details by event and account ID.
      *
-     * @param eventId Event ID
+     * @param eventId   Event ID
      * @param accountId Account ID
      * @return Member details
      */

@@ -1,4 +1,4 @@
-package com.mavent.dev.DTO;
+package com.mavent.dev.dto;
 
 import com.mavent.dev.entity.Account;
 import lombok.AllArgsConstructor;
@@ -22,6 +22,7 @@ public class UserProfileDTO {
     private LocalDate dateOfBirth;
     private String studentId;
     private Account.SystemRole systemRole;
+
     public Account.SystemRole getSystemRole() {
         return systemRole;
     }

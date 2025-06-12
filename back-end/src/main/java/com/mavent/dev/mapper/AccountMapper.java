@@ -12,13 +12,15 @@ public class AccountMapper {
 
     /**
      * Convert Account entity to AccountDTO.
+     *
      * @param account the account entity
      * @return AccountDTO
      */
     public static AccountDTO toDTO(Account account) {
         if (account == null) {
             return null;
-        }        return new AccountDTO(
+        }
+        return new AccountDTO(
                 account.getAccountId(),
                 account.getUsername(),
                 account.getEmail(),
@@ -33,7 +35,8 @@ public class AccountMapper {
     /**
      * Convert AccountDTO to Account entity (for creation).
      * Note: This does not set ID, password, timestamps as they are handled separately.
-     * @param accountDTO the account DTO
+     *
+     * @param accountDTO the account dto
      * @return Account entity
      */
     public Account toEntity(AccountDTO accountDTO) {
@@ -48,7 +51,8 @@ public class AccountMapper {
         account.setPhoneNumber(accountDTO.getPhoneNumber());
 
         if (accountDTO.getSystemRole() != null) {
-            account.setSystemRole(Account.SystemRole.valueOf(accountDTO.getSystemRole()));        }
+            account.setSystemRole(Account.SystemRole.valueOf(accountDTO.getSystemRole()));
+        }
 
         account.setAvatarUrl(accountDTO.getAvatarUrl());
 
@@ -61,8 +65,9 @@ public class AccountMapper {
 
     /**
      * Update existing Account entity with data from AccountDTO.
-     * @param account the existing account entity
-     * @param accountDTO the account DTO with updated data
+     *
+     * @param account    the existing account entity
+     * @param accountDTO the account dto with updated data
      */
     public void updateEntityFromDTO(Account account, AccountDTO accountDTO) {
         if (account == null || accountDTO == null) {
@@ -76,7 +81,8 @@ public class AccountMapper {
 
         if (accountDTO.getSystemRole() != null) {
             account.setSystemRole(Account.SystemRole.valueOf(accountDTO.getSystemRole()));
-        }        account.setAvatarUrl(accountDTO.getAvatarUrl());
+        }
+        account.setAvatarUrl(accountDTO.getAvatarUrl());
 
         if (accountDTO.getIsDeleted() != null) {
             account.setIsDeleted(accountDTO.getIsDeleted());

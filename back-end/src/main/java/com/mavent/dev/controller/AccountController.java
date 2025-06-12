@@ -1,13 +1,13 @@
 package com.mavent.dev.controller;
 
-import com.mavent.dev.DTO.superadmin.AccountDTO;
-import com.mavent.dev.DTO.LoginDTO;
-import com.mavent.dev.DTO.UserProfileDTO;
-import com.mavent.dev.DTO.OtpDTO;
-import com.mavent.dev.DTO.ChangePasswordDTO;
-import com.mavent.dev.DTO.TaskDTO;
-import com.mavent.dev.DTO.superadmin.EventDTO;
-import com.mavent.dev.DTO.UserEventDTO;
+import com.mavent.dev.dto.superadmin.AccountDTO;
+import com.mavent.dev.dto.LoginDTO;
+import com.mavent.dev.dto.UserProfileDTO;
+import com.mavent.dev.dto.OtpDTO;
+import com.mavent.dev.dto.ChangePasswordDTO;
+import com.mavent.dev.dto.TaskDTO;
+import com.mavent.dev.dto.superadmin.EventDTO;
+import com.mavent.dev.dto.UserEventDTO;
 import com.mavent.dev.config.MailConfig;
 
 import com.mavent.dev.entity.Account;
@@ -18,29 +18,28 @@ import com.mavent.dev.service.AccountService;
 import com.mavent.dev.service.EventService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.multipart.MultipartFile;
 import com.mavent.dev.config.CloudConfig;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Optional;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api")
-public class AccountController {    @Autowired
+public class AccountController {
+    @Autowired
     private AccountService accountService;
     @Autowired
-    private EventService eventService;@Autowired
+    private EventService eventService;
+    @Autowired
     AccountRepository accountRepository;
 
     @Autowired
@@ -120,7 +119,7 @@ public class AccountController {    @Autowired
     }
 
     @PostMapping("/send-register-otp")
-    public ResponseEntity<?> sendOtp(@RequestBody com.mavent.dev.DTO.RegisterDTO request, HttpSession session) {
+    public ResponseEntity<?> sendOtp(@RequestBody com.mavent.dev.dto.RegisterDTO request, HttpSession session) {
         if (accountService.getAccount(request.getUsername()) != null) {
             return ResponseEntity.badRequest().body("Username already exists!");
         }
@@ -145,7 +144,7 @@ public class AccountController {    @Autowired
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerWithOtp(@RequestBody com.mavent.dev.DTO.OtpDTO request, HttpSession session) {
+    public ResponseEntity<?> registerWithOtp(@RequestBody com.mavent.dev.dto.OtpDTO request, HttpSession session) {
         String otpSession = (String) session.getAttribute("register_otp");
         String username = (String) session.getAttribute("register_username");
         String email = (String) session.getAttribute("register_email");
@@ -157,7 +156,8 @@ public class AccountController {    @Autowired
         System.out.println("Email from session: " + email);
         System.out.println("Encoded Password from session: " + encodedPassword);
         Long time = (Long) session.getAttribute("register_time");
-        if (accountService.isOtpTrue(otpSession, time, request.getOtp()) != null) {;
+        if (accountService.isOtpTrue(otpSession, time, request.getOtp()) != null) {
+            ;
             return ResponseEntity.badRequest().body(accountService.isOtpTrue(otpSession, time, request.getOtp()));
         }
 
@@ -170,7 +170,7 @@ public class AccountController {    @Autowired
     }
 
     @PostMapping("/reset-password-request")
-    public ResponseEntity<?> resetPasswordRequest(@RequestBody com.mavent.dev.DTO.ResetPasswordDTO request, HttpSession session) {
+    public ResponseEntity<?> resetPasswordRequest(@RequestBody com.mavent.dev.dto.ResetPasswordDTO request, HttpSession session) {
         Account account = accountRepository.findByEmail(request.getEmail());
         if (account == null) {
             return ResponseEntity.badRequest().body("Email not found");
@@ -345,7 +345,9 @@ public class AccountController {    @Autowired
                 sortOrder,
                 evName);
         return ResponseEntity.ok(tasks);
-    }    @GetMapping("/user/events")
+    }
+
+    @GetMapping("/user/events")
     public ResponseEntity<?> getUserEvents(HttpSession session) {
         Account account = (Account) session.getAttribute("account");
         if (account == null) {
@@ -360,7 +362,7 @@ public class AccountController {    @Autowired
     /**
      * Get the current user's role in a specific event.
      * This endpoint is used by the frontend role-based permission system.
-     * 
+     *
      * @param eventId the event ID
      * @param session the HTTP session
      * @return the user's role in the event or 401 if not authenticated

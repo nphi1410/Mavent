@@ -21,6 +21,24 @@ const EventBanner = ({ eventData }) => {
     getAccount();
   }, [eventData?.createBy]);
 
+  const handleRegister = (role) => {
+    //check user has logged in
+    //if not logged in show message you have to login first, then redirect to login page
+    if(!sessionStorage.getItem("isLoggedIn")){
+      console.log("You have to login first");
+      return;
+    }
+    
+    if(role === "participant"){
+      //add to registered event dashboard
+      return
+    }
+      //insert event_account_role
+      //if register as a member, add to registered event dashboard with role member and status pending for interview
+    console.log("Registering for role:", role);
+    
+  };
+
   return (
     <div className="relative w-full">
       <iframe
@@ -52,10 +70,16 @@ const EventBanner = ({ eventData }) => {
             {eventData.startDatetime.split("T")[0]}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 mt-4">
-            <button className="bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-2 px-4 rounded text-sm sm:text-base">
+            <button
+              onClick={() => handleRegister("participant")}
+              className="bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-2 px-4 rounded text-sm sm:text-base"
+            >
               Participate Now
             </button>
-            <button className="bg-gray-200 hover:bg-gray-300 transition text-gray-800 font-semibold py-2 px-4 rounded text-sm sm:text-base">
+            <button
+              onClick={() => handleRegister("member")}
+              className="bg-gray-200 hover:bg-gray-300 transition text-gray-800 font-semibold py-2 px-4 rounded text-sm sm:text-base"
+            >
               Become a Member
             </button>
           </div>

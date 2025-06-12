@@ -20,7 +20,7 @@ public class TagController {
     @GetMapping
     public ResponseEntity<List<Tag>> getAllTags(
             @RequestParam(required = false) Integer eventId
-    ){
+    ) {
         if (eventId == null) {
             return ResponseEntity.ok(tagService.getAllTags());
         }

@@ -20,24 +20,19 @@ public class DepartmentController {
         this.departmentRepository = departmentRepository;
     }
 
-    /**
-     * Get departments by event ID
-     * @param eventId the event ID
-     * @return list of departments for the event
-     */
     @GetMapping("/departments")
     public ResponseEntity<ApiResponseDTO<List<Department>>> getDepartmentsByEvent(
             @RequestParam Integer eventId) {
         try {
             List<Department> departments = departmentRepository.findByEventId(eventId);
-            
+
             ApiResponseDTO<List<Department>> response = ApiResponseDTO.<List<Department>>builder()
                     .success(true)
                     .message("Departments retrieved successfully")
                     .data(departments)
                     .timestamp(LocalDateTime.now().toString())
                     .build();
-            
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             ApiResponseDTO<List<Department>> response = ApiResponseDTO.<List<Department>>builder()
@@ -45,7 +40,7 @@ public class DepartmentController {
                     .message("Error retrieving departments: " + e.getMessage())
                     .timestamp(LocalDateTime.now().toString())
                     .build();
-            
+
             return ResponseEntity.status(500).body(response);
         }
     }

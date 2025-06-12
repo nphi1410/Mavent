@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * Base DTO for Account operations.
+ * Base dto for Account operations.
  * Used for account profile management and basic information display.
  */
 @Data
@@ -49,23 +49,24 @@ public class AccountDTO {
     private String gender;
 
     private String avatarUrl;
-    
+
     @NotNull(message = "System role is required")
     @Pattern(regexp = "^(USER|SUPER_ADMIN)$", message = "System role must be USER or SUPER_ADMIN")
     private String systemRole;
-    
+
     private Boolean isDeleted;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
-    
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
-      /**
+
+    /**
      * Constructor used by AccountMapper
      */
     public AccountDTO(Integer accountId, String username, String email, String fullName,
-                     String phoneNumber, String systemRole, String avatarUrl, Boolean isDeleted) {
+                      String phoneNumber, String systemRole, String avatarUrl, Boolean isDeleted) {
         this.accountId = accountId;
         this.username = username;
         this.email = email;

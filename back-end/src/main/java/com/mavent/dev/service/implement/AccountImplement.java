@@ -1,38 +1,31 @@
 package com.mavent.dev.service.implement;
 
-import com.mavent.dev.DTO.superadmin.AccountDTO;
-import com.mavent.dev.mapper.AccountMapper;
+import com.mavent.dev.dto.superadmin.AccountDTO;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
-import com.mavent.dev.DTO.TaskDTO;
-import com.mavent.dev.DTO.UserEventDTO;
-import com.mavent.dev.DTO.UserProfileDTO;
+import com.mavent.dev.dto.TaskDTO;
+import com.mavent.dev.dto.UserEventDTO;
+import com.mavent.dev.dto.UserProfileDTO;
 import com.mavent.dev.entity.Account;
-
-import com.mavent.dev.entity.Task;
 import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.repository.TaskRepository;
 import com.mavent.dev.service.AccountService;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
 import com.mavent.dev.config.MailConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-
 
 
 @Service
@@ -45,11 +38,12 @@ public class AccountImplement implements AccountService {
     private MailConfig mailConfig;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;    @Override
+    private PasswordEncoder passwordEncoder;
+
+    @Override
     @Transactional(readOnly = true)
     public Page<AccountDTO> getAllActiveAccounts(Pageable pageable) {
-        return accountRepository.findActiveAccounts(pageable)
-                .map(this::mapAccountToDTO);
+        return accountRepository.findActiveAccounts(pageable).map(this::mapAccountToDTO);
     }
 
     @Override
@@ -82,14 +76,14 @@ public class AccountImplement implements AccountService {
             return "This OTP has expired.";
         }
         if (!originOTP.equals(requestOtp)) {
-            return"Wrong OTP";
+            return "Wrong OTP";
         }
         return null;
     }
 
     @Override
     public String getRandomOTP() {
-        return String.valueOf((int)(Math.random() * 900000) + 100000); // 6-digit OTP
+        return String.valueOf((int) (Math.random() * 900000) + 100000); // 6-digit OTP
     }
 
     @Override
@@ -112,15 +106,12 @@ public class AccountImplement implements AccountService {
     public List<AccountDTO> getAllAccounts() {
         List<Account> accounts = accountRepository.findAllByIsDeletedFalse();
 
-        return accounts.stream()
-                .map(this::mapAccountToDTO)
-                .collect(Collectors.toList());
+        return accounts.stream().map(this::mapAccountToDTO).collect(Collectors.toList());
     }
 
     @Override
     public AccountDTO getAccountById(Integer id) {
-        Account account = accountRepository.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("Account not found with ID: " + id));
+        Account account = accountRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("Account not found with ID: " + id));
 
         return mapAccountToDTO(account);
     }
@@ -208,39 +199,29 @@ public class AccountImplement implements AccountService {
     private TaskRepository taskRepository;
 
     @Override
-    public List<TaskDTO> getUserTasks(Integer accountId, String status, String priority,
-                                      String keyword, String sortOrder, String eventName) {
+    public List<TaskDTO> getUserTasks(Integer accountId, String status, String priority, String keyword, String sortOrder, String eventName) {
         List<TaskDTO> tasks = taskRepository.findTasksWithEventAndDepartment(accountId);
 
         // Filter by status
         if (status != null && !status.isBlank()) {
-            tasks = tasks.stream()
-                    .filter(t -> t.getStatus().equalsIgnoreCase(status))
-                    .toList();
+            tasks = tasks.stream().filter(t -> t.getStatus().equalsIgnoreCase(status)).toList();
         }
 
         // Filter by priority
         if (priority != null && !priority.isBlank()) {
-            tasks = tasks.stream()
-                    .filter(t -> t.getPriority().equalsIgnoreCase(priority))
-                    .toList();
+            tasks = tasks.stream().filter(t -> t.getPriority().equalsIgnoreCase(priority)).toList();
         }
 
         // Filter by event name
         if (eventName != null && !eventName.isBlank()) {
             String lowerEventName = eventName.toLowerCase();
-            tasks = tasks.stream()
-                    .filter(t -> t.getEventName() != null &&
-                            t.getEventName().toLowerCase().contains(lowerEventName))
-                    .toList();
+            tasks = tasks.stream().filter(t -> t.getEventName() != null && t.getEventName().toLowerCase().contains(lowerEventName)).toList();
         }
 
         // Search by keyword (in title)
         if (keyword != null && !keyword.isBlank()) {
             String lowerKeyword = keyword.toLowerCase();
-            tasks = tasks.stream()
-                    .filter(t -> t.getTitle().toLowerCase().contains(lowerKeyword))
-                    .toList();
+            tasks = tasks.stream().filter(t -> t.getTitle().toLowerCase().contains(lowerKeyword)).toList();
         }
 
         // Sort by dueDate
@@ -254,7 +235,6 @@ public class AccountImplement implements AccountService {
 
         return tasks;
     }
-
 
 
     @Override
@@ -273,13 +253,13 @@ public class AccountImplement implements AccountService {
     @Override
     public List<UserEventDTO> getUserEvents(Integer accountId) {
         String sql = """
-        SELECT e.event_id, e.name AS event_name, e.description, e.status, ear.event_role, 
-               d.name AS department_name, e.banner_url
-        FROM events e
-        JOIN event_account_role ear ON e.event_id = ear.event_id
-        LEFT JOIN departments d ON ear.department_id = d.department_id
-        WHERE ear.account_id = ? AND e.is_deleted = false AND ear.is_active = true
-    """;
+                    SELECT e.event_id, e.name AS event_name, e.description, e.status, ear.event_role, 
+                           d.name AS department_name, e.banner_url
+                    FROM events e
+                    JOIN event_account_role ear ON e.event_id = ear.event_id
+                    LEFT JOIN departments d ON ear.department_id = d.department_id
+                    WHERE ear.account_id = ? AND e.is_deleted = false AND ear.is_active = true
+                """;
 
         Query query = entityManager.createNativeQuery(sql);
         query.setParameter(1, accountId);

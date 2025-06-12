@@ -25,7 +25,7 @@ public class ValidationUtil {
         if (violations.isEmpty()) {
             return null;
         }
-        
+
         return violations.stream()
                 .map(ConstraintViolation::getMessage)
                 .collect(Collectors.joining(", "));
@@ -54,7 +54,7 @@ public class ValidationUtil {
     public <T> Set<ConstraintViolation<T>> getViolations(T object) {
         return validator.validate(object);
     }
-    
+
     /**
      * Validate email format.
      */
@@ -64,7 +64,7 @@ public class ValidationUtil {
         }
         return email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
     }
-    
+
     /**
      * Validate phone number format.
      */
@@ -74,7 +74,7 @@ public class ValidationUtil {
         }
         return phoneNumber.matches("^[+]?[0-9\\s-()]{7,15}$");
     }
-    
+
     /**
      * Validate student ID format.
      */

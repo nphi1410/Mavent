@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 public class MemberMapper {
 
     private final AccountRepository accountRepository;
-    
+
     private DepartmentRepository departmentRepository;
 
     public MemberMapper(AccountRepository accountRepository) {
@@ -38,10 +38,10 @@ public class MemberMapper {
             return null;
         }        // Fetch related entities using IDs
         Account account = accountRepository.findById(eventAccountRole.getAccountId()).orElse(null);
-        Department department = eventAccountRole.getDepartmentId() != null ? 
-                               departmentRepository.findById(eventAccountRole.getDepartmentId()).orElse(null) : null;
-        Account assignedBy = eventAccountRole.getAssignedByAccountId() != null ? 
-                           accountRepository.findById(eventAccountRole.getAssignedByAccountId()).orElse(null) : null;
+        Department department = eventAccountRole.getDepartmentId() != null ?
+                departmentRepository.findById(eventAccountRole.getDepartmentId()).orElse(null) : null;
+        Account assignedBy = eventAccountRole.getAssignedByAccountId() != null ?
+                accountRepository.findById(eventAccountRole.getAssignedByAccountId()).orElse(null) : null;
 
         return MemberResponseDTO.builder()
                 // Account Information
@@ -55,15 +55,15 @@ public class MemberMapper {
                 .gender(account != null && account.getGender() != null ? account.getGender().name() : null)
                 .avatarUrl(account != null ? account.getAvatarUrl() : null)
                 .systemRole(account != null && account.getSystemRole() != null ? account.getSystemRole().name() : null)
-                  // Event Role Information
+                // Event Role Information
                 .eventId(eventAccountRole.getEventId())
                 .eventRole(eventAccountRole.getEventRole().name())
                 .departmentId(eventAccountRole.getDepartmentId())
                 .departmentName(department != null ? department.getName() : null)
                 .isActive(eventAccountRole.getIsActive())
                 .assignedByAccountId(eventAccountRole.getAssignedByAccountId())
-                .assignedByName(assignedBy != null ? 
-                               getDisplayName(assignedBy.getFullName(), assignedBy.getUsername()) : null)
+                .assignedByName(assignedBy != null ?
+                        getDisplayName(assignedBy.getFullName(), assignedBy.getUsername()) : null)
                 .joinedAt(eventAccountRole.getCreatedAt())
                 .updatedAt(eventAccountRole.getUpdatedAt())
                 .build();

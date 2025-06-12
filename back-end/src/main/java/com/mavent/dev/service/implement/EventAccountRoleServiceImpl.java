@@ -19,7 +19,9 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
 
     public EventAccountRoleServiceImpl(EventAccountRoleRepository eventAccountRoleRepository) {
         this.eventAccountRoleRepository = eventAccountRoleRepository;
-    }    @Override
+    }
+
+    @Override
     public List<EventAccountRole> getMembersByEventId(Integer eventId) {
         return eventAccountRoleRepository.findByEventId(eventId);
     }
@@ -37,7 +39,9 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
     @Override
     public Page<EventAccountRole> searchMembersInEvent(Integer eventId, String searchTerm, Pageable pageable) {
         return eventAccountRoleRepository.findByEventIdWithSearch(eventId, searchTerm, pageable);
-    }    @Override
+    }
+
+    @Override
     public List<EventAccountRole> getMembersByEventIdAndRole(Integer eventId, EventAccountRole.EventRole role) {
         return eventAccountRoleRepository.findByEventIdAndEventRole(eventId, role);
     }
@@ -50,7 +54,9 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
     @Override
     public EventAccountRole addMemberToEvent(EventAccountRole eventAccountRole) {
         return eventAccountRoleRepository.save(eventAccountRole);
-    }    @Override
+    }
+
+    @Override
     public EventAccountRole updateMemberRole(EventAccountRoleId id, EventAccountRole updatedRole) {
         Optional<EventAccountRole> existingRole = eventAccountRoleRepository.findByEventIdAndAccountId(id.getEventId(), id.getAccountId());
         if (existingRole.isPresent()) {
@@ -59,18 +65,20 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
             roleToUpdate.setDepartmentId(updatedRole.getDepartmentId());
             roleToUpdate.setIsActive(updatedRole.getIsActive());
             return eventAccountRoleRepository.save(roleToUpdate);
-        }        return null;
+        }
+        return null;
     }
-    
+
     @Override
     public boolean removeMemberFromEvent(EventAccountRoleId id) {
         Optional<EventAccountRole> member = eventAccountRoleRepository.findByEventIdAndAccountId(id.getEventId(), id.getAccountId());
         if (member.isPresent()) {
             eventAccountRoleRepository.delete(member.get());
             return true;
-        }        return false;
+        }
+        return false;
     }
-    
+
     @Override
     public boolean activateDeactivateMember(EventAccountRoleId id, boolean isActive) {
         Optional<EventAccountRole> member = eventAccountRoleRepository.findByEventIdAndAccountId(id.getEventId(), id.getAccountId());
@@ -79,9 +87,10 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
             memberToUpdate.setIsActive(isActive);
             eventAccountRoleRepository.save(memberToUpdate);
             return true;
-        }        return false;
+        }
+        return false;
     }
-    
+
     @Override
     public long countMembersByEventId(Integer eventId) {
         return eventAccountRoleRepository.findByEventId(eventId).size();
@@ -94,8 +103,9 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
 
     @Override
     public long countActiveMembersByEventId(Integer eventId) {
-        return eventAccountRoleRepository.countByEventIdAndActiveStatus(eventId, true);    }
-    
+        return eventAccountRoleRepository.countByEventIdAndActiveStatus(eventId, true);
+    }
+
     @Override
     public boolean isMemberInEvent(Integer eventId, Integer accountId) {
         return eventAccountRoleRepository.existsByEventIdAndAccountId(eventId, accountId);
@@ -117,13 +127,13 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
     }
 
     @Override
-    public Page<EventAccountRole> getMembersWithFilters(Integer eventId, Boolean isActive, 
-                                                       EventAccountRole.EventRole role, 
-                                                       Integer departmentId, 
-                                                       String searchTerm,
-                                                       java.util.Date startDate,
-                                                       java.util.Date endDate,
-                                                       Pageable pageable) {
+    public Page<EventAccountRole> getMembersWithFilters(Integer eventId, Boolean isActive,
+                                                        EventAccountRole.EventRole role,
+                                                        Integer departmentId,
+                                                        String searchTerm,
+                                                        java.util.Date startDate,
+                                                        java.util.Date endDate,
+                                                        Pageable pageable) {
         return eventAccountRoleRepository.findByEventIdWithFilters(eventId, isActive, role, departmentId, searchTerm, startDate, endDate, pageable);
     }
 }

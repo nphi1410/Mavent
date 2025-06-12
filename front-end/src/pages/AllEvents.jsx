@@ -22,22 +22,17 @@ const Events = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-
       <EventFilter
         onFilter={fetchFilteredEvents}
-        totalPagesFromApi={totalPages}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
+        totalPagesFromApi={totalPages}
       />
-
       <div className="flex-grow">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6 h-full">
           {filteredEvents.length > 0 ? (
             filteredEvents.map((event) => (
-              <div
-                key={event.eventId || event.id}
-                className="flex flex-col h-full"
-              >
+              <div key={event.eventId || event.id} className="flex flex-col h-full">
                 <CardMedium event={event} />
               </div>
             ))
@@ -46,7 +41,6 @@ const Events = () => {
           )}
         </div>
       </div>
-
       <Footer />
     </div>
   );

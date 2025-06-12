@@ -28,20 +28,20 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())  // new lambda style to disable CSRF
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/**","/public/**", "/login" ).permitAll()
+                        .requestMatchers("/api/**", "/public/**", "/login").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(logout -> logout
-                        .logoutUrl("/api/logout")
-                        // logout handler can be customized if needed
-                        .logoutSuccessHandler((request, response, authentication) -> {
-                            response.setStatus(200);
-                        })
-                        // redirect straight by this method is blocked by Spring Security (CORS issue)
+                                .logoutUrl("/api/logout")
+                                // logout handler can be customized if needed
+                                .logoutSuccessHandler((request, response, authentication) -> {
+                                    response.setStatus(200);
+                                })
+                                // redirect straight by this method is blocked by Spring Security (CORS issue)
 //                        .logoutSuccessUrl("http://localhost:5173")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
+                                .invalidateHttpSession(true)
+                                .deleteCookies("JSESSIONID")
                 );
         return http.build();
     }

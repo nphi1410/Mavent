@@ -1,11 +1,10 @@
 package com.mavent.dev.controller;
 
-import com.mavent.dev.DTO.FilterEventDTO;
-import com.mavent.dev.DTO.FilterRequestDTO;
-import com.mavent.dev.DTO.superadmin.EventDTO;
+import com.mavent.dev.dto.FilterEventDTO;
+import com.mavent.dev.dto.FilterRequestDTO;
+import com.mavent.dev.dto.superadmin.EventDTO;
 import com.mavent.dev.entity.Event;
 import com.mavent.dev.service.EventService;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;

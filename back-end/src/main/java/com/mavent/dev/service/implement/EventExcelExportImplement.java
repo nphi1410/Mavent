@@ -1,6 +1,6 @@
 package com.mavent.dev.service.implement;
 
-import com.mavent.dev.DTO.superadmin.EventDTO;
+import com.mavent.dev.dto.superadmin.EventDTO;
 import com.mavent.dev.service.export.ExcelExportService;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;

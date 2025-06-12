@@ -1,10 +1,11 @@
-package com.mavent.dev.DTO;
+package com.mavent.dev.dto;
+
 import lombok.Getter;
 import lombok.Setter;
+
 @Getter
 @Setter
-public class RegisterDTO {
+public class LoginDTO {
     private String username;
-    private String email;
     private String password;
 }

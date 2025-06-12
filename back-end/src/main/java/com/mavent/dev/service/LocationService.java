@@ -6,5 +6,6 @@ import java.util.List;
 
 public interface LocationService {
     List<Location> getAllLocations();
+
     Location getLocationById(Integer locationId);
 }
