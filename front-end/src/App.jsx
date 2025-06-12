@@ -26,6 +26,7 @@ import ResetPassword from "./pages/ResetPassword";
 import ChangePassword from "./pages/ChangePassword";
 import Members from './pages/Members/Members';
 import Layout from './components/layout/AdminLayout';
+import CreateEvent from "./pages/CreateEvent";
 
 
 function App() {
@@ -42,8 +43,8 @@ function App() {
                     <Route path="/logout" element={<Logout />} />
                     <Route path="/reset-password-request" element={<ResetPassword />} />
                     <Route path="/change-password" element={<ChangePassword />} />
-                    <Route path="/superadmin" element={<SuperAdminDashboard />} />
                     <Route path="/register" element={<Register />} />
+                    <Route path="/superadmin" element={<SuperAdminDashboard />} />
                     <Route
                         path="/superadmin/events"
                         element={<SuperAdminManageEvents />}
@@ -61,7 +62,8 @@ function App() {
                     <Route path="/events/:id" element={<EventDetails />} />
                     <Route path="/events/" element={<AllEvents />} />
 
-                     <Route path="/event/9/members" element={<Members />} />
+                    <Route path="/event/9/members" element={<Members />} />
+                    <Route path="/create-event" element={<CreateEvent />} />
                 </Routes>
             </div>
         </Router>
