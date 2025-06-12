@@ -39,6 +39,13 @@ public class EventController {
         );
     }
 
+    @PostMapping("/create-event")
+    public ResponseEntity<EventDTO> createEvent(@RequestBody EventDTO eventDTO) {
+        EventDTO createdEvent = eventService.createEvent(eventDTO);
+        return ResponseEntity.ok(createdEvent);
+    }
+
+
     //Get Event By ID
     @GetMapping("/{id}")
     public Event getEventById(@PathVariable("id") Integer eventId) {
@@ -52,4 +59,6 @@ public class EventController {
         EventDTO updatedEvent = eventService.updateEvent(eventId, eventDTO);
         return ResponseEntity.ok(updatedEvent);
     }
+
+
 }
