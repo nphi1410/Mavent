@@ -65,9 +65,6 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
         }
         return null;
         }
-        return null;
-    }
-
 
     @Override
     public boolean removeMemberFromEvent(EventAccountRole eventAccountRole) {
@@ -91,59 +88,59 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
         }
         return false;
         }
-        return false;
+
     }
 
-    @Override
-    public long countMembersByEventId(Integer eventId) {
-        return eventAccountRoleRepository.findByEventId(eventId).size();
-    }
+//    @Override
+//    public long countMembersByEventId(Integer eventId) {
+//        return eventAccountRoleRepository.findByEventId(eventId).size();
+//    }
+//
+//    @Override
+//    public long countMembersByRole(Integer eventId, EventAccountRole.EventRole role) {
+//        return eventAccountRoleRepository.countByEventIdAndRole(eventId, role);
+//    }
+//
+//    @Override
+//    public long countActiveMembersByEventId(Integer eventId) {
+//        return eventAccountRoleRepository.countByEventIdAndActiveStatus(eventId, true);
+//    }
+//
+//    @Override
+//    public boolean isMemberInEvent(Integer eventId, Integer accountId) {
+//        return eventAccountRoleRepository.existsByEventIdAndAccountId(eventId, accountId);
+//    }
+//
+//    @Override
+//    public boolean hasRoleInEvent(Integer eventId, Integer accountId, EventAccountRole.EventRole role) {
+//        return eventAccountRoleRepository.hasRoleInEvent(eventId, accountId, role);
+//    }
+//
+//    @Override
+//    public boolean isOrganizerOfEvent(Integer eventId, Integer accountId) {
+//        return eventAccountRoleRepository.isOrganizerOfEvent(eventId, accountId);
+//    }
+//
+//    @Override
+//    public boolean isParticipantInEvent(Integer eventId, Integer accountId) {
+//        return eventAccountRoleRepository.isParticipantInEvent(eventId, accountId);
+//    }
+//
+//    @Override
+//    public Page<EventAccountRole> getMembersWithFilters(Integer eventId, Boolean isActive,
+//                                                        EventAccountRole.EventRole role,
+//                                                        Integer departmentId,
+//                                                        String searchTerm,
+//                                                        java.util.Date startDate,
+//                                                        java.util.Date endDate,
+//                                                        Pageable pageable) {
+//    public Page<EventAccountRole> getMembersWithFilters(Integer eventId, Boolean isActive,
+//                                                        EventAccountRole.EventRole role,
+//                                                        Integer departmentId,
+//                                                        String searchTerm,
+//                                                        java.util.Date startDate,
+//                                                        java.util.Date endDate,
+//                                                        Pageable pageable) {
+//        return eventAccountRoleRepository.findByEventIdWithFilters(eventId, isActive, role, departmentId, searchTerm, startDate, endDate, pageable);
+//    }
 
-    @Override
-    public long countMembersByRole(Integer eventId, EventAccountRole.EventRole role) {
-        return eventAccountRoleRepository.countByEventIdAndRole(eventId, role);
-    }
-
-    @Override
-    public long countActiveMembersByEventId(Integer eventId) {
-        return eventAccountRoleRepository.countByEventIdAndActiveStatus(eventId, true);
-    }
-
-    @Override
-    public boolean isMemberInEvent(Integer eventId, Integer accountId) {
-        return eventAccountRoleRepository.existsByEventIdAndAccountId(eventId, accountId);
-    }
-
-    @Override
-    public boolean hasRoleInEvent(Integer eventId, Integer accountId, EventAccountRole.EventRole role) {
-        return eventAccountRoleRepository.hasRoleInEvent(eventId, accountId, role);
-    }
-
-    @Override
-    public boolean isOrganizerOfEvent(Integer eventId, Integer accountId) {
-        return eventAccountRoleRepository.isOrganizerOfEvent(eventId, accountId);
-    }
-
-    @Override
-    public boolean isParticipantInEvent(Integer eventId, Integer accountId) {
-        return eventAccountRoleRepository.isParticipantInEvent(eventId, accountId);
-    }
-
-    @Override
-    public Page<EventAccountRole> getMembersWithFilters(Integer eventId, Boolean isActive,
-                                                        EventAccountRole.EventRole role,
-                                                        Integer departmentId,
-                                                        String searchTerm,
-                                                        java.util.Date startDate,
-                                                        java.util.Date endDate,
-                                                        Pageable pageable) {
-    public Page<EventAccountRole> getMembersWithFilters(Integer eventId, Boolean isActive,
-                                                        EventAccountRole.EventRole role,
-                                                        Integer departmentId,
-                                                        String searchTerm,
-                                                        java.util.Date startDate,
-                                                        java.util.Date endDate,
-                                                        Pageable pageable) {
-        return eventAccountRoleRepository.findByEventIdWithFilters(eventId, isActive, role, departmentId, searchTerm, startDate, endDate, pageable);
-    }
-}
