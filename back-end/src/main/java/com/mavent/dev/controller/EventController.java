@@ -1,5 +1,6 @@
 package com.mavent.dev.controller;
 
+import com.mavent.dev.dto.EventRegisterDTO;
 import com.mavent.dev.dto.FilterEventDTO;
 import com.mavent.dev.dto.FilterRequestDTO;
 import com.mavent.dev.dto.superadmin.EventDTO;
@@ -38,13 +39,19 @@ public class EventController {
                 request.isTrending()
         );
     }
-
+  
     @PostMapping("/create-event")
     public ResponseEntity<EventDTO> createEvent(@RequestBody EventDTO eventDTO) {
         EventDTO createdEvent = eventService.createEvent(eventDTO);
         return ResponseEntity.ok(createdEvent);
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<String> registerEvent(@RequestBody EventRegisterDTO eventRegisterDto){
+
+        return ResponseEntity.ok("Register event successfully!");
+
+    }
 
     //Get Event By ID
     @GetMapping("/{id}")

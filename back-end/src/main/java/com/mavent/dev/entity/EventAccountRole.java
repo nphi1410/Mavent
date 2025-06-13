@@ -26,7 +26,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@IdClass(EventAccountRole.PK.class)  // Giữ chiến lược ID của team
+@IdClass(EventAccountRole.PK.class)
 public class EventAccountRole {
 
     @Id
@@ -59,25 +59,6 @@ public class EventAccountRole {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-
-    // Commented out to fix circular dependency - từ code của bạn
-    // @ManyToOne(fetch = FetchType.LAZY)
-    // @JoinColumn(name = "department_id")
-    // private Department department;
-
-    // @ManyToOne(fetch = FetchType.LAZY)
-    // @JoinColumn(name = "assigned_by_account_id")
-    // private Account assignedBy;
-
-    // @ManyToOne(fetch = FetchType.LAZY)
-    // @MapsId("eventId")
-    // @JoinColumn(name = "event_id", nullable = false)
-    // private Event event;
-
-    // @ManyToOne(fetch = FetchType.LAZY)
-    // @MapsId("accountId")
-    // @JoinColumn(name = "account_id", nullable = false)
-    // private Account account;
 
     /**
      * Enum representing possible roles in an event
