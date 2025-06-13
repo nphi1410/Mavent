@@ -2,6 +2,7 @@ import { Transition, TransitionChild } from "@headlessui/react";
 import { Fragment, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
+import { icon } from "leaflet";
 
 const SideBar = ({ isOpen, setIsOpen }) => {
   const navigate = useNavigate();
@@ -9,10 +10,11 @@ const SideBar = ({ isOpen, setIsOpen }) => {
 
   const navList = [
     { name: "Home", icon: "fa-solid fa-house", path: "/" },
-    { name:"all events", icon: "fa-solid fa-calendar", path: "/events" },
+    { name:"All events", icon: "fa-solid fa-calendar", path: "/events" },
     { name: "Profile", icon: "fa-solid fa-user", path: "/profile/account" },
     { name: "Attended Events", icon: "fa-solid fa-calendar-check", path: "/profile/events" },
-    { name: "tasks", icon: "fa-solid fa-list-check", path: "/profile/tasks" },
+    { name: "Tasks", icon: "fa-solid fa-list-check", path: "/profile/tasks" },
+    { name: "Create new event", icon: "", path: "/event/create-event"}
   ];
 
   // Close sidebar on outside click

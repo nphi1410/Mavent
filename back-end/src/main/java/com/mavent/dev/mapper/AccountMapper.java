@@ -4,18 +4,9 @@ import com.mavent.dev.dto.account.AccountDTO;
 import com.mavent.dev.entity.Account;
 import org.springframework.stereotype.Component;
 
-/**
- * Mapper for converting between Account entity and AccountDTO.
- */
 @Component
 public class AccountMapper {
 
-    /**
-     * Convert Account entity to AccountDTO.
-     *
-     * @param account the account entity
-     * @return AccountDTO
-     */
     public static AccountDTO toDTO(Account account) {
         if (account == null) {
             return null;
@@ -32,13 +23,6 @@ public class AccountMapper {
         );
     }
 
-    /**
-     * Convert AccountDTO to Account entity (for creation).
-     * Note: This does not set ID, password, timestamps as they are handled separately.
-     *
-     * @param accountDTO the account dto
-     * @return Account entity
-     */
     public Account toEntity(AccountDTO accountDTO) {
         if (accountDTO == null) {
             return null;
@@ -63,12 +47,6 @@ public class AccountMapper {
         return account;
     }
 
-    /**
-     * Update existing Account entity with data from AccountDTO.
-     *
-     * @param account    the existing account entity
-     * @param accountDTO the account dto with updated data
-     */
     public void updateEntityFromDTO(Account account, AccountDTO accountDTO) {
         if (account == null || accountDTO == null) {
             return;

@@ -19,6 +19,4 @@ public class DashboardController {
         DashboardDTO dashboard = dashboardService.getDashboard();
         return ResponseEntity.ok(dashboard);
     }
-
-
 }
