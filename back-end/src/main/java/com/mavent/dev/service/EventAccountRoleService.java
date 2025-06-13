@@ -1,12 +1,10 @@
 package com.mavent.dev.service;
 
 import com.mavent.dev.entity.EventAccountRole;
-import com.mavent.dev.entity.EventAccountRoleId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface EventAccountRoleService {
     // Quản lý members trong event
@@ -26,11 +24,11 @@ public interface EventAccountRoleService {
     // Quản lý thành viên
     EventAccountRole addMemberToEvent(EventAccountRole eventAccountRole);
 
-    EventAccountRole updateMemberRole(EventAccountRoleId id, EventAccountRole updatedRole);
+    EventAccountRole updateMemberRole(EventAccountRole updatedRole);
 
-    boolean removeMemberFromEvent(EventAccountRoleId id);
+    boolean removeMemberFromEvent(EventAccountRole eventAccountRole);
 
-    boolean activateDeactivateMember(EventAccountRoleId id, boolean isActive);
+    boolean activateDeactivateMember(EventAccountRole eventAccountRole, boolean isActive);
 
     // Thống kê
     long countMembersByEventId(Integer eventId);
