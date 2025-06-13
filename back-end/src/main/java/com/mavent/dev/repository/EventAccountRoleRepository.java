@@ -2,7 +2,6 @@ package com.mavent.dev.repository;
 
 
 import com.mavent.dev.entity.EventAccountRole;
-import com.mavent.dev.entity.EventAccountRoleId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,7 +17,7 @@ import java.util.Optional;
  * Provides data access methods for event-account role relationships.
  */
 @Repository
-public interface EventAccountRoleRepository extends JpaRepository<EventAccountRole, EventAccountRoleId> {
+public interface EventAccountRoleRepository extends JpaRepository<EventAccountRole, Integer> {
 
     /**
      * Find all roles for a specific event using composite key.
