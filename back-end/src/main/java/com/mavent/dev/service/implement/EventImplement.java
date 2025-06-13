@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,30 @@ public class EventImplement implements EventService {
         return "eventId=" + dto.getEventId() +
                 ", startDatetime=" + dto.getStartDatetime() +
                 ", endDatetime=" + dto.getEndDatetime();
+    }
+
+    @Override
+    public EventDTO createEvent(EventDTO eventDTO) {
+        Event event = new Event();
+
+        event.setName(eventDTO.getName());
+        event.setDescription(eventDTO.getDescription());
+        event.setStartDatetime(eventDTO.getStartDatetime());
+        event.setEndDatetime(eventDTO.getEndDatetime());
+        event.setLocation(eventDTO.getLocation());
+        event.setDdayInfo(eventDTO.getDdayInfo());
+        event.setMaxMemberNumber(eventDTO.getMaxMemberNumber());
+        event.setMaxParticipantNumber(eventDTO.getMaxParticipantNumber());
+        event.setStatus(eventDTO.getStatus());
+        event.setCreatedBy(eventDTO.getCreatedBy());
+        event.setIsDeleted(false); // Khi tạo mặc định là chưa xoá
+        event.setCreatedAt(java.time.LocalDateTime.now());
+        event.setUpdatedAt(java.time.LocalDateTime.now());
+
+        // Lưu vào db
+        Event savedEvent = eventRepository.save(event);
+
+        return mapToDTO(savedEvent);
     }
 
 

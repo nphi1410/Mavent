@@ -4,13 +4,13 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
 import { getTags } from "./../services/tagService";
-import { useNavigate, useSearchParams } from "react-router-dom"; // ✅ Import hook
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const NavBar = () => {
+  const navigate = useNavigate();
   const swiperRef = useRef(null);
   const [tags, setTags] = useState([]);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const [searchParam] = useSearchParams();
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -25,15 +25,10 @@ const NavBar = () => {
     fetchTags();
   }, []);
 
-  const navigateAllEvents = (tagId) => {
-    const params = new URLSearchParams(searchParams);
-    if (tagId) {
-      params.set("tagIds", [tagId]);
-    } else {
-      params.delete("tagIds");
-    }    
-    setSearchParams(params);
-    navigate(`/events?${params.toString()}`);
+  const handleNavigate = (tagId) => {
+    const newParams = new URLSearchParams(searchParam);
+    newParams.set("tagId", tagId);
+    navigate(`/events?${newParams.toString()}`);
   };
 
   return (
@@ -48,15 +43,13 @@ const NavBar = () => {
           onSwiper={(swiper) => (swiperRef.current = swiper)}
           className="!overflow-visible"
         >
-          {tags.map((tag, index) => (
+          {tags.map((tag) => (
             <SwiperSlide
-              key={index}
+              key={tag.tagId}
               className="!w-auto cursor-pointer select-none rounded-md px-4 py-2 hover:bg-blue-100 transition"
+              onClick={() => handleNavigate(tag.tagId)}
             >
-              <span
-                onClick={() => navigateAllEvents(tag.tagId)}
-                className="text-base font-semibold whitespace-nowrap"
-              >
+              <span className="text-base font-semibold whitespace-nowrap">
                 {tag.name}
               </span>
             </SwiperSlide>

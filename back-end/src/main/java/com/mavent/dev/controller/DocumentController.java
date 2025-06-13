@@ -1,6 +1,7 @@
 package com.mavent.dev.controller;
 
 import com.mavent.dev.dto.ImageDTO;
+import com.mavent.dev.entity.Document;
 import com.mavent.dev.service.DocumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ public class DocumentController {
     private DocumentService documentService;
 
     @GetMapping
-    public ResponseEntity<List<ImageDTO>> getFiveImage() {
+    public ResponseEntity<List<Document>> getFiveImage(){
         return ResponseEntity.ok(documentService.getFiveImage());
     }
 }

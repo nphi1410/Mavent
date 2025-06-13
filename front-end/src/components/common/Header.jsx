@@ -6,7 +6,7 @@ import SideBar from "./SideBar";
 const Header = () => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
-  const [showSideBar, setShowSideBar] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     fetchUserProfile();
@@ -23,9 +23,6 @@ const Header = () => {
     }
   };
 
-  const handleShowSideBar = () => {
-    setShowSideBar(!showSideBar);
-  };
   const navigateAllEvents = (type, isTrending) => {
     const searchParams = new URLSearchParams();
     if (type) searchParams.set("type", type);
@@ -84,12 +81,13 @@ const Header = () => {
               </span>
               <div className="w-12 h-12 rounded-full border-2 border-gray-300 overflow-hidden">
                 <img
-                  onClick={() => handleShowSideBar()}
-                  src="/avatar.jpg"
+                  onClick={() => setIsOpen(!isOpen)}
+                  src={userData.avatarUrl}
                   alt="User Avatar"
                   className="w-full h-full object-cover cursor-pointer"
                 />
               </div>
+              <SideBar isOpen={isOpen} setIsOpen={setIsOpen}/>
             </>
           ) : (
             <span
@@ -99,8 +97,6 @@ const Header = () => {
               Login
             </span>
           )}
-
-          <SideBar isOpen={showSideBar} setIsOpen={setShowSideBar} />
         </div>
       </div>
     </header>

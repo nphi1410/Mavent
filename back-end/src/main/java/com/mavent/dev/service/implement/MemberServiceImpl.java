@@ -3,7 +3,6 @@ package com.mavent.dev.service.implement;
 import com.mavent.dev.dto.member.*;
 import com.mavent.dev.dto.common.PagedResponseDTO;
 import com.mavent.dev.entity.EventAccountRole;
-import com.mavent.dev.entity.EventAccountRoleId;
 import com.mavent.dev.exception.MemberNotFoundException;
 import com.mavent.dev.repository.EventAccountRoleRepository;
 import com.mavent.dev.service.MemberService;

@@ -1,15 +1,9 @@
 package com.mavent.dev.controller;
 
+import com.mavent.dev.dto.*;
 import com.mavent.dev.dto.superadmin.AccountDTO;
-import com.mavent.dev.dto.LoginDTO;
-import com.mavent.dev.dto.UserProfileDTO;
-import com.mavent.dev.dto.OtpDTO;
-import com.mavent.dev.dto.ChangePasswordDTO;
-import com.mavent.dev.dto.TaskDTO;
 import com.mavent.dev.dto.superadmin.EventDTO;
-import com.mavent.dev.dto.UserEventDTO;
 import com.mavent.dev.config.MailConfig;
-
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.EventAccountRole;
 import com.mavent.dev.repository.AccountRepository;
@@ -119,7 +113,7 @@ public class AccountController {
     }
 
     @PostMapping("/send-register-otp")
-    public ResponseEntity<?> sendOtp(@RequestBody com.mavent.dev.dto.RegisterDTO request, HttpSession session) {
+    public ResponseEntity<?> sendOtp(@RequestBody RegisterDTO request, HttpSession session) {
         if (accountService.getAccount(request.getUsername()) != null) {
             return ResponseEntity.badRequest().body("Username already exists!");
         }
@@ -144,7 +138,7 @@ public class AccountController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerWithOtp(@RequestBody com.mavent.dev.dto.OtpDTO request, HttpSession session) {
+    public ResponseEntity<?> registerWithOtp(@RequestBody OtpDTO request, HttpSession session) {
         String otpSession = (String) session.getAttribute("register_otp");
         String username = (String) session.getAttribute("register_username");
         String email = (String) session.getAttribute("register_email");
@@ -170,7 +164,7 @@ public class AccountController {
     }
 
     @PostMapping("/reset-password-request")
-    public ResponseEntity<?> resetPasswordRequest(@RequestBody com.mavent.dev.dto.ResetPasswordDTO request, HttpSession session) {
+    public ResponseEntity<?> resetPasswordRequest(@RequestBody ResetPasswordDTO request, HttpSession session) {
         Account account = accountRepository.findByEmail(request.getEmail());
         if (account == null) {
             return ResponseEntity.badRequest().body("Email not found");
