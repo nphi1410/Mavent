@@ -3,7 +3,7 @@ package com.mavent.dev.controller.export;
 
 import com.mavent.dev.dto.superadmin.EventDTO;
 import com.mavent.dev.service.EventService;
-import com.mavent.dev.service.export.ExcelExportService;
+import com.mavent.dev.service.globalservice.ExcelExportService;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
