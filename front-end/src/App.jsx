@@ -28,6 +28,7 @@ import SuperAdminManageUsers from "./pages/superadmin/SuperAdminManageUsers";
 import SuperAdminViewEventDetails from "./pages/superadmin/SuperAdminViewEventDetails";
 import SuperAdminEditEvent from "./pages/superadmin/SuperAdminEditEvent";
 import SuperAdminViewUserDetails from "./pages/superadmin/SuperAdminViewUserDetails";
+import SuperAdminLayout from "./layouts/SuperAdminLayout";
 
 function App() {
   return (
@@ -53,25 +54,22 @@ function App() {
             <Route path="dashboard" element={<UserDashboardPage />} />
             <Route path="tasks" element={<UserTasksPage />} />
           </Route>
+        </Route>
 
-          {/* Super Admin Routes */}
-          <Route path="superadmin">
-            <Route index element={<SuperAdminDashboard />} />
-            <Route path="events" element={<SuperAdminManageEvents />} />
-            <Route path="users" element={<SuperAdminManageUsers />} />
-            <Route
-              path="event-detail/:eventId"
-              element={<SuperAdminViewEventDetails />}
-            />
-            <Route
-              path="edit-event/:eventId"
-              element={<SuperAdminEditEvent />}
-            />
-            <Route
-              path="user-detail/:id"
-              element={<SuperAdminViewUserDetails />}
-            />
-          </Route>
+        {/* Super Admin Routes */}
+        <Route path="superadmin" element={<SuperAdminLayout />}>
+          <Route index element={<SuperAdminDashboard />} />
+          <Route path="events" element={<SuperAdminManageEvents />} />
+          <Route path="users" element={<SuperAdminManageUsers />} />
+          <Route
+            path="event-detail/:eventId"
+            element={<SuperAdminViewEventDetails />}
+          />
+          <Route path="edit-event/:eventId" element={<SuperAdminEditEvent />} />
+          <Route
+            path="user-detail/:id"
+            element={<SuperAdminViewUserDetails />}
+          />
         </Route>
       </Routes>
     </Router>
