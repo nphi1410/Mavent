@@ -39,6 +39,12 @@ public class EventController {
                 request.isTrending()
         );
     }
+  
+    @PostMapping("/create-event")
+    public ResponseEntity<EventDTO> createEvent(@RequestBody EventDTO eventDTO) {
+        EventDTO createdEvent = eventService.createEvent(eventDTO);
+        return ResponseEntity.ok(createdEvent);
+    }
 
     @PostMapping("/register")
     public ResponseEntity<String> registerEvent(@RequestBody EventRegisterDTO eventRegisterDto){
@@ -60,4 +66,6 @@ public class EventController {
         EventDTO updatedEvent = eventService.updateEvent(eventId, eventDTO);
         return ResponseEntity.ok(updatedEvent);
     }
+
+
 }

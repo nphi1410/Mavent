@@ -23,8 +23,8 @@ export const getFilterEvents = async ({
       isTrending,
     };
 
-    const res = await Api.post("/events/filter", body); 
-    
+    const res = await Api.post("/events/filter", body);
+
     return res.data;
   } catch (err) {
     console.error(err);
@@ -52,6 +52,19 @@ export const getEventById = async (id) => {
   } catch (error) {
     console.error(`Error fetching event with ID ${id}:`, error);
     return null;
+  }
+};
+
+// Create event
+export const createEvent = async (eventData) => {
+  try {
+    const response = await Api.post("/events/create-event", eventData);
+    return { success: true, data: response.data }; // Trả về data từ BE
+  } catch (error) {
+    console.error("Error creating event:", error);
+    // Trích xuất thông báo lỗi từ phản hồi của BE
+    const errorMessage = error.response?.data?.message || error.message || "Đã có lỗi không mong muốn xảy ra.";
+    return { success: false, message: errorMessage };
   }
 };
 
