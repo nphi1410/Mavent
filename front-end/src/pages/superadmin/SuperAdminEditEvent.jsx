@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Route, useParams } from 'react-router-dom';
 import SuperAdminSidebar from '../../components/superadmin/SuperAdminSidebar';
-import SuperAdminHeader from '../../components/superadmin/SuperAdminHeader';
 import { getEventById, updateEvent } from '../../services/eventService'; // giả sử bạn export axios funcs từ api.js
 
 function SuperAdminEditEvent() {
@@ -65,7 +64,6 @@ function SuperAdminEditEvent() {
         <div className="h-screen w-screen flex bg-amber-50">
             <SuperAdminSidebar />
             <div className="flex flex-col flex-1">
-                <SuperAdminHeader />
                 <main className="flex-1 overflow-y-auto p-10 bg-gray-100">
                     <form onSubmit={handleSubmit} className="py-10 w-full">
                         <div className="mb-6">

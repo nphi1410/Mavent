@@ -4,7 +4,6 @@ import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from 'react-router-dom';
 
 import SuperAdminSidebar from '../../components/superadmin/SuperAdminSidebar';
-import SuperAdminHeader from '../../components/superadmin/SuperAdminHeader';
 import SuperAdminActionDropdown from '../../components/superadmin/SuperAdminActionDropdown';
 import { getAllAccounts } from '../../services/accountService';
 
@@ -66,7 +65,6 @@ function SuperAdminManageUsers() {
         <div className="h-screen w-screen flex bg-amber-50">
             <SuperAdminSidebar />
             <div className="flex flex-col flex-1">
-                <SuperAdminHeader />
                 <main className="flex-1 overflow-y-auto p-10 bg-gray-100">
                     <div className="py-10 w-full">
                         <h1 className="text-4xl font-bold text-gray-800 mb-4">Users</h1>

@@ -17,7 +17,6 @@ import {
     Filler
 } from 'chart.js';
 import SuperAdminSidebar from "../../components/superadmin/SuperAdminSidebar";
-import SuperAdminHeader from "../../components/superadmin/SuperAdminHeader";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler);
 
@@ -148,7 +147,6 @@ const SuperAdminDashboard = () => {
         <div className="h-screen w-screen flex bg-amber-50">
             <SuperAdminSidebar />
             <div className="flex flex-col flex-1">
-                <SuperAdminHeader />
                 <main className="flex-1 overflow-y-auto p-10 bg-gray-100">
                     <div className="py-10 w-full">
                         <h1 className="text-3xl font-bold">Dashboard</h1>

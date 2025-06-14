@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Header from "../components/common/Header";
 import Banner from "../components/Banner";
-import Footer from "../components/common/Footer";
 import NavBar from "./../components/NavBar";
 import Content from "../components/Content";
 import Video from "../components/visual/Video";
@@ -36,14 +34,11 @@ const HomePage = () => {
 
   return (
     <div className="w-full">
-      <Header />
-      {/*ongoing trending events */}
       <Banner />
       <NavBar />
       <Content />
       <Video />
       <Gallery imageUrls={bannerUrls} />
-      <Footer />
     </div>
   );
 };

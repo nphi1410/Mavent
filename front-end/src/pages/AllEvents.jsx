@@ -1,8 +1,6 @@
 import React, { useState, useCallback } from "react";
 import EventFilter from "../components/filter/EventFilter";
 import CardMedium from "../components/card/CardMedium";
-import Footer from "../components/common/Footer";
-import Header from "../components/common/Header";
 import { getFilterEvents } from "../services/eventService";
 
 const Events = () => {
@@ -21,7 +19,6 @@ const Events = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
       <EventFilter
         onFilter={fetchFilteredEvents}
         currentPage={currentPage}
@@ -41,7 +38,6 @@ const Events = () => {
           )}
         </div>
       </div>
-      <Footer />
     </div>
   );
 };
