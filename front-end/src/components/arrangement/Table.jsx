@@ -1,35 +1,60 @@
+import React from "react";
+
+const formatHeader = (header) =>
+  header
+    .replace(/([A-Z])/g, " $1")
+    .replace(/^./, (char) => char.toUpperCase());
+
+const formatValue = (value) => {
+  if (typeof value === "boolean") return value ? "✅" : "❌";
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}T/.test(value)) {
+    return new Date(value).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  }
+  return value;
+};
 
 const Table = ({ data = [] }) => {
   if (!data.length) {
-    return <p className="text-gray-500 italic">No data available.</p>;
+    return (
+      <div className="p-4 text-center text-gray-500 italic">
+        No data available.
+      </div>
+    );
   }
 
   const headers = Object.keys(data[0]);
 
   return (
-    <div className="overflow-x-auto rounded-lg shadow-md">
-      <table className="min-w-full divide-y divide-gray-200 bg-white">
-        <thead className="bg-gray-100">
+    <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+      <table className="min-w-full bg-white text-sm text-gray-700">
+        <thead className="bg-gray-50 border-b border-gray-200">
           <tr>
             {headers.map((header) => (
               <th
                 key={header}
-                className="px-4 py-2 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider"
+                className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wider text-gray-600"
               >
-                {header}
+                {formatHeader(header)}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-100">
-          {data.map((row, index) => (
-            <tr key={row.id || index}>
+        <tbody>
+          {data.map((row, idx) => (
+            <tr
+              key={row.id || idx}
+              className="border-b border-gray-100 transition-colors duration-100 hover:bg-blue-50"
+            >
               {headers.map((header) => (
                 <td
-                  key={`${index}-${header}`}
-                  className="px-4 py-2 text-sm text-gray-800 whitespace-nowrap"
+                  key={`${idx}-${header}`}
+                  className="px-5 py-3 whitespace-nowrap text-sm text-gray-800"
                 >
-                  {row[header]}
+                  {formatValue(row[header])}
                 </td>
               ))}
             </tr>
