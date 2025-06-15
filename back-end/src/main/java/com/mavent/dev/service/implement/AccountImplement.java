@@ -15,6 +15,10 @@ import com.mavent.dev.config.MailConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +33,7 @@ import java.util.Comparator;
 
 
 @Service
-public class AccountImplement implements AccountService {
+public class AccountImplement implements AccountService, UserDetailsService {
 
     @Autowired
     private AccountRepository accountRepository;
@@ -37,8 +41,12 @@ public class AccountImplement implements AccountService {
     @Autowired
     private MailConfig mailConfig;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+//    @Autowired
+    private final PasswordEncoder passwordEncoder;
+
+    public AccountImplement(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -97,6 +105,22 @@ public class AccountImplement implements AccountService {
         return password.toString();
     }
 
+    // for User Authentication
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Account account = accountRepository.findByUsername(username);
+        if (account == null) throw new UsernameNotFoundException("User not found");
+
+        List<GrantedAuthority> authorities = List.of(
+                new SimpleGrantedAuthority("ROLE_" + account.getSystemRole().name())
+        );
+
+
+        return new org.springframework.security.core.userdetails.User(
+                account.getUsername(), account.getPasswordHash(), authorities
+        );
+    }
+
     @Override
     public void save(Account accountInfo) {
         accountRepository.save(accountInfo);
@@ -120,7 +144,12 @@ public class AccountImplement implements AccountService {
     public UserProfileDTO getUserProfile(String username) {
         Account account = getAccount(username);
         if (account == null) {
-            account = accountRepository.findByEmail(username);
+            try {
+                account = accountRepository.findByEmail(username);
+            } catch (Exception e) {
+                System.err.println("Account not found with email: " + username);
+                System.err.println("Error: " + e);
+            }
         }
         return mapAccountToUserProfileDTO(account);
     }
@@ -302,5 +331,6 @@ public class AccountImplement implements AccountService {
         dto.setUpdatedAt(account.getUpdatedAt());
         return dto;
     }
+
 }
 

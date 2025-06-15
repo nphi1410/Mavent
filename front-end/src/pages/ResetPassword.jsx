@@ -14,7 +14,7 @@ function ResetPassword() {
 
         try {
             setError(""); // Reset error message
-            const response = await axios.post("http://localhost:8080/api/reset-password-request",
+            const response = await axios.post("http://localhost:8080/api/public/reset-password-request",
                 {
                     email
                 },
@@ -43,7 +43,7 @@ function ResetPassword() {
         e.preventDefault();
         try {
             setError(""); // Reset error message
-            const response = await axios.post("http://localhost:8080/api/verify-reset-otp",
+            const response = await axios.post("http://localhost:8080/api/public/verify-reset-otp",
                 { email, otp },
                 {
                     headers: { "Content-Type": "application/json" },

@@ -1,6 +1,6 @@
 package com.mavent.dev.service.implement;
 
-import com.mavent.dev.DTO.event.TimelineItemDTO;
+import com.mavent.dev.dto.event.TimelineItemDTO;
 import com.mavent.dev.entity.TimelineItem;
 import com.mavent.dev.repository.TimelineItemRepository;
 import com.mavent.dev.service.TimelineItemService;
