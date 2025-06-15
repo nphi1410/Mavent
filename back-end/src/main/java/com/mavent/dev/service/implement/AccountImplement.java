@@ -1,6 +1,14 @@
 package com.mavent.dev.service.implement;
 
+import com.mavent.dev.entity.Event;
+import com.mavent.dev.entity.Department;
+import com.mavent.dev.dto.TaskCreateDTO;
 import com.mavent.dev.dto.superadmin.AccountDTO;
+import com.mavent.dev.entity.Task;
+import com.mavent.dev.entity.TaskAttendee;
+import com.mavent.dev.repository.TaskAttendeeRepository;
+import com.mavent.dev.repository.EventRepository;
+import com.mavent.dev.repository.DepartmentRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
@@ -18,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -124,7 +133,6 @@ public class AccountImplement implements AccountService {
         }
         return mapAccountToUserProfileDTO(account);
     }
-
 
     @Override
 
@@ -236,6 +244,94 @@ public class AccountImplement implements AccountService {
         return tasks;
     }
 
+    @Override
+    public TaskDTO getTaskDetails(Integer accountId, Integer taskId) {
+        List<TaskDTO> tasks = taskRepository.findTasksWithEventAndDepartment(accountId);
+        return tasks.stream()
+                .filter(task -> task.getTaskId().equals(taskId))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Autowired
+    public TaskAttendeeRepository taskAttendeeRepository;
+
+    @Autowired
+    public EventRepository eventRepository;
+
+    @Autowired
+    public DepartmentRepository departmentRepository;
+
+    @Override
+    public TaskDTO createTask(TaskCreateDTO taskCreateDTO, Account creator) {
+
+        if (taskCreateDTO.getTitle() == null || taskCreateDTO.getTitle().trim().isEmpty()) {
+            throw new IllegalArgumentException("Task title is required");
+        }
+        if (taskCreateDTO.getEventId() == null) {
+            throw new IllegalArgumentException("Event ID is required");
+        }
+        if (taskCreateDTO.getDueDate() != null && taskCreateDTO.getDueDate().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Due date cannot be in the past");
+        }
+
+        Task task = new Task();
+        task.setEventId(taskCreateDTO.getEventId());
+        task.setDepartmentId(taskCreateDTO.getDepartmentId());
+        task.setTitle(taskCreateDTO.getTitle());
+        task.setDescription(taskCreateDTO.getDescription());
+        task.setAssignedToAccountId(taskCreateDTO.getAssignedToAccountId());
+        task.setAssignedByAccountId(creator.getAccountId());
+        task.setDueDate(taskCreateDTO.getDueDate());
+        task.setStatus(Task.Status.TODO);
+        task.setPriority(taskCreateDTO.getPriority() != null ?
+                Task.Priority.valueOf(taskCreateDTO.getPriority()) : Task.Priority.MEDIUM);
+        task.setCreatedAt(LocalDateTime.now());
+        task.setUpdatedAt(LocalDateTime.now());
+
+        Task savedTask = taskRepository.save(task);
+
+        if (taskCreateDTO.getTaskAttendees() != null && !taskCreateDTO.getTaskAttendees().isEmpty()) {
+            for (Integer attendeeId : taskCreateDTO.getTaskAttendees()) {
+                TaskAttendee taskAttendee = new TaskAttendee();
+                taskAttendee.setTaskId(savedTask.getTaskId());
+                taskAttendee.setAccountId(attendeeId);
+                taskAttendee.setStatus(TaskAttendee.Status.INVITED);
+                taskAttendeeRepository.save(taskAttendee);
+            }
+        }
+
+        return convertToTaskDTO(savedTask);
+    }
+
+    private TaskDTO convertToTaskDTO(Task task) {
+        TaskDTO dto = new TaskDTO();
+        dto.setTaskId(task.getTaskId());
+        dto.setEventId(task.getEventId());
+        dto.setDepartmentId(task.getDepartmentId());
+        dto.setTitle(task.getTitle());
+        dto.setDescription(task.getDescription());
+        dto.setAssignedToAccountId(task.getAssignedToAccountId());
+        dto.setAssignedByAccountId(task.getAssignedByAccountId());
+        dto.setDueDate(task.getDueDate());
+        dto.setStatus(task.getStatus().toString());
+        dto.setPriority(task.getPriority().toString());
+        dto.setCreatedAt(task.getCreatedAt());
+        dto.setUpdatedAt(task.getUpdatedAt());
+        if (task.getEventId() != null) {
+            Event event = eventRepository.findByEventId(task.getEventId());
+            if (event != null) {
+                dto.setEventName(event.getName());
+            }
+        }
+        if (task.getDepartmentId() != null) {
+            Department department = departmentRepository.findByDepartmentId(task.getDepartmentId());
+            if (department != null) {
+                dto.setDepartmentName(department.getName());
+            }
+        }
+        return dto;
+    }
 
     @Override
     public void updateAvatar(String username, String imageUrl) {
