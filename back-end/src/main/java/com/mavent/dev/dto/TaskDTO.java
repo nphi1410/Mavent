@@ -23,6 +23,9 @@ public class TaskDTO {
     private String eventName;
     private String departmentName;
 
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
     public TaskDTO(Integer taskId, Integer eventId, Integer departmentId, String title,
                    String description, Integer assignedToAccountId, Integer assignedByAccountId,
                    LocalDateTime dueDate, com.mavent.dev.entity.Task.Status status,

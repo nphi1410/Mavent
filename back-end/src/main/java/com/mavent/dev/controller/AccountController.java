@@ -353,6 +353,72 @@ public class AccountController {
         return ResponseEntity.ok(tasks);
     }
 
+    @GetMapping("/user/tasks/{taskId}")
+    public ResponseEntity<TaskDTO> getTaskDetails(
+            @PathVariable Integer taskId,
+            HttpSession session) {
+        Account account = (Account) session.getAttribute("account");
+        if (account == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        try {
+            TaskDTO taskDetails = accountService.getTaskDetails(account.getAccountId(), taskId);
+            if (taskDetails == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(taskDetails);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    @PostMapping("/user/tasks")
+    public ResponseEntity<Object> createTask(
+            @RequestBody TaskCreateDTO taskCreateDTO,
+            HttpSession session) {
+        Account account = (Account) session.getAttribute("account");
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("You must be logged in to create tasks.");
+        }
+        System.out.println("Creating task for account: " + account.getUsername());
+        System.out.println("Task Create DTO: " + taskCreateDTO);
+        System.out.println("Event ID: " + taskCreateDTO.getEventId());
+        Optional<EventAccountRole> eventRoleOpt = eventAccountRoleRepository
+                .findByEventIdAndAccountId(taskCreateDTO.getEventId(), account.getAccountId());
+
+        if (eventRoleOpt.isPresent()) {
+            System.out.println("Event Role Optional: " + eventRoleOpt.get().getEventRole());
+        } else {
+            System.out.println("Event Role not found for eventId: " + taskCreateDTO.getEventId()
+                    + " and accountId: " + account.getAccountId());
+        }
+
+        boolean hasPermission = eventRoleOpt.isPresent() &&
+                Boolean.TRUE.equals(eventRoleOpt.get().getIsActive()) &&
+                switch (eventRoleOpt.get().getEventRole()) {
+                    case ADMIN, DEPARTMENT_MANAGER -> true;
+                    default -> false;
+                };
+
+        if (!hasPermission) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("You don't have permission to create tasks for this event.");
+        }
+
+        try {
+            TaskDTO createdTask = accountService.createTask(taskCreateDTO, account);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdTask);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error creating task: " + e.getMessage());
+        }
+    }
+
+
     @GetMapping("/user/events")
     public ResponseEntity<?> getUserEvents(HttpSession session) {
         Account account = (Account) session.getAttribute("account");
