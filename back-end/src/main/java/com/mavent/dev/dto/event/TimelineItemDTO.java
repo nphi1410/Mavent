@@ -1,4 +1,4 @@
-package com.mavent.dev.DTO.event;
+package com.mavent.dev.dto.event;
 
 import lombok.*;
 

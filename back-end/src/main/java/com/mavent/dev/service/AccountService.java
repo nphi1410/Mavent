@@ -5,10 +5,11 @@ import com.mavent.dev.dto.UserProfileDTO;
 import com.mavent.dev.entity.Account;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
 
-public interface AccountService {
+public interface AccountService extends UserDetailsService {
 
     Page<AccountDTO> getAllActiveAccounts(Pageable pageable);
 
