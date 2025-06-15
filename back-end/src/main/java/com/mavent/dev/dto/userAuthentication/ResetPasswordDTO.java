@@ -1,4 +1,4 @@
-package com.mavent.dev.dto;
+package com.mavent.dev.dto.userAuthentication;
 
 import lombok.Getter;
 import lombok.Setter;

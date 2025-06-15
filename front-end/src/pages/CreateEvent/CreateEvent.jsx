@@ -149,13 +149,12 @@ const CreateEvent = () => {
         setSuccessMessage("");
 
         const result = await createEvent(formData);
-        console.log("Tạo thành công", result); // <-- vẫn giữ log này để debug
 
         if (result.success) {
             setSuccessMessage("Tạo sự kiện thành công!");
 
             setTimeout(() => {
-                navigate(`/${result.eventId}/create-timeline`);
+                navigate(`/create-event/${result.eventId}/create-timeline`);
             }, 500);
         } else {
             setErrorMessage(result.message);
