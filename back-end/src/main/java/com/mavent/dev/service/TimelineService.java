@@ -1,7 +1,7 @@
 package com.mavent.dev.service;
 
-import com.mavent.dev.dto.event.TimelineItemDTO;
+import com.mavent.dev.dto.event.TimelineDTO;
 
-public interface TimelineItemService {
-    TimelineItemDTO createTimelineItem(Integer eventId, TimelineItemDTO dto);
+public interface TimelineService {
+    TimelineDTO createTimelineItem(Integer eventId, TimelineDTO dto);
 }

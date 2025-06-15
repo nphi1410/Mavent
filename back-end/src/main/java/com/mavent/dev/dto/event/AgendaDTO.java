@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AgendaItemDTO {
+public class AgendaDTO {
     private int eventId;
     private String agendaTitle;
     private String agendaDescription;

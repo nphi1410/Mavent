@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Data
 @Builder
-public class TimelineItem {
+public class Timeline {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
