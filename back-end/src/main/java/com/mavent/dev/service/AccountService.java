@@ -1,5 +1,7 @@
 package com.mavent.dev.service;
 
+import com.mavent.dev.dto.TaskCreateDTO;
+import com.mavent.dev.dto.TaskDTO;
 import com.mavent.dev.dto.superadmin.AccountDTO;
 import com.mavent.dev.dto.UserProfileDTO;
 import com.mavent.dev.entity.Account;
@@ -33,8 +35,11 @@ public interface AccountService extends UserDetailsService {
 
     void updateAvatar(String username, String imageUrl);
 
-    List<com.mavent.dev.dto.TaskDTO> getUserTasks(Integer accountId, String status, String priority,
-                                                  String keyword, String sortOrder, String eventName);
+    List<TaskDTO> getUserTasks(Integer accountId, String status, String priority,
+                               String keyword, String sortOrder, String eventName);
+    TaskDTO getTaskDetails(Integer accountId, Integer taskId);
+
+    TaskDTO createTask(TaskCreateDTO taskCreateDTO, Account creator) throws Exception;
 
     String getRandomPassword(int length);
 

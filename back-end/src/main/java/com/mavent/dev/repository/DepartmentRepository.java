@@ -14,7 +14,7 @@ public interface DepartmentRepository extends JpaRepository<Department, Integer>
      * @return list of departments for the event
      */
     List<Department> findByEventId(Integer eventId);
-
+    Department findByDepartmentId(Integer departmentId);
     /**
      * Find departments by name containing the search term (case-insensitive).
      * @param name the name to search for
