@@ -22,6 +22,8 @@ import ProfilePage from "./pages/ProfilePage";
 import UserEventsPage from "./pages/UserEventsPage";
 import UserDashboardPage from "./pages/UserDashboardPage";
 import UserTasksPage from "./pages/UserTasksPage";
+import CreateEvent from "./pages/CreateEvent/CreateEvent";
+import CreateTimeline from "./pages/CreateEvent/CreateTimeline";
 
 // Super Admin
 import SuperAdminDashboard from "./pages/superadmin/SuperAdminDashBoard";
@@ -50,6 +52,12 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="events" element={<AllEvents />} />
           <Route path="events/:id" element={<EventDetails />} />
+
+          {/* Event-Protected Routes */}
+          <Route path="create-event">
+            <Route index element={Protect(<CreateEvent />)} />
+            <Route path=":eventId/create-timeline" element={Protect(<CreateTimeline />)} />
+          </Route>
 
           {/* User-Protected Routes */}
           <Route path="profile">

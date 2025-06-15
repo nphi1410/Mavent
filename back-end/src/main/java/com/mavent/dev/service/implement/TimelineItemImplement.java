@@ -19,7 +19,7 @@ public class TimelineItemImplement implements TimelineItemService {
                 .timelineDatetime(dto.getTimelineDatetime())
                 .timelineTitle(dto.getTimelineTitle())
                 .timelineDescription(dto.getTimelineDescription())
-                .createdByAccountId(dto.getCreatedByAccountId())
+//                .createdByAccountId(dto.getCreatedByAccountId())
                 .build();
 
         TimelineItem savedTimelineItem = timelineItemRepository.save(timelineItem);
@@ -29,7 +29,7 @@ public class TimelineItemImplement implements TimelineItemService {
                 .timelineDatetime(dto.getTimelineDatetime())
                 .timelineTitle(dto.getTimelineTitle())
                 .timelineDescription(dto.getTimelineDescription())
-                .createdByAccountId(dto.getCreatedByAccountId())
+//                .createdByAccountId(dto.getCreatedByAccountId())
                 .build();
     }
 }

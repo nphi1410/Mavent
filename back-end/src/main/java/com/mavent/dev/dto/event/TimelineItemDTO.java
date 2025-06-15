@@ -13,5 +13,5 @@ public class TimelineItemDTO {
     private LocalDateTime timelineDatetime;
     private String timelineTitle;
     private String timelineDescription;
-    private int createdByAccountId;
+//    private int createdByAccountId;
 }
