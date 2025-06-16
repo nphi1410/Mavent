@@ -362,6 +362,24 @@ public class AccountImplement implements AccountService, UserDetailsService {
         return dto;
     }
 
+    public TaskDTO updateTaskStatus(Integer taskId, String newStatus) {
+        // Tìm task trong cơ sở dữ liệu
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new IllegalArgumentException("Task không tồn tại"));
+
+        // Cập nhật trạng thái
+        task.setStatus(Task.Status.valueOf(newStatus));
+
+        // Cập nhật thời gian sửa đổi
+        task.setUpdatedAt(LocalDateTime.now());
+
+        // Lưu vào cơ sở dữ liệu
+        Task updatedTask = taskRepository.save(task);
+
+        // Chuyển đổi và trả về DTO
+        return convertToTaskDTO(updatedTask);
+    }
+
     @Override
     public void updateAvatar(String username, String imageUrl) {
         Account account = accountRepository.findByUsername(username);

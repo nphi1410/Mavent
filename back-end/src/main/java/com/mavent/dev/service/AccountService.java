@@ -41,6 +41,8 @@ public interface AccountService extends UserDetailsService {
 
     TaskDTO createTask(TaskCreateDTO taskCreateDTO, Account creator) throws Exception;
 
+    TaskDTO updateTaskStatus(Integer taskId, String newStatus);
+
     String getRandomPassword(int length);
 
     List<AccountDTO> getAllAccounts();

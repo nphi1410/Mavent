@@ -52,7 +52,7 @@ public class Task {
     private LocalDateTime updatedAt;
 
     public enum Status {
-        TODO, DOING, DONE, FEEDBACK_NEEDED, REJECTED, CANCELLED
+        TODO, DOING, DONE, REVIEW, REJECTED, CANCELLED
     }
 
     public enum Priority {
