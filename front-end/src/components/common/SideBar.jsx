@@ -2,6 +2,8 @@ import { Transition, TransitionChild } from "@headlessui/react";
 import { Fragment, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
+import { logout } from "../../services/AuthService";
+import LogoutButton from "./LogoutButton";
 
 const SideBar = ({ isOpen, setIsOpen }) => {
   const navigate = useNavigate();
@@ -14,6 +16,7 @@ const SideBar = ({ isOpen, setIsOpen }) => {
     { name: "Dashboard", icon: "fa-solid fa-chart-line", path: "/profile/dashboard" },
     { name: "Attended Events", icon: "fa-solid fa-calendar-check", path: "/profile/attended" },
     { name: "tasks", icon: "fa-solid fa-list-check", path: "/profile/tasks" },
+    { name: "Create New Event", icon: "fa-solid fa-list-check", path: "/create-event" }
   ];
 
   // Close sidebar on outside click
@@ -72,16 +75,17 @@ const SideBar = ({ isOpen, setIsOpen }) => {
               </div>
             ))}
 
-            <div
+            {/* <div
               onClick={() => {
-                navigate("/logout");
+                logout();
                 setIsOpen(false);
               }}
               className="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-gray-300 transition"
             >
               <FontAwesomeIcon icon="fa-solid fa-right-from-bracket" />
               Logout
-            </div>
+            </div> */}
+            <LogoutButton setIsOpen={setIsOpen} />
           </div>
         </TransitionChild>
       </div>

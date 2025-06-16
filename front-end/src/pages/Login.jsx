@@ -1,3 +1,5 @@
+import { jwtDecode } from 'jwt-decode'; // ✅ Correct for named exports
+
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import { login } from '../services/AuthService';
@@ -9,13 +11,13 @@ function Login() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleLoginFormSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
       const response = await axios.post(
-        "http://localhost:8080/api/login",
+        "http://localhost:8080/api/public/login",
         {
           username,
           password
@@ -28,14 +30,28 @@ function Login() {
         }
       );
 
-      if (response.status === 200) {
-        // Lưu minimal info vào sessionStorage
-        sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('username', username);
+      if (response.status === 200 && response.data.token) {
+        const token = response.data.token;
+        const decoded = jwtDecode(token);
+        const roles = decoded.roles || [];
+        // console.log("Decoded JWT:", decoded);
+        // console.log("User roles:", roles);
 
-        // Sử dụng navigate thay vì window.location để chuyển trang mượt hơn
-        console.log("Login successful:", response.data);
-        navigate(`${response.data}`);
+        // Store token and basic info
+        sessionStorage.setItem("token", token);
+        sessionStorage.setItem("isLoggedIn", "true");
+        sessionStorage.setItem("username", decoded.sub);
+
+        // Redirect based on role
+        if (roles.includes("ROLE_SUPER_ADMIN")) {
+          console.log("Super Admin logged in");
+          navigate("/superadmin");
+        } else if (roles.includes("ROLE_USER")) {
+          console.log("User logged in");
+          navigate("/profile");
+        } else {
+          navigate("/home");
+        }
       }
     } catch (error) {
       console.error("Login failed:", error);
@@ -59,7 +75,7 @@ function Login() {
         <div className="w-1/2 flex flex-col items-center justify-center p-8 space-y-5">
           <h1 className="text-5xl font-semibold text-center pb-4 text-blue-900">WELCOME TO MAVENT</h1>
 
-          <form onSubmit={handleSubmit} className="flex flex-col items-center space-y-4 w-full">
+          <form onSubmit={handleLoginFormSubmit} className="flex flex-col items-center space-y-4 w-full">
             <input
               type="text"
               name="username"

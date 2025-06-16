@@ -39,7 +39,7 @@ const handleAuthError = (error) => {
 //     handleAuthError(error);
 //   }
 // };
-export const getUserProfile = async ({ requireAuth = true } = {}) => {
+export const getUserProfile = async ({ requireAuth = false } = {}) => {
   try {
     // console.log("Fetching user profile...");
     const response = await Api.get("/user/profile");

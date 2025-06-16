@@ -1,6 +1,6 @@
 package com.mavent.dev.service.implement;
 
-import com.mavent.dev.DTO.event.TimelineItemDTO;
+import com.mavent.dev.dto.event.TimelineItemDTO;
 import com.mavent.dev.entity.TimelineItem;
 import com.mavent.dev.repository.TimelineItemRepository;
 import com.mavent.dev.service.TimelineItemService;
@@ -19,7 +19,7 @@ public class TimelineItemImplement implements TimelineItemService {
                 .timelineDatetime(dto.getTimelineDatetime())
                 .timelineTitle(dto.getTimelineTitle())
                 .timelineDescription(dto.getTimelineDescription())
-                .createdByAccountId(dto.getCreatedByAccountId())
+//                .createdByAccountId(dto.getCreatedByAccountId())
                 .build();
 
         TimelineItem savedTimelineItem = timelineItemRepository.save(timelineItem);
@@ -29,7 +29,7 @@ public class TimelineItemImplement implements TimelineItemService {
                 .timelineDatetime(dto.getTimelineDatetime())
                 .timelineTitle(dto.getTimelineTitle())
                 .timelineDescription(dto.getTimelineDescription())
-                .createdByAccountId(dto.getCreatedByAccountId())
+//                .createdByAccountId(dto.getCreatedByAccountId())
                 .build();
     }
 }

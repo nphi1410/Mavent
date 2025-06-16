@@ -1,6 +1,6 @@
 package com.mavent.dev.controller;
 
-import com.mavent.dev.DTO.event.TimelineItemDTO;
+import com.mavent.dev.dto.event.TimelineItemDTO;
 import com.mavent.dev.service.TimelineItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

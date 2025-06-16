@@ -1,4 +1,4 @@
-package com.mavent.dev.DTO.event;
+package com.mavent.dev.dto.event;
 
 import lombok.*;
 
@@ -13,5 +13,5 @@ public class TimelineItemDTO {
     private LocalDateTime timelineDatetime;
     private String timelineTitle;
     private String timelineDescription;
-    private int createdByAccountId;
+//    private int createdByAccountId;
 }

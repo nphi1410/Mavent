@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 // Đảm bảo eventService.js của bạn đã được cập nhật để xử lý lỗi như đề xuất trước đó
-import { createEvent } from "../services/eventService";
+import { createEvent } from "../../services/eventService";
+import { useNavigate } from "react-router-dom";
 
 const CreateEvent = () => {
     const [formData, setFormData] = useState({
@@ -16,6 +17,8 @@ const CreateEvent = () => {
         bannerUrl: "",
         posterUrl: "",
     });
+
+    const navigate = useNavigate();
 
     const [loading, setLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
@@ -141,69 +144,66 @@ const CreateEvent = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        // 1. Validate dữ liệu
-        if (!validateForm()) {
-            return; // Dừng lại nếu validation thất bại
-        }
-
         setLoading(true);
-        setSuccessMessage("");
         setErrorMessage("");
+        setSuccessMessage("");
 
-        const payload = {
-            ...formData,
-            // Chuyển đổi ngày giờ sang định dạng ISO string cho BE
-            startDatetime: formData.startDatetime ? new Date(formData.startDatetime).toISOString() : null,
-            endDatetime: formData.endDatetime ? new Date(formData.endDatetime).toISOString() : null,
-        };
+        const result = await createEvent(formData);
 
-        try {
-            const result = await createEvent(payload); // Giả sử createEvent trả về { success: true, data: response.data }
+        if (result.success) {
+            setSuccessMessage("Tạo sự kiện thành công!");
 
-            // THAY ĐỔI DÒNG NÀY:
-            if (result.success && result.data && result.data.eventId) { // Kiểm tra createdEvent.eventId
-                setSuccessMessage("🎉 Tạo sự kiện thành công!");
-                // Tùy chọn: reset form sau khi tạo thành công
-                setFormData({
-                    name: "",
-                    description: "",
-                    startDatetime: "",
-                    endDatetime: "",
-                    location: "",
-                    ddayInfo: "",
-                    maxMemberNumber: 0,
-                    maxParticipantNumber: 0,
-                    status: "UPCOMING",
-                    bannerUrl: "",
-                    posterUrl: "",
-                });
-            } else {
-                // Sử dụng thông báo lỗi từ result.message nếu có, hoặc thông báo chung
-                setErrorMessage(result.message || "Tạo sự kiện thất bại. Vui lòng thử lại.");
-            }
-        } catch (error) {
-            console.error("Lỗi khi tạo sự kiện:", error);
-            setErrorMessage(error.message || "Có lỗi xảy ra. Vui lòng thử lại sau.");
-        } finally {
-            setLoading(false);
+            setTimeout(() => {
+                navigate(`/create-event/${result.eventId}/create-timeline`);
+            }, 500);
+        } else {
+            setErrorMessage(result.message);
         }
+
+        setLoading(false);
     };
 
-    return (
-        <div className="max-w-4xl mx-auto py-10 px-4">
-            <h1 className="text-3xl font-bold mb-6">Tạo sự kiện mới</h1>
 
-            <form onSubmit={handleSubmit} className="space-y-8">
-                <div className="bg-white shadow-md rounded-xl p-6 space-y-6">
+
+
+    return (
+        <div className="min-h-screen bg-green-50 px-4 py-8">
+            <div className="max-w-4xl mx-auto text-center">
+                <h1 className="text-3xl font-bold">Create New Event</h1>
+                <p className="mt-2 text-gray-600">Fill in the details to get started</p>
+
+                {/* Stepper */}
+                <div className="mt-6 flex justify-center items-center gap-6">
+                    <div className="flex items-center gap-2 text-green-600 font-medium">
+                        <div className="w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center">1</div>
+                        Event Details
+                    </div>
+                    <div className="h-px w-8 bg-gray-400"></div>
+                    <div className="flex items-center gap-2 text-gray-400 font-medium">
+                        <div className="w-6 h-6 rounded-full border-2 border-gray-400 flex items-center justify-center">2</div>
+                        Timeline
+                    </div>
+                    <div className="h-px w-8 bg-gray-400"></div>
+                    <div className="flex items-center gap-2 text-gray-400 font-medium">
+                        <div className="w-6 h-6 rounded-full border-2 border-gray-400 flex items-center justify-center">3</div>
+                        Agenda
+                    </div>
+                </div>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="max-w-4xl mx-auto mt-10 space-y-8">
+                <div className="bg-white shadow rounded-xl p-6 space-y-6">
                     {/* Event Name */}
                     <div>
-                        <label htmlFor="name" className="block mb-2 font-medium">Tên sự kiện <span className="text-red-500">*</span></label>
+                        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                            Tên sự kiện <span className="text-red-500">*</span>
+                        </label>
                         <input
                             type="text"
                             id="name"
                             name="name"
-                            className="w-full p-2 border rounded"
+                            className="w-full border border-gray-300 rounded-lg p-2"
                             value={formData.name}
                             onChange={handleChange}
                             required
@@ -212,37 +212,43 @@ const CreateEvent = () => {
 
                     {/* Description */}
                     <div>
-                        <label htmlFor="description" className="block mb-2 font-medium">Mô tả <span className="text-red-500">*</span></label>
+                        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                            Mô tả <span className="text-red-500">*</span>
+                        </label>
                         <textarea
                             id="description"
                             name="description"
                             rows={4}
-                            className="w-full p-2 border rounded"
+                            className="w-full border border-gray-300 rounded-lg p-2"
                             value={formData.description}
                             onChange={handleChange}
                             required
                         />
                     </div>
 
-                    {/* Start & End Datetime */}
+                    {/* Start & End Date */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label htmlFor="startDatetime" className="block mb-2 font-medium">Thời gian bắt đầu <span className="text-red-500">*</span></label>
+                            <label htmlFor="startDatetime" className="block text-sm font-medium text-gray-700 mb-1">
+                                Thời gian bắt đầu <span className="text-red-500">*</span>
+                            </label>
                             <input
                                 type="datetime-local"
                                 id="startDatetime"
-                                className="w-full p-2 border rounded"
+                                className="w-full border border-gray-300 rounded-lg p-2"
                                 value={formData.startDatetime}
                                 onChange={(e) => handleDateChange("startDatetime", e.target.value)}
                                 required
                             />
                         </div>
                         <div>
-                            <label htmlFor="endDatetime" className="block mb-2 font-medium">Thời gian kết thúc <span className="text-red-500">*</span></label>
+                            <label htmlFor="endDatetime" className="block text-sm font-medium text-gray-700 mb-1">
+                                Thời gian kết thúc <span className="text-red-500">*</span>
+                            </label>
                             <input
                                 type="datetime-local"
                                 id="endDatetime"
-                                className="w-full p-2 border rounded"
+                                className="w-full border border-gray-300 rounded-lg p-2"
                                 value={formData.endDatetime}
                                 onChange={(e) => handleDateChange("endDatetime", e.target.value)}
                                 required
@@ -252,12 +258,14 @@ const CreateEvent = () => {
 
                     {/* Location */}
                     <div>
-                        <label htmlFor="location" className="block mb-2 font-medium">Địa điểm <span className="text-red-500">*</span></label>
+                        <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
+                            Địa điểm <span className="text-red-500">*</span>
+                        </label>
                         <input
                             type="text"
                             id="location"
                             name="location"
-                            className="w-full p-2 border rounded"
+                            className="w-full border border-gray-300 rounded-lg p-2"
                             value={formData.location}
                             onChange={handleChange}
                             required
@@ -266,12 +274,14 @@ const CreateEvent = () => {
 
                     {/* D-Day Info */}
                     <div>
-                        <label htmlFor="ddayInfo" className="block mb-2 font-medium">Thông tin D-Day</label>
+                        <label htmlFor="ddayInfo" className="block text-sm font-medium text-gray-700 mb-1">
+                            Thông tin D-Day
+                        </label>
                         <input
                             type="text"
                             id="ddayInfo"
                             name="ddayInfo"
-                            className="w-full p-2 border rounded"
+                            className="w-full border border-gray-300 rounded-lg p-2"
                             value={formData.ddayInfo}
                             onChange={handleChange}
                         />
@@ -280,25 +290,29 @@ const CreateEvent = () => {
                     {/* Max Members & Participants */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label htmlFor="maxMemberNumber" className="block mb-2 font-medium">Số thành viên tối đa</label>
+                            <label htmlFor="maxMemberNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                                Số thành viên tối đa
+                            </label>
                             <input
                                 type="number"
                                 id="maxMemberNumber"
                                 name="maxMemberNumber"
                                 min="0"
-                                className="w-full p-2 border rounded"
+                                className="w-full border border-gray-300 rounded-lg p-2"
                                 value={formData.maxMemberNumber}
                                 onChange={handleNumberChange}
                             />
                         </div>
                         <div>
-                            <label htmlFor="maxParticipantNumber" className="block mb-2 font-medium">Số người tham gia tối đa</label>
+                            <label htmlFor="maxParticipantNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                                Số người tham gia tối đa
+                            </label>
                             <input
                                 type="number"
                                 id="maxParticipantNumber"
                                 name="maxParticipantNumber"
                                 min="0"
-                                className="w-full p-2 border rounded"
+                                className="w-full border border-gray-300 rounded-lg p-2"
                                 value={formData.maxParticipantNumber}
                                 onChange={handleNumberChange}
                             />
@@ -307,11 +321,13 @@ const CreateEvent = () => {
 
                     {/* Status */}
                     <div>
-                        <label htmlFor="status" className="block mb-2 font-medium">Trạng thái</label>
+                        <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
+                            Trạng thái
+                        </label>
                         <select
                             id="status"
                             name="status"
-                            className="w-full p-2 border rounded"
+                            className="w-full border border-gray-300 rounded-lg p-2"
                             value={formData.status}
                             onChange={handleChange}
                         >
@@ -325,27 +341,32 @@ const CreateEvent = () => {
                         </select>
                     </div>
 
-                    {/* Banner & Poster */}
+                    {/* Banner */}
                     <div>
-                        <label htmlFor="bannerUrl" className="block mb-2 font-medium">Banner URL</label>
+                        <label htmlFor="bannerUrl" className="block text-sm font-medium text-gray-700 mb-1">
+                            Banner URL
+                        </label>
                         <input
                             type="text"
                             id="bannerUrl"
                             name="bannerUrl"
-                            className="w-full p-2 border rounded"
+                            className="w-full border border-gray-300 rounded-lg p-2"
                             value={formData.bannerUrl}
                             onChange={handleChange}
                             placeholder="e.g., https://example.com/banner.jpg"
                         />
                     </div>
 
+                    {/* Poster */}
                     <div>
-                        <label htmlFor="posterUrl" className="block mb-2 font-medium">Poster URL</label>
+                        <label htmlFor="posterUrl" className="block text-sm font-medium text-gray-700 mb-1">
+                            Poster URL
+                        </label>
                         <input
                             type="text"
                             id="posterUrl"
                             name="posterUrl"
-                            className="w-full p-2 border rounded"
+                            className="w-full border border-gray-300 rounded-lg p-2"
                             value={formData.posterUrl}
                             onChange={handleChange}
                             placeholder="e.g., https://example.com/poster.png"
@@ -353,25 +374,26 @@ const CreateEvent = () => {
                     </div>
                 </div>
 
+                {/* Error/Success Message */}
                 {errorMessage && (
                     <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-md">
                         {errorMessage}
                     </div>
                 )}
-
                 {successMessage && (
                     <div className="mt-4 p-3 bg-green-100 text-green-700 rounded-md">
                         {successMessage}
                     </div>
                 )}
 
-                <div className="flex justify-end">
+                {/* Submit Button */}
+                <div className="text-center mt-8">
                     <button
                         type="submit"
-                        className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="cursor-pointer bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={loading}
                     >
-                        {loading ? "Đang tạo..." : "Xác nhận tạo sự kiện"}
+                        {loading ? "Đang tạo..." : "Create Event & Next to Timeline"}
                     </button>
                 </div>
             </form>

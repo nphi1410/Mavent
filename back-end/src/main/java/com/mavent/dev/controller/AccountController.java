@@ -4,14 +4,19 @@ import com.mavent.dev.dto.*;
 import com.mavent.dev.dto.superadmin.AccountDTO;
 import com.mavent.dev.dto.superadmin.EventDTO;
 import com.mavent.dev.config.MailConfig;
+import com.mavent.dev.dto.userAuthentication.*;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.EventAccountRole;
 import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.repository.EventAccountRoleRepository;
 import com.mavent.dev.service.AccountService;
 import com.mavent.dev.service.EventService;
+import com.mavent.dev.service.JwtBlacklistService;
+import com.mavent.dev.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.mavent.dev.config.CloudConfig;
 
+import javax.naming.AuthenticationException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +43,12 @@ public class AccountController {
     AccountRepository accountRepository;
 
     @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
     private EventAccountRoleRepository eventAccountRoleRepository;
 
     @Autowired
@@ -44,6 +56,9 @@ public class AccountController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtBlacklistService jwtBlacklistService;
 
     @GetMapping("/accounts")
     public ResponseEntity<List<AccountDTO>> getAllAccounts() {
@@ -62,57 +77,32 @@ public class AccountController {
         }
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginDTO loginDTO, HttpServletRequest request) {
-        System.out.println("Login attempt with username/email: " + loginDTO.getUsername());
-        System.out.println("Password: " + loginDTO.getPassword());
-        HttpSession session = request.getSession();
-        boolean success = accountService.checkLogin(loginDTO.getUsername(), loginDTO.getPassword());
-        if (success) {
-//            System.out.println("Login successful for username/email: " + loginDTO.getUsername());
-            try {
-                Account acc = null;
-                if (accountService.getAccount(loginDTO.getUsername()) == null) {
-                    acc = accountService.getAccountByEmail(loginDTO.getUsername());
-                } else {
-                    acc = accountService.getAccount(loginDTO.getUsername());
-                }
+    @PostMapping("/public/login")
+    public ResponseEntity<?> authenticate(@RequestBody AuthRequestDTO authRequestDTO, HttpServletRequest request) throws AuthenticationException {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(authRequestDTO.getUsername(), authRequestDTO.getPassword())
+        );
 
-//                if (acc == null) {
-//                    System.out.println("Account not found by username, trying to find by email: " + loginDTO.getUsername());
-//                    acc = accountByEmail;
-//                }
-//            if (acc == null) {
-//                System.out.println("Invalid login attempt for username/email: " + loginDTO.getUsername());
-//                return ResponseEntity.status(401).body("Invalid username or password");
-//            } else {
-//                System.out.println("Account found by email: " + acc.getEmail());
-//            }
-                session.setAttribute("email", acc.getEmail());
-//            if (accByEmail != null) System.out.println("Account found by email: " + (accByEmail != null ? accByEmail.getUsername() : "null"));
-                session.setAttribute("username", acc.getUsername());
-                session.setAttribute("account", acc);
-                session.setAttribute("isSuperAdmin", acc.getSystemRole() == Account.SystemRole.SUPER_ADMIN);
-
-                String username = (String) session.getAttribute("username");
-                System.out.println("Username from session: " + username);
-                System.out.println("Session ID: " + session.getId());
-                System.out.println("encoded password: " + acc.getPasswordHash());
-
-                boolean isSuperAdmin = acc.getSystemRole() == Account.SystemRole.SUPER_ADMIN;
-                String redirectUrl = isSuperAdmin ? "/superadmin" : "/profile";
-                System.out.println("Redirect URL: " + redirectUrl);
-                return ResponseEntity.ok(redirectUrl);
-            } catch (Exception e) {
-                System.out.println("Error during login: " + e.getMessage());
-                return ResponseEntity.status(500).body("Internal server error");
-            }
-        } else {
-            return ResponseEntity.status(401).body("Invalid username or password");
-        }
+        Account account = accountService.getAccount(authRequestDTO.getUsername());
+        String jwt = jwtUtil.generateToken(account);
+        return ResponseEntity.ok(new AuthResponseDTO(jwt));
     }
 
-    @PostMapping("/send-register-otp")
+    @PostMapping("/public/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            jwtBlacklistService.blacklistToken(token);
+            System.out.println("Token blacklisted: " + token);
+            return ResponseEntity.ok("Successfully logged out");
+        }
+
+        return ResponseEntity.badRequest().body("No token provided");
+    }
+
+    @PostMapping("/public/send-register-otp")
     public ResponseEntity<?> sendOtp(@RequestBody RegisterDTO request, HttpSession session) {
         if (accountService.getAccount(request.getUsername()) != null) {
             return ResponseEntity.badRequest().body("Username already exists!");
@@ -137,7 +127,7 @@ public class AccountController {
         return ResponseEntity.ok("OTP was sent to email " + request.getEmail());
     }
 
-    @PostMapping("/register")
+    @PostMapping("/public/register")
     public ResponseEntity<?> registerWithOtp(@RequestBody OtpDTO request, HttpSession session) {
         String otpSession = (String) session.getAttribute("register_otp");
         String username = (String) session.getAttribute("register_username");
@@ -163,7 +153,7 @@ public class AccountController {
         return ResponseEntity.ok("Registration successful! You can now log in with your new account.");
     }
 
-    @PostMapping("/reset-password-request")
+    @PostMapping("/public/reset-password-request")
     public ResponseEntity<?> resetPasswordRequest(@RequestBody ResetPasswordDTO request, HttpSession session) {
         Account account = accountRepository.findByEmail(request.getEmail());
         if (account == null) {
@@ -180,7 +170,7 @@ public class AccountController {
         return ResponseEntity.ok("OTP was sent to email " + request.getEmail());
     }
 
-    @PostMapping("/verify-reset-otp")
+    @PostMapping("/public/verify-reset-otp")
     public ResponseEntity<?> verifyResetOtp(@RequestBody OtpDTO request, HttpSession session) {
         String otpSession = (String) session.getAttribute("reset_otp");
         String email = (String) session.getAttribute("reset_email");
@@ -246,12 +236,34 @@ public class AccountController {
 
     @GetMapping("/user/profile")
     public ResponseEntity<UserProfileDTO> getUserProfile(HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        String username = (String) session.getAttribute("username");
-        System.out.println("Username from session: " + username);
-        System.out.println("Session ID: " + session.getId());
-        if (username == null) {
-            return ResponseEntity.status(401).build();
+//        HttpSession session = request.getSession();
+//        String username = (String) session.getAttribute("username");
+//        System.out.println("Username from session: " + username);
+//        System.out.println("Session ID: " + session.getId());
+//        if (username == null) {
+//            return ResponseEntity.status(401).build();
+//        }
+//        UserProfileDTO profile = accountService.getUserProfile(username);
+//        return ResponseEntity.ok(profile);
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String token = authHeader.substring(7); // Strip "Bearer "
+        String username;
+
+        try {
+            username = jwtUtil.extractUsername(token);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Account account = accountService.getAccount(username); // your custom method
+
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         UserProfileDTO profile = accountService.getUserProfile(username);
         return ResponseEntity.ok(profile);
@@ -340,6 +352,72 @@ public class AccountController {
                 evName);
         return ResponseEntity.ok(tasks);
     }
+
+    @GetMapping("/user/tasks/{taskId}")
+    public ResponseEntity<TaskDTO> getTaskDetails(
+            @PathVariable Integer taskId,
+            HttpSession session) {
+        Account account = (Account) session.getAttribute("account");
+        if (account == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        try {
+            TaskDTO taskDetails = accountService.getTaskDetails(account.getAccountId(), taskId);
+            if (taskDetails == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(taskDetails);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    @PostMapping("/user/tasks")
+    public ResponseEntity<Object> createTask(
+            @RequestBody TaskCreateDTO taskCreateDTO,
+            HttpSession session) {
+        Account account = (Account) session.getAttribute("account");
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("You must be logged in to create tasks.");
+        }
+        System.out.println("Creating task for account: " + account.getUsername());
+        System.out.println("Task Create DTO: " + taskCreateDTO);
+        System.out.println("Event ID: " + taskCreateDTO.getEventId());
+        Optional<EventAccountRole> eventRoleOpt = eventAccountRoleRepository
+                .findByEventIdAndAccountId(taskCreateDTO.getEventId(), account.getAccountId());
+
+        if (eventRoleOpt.isPresent()) {
+            System.out.println("Event Role Optional: " + eventRoleOpt.get().getEventRole());
+        } else {
+            System.out.println("Event Role not found for eventId: " + taskCreateDTO.getEventId()
+                    + " and accountId: " + account.getAccountId());
+        }
+
+        boolean hasPermission = eventRoleOpt.isPresent() &&
+                Boolean.TRUE.equals(eventRoleOpt.get().getIsActive()) &&
+                switch (eventRoleOpt.get().getEventRole()) {
+                    case ADMIN, DEPARTMENT_MANAGER -> true;
+                    default -> false;
+                };
+
+        if (!hasPermission) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("You don't have permission to create tasks for this event.");
+        }
+
+        try {
+            TaskDTO createdTask = accountService.createTask(taskCreateDTO, account);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdTask);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error creating task: " + e.getMessage());
+        }
+    }
+
 
     @GetMapping("/user/events")
     public ResponseEntity<?> getUserEvents(HttpSession session) {
