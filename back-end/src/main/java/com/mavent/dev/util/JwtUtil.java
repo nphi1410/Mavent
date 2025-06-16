@@ -1,5 +1,6 @@
 package com.mavent.dev.util;
 
+import com.mavent.dev.config.JwtProperties;
 import com.mavent.dev.entity.Account;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -14,10 +15,15 @@ import java.util.*;
 public class JwtUtil {
 
     // 🔐 Must be at least 256 bits (32 bytes) for HS256
-    private static final String SECRET_KEY = "th1s!sma5eNt$ecre7KeytH@T!$Sup3rs3curedAnd$ecr3t";
+//    private static final String SECRET_KEY = "th1s!sma5eNt$ecre7KeytH@T!$Sup3rs3curedAnd$ecr3t";
+    private final JwtProperties jwtProperties;
+
+    public JwtUtil(JwtProperties jwtProperties) {
+        this.jwtProperties = jwtProperties;
+    }
 
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+        return Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8));
     }
 
     public String generateToken(Account account) {
@@ -28,7 +34,7 @@ public class JwtUtil {
                 .claims(claims) // <- use builder-style claim setting
                 .subject(account.getUsername())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30)) // 30 min
+                .expiration(new Date(System.currentTimeMillis() + jwtProperties.getExpiration()))
                 .signWith(getSigningKey(), Jwts.SIG.HS256)
                 .compact();
     }
