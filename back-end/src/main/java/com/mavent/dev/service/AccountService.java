@@ -43,6 +43,8 @@ public interface AccountService extends UserDetailsService {
 
     TaskDTO updateTaskStatus(Integer taskId, String newStatus);
 
+    boolean hasCreateTaskPermission(Integer eventId, Integer accountId);
+
     String getRandomPassword(int length);
 
     List<AccountDTO> getAllAccounts();
