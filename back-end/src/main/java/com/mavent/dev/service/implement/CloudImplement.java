@@ -45,7 +45,7 @@ public class CloudImplement implements CloudService {
         String extension = originalFilename != null
                 ? originalFilename.substring(originalFilename.lastIndexOf("."))
                 : ".dat";
-        String blobName = UUID.randomUUID().toString() + extension;
+        String blobName = UUID.randomUUID() + extension;
 
         // Get container client
         BlobContainerClient containerClient = getContainerClient(containerName);

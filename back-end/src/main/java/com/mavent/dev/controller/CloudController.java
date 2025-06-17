@@ -38,19 +38,19 @@ public class CloudController {
         }
     }
 
-    @GetMapping("/{container}/{blobName}")
-    public ResponseEntity<?> downloadFile(@PathVariable String container,
-                                          @PathVariable String blobName) {
-        try {
-            byte[] data = cloudService.downloadFile(blobName, container);
-            return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .body(data);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Error downloading file: " + e.getMessage());
-        }
-    }
+//    @GetMapping("/{container}/{blobName}")
+//    public ResponseEntity<?> downloadFile(@PathVariable String container,
+//                                          @PathVariable String blobName) {
+//        try {
+//            byte[] data = cloudService.downloadFile(blobName, container);
+//            return ResponseEntity.ok()
+//                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+//                    .body(data);
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+//                    .body("Error downloading file: " + e.getMessage());
+//        }
+//    }
 
     @GetMapping("/url/{container}/{blobName}")
     public ResponseEntity<?> getImageUrl(@PathVariable String container,
