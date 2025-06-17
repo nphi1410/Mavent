@@ -26,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.mavent.dev.config.CloudConfig;
+import com.mavent.dev.service.globalservice.CloudService;
 
 import javax.naming.AuthenticationException;
 import java.io.IOException;
@@ -61,6 +62,9 @@ public class AccountController {
 
     @Autowired
     private JwtBlacklistService jwtBlacklistService;
+
+    @Autowired
+    private CloudService cloudService;
 
     @GetMapping("/accounts")
     public ResponseEntity<List<AccountDTO>> getAllAccounts() {
@@ -320,19 +324,33 @@ public class AccountController {
         }
 
         try {
-            CloudConfig cloudConfig = new CloudConfig();
-            String folder = "avatars";
-            String fileName = file.getOriginalFilename();
-            String keyName = folder + "/" + fileName;
+            String containerName = "maventcontainer";
 
-            cloudConfig.uploadMultipartFile(file, folder);
 
+            // Get the account to retrieve existing avatar URL if any
             Account account = accountService.getAccount(username);
-            account.setAvatarUrl(keyName);
+            String oldAvatarUrl = account.getAvatarUrl();
+
+            // Upload the new avatar to Azure Blob Storage
+            String fileUrl = cloudService.uploadFile(file, containerName);
+
+            // Extract blob name from the URL for future reference
+            String blobName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
+            String avatarPath = cloudService.getFileUrl(blobName, containerName);
+
+            // Save the new avatar URL to the account
+            account.setAvatarUrl(avatarPath);
             accountService.save(account);
 
+            // Delete old avatar if it exists
+            if (oldAvatarUrl != null && !oldAvatarUrl.isEmpty()) {
+                // Extract old blob name from the path
+                String oldBlobName = oldAvatarUrl.substring(oldAvatarUrl.lastIndexOf("/") + 1);
+                cloudService.deleteFile(oldBlobName, containerName);
+            }
+
             return ResponseEntity.ok().body(Map.of(
-                    "avatarUrl", keyName,
+                    "avatarUrl", avatarPath,
                     "message", "Avatar updated successfully"
             ));
         } catch (IOException e) {
