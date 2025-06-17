@@ -432,9 +432,6 @@ public class AccountController {
         }
     }
 
-    @Autowired
-    public TaskRepository taskRepository;
-
     @PatchMapping("/user/tasks/{taskId}/status")
     public ResponseEntity<?> updateTaskStatus(
             @PathVariable Integer taskId,
@@ -462,7 +459,7 @@ public class AccountController {
         }
 
         try {
-            // Lấy thông tin task hiện tại
+            // Lấy thông tin task hiện tại qua AccountService
             TaskDTO currentTask = accountService.getTaskDetails(account.getAccountId(), taskId);
             if (currentTask == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -490,20 +487,15 @@ public class AccountController {
                         .body("Không thể chuyển trạng thái từ " + currentStatus + " sang " + newStatus);
             }
 
-            // Nếu cần quyền người giao task, kiểm tra xem người dùng hiện tại có phải là người giao task không
+            // Nếu cần quyền người giao task, kiểm tra thông qua AccountService (bằng DTO)
             if (needsCreatorPermission) {
-                // Lấy thông tin task từ cơ sở dữ liệu
-                Task task = taskRepository.findById(taskId)
-                        .orElseThrow(() -> new IllegalArgumentException("Task không tồn tại"));
-
-                // Kiểm tra xem người đang thực hiện có phải là người giao task không
-                if (!account.getAccountId().equals(task.getAssignedByAccountId())) {
+                if (!account.getAccountId().equals(currentTask.getAssignedByAccountId())) {
                     return ResponseEntity.status(HttpStatus.FORBIDDEN)
                             .body("Chỉ người giao task mới có thể chuyển trạng thái task này sang DONE");
                 }
             }
 
-            // Thực hiện cập nhật trạng thái
+            // Thực hiện cập nhật trạng thái qua AccountService
             TaskDTO updatedTask = accountService.updateTaskStatus(taskId, newStatus);
             return ResponseEntity.ok(updatedTask);
         } catch (Exception e) {
@@ -538,26 +530,7 @@ public class AccountController {
                     .body("You must be logged in to create tasks.");
         }
 
-        System.out.println("Creating task for account: " + account.getUsername());
-        System.out.println("Task Create DTO: " + taskCreateDTO);
-        System.out.println("Event ID: " + taskCreateDTO.getEventId());
-
-        Optional<EventAccountRole> eventRoleOpt = eventAccountRoleRepository
-                .findByEventIdAndAccountId(taskCreateDTO.getEventId(), account.getAccountId());
-
-        if (eventRoleOpt.isPresent()) {
-            System.out.println("Event Role Optional: " + eventRoleOpt.get().getEventRole());
-        } else {
-            System.out.println("Event Role not found for eventId: " + taskCreateDTO.getEventId()
-                    + " and accountId: " + account.getAccountId());
-        }
-
-        boolean hasPermission = eventRoleOpt.isPresent() &&
-                Boolean.TRUE.equals(eventRoleOpt.get().getIsActive()) &&
-                switch (eventRoleOpt.get().getEventRole()) {
-                    case ADMIN, DEPARTMENT_MANAGER -> true;
-                    default -> false;
-                };
+        boolean hasPermission = accountService.hasCreateTaskPermission(taskCreateDTO.getEventId(), account.getAccountId());
 
         if (!hasPermission) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)

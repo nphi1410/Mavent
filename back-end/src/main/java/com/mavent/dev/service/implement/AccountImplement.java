@@ -1,23 +1,15 @@
 package com.mavent.dev.service.implement;
 
-import com.mavent.dev.entity.Event;
-import com.mavent.dev.entity.Department;
+import com.mavent.dev.entity.*;
 import com.mavent.dev.dto.TaskCreateDTO;
 import com.mavent.dev.dto.superadmin.AccountDTO;
-import com.mavent.dev.entity.Task;
-import com.mavent.dev.entity.TaskAttendee;
-import com.mavent.dev.repository.TaskAttendeeRepository;
-import com.mavent.dev.repository.EventRepository;
-import com.mavent.dev.repository.DepartmentRepository;
+import com.mavent.dev.repository.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import com.mavent.dev.dto.TaskDTO;
 import com.mavent.dev.dto.UserEventDTO;
 import com.mavent.dev.dto.UserProfileDTO;
-import com.mavent.dev.entity.Account;
-import com.mavent.dev.repository.AccountRepository;
-import com.mavent.dev.repository.TaskRepository;
 import com.mavent.dev.service.AccountService;
 import com.mavent.dev.config.MailConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -380,6 +373,21 @@ public class AccountImplement implements AccountService, UserDetailsService {
         return convertToTaskDTO(updatedTask);
     }
 
+    @Autowired
+    private EventAccountRoleRepository eventAccountRoleRepository;
+
+    @Override
+    public boolean hasCreateTaskPermission(Integer eventId, Integer accountId) {
+        Optional<EventAccountRole> eventRoleOpt = eventAccountRoleRepository
+                .findByEventIdAndAccountId(eventId, accountId);
+
+        return eventRoleOpt.isPresent()
+                && Boolean.TRUE.equals(eventRoleOpt.get().getIsActive())
+                && switch (eventRoleOpt.get().getEventRole()) {
+            case ADMIN, DEPARTMENT_MANAGER -> true;
+            default -> false;
+        };
+    }
     @Override
     public void updateAvatar(String username, String imageUrl) {
         Account account = accountRepository.findByUsername(username);
