@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarAlt, faUser, faClock, faLocationDot } from "@fortawesome/free-solid-svg-icons";
 import SuperAdminSidebar from "../../components/superadmin/SuperAdminSidebar";
-import SuperAdminHeader from "../../components/superadmin/SuperAdminHeader";
 import { getEventById } from "../../services/eventService";
 
 function SuperAdminViewEventDetails() {
@@ -25,7 +24,6 @@ function SuperAdminViewEventDetails() {
         <div className="h-screen w-screen flex bg-amber-50">
             <SuperAdminSidebar />
             <div className='flex flex-col flex-1'>
-                <SuperAdminHeader />
                 <main className='flex-1 overflow-y-auto p-10 bg-gray-100'>
                     <div className="py-10 w-full">
                         <div className="flex items-center justify-between mb-6">

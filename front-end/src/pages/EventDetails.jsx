@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom"; // <-- Import useParams
-import Header from "../components/common/Header";
-import Footer from "../components/common/Footer";
+import { useParams } from "react-router-dom";
 import EventBanner from "../components/EventBanner";
 import Description from "../components/Description";
 import MapGuide from "../components/MapGuide";
@@ -39,9 +37,7 @@ const EventDetails = () => {
   if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <Header />
-      <main className="flex-grow">
+    <div>
         <EventBanner eventData={eventData}/>
 
         <section className="flex flex-col lg:flex-row justify-between gap-8 px-4 sm:px-6 lg:px-12 py-8">
@@ -63,8 +59,6 @@ const EventDetails = () => {
           </div>
         </section>
         <RelevantEvent eventData={eventData} />
-      </main>
-      <Footer />
     </div>
   );
 };

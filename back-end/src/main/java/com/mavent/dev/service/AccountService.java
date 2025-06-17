@@ -1,14 +1,17 @@
 package com.mavent.dev.service;
 
+import com.mavent.dev.dto.TaskCreateDTO;
+import com.mavent.dev.dto.TaskDTO;
 import com.mavent.dev.dto.superadmin.AccountDTO;
 import com.mavent.dev.dto.UserProfileDTO;
 import com.mavent.dev.entity.Account;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
 
-public interface AccountService {
+public interface AccountService extends UserDetailsService {
 
     Page<AccountDTO> getAllActiveAccounts(Pageable pageable);
 
@@ -32,8 +35,15 @@ public interface AccountService {
 
     void updateAvatar(String username, String imageUrl);
 
-    List<com.mavent.dev.dto.TaskDTO> getUserTasks(Integer accountId, String status, String priority,
-                                                  String keyword, String sortOrder, String eventName);
+    List<TaskDTO> getUserTasks(Integer accountId, String status, String priority,
+                               String keyword, String sortOrder, String eventName);
+    TaskDTO getTaskDetails(Integer accountId, Integer taskId);
+
+    TaskDTO createTask(TaskCreateDTO taskCreateDTO, Account creator) throws Exception;
+
+    TaskDTO updateTaskStatus(Integer taskId, String newStatus);
+
+    boolean hasCreateTaskPermission(Integer eventId, Integer accountId);
 
     String getRandomPassword(int length);
 

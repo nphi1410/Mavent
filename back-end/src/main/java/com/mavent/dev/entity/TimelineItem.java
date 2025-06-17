@@ -34,7 +34,7 @@ public class TimelineItem {
     private String timelineDescription;
 
     @Column(name = "created_by_account_id")
-    private int createdByAccountId;
+    private Integer createdByAccountId;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

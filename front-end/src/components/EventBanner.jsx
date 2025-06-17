@@ -5,6 +5,8 @@ import { getAccountById } from "../services/accountService";
 
 const EventBanner = ({ eventData }) => {
   const [createAccount, setCreateAccount] = useState(null);
+  const PARTICIPANT_ROLE = "participant";
+  const MEMBER_ROLE = "member";
 
   useEffect(() => {
     const getAccount = async () => {
@@ -24,19 +26,18 @@ const EventBanner = ({ eventData }) => {
   const handleRegister = (role) => {
     //check user has logged in
     //if not logged in show message you have to login first, then redirect to login page
-    if(!sessionStorage.getItem("isLoggedIn")){
+    if (!sessionStorage.getItem("isLoggedIn")) {
       console.log("You have to login first");
       return;
     }
-    
-    if(role === "participant"){
+
+    if (role === "participant") {
       //add to registered event dashboard
-      return
+      return;
     }
-      //insert event_account_role
-      //if register as a member, add to registered event dashboard with role member and status pending for interview
+    //insert event_account_role
+    //if register as a member, add to registered event dashboard with role member and status pending for interview
     console.log("Registering for role:", role);
-    
   };
 
   return (
@@ -71,17 +72,19 @@ const EventBanner = ({ eventData }) => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 mt-4">
             <button
-              onClick={() => handleRegister("participant")}
+              onClick={() => handleRegister(PARTICIPANT_ROLE)}
               className="bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-2 px-4 rounded text-sm sm:text-base"
             >
               Participate Now
             </button>
-            <button
-              onClick={() => handleRegister("member")}
-              className="bg-gray-200 hover:bg-gray-300 transition text-gray-800 font-semibold py-2 px-4 rounded text-sm sm:text-base"
-            >
-              Become a Member
-            </button>
+            {eventData.status === "RECRUITING" && (
+              <button
+                onClick={() => handleRegister(MEMBER_ROLE)}
+                className="bg-gray-200 hover:bg-gray-300 transition text-gray-800 font-semibold py-2 px-4 rounded text-sm sm:text-base"
+              >
+                Become a Member
+              </button>
+            )}
           </div>
         </div>
       </div>

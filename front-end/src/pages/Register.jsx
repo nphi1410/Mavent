@@ -34,7 +34,7 @@ const Register = () => {
     try {
       setIsLoading(true);
       setRegisterError("");
-      const response = await axios.post("http://localhost:8080/api/send-register-otp", {
+      const response = await axios.post("http://localhost:8080/api/public/send-register-otp", {
         username,
         email,
         password
@@ -62,7 +62,7 @@ const Register = () => {
     e.preventDefault();
     try {
       setIsLoading(true);
-      const response = await axios.post("http://localhost:8080/api/register", {
+      const response = await axios.post("http://localhost:8080/api/public/register", {
         otp
       }, {
         headers: { "Content-Type": "application/json" },

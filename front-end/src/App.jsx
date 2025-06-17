@@ -1,73 +1,93 @@
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import {
-    BrowserRouter as Router,
-    Routes,
-    Route
-} from "react-router-dom";
-import 'leaflet/dist/leaflet.css';  // Add this line
-import ProfilePage from './pages/ProfilePage';
-import Login from './pages/Login';
-import HomePage from './pages/HomePage';
-import SuperAdminDashboard from './pages/superadmin/SuperAdminDashBoard';
-import EventDetails from "./pages/EventDetails";
-import SuperAdminManageEvents from './pages/superadmin/SuperAdminManageEvents';
-import SuperAdminManageUsers from './pages/superadmin/SuperAdminManageUsers';
-import SuperAdminViewEventDetails from './pages/superadmin/SuperAdminViewEventDetails';
-import SuperAdminViewUserDetails from './pages/superadmin/SuperAdminViewUserDetails';
-import SuperAdminEditEvent from './pages/superadmin/SuperAdminEditEvent';
-import UserEventsPage from './pages/UserEventsPage';
-import Register from './pages/Register';
-import Logout from './components/Logout';
-import AllEvents from './pages/AllEvents';
+// Layout
+import MainLayout from "./layouts/MainLayout";
 
-
-import UserTasksPage from "./pages/UserTasksPage";
+// Public
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Logout from "./components/Logout";
 import ResetPassword from "./pages/ResetPassword";
 import ChangePassword from "./pages/ChangePassword";
-import Members from './pages/Members/Members';
-import Layout from './components/layout/AdminLayout';
-import CreateEvent from "./pages/CreateEvent";
+import HomePage from "./pages/HomePage";
+import AllEvents from "./pages/AllEvents";
+import EventDetails from "./pages/EventDetails";
 
+// Auth
+import ProtectedRoute from "./auth/ProtectedRoute";
+import SuperAdminRoute from "./auth/SuperAdminRoute";
+
+// User
+import ProfilePage from "./pages/ProfilePage";
+import UserEventsPage from "./pages/UserEventsPage";
+import UserDashboardPage from "./pages/UserDashboardPage";
+import UserTasksPage from "./pages/UserTasksPage";
+import CreateEvent from "./pages/CreateEvent/CreateEvent";
+import CreateTimeline from "./pages/CreateEvent/CreateTimeline";
+
+// Super Admin
+import SuperAdminDashboard from "./pages/superadmin/SuperAdminDashBoard";
+import SuperAdminManageEvents from "./pages/superadmin/SuperAdminManageEvents";
+import SuperAdminManageUsers from "./pages/superadmin/SuperAdminManageUsers";
+import SuperAdminViewEventDetails from "./pages/superadmin/SuperAdminViewEventDetails";
+import SuperAdminEditEvent from "./pages/superadmin/SuperAdminEditEvent";
+import SuperAdminViewUserDetails from "./pages/superadmin/SuperAdminViewUserDetails";
+
+// Higher Order Components for Route Protection
+const Protect = (Component) => <ProtectedRoute children={Component} />;
+const SuperAdmin = (Component) => <SuperAdminRoute children={Component} />;
 
 function App() {
-    return (
-        <Router>
-            <div className="min-h-screen w-full">
-                <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/profile" element={<ProfilePage />} />
-                    <Route path="/profile/account" element={<ProfilePage />} />
-                    <Route path="/profile/events" element={<UserEventsPage />} />
-                    <Route path="/profile/tasks" element={<UserTasksPage />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/logout" element={<Logout />} />
-                    <Route path="/reset-password-request" element={<ResetPassword />} />
-                    <Route path="/change-password" element={<ChangePassword />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/superadmin" element={<SuperAdminDashboard />} />
-                    <Route
-                        path="/superadmin/events"
-                        element={<SuperAdminManageEvents />}
-                    />
-                    <Route path="/superadmin/users" element={<SuperAdminManageUsers />} />
-                    <Route
-                        path="/superadmin/event-detail/:eventId"
-                        element={<SuperAdminViewEventDetails />}
-                    />
-                    <Route path="/superadmin/user-detail/:id" element={<SuperAdminViewUserDetails />} />
-                    <Route
-                        path="/superadmin/edit-event/:eventId"
-                        element={<SuperAdminEditEvent />}
-                    />
-                    <Route path="/events/:id" element={<EventDetails />} />
-                    <Route path="/events/" element={<AllEvents />} />
+  return (
+    <Router>
+      <Routes>
+        {/* Public */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/logout" element={<Logout />} />
+        <Route path="/reset-password-request" element={<ResetPassword />} />
+        <Route path="/change-password" element={<ChangePassword />} />
 
-                    <Route path="/event/9/members" element={<Members />} />
-                    <Route path="/create-event" element={<CreateEvent />} />
-                </Routes>
-            </div>
-        </Router>
-    );
+        <Route path="/" element={<MainLayout />}>
+          <Route index element={<HomePage />} />
+          <Route path="events" element={<AllEvents />} />
+          <Route path="events/:id" element={<EventDetails />} />
+
+          {/* Event-Protected Routes */}
+          <Route path="create-event">
+            <Route index element={Protect(<CreateEvent />)} />
+            <Route path=":eventId/create-timeline" element={Protect(<CreateTimeline />)} />
+          </Route>
+
+          {/* User-Protected Routes */}
+          <Route path="profile">
+            <Route index element={Protect(<ProfilePage />)} />
+            <Route path="attended" element={Protect(<UserEventsPage />)} />
+            <Route path="dashboard" element={Protect(<UserDashboardPage />)} />
+            <Route path="tasks" element={Protect(<UserTasksPage />)} />
+          </Route>
+
+          {/* Super Admin Routes */}
+          <Route path="superadmin">
+            <Route index element={SuperAdmin(<SuperAdminDashboard />)} />
+            <Route path="events" element={SuperAdmin(<SuperAdminManageEvents />)} />
+            <Route path="users" element={SuperAdmin(<SuperAdminManageUsers />)} />
+            <Route
+              path="event-detail/:eventId"
+              element={SuperAdmin(<SuperAdminViewEventDetails />)}
+            />
+            <Route
+              path="edit-event/:eventId"
+              element={SuperAdmin(<SuperAdminEditEvent />)}
+            />
+            <Route
+              path="user-detail/:id"
+              element={SuperAdmin(<SuperAdminViewUserDetails />)}
+            />
+          </Route>
+        </Route>
+      </Routes>
+    </Router>
+  );
 }
-
 export default App;

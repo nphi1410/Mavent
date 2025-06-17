@@ -20,6 +20,10 @@ const MapGuide = ({ eventData }) => {
   useEffect(() => {
     const fetchPosition = async () => {
       try {
+        if (eventData.locationId === null) {
+          setPosition(null);
+          return;
+        }
         const location = await getLocationById(eventData.locationId);
         setPosition(location);
       } catch (err) {
