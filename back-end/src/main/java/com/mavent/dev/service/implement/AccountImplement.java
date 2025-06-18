@@ -1,13 +1,14 @@
 package com.mavent.dev.service.implement;
 
+import com.mavent.dev.dto.task.TaskFeedbackDTO;
 import com.mavent.dev.entity.*;
-import com.mavent.dev.dto.TaskCreateDTO;
+import com.mavent.dev.dto.task.TaskCreateDTO;
 import com.mavent.dev.dto.superadmin.AccountDTO;
 import com.mavent.dev.repository.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
-import com.mavent.dev.dto.TaskDTO;
+import com.mavent.dev.dto.task.TaskDTO;
 import com.mavent.dev.dto.UserEventDTO;
 import com.mavent.dev.dto.UserProfileDTO;
 import com.mavent.dev.service.AccountService;
@@ -388,6 +389,60 @@ public class AccountImplement implements AccountService, UserDetailsService {
             default -> false;
         };
     }
+
+    @Autowired
+    private TaskFeedbackRepository taskFeedbackRepository;
+
+    @Override
+    public TaskFeedbackDTO createTaskFeedback(Integer taskId, Integer feedbackById, String comment) {
+        Task task = taskRepository.findById(taskId)
+            .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
+
+        Integer creator = task.getAssignedByAccountId();
+        Integer assignee = task.getAssignedToAccountId();
+        if (!feedbackById.equals(creator) && !feedbackById.equals(assignee)) {
+            return null;
+        }
+
+        TaskFeedback fb = new TaskFeedback();
+        fb.setTaskId(taskId);
+        fb.setFeedbackByAccountId(feedbackById);
+        fb.setComment(comment);
+        fb.setCreatedAt(LocalDateTime.now());
+
+        TaskFeedback saved = taskFeedbackRepository.save(fb);
+
+        TaskFeedbackDTO dto = new TaskFeedbackDTO();
+        dto.setId(saved.getId());
+        dto.setTaskId(saved.getTaskId());
+        dto.setFeedbackByAccountId(saved.getFeedbackByAccountId());
+        dto.setComment(saved.getComment());
+        dto.setCreatedAt(saved.getCreatedAt());
+        return dto;
+    }
+
+    @Override
+    public List<TaskFeedbackDTO> getTaskFeedback(Integer taskId, Integer accountId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
+
+        Integer creator = task.getAssignedByAccountId();
+        Integer assignee = task.getAssignedToAccountId();
+        if (!accountId.equals(creator) && !accountId.equals(assignee)) {
+            return null;
+        }
+
+        return taskFeedbackRepository.findByTaskId(taskId).stream().map(fb -> {
+            TaskFeedbackDTO dto = new TaskFeedbackDTO();
+            dto.setId(fb.getId());
+            dto.setTaskId(fb.getTaskId());
+            dto.setFeedbackByAccountId(fb.getFeedbackByAccountId());
+            dto.setComment(fb.getComment());
+            dto.setCreatedAt(fb.getCreatedAt());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
     @Override
     public void updateAvatar(String username, String imageUrl) {
         Account account = accountRepository.findByUsername(username);

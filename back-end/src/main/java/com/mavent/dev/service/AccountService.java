@@ -1,9 +1,10 @@
 package com.mavent.dev.service;
 
-import com.mavent.dev.dto.TaskCreateDTO;
-import com.mavent.dev.dto.TaskDTO;
+import com.mavent.dev.dto.task.TaskCreateDTO;
+import com.mavent.dev.dto.task.TaskDTO;
 import com.mavent.dev.dto.superadmin.AccountDTO;
 import com.mavent.dev.dto.UserProfileDTO;
+import com.mavent.dev.dto.task.TaskFeedbackDTO;
 import com.mavent.dev.entity.Account;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,6 +45,10 @@ public interface AccountService extends UserDetailsService {
     TaskDTO updateTaskStatus(Integer taskId, String newStatus);
 
     boolean hasCreateTaskPermission(Integer eventId, Integer accountId);
+
+    TaskFeedbackDTO createTaskFeedback(Integer taskId, Integer feedbackById, String comment);
+
+    List<TaskFeedbackDTO> getTaskFeedback(Integer taskId, Integer accountId);
 
     String getRandomPassword(int length);
 
