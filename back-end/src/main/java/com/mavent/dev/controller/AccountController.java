@@ -25,7 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import com.mavent.dev.config.CloudConfig;
+//import com.mavent.dev.config.CloudConfig;
 import com.mavent.dev.service.globalservice.CloudService;
 
 import javax.naming.AuthenticationException;

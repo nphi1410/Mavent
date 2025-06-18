@@ -1,67 +1,72 @@
 package com.mavent.dev.controller;
 
-import com.mavent.dev.entity.Department;
-import com.mavent.dev.repository.DepartmentRepository;
-import com.mavent.dev.dto.common.ApiResponseDTO;
+
+import com.mavent.dev.dto.department.DepartmentRequestDTO;
+import com.mavent.dev.dto.department.DepartmentResponseDTO;
+
 import com.mavent.dev.service.DepartmentService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.time.LocalDateTime;
+import java.net.URI;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/departments")
 public class DepartmentController {
 
-   @Autowired
-   private DepartmentService departmentService;
+    private final DepartmentService departmentService;
 
-    @GetMapping("/departments")
-    public ResponseEntity<ApiResponseDTO<List<Department>>> getDepartmentsByEvent(
+    public DepartmentController(DepartmentService departmentService) {
+        this.departmentService = departmentService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<DepartmentResponseDTO>> getByEvent(
             @RequestParam Integer eventId) {
-        try {
-            List<Department> departments = departmentService.getAllDepartmentsByEvent(eventId);
-
-            ApiResponseDTO<List<Department>> response = ApiResponseDTO.<List<Department>>builder()
-                    .success(true)
-                    .message("Departments retrieved successfully")
-                    .data(departments)
-                    .timestamp(LocalDateTime.now().toString())
-                    .build();
-
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            ApiResponseDTO<List<Department>> response = ApiResponseDTO.<List<Department>>builder()
-                    .success(false)
-                    .message("Error retrieving departments: " + e.getMessage())
-                    .timestamp(LocalDateTime.now().toString())
-                    .build();
-
-            return ResponseEntity.status(500).body(response);
-        }
+        List<DepartmentResponseDTO> departments =
+                departmentService.getAllDepartmentsByEvent(eventId);
+        return ResponseEntity.ok(departments);
     }
 
-    @PostMapping("department/create")
-    public ResponseEntity<ApiResponseDTO<Department>> createDepartment(@RequestBody Department department) {
-        try {
-            Department createdDepartment = departmentService.createDepartment(department);
-            ApiResponseDTO<Department> response = ApiResponseDTO.<Department>builder()
-                    .success(true)
-                    .message("Department created successfully")
-                    .data(createdDepartment)
-                    .timestamp(LocalDateTime.now().toString())
-                    .build();
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            ApiResponseDTO<Department> response = ApiResponseDTO.<Department>builder()
-                    .success(false)
-                    .message("Error creating department: " + e.getMessage())
-                    .timestamp(LocalDateTime.now().toString())
-                    .build();
-            return ResponseEntity.status(500).body(response);
-        }
+    @PostMapping
+    public ResponseEntity<DepartmentResponseDTO> create(
+            @RequestBody @Valid DepartmentRequestDTO dto,
+            UriComponentsBuilder uriBuilder) {
+        DepartmentResponseDTO created = departmentService.createDepartment(dto);
+        URI location = uriBuilder
+                .path("/api/departments/{id}")
+                .buildAndExpand(created.getDepartmentId())
+                .toUri();
+        return ResponseEntity
+                .created(location)
+                .body(created);
     }
+
+    @PutMapping("/{departmentId}")
+    public ResponseEntity<DepartmentResponseDTO> update(
+            @PathVariable Integer departmentId,
+            @RequestBody @Valid DepartmentRequestDTO dto
+    ){
+        DepartmentResponseDTO updated = departmentService.updateDepartment(departmentId,dto);
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/{departmentId}")
+    public ResponseEntity<Map<String,String>> delete(@PathVariable Integer departmentId) {
+        departmentService.deleteDepartment(departmentId);
+        Map<String,String> response = new HashMap<>();
+        response.put("message", "Department deleted successfully");
+        response.put("departmentId", String.valueOf(departmentId));
+
+        return ResponseEntity.ok(response);
+    }
+
 
 }
