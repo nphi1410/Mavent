@@ -568,6 +568,35 @@ public class AccountController {
         }
     }
 
+    @PutMapping("/user/tasks/{taskId}")
+    public ResponseEntity<TaskDTO> updateTask(
+            @PathVariable Integer taskId,
+            @RequestBody TaskCreateDTO updateDto,
+            HttpServletRequest request) {
+
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String token = authHeader.substring(7);
+        String username = jwtUtil.extractUsername(token);
+        Account account = accountService.getAccount(username);
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        TaskDTO current = accountService.getTaskDetails(account.getAccountId(), taskId);
+        if (current == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        if (!account.getAccountId().equals(current.getAssignedByAccountId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        TaskDTO updated = accountService.updateTask(taskId, updateDto);
+        return ResponseEntity.ok(updated);
+    }
+
     @PostMapping("/user/tasks/{taskId}/feedback")
     public ResponseEntity<?> createTaskFeedback(
             @PathVariable Integer taskId,

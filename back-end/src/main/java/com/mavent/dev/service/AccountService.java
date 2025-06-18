@@ -42,6 +42,8 @@ public interface AccountService extends UserDetailsService {
 
     TaskDTO createTask(TaskCreateDTO taskCreateDTO, Account creator) throws Exception;
 
+    TaskDTO updateTask(Integer taskId, TaskCreateDTO updateDto);
+
     TaskDTO updateTaskStatus(Integer taskId, String newStatus);
 
     boolean hasCreateTaskPermission(Integer eventId, Integer accountId);
