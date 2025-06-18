@@ -4,13 +4,15 @@ import com.mavent.dev.dto.*;
 import com.mavent.dev.dto.superadmin.AccountDTO;
 import com.mavent.dev.dto.superadmin.EventDTO;
 import com.mavent.dev.config.MailConfig;
+import com.mavent.dev.dto.task.TaskCreateDTO;
+import com.mavent.dev.dto.task.TaskDTO;
+import com.mavent.dev.dto.task.TaskFeedbackDTO;
+import com.mavent.dev.dto.task.TaskStatusUpdateDTO;
 import com.mavent.dev.dto.userAuthentication.*;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.EventAccountRole;
-import com.mavent.dev.entity.Task;
 import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.repository.EventAccountRoleRepository;
-import com.mavent.dev.repository.TaskRepository;
 import com.mavent.dev.service.AccountService;
 import com.mavent.dev.service.EventService;
 import com.mavent.dev.service.JwtBlacklistService;
@@ -563,6 +565,61 @@ public class AccountController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error creating task: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/user/tasks/{taskId}/feedback")
+    public ResponseEntity<?> createTaskFeedback(
+            @PathVariable Integer taskId,
+            @RequestBody TaskFeedbackDTO feedbackDto,
+            HttpServletRequest request) {
+
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String token = authHeader.substring(7);
+        String username = jwtUtil.extractUsername(token);
+        Account account = accountService.getAccount(username);
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        TaskFeedbackDTO created = accountService.createTaskFeedback(
+            taskId,
+            account.getAccountId(),
+            feedbackDto.getComment()
+        );
+
+        if (created == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("You don't have permission to create feedback for this task.");
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @GetMapping("/user/tasks/{taskId}/feedback")
+    public ResponseEntity<List<TaskFeedbackDTO>> viewTaskFeedback(
+            @PathVariable Integer taskId,
+            HttpServletRequest request) {
+
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String token = authHeader.substring(7);
+        String username = jwtUtil.extractUsername(token);
+        var account = accountService.getAccount(username);
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            var feedbacks = accountService.getTaskFeedback(taskId, account.getAccountId());
+            return ResponseEntity.ok(feedbacks);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
