@@ -327,6 +327,43 @@ public class AccountImplement implements AccountService, UserDetailsService {
         return convertToTaskDTO(savedTask);
     }
 
+    @Override
+    public TaskDTO updateTask(Integer taskId, TaskCreateDTO updateDto) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
+
+        // Cập nhật các trường từ DTO vào entity
+        task.setTitle(updateDto.getTitle());
+        task.setDescription(updateDto.getDescription());
+        task.setPriority(Task.Priority.valueOf(updateDto.getPriority()));
+        task.setDueDate(updateDto.getDueDate());
+
+        // Cập nhật thời gian sửa đổi
+        task.setUpdatedAt(LocalDateTime.now());
+
+        // Lưu thay đổi
+        Task saved = taskRepository.save(task);
+
+        // Trả về DTO tương ứng
+        TaskDTO dto = new TaskDTO();
+        dto.setTaskId(saved.getTaskId());
+        dto.setEventId(saved.getEventId());
+        dto.setDepartmentId(saved.getDepartmentId());
+        dto.setTitle(saved.getTitle());
+        dto.setDescription(saved.getDescription());
+        dto.setAssignedToAccountId(saved.getAssignedToAccountId());
+        dto.setAssignedByAccountId(saved.getAssignedByAccountId());
+        dto.setDueDate(saved.getDueDate());
+        dto.setStatus(saved.getStatus().name());  // enum -> String
+        dto.setPriority(saved.getPriority().name()); // enum -> String
+        dto.setCreatedAt(saved.getCreatedAt());
+        dto.setUpdatedAt(saved.getUpdatedAt());
+
+
+        return dto;
+    }
+
+
     private TaskDTO convertToTaskDTO(Task task) {
         TaskDTO dto = new TaskDTO();
         dto.setTaskId(task.getTaskId());
