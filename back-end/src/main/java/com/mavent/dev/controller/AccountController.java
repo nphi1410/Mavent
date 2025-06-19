@@ -80,7 +80,7 @@ public class AccountController {
     }
 
     @PostMapping("/public/login")
-    public ResponseEntity<?> authenticate(@RequestBody AuthRequestDTO authRequestDTO, HttpServletRequest request) throws AuthenticationException {
+    public ResponseEntity<?> authenticate(@RequestBody AuthRequestDTO authRequestDTO) throws AuthenticationException {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authRequestDTO.getUsername(), authRequestDTO.getPassword())
         );
