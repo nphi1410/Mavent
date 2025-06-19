@@ -2,6 +2,7 @@ package com.mavent.dev.service;
 
 import com.mavent.dev.dto.TaskCreateDTO;
 import com.mavent.dev.dto.TaskDTO;
+import com.mavent.dev.dto.UserEventDTO;
 import com.mavent.dev.dto.superadmin.AccountDTO;
 import com.mavent.dev.dto.UserProfileDTO;
 import com.mavent.dev.entity.Account;
@@ -23,7 +24,7 @@ public interface AccountService extends UserDetailsService {
 
     UserProfileDTO updateProfile(String username, UserProfileDTO userProfileDTO);
 
-    List<com.mavent.dev.dto.UserEventDTO> getUserEvents(Integer accountId);
+    List<UserEventDTO> getUserEvents(Integer accountId);
 
     Account getAccount(String username);
 

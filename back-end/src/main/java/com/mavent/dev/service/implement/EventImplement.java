@@ -28,12 +28,6 @@ public class EventImplement implements EventService {
         return eventRepository.findAllUnified(name, status, type, tagCheck, tagIds, isTrending, sortType, pageable);
     }
 
-    public static String toString(FilterEventDTO dto) {
-        return "eventId=" + dto.getEventId() +
-                ", startDatetime=" + dto.getStartDatetime() +
-                ", endDatetime=" + dto.getEndDatetime();
-    }
-
     @Override
     public EventDTO createEvent(EventDTO eventDTO) {
         Event event = new Event();

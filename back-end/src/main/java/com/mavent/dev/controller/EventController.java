@@ -3,14 +3,21 @@ package com.mavent.dev.controller;
 import com.mavent.dev.dto.EventRegisterDTO;
 import com.mavent.dev.dto.FilterEventDTO;
 import com.mavent.dev.dto.FilterRequestDTO;
+import com.mavent.dev.dto.event.EventAccountRoleDTO;
+import com.mavent.dev.dto.superadmin.AccountDTO;
 import com.mavent.dev.dto.superadmin.EventDTO;
 import com.mavent.dev.entity.Event;
+import com.mavent.dev.entity.EventAccountRole;
+import com.mavent.dev.service.AccountService;
+import com.mavent.dev.service.EventAccountRoleService;
 import com.mavent.dev.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -19,6 +26,11 @@ public class EventController {
 
     @Autowired
     private EventService eventService;
+
+    @Autowired
+    private EventAccountRoleService eventAccountRoleService;
+    @Autowired
+    private AccountService accountService;
 
     //Get All Event
     @GetMapping("")
@@ -49,8 +61,26 @@ public class EventController {
     @PostMapping("/register")
     public ResponseEntity<String> registerEvent(@RequestBody EventRegisterDTO eventRegisterDto){
 
-        return ResponseEntity.ok("Register event successfully!");
+        Integer accountId = accountService.getAccount(eventRegisterDto.getUsername()).getAccountId();
+        EventAccountRole eventAccountRole = new EventAccountRole();
+        eventAccountRole.setEventId(eventRegisterDto.getEventId());
+        eventAccountRole.setEventRole(eventRegisterDto.getRole());
+        eventAccountRole.setAccountId(accountId);
+        eventAccountRole.setCreatedAt(LocalDateTime.now());
+        if(eventRegisterDto.getRole().equals(EventAccountRole.EventRole.PARTICIPANT)){
+            return ResponseEntity.ok(eventAccountRoleService.addMemberToEvent(eventAccountRole).toString());
+        }
 
+        // chua xu ly register as member
+        eventAccountRole.setDepartmentId(eventRegisterDto.getDepartmentId());
+
+        return ResponseEntity.ok(eventRegisterDto.toString());
+    }
+
+    @GetMapping("/attending/{accountId}")
+    public ResponseEntity<Page<EventAccountRoleDTO>> getAttendingEvent(@PathVariable Integer accountId, Pageable pageable){
+        Page<EventAccountRoleDTO> eventAccountRolePage = eventAccountRoleService.getMembersByAccountIdWithPagination(accountId,pageable);
+        return ResponseEntity.ok(eventAccountRolePage);
     }
 
     //Get Event By ID
