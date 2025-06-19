@@ -70,7 +70,9 @@ export const createEvent = async (eventData) => {
   } catch (error) {
     console.error("Error creating event:", error);
     const errorMessage =
-      error.response?.data?.message || error.message || "Đã có lỗi không mong muốn xảy ra.";
+      error.response?.data?.message ||
+      error.message ||
+      "Đã có lỗi không mong muốn xảy ra.";
     return { success: false, message: errorMessage };
   }
 };
@@ -96,3 +98,31 @@ export const getTrendingEvents = async (type) => {
     return [];
   }
 };
+
+export const registerEvent = async (eventRegisterDTO) => {
+  try {
+    // console.log(eventRegisterDTO);
+
+    const response = await Api.post(`/events/register`, eventRegisterDTO);
+    return response;
+  } catch (error) {
+    console.error(
+      `Error registering for event with ID ${eventRegisterDTO}:`,
+      error
+    );
+    return null;
+  }
+};
+
+export const getAttendingEvent = async (accountId, pageable) => {
+  try {
+    const response = await Api.get(`/events/attending/${accountId}`, {
+      params: pageable,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching attending events:", error);
+    return [];
+  }
+};
+
