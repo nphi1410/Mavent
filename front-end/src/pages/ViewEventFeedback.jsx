@@ -1,24 +1,10 @@
-// AdminViewEventFeedback.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { getEventFeedback } from '../services/eventFeedbackService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStar, faChartColumn, faUser } from '@fortawesome/free-solid-svg-icons';
 import { Bar } from 'react-chartjs-2';
 import 'chart.js/auto';
-
-const mockFeedback = [
-    { id: 1, name: 'Thomas Brown', rating: 5, comment: 'Outstanding event! The diversity of speakers and topics was impressive.', date: 'Jan 17, 2024, 11:30 PM', eventId: 101 },
-    { id: 2, name: 'Lisa White', rating: 4, comment: 'Good event, well organized.', date: 'Jan 18, 2024, 9:15 AM', eventId: 101 },
-    { id: 3, name: 'John Smith', rating: 3, comment: 'It was okay, but a bit too long.', date: 'Jan 19, 2024, 1:00 PM', eventId: 101 },
-    { id: 4, name: 'Mary Johnson', rating: 2, comment: 'Not very engaging.', date: 'Jan 20, 2024, 3:45 PM', eventId: 101 },
-    { id: 5, name: 'Chris Green', rating: 4, comment: 'Informative but room for improvement.', date: 'Jan 21, 2024, 5:20 PM', eventId: 101 },
-    { id: 6, name: 'Emily Davis', rating: 5, comment: 'Fantastic speakers and topics.', date: 'Jan 22, 2024, 10:00 AM', eventId: 101 },
-    { id: 7, name: 'Brian Lee', rating: 1, comment: 'Very disappointing experience.', date: 'Jan 23, 2024, 11:45 AM', eventId: 101 },
-    { id: 8, name: 'Sophia Martinez', rating: 5, comment: 'Loved everything about it!', date: 'Jan 24, 2024, 2:30 PM', eventId: 101 },
-    { id: 9, name: 'Daniel Kim', rating: 3, comment: 'Could be better.', date: 'Jan 25, 2024, 4:00 PM', eventId: 101 },
-    { id: 10, name: 'Nancy Wilson', rating: 5, comment: 'Truly outstanding!', date: 'Jan 26, 2024, 6:15 PM', eventId: 101 },
-    { id: 11, name: 'Steve Clark', rating: 2, comment: 'Not what I expected.', date: 'Jan 27, 2024, 8:00 PM', eventId: 101 },
-    { id: 12, name: 'Rachel Moore', rating: 4, comment: 'Good session overall.', date: 'Jan 28, 2024, 9:00 AM', eventId: 101 },
-];
 
 function getChartData(data) {
     return {
@@ -33,9 +19,7 @@ function getChartData(data) {
                     data.filter(f => f.rating === 2).length,
                     data.filter(f => f.rating === 1).length,
                 ],
-                backgroundColor: [
-                    '#22c55e', '#4ade80', '#facc15', '#f87171', '#fca5a5'
-                ],
+                backgroundColor: ['#22c55e', '#4ade80', '#facc15', '#f87171', '#fca5a5'],
             },
         ],
     };
@@ -43,40 +27,53 @@ function getChartData(data) {
 
 const chartOptions = {
     indexAxis: 'y',
-    scales: {
-        x: { beginAtZero: true },
-    },
-    plugins: {
-        legend: { display: false },
-    },
+    scales: { x: { beginAtZero: true } },
+    plugins: { legend: { display: false } },
 };
 
 function FeedbackCard({ feedback }) {
     return (
         <div className="bg-white p-4 rounded-lg shadow mb-4">
             <div className="flex items-center gap-2 text-yellow-500">
-                {[...Array(feedback.rating)].map((_, i) => <FontAwesomeIcon icon={faStar} aStar key={i} />)}
+                {[...Array(feedback.rating)].map((_, i) => (
+                    <FontAwesomeIcon icon={faStar} key={i} />
+                ))}
                 <span className="text-sm font-semibold">{feedback.rating}/5</span>
             </div>
             <p className="mt-2 text-gray-700">{feedback.comment}</p>
             <div className="text-sm text-gray-500 mt-2 flex justify-between">
-                <span>{feedback.name}</span>
-                <span>{feedback.date}</span>
+                <span>User ID: {feedback.accountId}</span>
+                <span>{new Date(feedback.submittedAt).toLocaleString()}</span>
             </div>
-            <div className="text-xs text-gray-400">Event ID: {feedback.eventId}</div>
         </div>
     );
 }
 
 export default function ViewEventFeedback() {
+    const { eventId } = useParams();
+    const [feedbackList, setFeedbackList] = useState([]);
     const [search, setSearch] = useState('');
     const [filterRating, setFilterRating] = useState(null);
     const [page, setPage] = useState(1);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const pageSize = 6;
 
-    const filtered = mockFeedback.filter(f => {
-        const matchText = f.comment.toLowerCase().includes(search.toLowerCase()) ||
-            f.name.toLowerCase().includes(search.toLowerCase());
+    useEffect(() => {
+        setLoading(true);
+        getEventFeedback(eventId)
+            .then(res => {
+                setFeedbackList(res);
+                setLoading(false);
+            })
+            .catch(err => {
+                setError('Failed to load feedback.');
+                setLoading(false);
+            });
+    }, [eventId]);
+
+    const filtered = feedbackList.filter(f => {
+        const matchText = f.comment.toLowerCase().includes(search.toLowerCase());
         const matchRating = filterRating ? f.rating === filterRating : true;
         return matchText && matchRating;
     });
@@ -84,12 +81,15 @@ export default function ViewEventFeedback() {
     const paginated = filtered.slice((page - 1) * pageSize, page * pageSize);
     const totalPages = Math.ceil(filtered.length / pageSize);
 
+    if (loading) return <div className="p-6">Loading feedback...</div>;
+    if (error) return <div className="p-6 text-red-500">{error}</div>;
+
     const chartData = getChartData(filtered);
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
             <div className="max-w-5xl mx-auto">
-                <h1 className="text-3xl font-bold mb-6 text-gray-800">Feedback from Event Participants</h1>
+                <h1 className="text-3xl font-bold mb-6 text-gray-800">Feedback for Event #{eventId}</h1>
 
                 <div className="bg-white p-6 rounded-lg shadow mb-6">
                     <div className="flex items-center mb-4">
@@ -101,14 +101,15 @@ export default function ViewEventFeedback() {
                         <div>
                             <p className="text-sm text-gray-500">Average Rating</p>
                             <p className="text-2xl font-bold flex items-center gap-2 text-yellow-500">
-                                <FontAwesomeIcon icon={faStar} /> {(mockFeedback.reduce((a, b) => a + b.rating, 0) / mockFeedback.length).toFixed(1)}
+                                <FontAwesomeIcon icon={faStar} />
+                                {(filtered.reduce((a, b) => a + b.rating, 0) / (filtered.length || 1)).toFixed(1)}
                             </p>
                         </div>
                         <div>
                             <p className="text-sm text-gray-500">Total Reviews</p>
                             <p className="text-2xl font-bold flex items-center gap-2">
                                 <FontAwesomeIcon icon={faUser} className='text-blue-500' />
-                                {mockFeedback.length}
+                                {filtered.length}
                             </p>
                         </div>
                     </div>
@@ -118,7 +119,7 @@ export default function ViewEventFeedback() {
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
                     <input
                         type="text"
-                        placeholder="Search by name or comment..."
+                        placeholder="Search by comment..."
                         className="w-full md:w-1/2 p-2 border border-gray-300 rounded-lg"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
@@ -139,8 +140,8 @@ export default function ViewEventFeedback() {
                     </div>
                 </div>
 
-                {paginated.map(f => (
-                    <FeedbackCard key={f.id} feedback={f} />
+                {paginated.map((f, index) => (
+                    <FeedbackCard key={index} feedback={f} />
                 ))}
 
                 <div className="flex justify-center items-center mt-6 gap-2">

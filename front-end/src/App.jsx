@@ -55,7 +55,7 @@ function App() {
           <Route path="events" element={<AllEvents />} />
           <Route path="events/:id" element={<EventDetails />} />
 
-          <Route path="/event-feedback" element={<ViewEventFeedback />} />
+          <Route path="/event/:eventId/feedback" element={<ViewEventFeedback />} />
 
           {/* Create Event-Protected Routes */}
           <Route path="create-event">
