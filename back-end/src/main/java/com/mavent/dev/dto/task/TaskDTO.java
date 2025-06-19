@@ -1,4 +1,4 @@
-package com.mavent.dev.dto;
+package com.mavent.dev.dto.task;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,6 +22,9 @@ public class TaskDTO {
     private String priority;
     private String eventName;
     private String departmentName;
+
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public TaskDTO(Integer taskId, Integer eventId, Integer departmentId, String title,
                    String description, Integer assignedToAccountId, Integer assignedByAccountId,

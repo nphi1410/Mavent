@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,12 +27,6 @@ public class EventImplement implements EventService {
         Pageable pageable = PageRequest.of(page, size);
         boolean tagCheck = tagIds != null && !tagIds.isEmpty();
         return eventRepository.findAllUnified(name, status, type, tagCheck, tagIds, isTrending, sortType, pageable);
-    }
-
-    public static String toString(FilterEventDTO dto) {
-        return "eventId=" + dto.getEventId() +
-                ", startDatetime=" + dto.getStartDatetime() +
-                ", endDatetime=" + dto.getEndDatetime();
     }
 
     @Override
