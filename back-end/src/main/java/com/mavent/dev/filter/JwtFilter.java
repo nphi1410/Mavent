@@ -49,27 +49,29 @@ public class JwtFilter extends OncePerRequestFilter {
                 return;
             }
 
-            final String username = jwtUtil.extractUsername(token);
-//            System.out.println("Extracted Username: " + username); // Debugging line to log the username
-
-            if (!jwtUtil.isTokenValid(token, accountService.getAccount(username))) {
-                System.out.println("Invalid token for user: " + username); // Debugging line for invalid token
-//                SecurityContextHolder.getContext().setAuthentication(null);
-            }
+            try {
+                final String username = jwtUtil.extractUsername(token);
+                if (!jwtUtil.isTokenValid(token, accountService.getAccount(username))) {
+//                    System.out.println("Invalid token for user: " + username); // Debugging line for invalid token
+                    SecurityContextHolder.getContext().setAuthentication(null);
+                }
 //            else {
 //                System.out.println("Token is valid for user: " + username); // Debugging line to confirm token validity
 //            }
 
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                List<String> roles = jwtUtil.extractRoles(token);
-                List<SimpleGrantedAuthority> authorities = roles.stream()
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList());
+                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    List<String> roles = jwtUtil.extractRoles(token);
+                    List<SimpleGrantedAuthority> authorities = roles.stream()
+                            .map(SimpleGrantedAuthority::new)
+                            .collect(Collectors.toList());
 
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(username, null, authorities);
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(username, null, authorities);
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+            } catch (Exception e) {
+                System.err.println("JwtFilter.java: " + e.getMessage());
             }
         }
 

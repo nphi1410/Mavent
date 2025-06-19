@@ -41,6 +41,7 @@ function Login() {
         sessionStorage.setItem("token", token);
         sessionStorage.setItem("isLoggedIn", "true");
         sessionStorage.setItem("username", decoded.sub);
+        console.log(decoded.sub);
 
         // Redirect based on role
         if (roles.includes("ROLE_SUPER_ADMIN")) {
