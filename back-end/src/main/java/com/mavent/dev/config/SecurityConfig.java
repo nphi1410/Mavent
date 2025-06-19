@@ -50,13 +50,18 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/events/**", "/api/tags", "/api/document", "/api/public/**",
-                                "/api/location/**"
+                                "/api/events/**",
+                                "/api/tags",
+                                "/api/document",
+                                "/api/public/**",
+                                "/api/location/**",
+                                "/api/event/*/feedback"
                         ).permitAll()
                         .requestMatchers("/api/**").hasAnyRole("USER", "SUPER_ADMIN")
                         .requestMatchers("/api/dashboard").hasRole("SUPER_ADMIN")
                         .anyRequest().authenticated()
                 )
+
                 .authenticationProvider(customAuthenticationProvider)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session
@@ -89,4 +94,4 @@ public class SecurityConfig {
         return builder.build(); // ✅ Only call build() on AuthenticationManagerBuilder
     }
 
- }
+}
