@@ -38,6 +38,7 @@ public class EventImplement implements EventService {
         event.setStartDatetime(eventDTO.getStartDatetime());
         event.setEndDatetime(eventDTO.getEndDatetime());
         event.setLocation(eventDTO.getLocation());
+        event.setLocationId(eventDTO.getLocationId());
         event.setDdayInfo(eventDTO.getDdayInfo());
         event.setMaxMemberNumber(eventDTO.getMaxMemberNumber());
         event.setMaxParticipantNumber(eventDTO.getMaxParticipantNumber());
@@ -118,6 +119,7 @@ public class EventImplement implements EventService {
                 event.getStartDatetime(),
                 event.getEndDatetime(),
                 event.getLocation(),
+                event.getLocationId(),
                 event.getDdayInfo(),
                 event.getMaxMemberNumber(),
                 event.getMaxParticipantNumber(),

@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TimelineItemDTO {
+public class TimelineDTO {
     private int eventId;
     private LocalDateTime timelineDatetime;
     private String timelineTitle;

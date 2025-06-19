@@ -1,75 +1,60 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClock, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { useParams, useNavigate } from 'react-router-dom';
-import { createTimelineItem } from '../../services/timelineService';
-import { getEventById } from '../../services/eventService';
+import { createAgendaItem } from '../../services/agendaService'; // giả định bạn đã có service này
 
-const CreateTimeline = () => {
+const CreateAgenda = () => {
     const { eventId } = useParams();
-    const [event, setEvent] = useState('null');
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        const fetchEvent = async () => {
-            const data = await getEventById(eventId); //gọi API theo ID
-            setEvent(data);
-        };
-        fetchEvent();
-    }, [eventId]);
-
-    const [stages, setStages] = useState([
-        { title: '', description: '', startDate: '' },
+    const [agendas, setAgendas] = useState([
+        { title: '', description: '', startTime: '', endTime: '' },
     ]);
 
     const handleChange = (index, field, value) => {
-        const updatedStages = [...stages];
-        updatedStages[index][field] = value;
-        setStages(updatedStages);
+        const updated = [...agendas];
+        updated[index][field] = value;
+        setAgendas(updated);
     };
 
-    const removeStage = (index) => {
-        if (stages.length === 1) return;
-        setStages(stages.filter((_, i) => i !== index));
+    const removeAgenda = (index) => {
+        if (agendas.length === 1) return;
+        setAgendas(agendas.filter((_, i) => i !== index));
     };
 
-    const addStage = () => {
-        setStages([...stages, { title: '', description: '', startDate: '' }]);
+    const addAgenda = () => {
+        setAgendas([...agendas, { title: '', description: '', startTime: '', endTime: '' }]);
     };
 
-    const handleSaveTimeline = async () => {
-
+    const handleSaveAgenda = async () => {
         try {
-            for (const stage of stages) {
-                if (!stage.title || !stage.startDate) {
-                    alert("Please enter title and start date for all stages.");
+            for (const agenda of agendas) {
+                if (!agenda.title || !agenda.startTime || !agenda.endTime) {
+                    alert("Please fill in all required fields.");
                     return;
                 }
 
                 const dto = {
-                    timelineTitle: stage.title,
-                    timelineDescription: stage.description || "", // optional
-                    timelineDatetime: stage.startDate, // make sure it's like: 2025-06-15T10:00
-                    // createdByAccountId: accountId
+                    agendaTitle: agenda.title,
+                    agendaDescription: agenda.description || '',
+                    agendaStartTime: agenda.startTime,
+                    agendaEndTime: agenda.endTime,
                 };
-                await createTimelineItem(eventId, dto);
+
+                console.log("Sending agenda DTO:", dto);
+                await createAgendaItem(eventId, dto);
             }
-            navigate(`/create-event/${eventId}/create-agenda`);
+            alert("Agenda created successfully!");
         } catch (error) {
             console.error("Error:", error.response?.data || error.message);
-            alert("Error creating timeline. Please try again.");
+            alert("Error creating agenda. Please try again.");
         }
     };
-
 
     return (
         <div className="min-h-screen bg-green-50 px-4 py-8">
             <div className="max-w-4xl mx-auto text-center">
-                <h1 className="text-3xl font-bold">Create Timeline</h1>
-                <p className="mt-2 text-gray-600">Define the stages leading up to your event</p>
-                <div className="mt-2 text-sm font-medium text-gray-700 bg-white inline-block px-3 py-1 rounded-full border">
-                    Event Name: <span className="font-semibold text-gray-900">{event.name}</span>
-                </div>
+                <h1 className="text-3xl font-bold">Create Agenda</h1>
+                <p className="mt-2 text-gray-600">Define the detailed agenda for your event</p>
 
                 {/* Stepper */}
                 <div className="mt-6 flex justify-center items-center gap-6">
@@ -79,44 +64,44 @@ const CreateTimeline = () => {
                     </div>
                     <div className="h-px w-8 bg-gray-400"></div>
                     <div className="flex items-center gap-2 text-green-600 font-medium">
-                        <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">2</div>
+                        <div className="w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center">✓</div>
                         Timeline
                     </div>
                     <div className="h-px w-8 bg-gray-400"></div>
-                    <div className="flex items-center gap-2 text-gray-400 font-medium">
-                        <div className="w-6 h-6 rounded-full border-2 border-gray-400 flex items-center justify-center">3</div>
+                    <div className="flex items-center gap-2 text-green-600 font-medium">
+                        <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">3</div>
                         Agenda
                     </div>
                 </div>
             </div>
 
-            {/* Timeline Form */}
+            {/* Agenda Form */}
             <div className="max-w-4xl mx-auto mt-10">
-                {stages.map((stage, index) => (
+                {agendas.map((agenda, index) => (
                     <div key={index} className="bg-white rounded-xl p-6 mb-6 shadow relative">
                         {/* Trash Icon */}
                         <button
-                            className="absolute top-4 right-4 text-gray-500 hover:text-red-600"
-                            onClick={() => removeStage(index)}
+                            className="cursor-pointer absolute top-4 right-4 text-gray-500 hover:text-red-600"
+                            onClick={() => removeAgenda(index)}
                         >
                             <FontAwesomeIcon icon={faTrash} />
                         </button>
 
-                        {/* Stage Header */}
+                        {/* Agenda Header */}
                         <div className="flex items-center gap-2 mb-4 text-xl font-semibold">
                             <FontAwesomeIcon icon={faClock} />
-                            Stage {index + 1}
+                            Agenda {index + 1}
                         </div>
 
                         {/* Form Inputs */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Stage Title *</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Agenda Title *</label>
                                 <input
                                     type="text"
                                     className="w-full border border-gray-300 rounded-lg p-2"
-                                    placeholder="e.g., Recruitment, Interview, Selection"
-                                    value={stage.title}
+                                    placeholder="e.g., Opening Ceremony"
+                                    value={agenda.title}
                                     onChange={(e) => handleChange(index, 'title', e.target.value)}
                                 />
                             </div>
@@ -125,40 +110,49 @@ const CreateTimeline = () => {
                                 <input
                                     type="text"
                                     className="w-full border border-gray-300 rounded-lg p-2"
-                                    placeholder="Brief description of this stage"
-                                    value={stage.description}
+                                    placeholder="Brief description"
+                                    value={agenda.description}
                                     onChange={(e) => handleChange(index, 'description', e.target.value)}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Start Time *</label>
                                 <input
                                     type="datetime-local"
                                     className="w-full border border-gray-300 rounded-lg p-2"
-                                    value={stage.startDate}
-                                    onChange={(e) => handleChange(index, 'startDate', e.target.value)}
+                                    value={agenda.startTime}
+                                    onChange={(e) => handleChange(index, 'startTime', e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">End Time *</label>
+                                <input
+                                    type="datetime-local"
+                                    className="w-full border border-gray-300 rounded-lg p-2"
+                                    value={agenda.endTime}
+                                    onChange={(e) => handleChange(index, 'endTime', e.target.value)}
                                 />
                             </div>
                         </div>
                     </div>
                 ))}
 
-                {/* Add Another Stage */}
+                {/* Add Agenda Button */}
                 <div
                     className="border-2 border-dashed border-gray-300 rounded-lg text-center py-6 cursor-pointer hover:bg-gray-50 transition"
-                    onClick={addStage}
+                    onClick={addAgenda}
                 >
                     <FontAwesomeIcon icon={faPlus} className="text-gray-500" />{' '}
-                    <span className="text-gray-700 font-medium">Add Another Stage</span>
+                    <span className="text-gray-700 font-medium">Add Another Agenda</span>
                 </div>
 
                 {/* Save Button */}
                 <div className="text-center mt-8">
                     <button
                         className="cursor-pointer bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition"
-                        onClick={handleSaveTimeline}
+                        onClick={handleSaveAgenda}
                     >
-                        Save Timeline & Create Agenda
+                        Save Agenda & Send Request
                     </button>
                 </div>
             </div>
@@ -166,4 +160,4 @@ const CreateTimeline = () => {
     );
 };
 
-export default CreateTimeline;
+export default CreateAgenda;

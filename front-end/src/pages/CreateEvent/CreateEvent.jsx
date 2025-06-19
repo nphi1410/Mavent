@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-// Đảm bảo eventService.js của bạn đã được cập nhật để xử lý lỗi như đề xuất trước đó
+import React, { useState, useEffect } from "react";
 import { createEvent } from "../../services/eventService";
+import { getAllLocations } from "../../services/eventLocationService";
 import { useNavigate } from "react-router-dom";
 
 const CreateEvent = () => {
@@ -9,11 +9,11 @@ const CreateEvent = () => {
         description: "",
         startDatetime: "", // Khởi tạo là chuỗi rỗng để dễ dàng bind với input datetime-local
         endDatetime: "",   // Khởi tạo là chuỗi rỗng để dễ dàng bind với input datetime-local
-        location: "",
+        locationId: "",
         ddayInfo: "",
         maxMemberNumber: 0,
         maxParticipantNumber: 0,
-        status: "UPCOMING",
+        status: "PENDING",
         bannerUrl: "",
         posterUrl: "",
     });
@@ -23,6 +23,17 @@ const CreateEvent = () => {
     const [loading, setLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
+    const [locations, setLocations] = useState([]);
+
+    useEffect(() => {
+        const fetchLocations = async () => {
+            const data = await getAllLocations();
+            setLocations(data);
+        };
+
+        fetchLocations();
+    }, []);
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -261,16 +272,23 @@ const CreateEvent = () => {
                         <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
                             Địa điểm <span className="text-red-500">*</span>
                         </label>
-                        <input
-                            type="text"
-                            id="location"
-                            name="location"
+                        <select
+                            id="locationId"
+                            name="locationId"
                             className="w-full border border-gray-300 rounded-lg p-2"
-                            value={formData.location}
+                            value={formData.locationId}
                             onChange={handleChange}
                             required
-                        />
+                        >
+                            <option value="">-- Vui lòng chọn địa điểm --</option>
+                            {locations.map((loc) => (
+                                <option key={loc.locationId} value={loc.locationId}>
+                                    {loc.locationName}
+                                </option>
+                            ))}
+                        </select>
                     </div>
+
 
                     {/* D-Day Info */}
                     <div>
@@ -324,21 +342,15 @@ const CreateEvent = () => {
                         <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
                             Trạng thái
                         </label>
-                        <select
+                        <input
+                            type="text"
                             id="status"
                             name="status"
                             className="w-full border border-gray-300 rounded-lg p-2"
                             value={formData.status}
-                            onChange={handleChange}
+                            readOnly
                         >
-                            <option value="UPCOMING">UPCOMING</option>
-                            <option value="REVIEWING">REVIEWING</option>
-                            <option value="PENDING">PENDING</option>
-                            <option value="ONGOING">ONGOING</option>
-                            <option value="ENDED">ENDED</option>
-                            <option value="CANCELLED">CANCELLED</option>
-                            <option value="RECRUITING">RECRUITING</option>
-                        </select>
+                        </input>
                     </div>
 
                     {/* Banner */}
