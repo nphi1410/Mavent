@@ -57,7 +57,7 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
             Pageable pageable
     );
 
-    @Query("""
+    @Query(value = """
                 SELECT 
                     DATE_FORMAT(created_at, '%Y-%m') AS month,
                     COUNT(*) AS totalEvents
@@ -67,7 +67,8 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
                   AND (:status IS NULL OR status != :status)
                 GROUP BY month
                 ORDER BY month DESC
-            """)
+            """, nativeQuery = true)
     List<EventCountDTO> countByMonthWithoutStatus(@Param("status") String status);
+
 
 }
