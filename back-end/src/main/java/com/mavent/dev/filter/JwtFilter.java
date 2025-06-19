@@ -42,7 +42,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
             final String token = authHeader.substring(7);
-            System.out.println("JWT Token: " + token); // Debugging line to log the token
+//            System.out.println("JWT Token: " + token); // Debugging line to log the token
             if (blacklistService.isTokenBlacklisted(token)) {
                 SecurityContextHolder.clearContext();
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token is blacklisted");
@@ -50,15 +50,15 @@ public class JwtFilter extends OncePerRequestFilter {
             }
 
             final String username = jwtUtil.extractUsername(token);
-            System.out.println("Extracted Username: " + username); // Debugging line to log the username
+//            System.out.println("Extracted Username: " + username); // Debugging line to log the username
 
-            if (jwtUtil.isTokenValid(token, accountService.getAccount(username))) {
-                System.out.println("Token is valid for user: " + username); // Debugging line to confirm token validity
-            } else {
+            if (!jwtUtil.isTokenValid(token, accountService.getAccount(username))) {
                 System.out.println("Invalid token for user: " + username); // Debugging line for invalid token
-
-                SecurityContextHolder.getContext().setAuthentication(null);
+//                SecurityContextHolder.getContext().setAuthentication(null);
             }
+//            else {
+//                System.out.println("Token is valid for user: " + username); // Debugging line to confirm token validity
+//            }
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 List<String> roles = jwtUtil.extractRoles(token);
