@@ -24,6 +24,13 @@ public class DepartmentImplement implements DepartmentService {
     }
 
     @Override
+    public DepartmentResponseDTO getDepartmentById(Integer departmentId) {
+        Department department = departmentRepository.findById(departmentId)
+                .orElseThrow(() -> new EntityNotFoundException("Department not found"));
+        return DepartmentMapper.toDTO(department);
+    }
+
+    @Override
     public DepartmentResponseDTO createDepartment(DepartmentRequestDTO departmentRequestDTO) {
         //Convert DTO to entity
         Department department = DepartmentMapper.toEntity(departmentRequestDTO);

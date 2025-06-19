@@ -9,6 +9,8 @@ import java.util.List;
 public interface DepartmentService {
     List<DepartmentResponseDTO> getAllDepartmentsByEvent(Integer eventId);
 
+    DepartmentResponseDTO getDepartmentById(Integer departmentId);
+
     DepartmentResponseDTO createDepartment(DepartmentRequestDTO departmentRequestDTO);
 
     DepartmentResponseDTO updateDepartment(Integer departmentId, DepartmentRequestDTO departmentRequestDTO);

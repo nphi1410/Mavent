@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/departments")
+@RequestMapping("/api/events/{eventId}/departments")
 public class DepartmentController {
 
     private final DepartmentService departmentService;
@@ -29,11 +29,18 @@ public class DepartmentController {
 
     @GetMapping
     public ResponseEntity<List<DepartmentResponseDTO>> getByEvent(
-            @RequestParam Integer eventId) {
+            @PathVariable Integer eventId) {
         List<DepartmentResponseDTO> departments =
                 departmentService.getAllDepartmentsByEvent(eventId);
         return ResponseEntity.ok(departments);
     }
+
+    @GetMapping("/{departmentId}")
+    public ResponseEntity<DepartmentResponseDTO> getDepartmentById(@PathVariable Integer departmentId) {
+        DepartmentResponseDTO departmentResponseDTO = departmentService.getDepartmentById(departmentId);
+        return ResponseEntity.ok(departmentResponseDTO);
+    }
+
 
     @PostMapping
     public ResponseEntity<DepartmentResponseDTO> create(
@@ -41,7 +48,7 @@ public class DepartmentController {
             UriComponentsBuilder uriBuilder) {
         DepartmentResponseDTO created = departmentService.createDepartment(dto);
         URI location = uriBuilder
-                .path("/api/departments/{id}")
+                .path("/api/events/{eventId}/departments/{id}")
                 .buildAndExpand(created.getDepartmentId())
                 .toUri();
         return ResponseEntity
