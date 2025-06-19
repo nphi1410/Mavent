@@ -34,13 +34,15 @@ function Login() {
         const token = response.data.token;
         const decoded = jwtDecode(token);
         const roles = decoded.roles || [];
-        // console.log("Decoded JWT:", decoded);
+        // console.log("Decoded JWT:", decoded;
         // console.log("User roles:", roles);
 
         // Store token and basic info
         sessionStorage.setItem("token", token);
         sessionStorage.setItem("isLoggedIn", "true");
         sessionStorage.setItem("username", decoded.sub);
+        console.log(decoded);
+        
 
         // Redirect based on role
         if (roles.includes("ROLE_SUPER_ADMIN")) {

@@ -15,12 +15,14 @@ const Header = () => {
   const fetchUserProfile = async () => {
     try {
       if (!sessionStorage.getItem("token")) {
-        // navigate("/login"); 
+        navigate("/login");
         return;
       }
       const response = await getUserProfile({ requireAuth: false });
       if (response) {
         setUserData(response);
+        sessionStorage.setItem("fullName", response.fullName);
+        sessionStorage.setItem("accountId", response.id);
       }
     } catch (err) {
       console.error("Error fetching user profile:", err);
@@ -91,7 +93,7 @@ const Header = () => {
                   className="w-full h-full object-cover cursor-pointer"
                 />
               </div>
-              <SideBar isOpen={isOpen} setIsOpen={setIsOpen}/>
+              <SideBar isOpen={isOpen} setIsOpen={setIsOpen} />
             </>
           ) : (
             <span
