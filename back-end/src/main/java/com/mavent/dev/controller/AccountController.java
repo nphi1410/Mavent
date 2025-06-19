@@ -4,13 +4,15 @@ import com.mavent.dev.dto.*;
 import com.mavent.dev.dto.superadmin.AccountDTO;
 import com.mavent.dev.dto.superadmin.EventDTO;
 import com.mavent.dev.config.MailConfig;
+import com.mavent.dev.dto.task.TaskCreateDTO;
+import com.mavent.dev.dto.task.TaskDTO;
+import com.mavent.dev.dto.task.TaskFeedbackDTO;
+import com.mavent.dev.dto.task.TaskStatusUpdateDTO;
 import com.mavent.dev.dto.userAuthentication.*;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.EventAccountRole;
-import com.mavent.dev.entity.Task;
 import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.repository.EventAccountRoleRepository;
-import com.mavent.dev.repository.TaskRepository;
 import com.mavent.dev.service.AccountService;
 import com.mavent.dev.service.EventService;
 import com.mavent.dev.service.JwtBlacklistService;
@@ -26,6 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.mavent.dev.config.CloudConfig;
+import com.mavent.dev.service.globalservice.CloudService;
 
 import javax.naming.AuthenticationException;
 import java.io.IOException;
@@ -62,6 +65,9 @@ public class AccountController {
     @Autowired
     private JwtBlacklistService jwtBlacklistService;
 
+    @Autowired
+    private CloudService cloudService;
+
     @GetMapping("/accounts")
     public ResponseEntity<List<AccountDTO>> getAllAccounts() {
         List<AccountDTO> accounts = accountService.getAllAccounts();
@@ -80,7 +86,7 @@ public class AccountController {
     }
 
     @PostMapping("/public/login")
-    public ResponseEntity<?> authenticate(@RequestBody AuthRequestDTO authRequestDTO, HttpServletRequest request) throws AuthenticationException {
+    public ResponseEntity<?> authenticate(@RequestBody AuthRequestDTO authRequestDTO) throws AuthenticationException {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authRequestDTO.getUsername(), authRequestDTO.getPassword())
         );
@@ -320,19 +326,33 @@ public class AccountController {
         }
 
         try {
-            CloudConfig cloudConfig = new CloudConfig();
-            String folder = "avatars";
-            String fileName = file.getOriginalFilename();
-            String keyName = folder + "/" + fileName;
+            String containerName = "maventcontainer";
 
-            cloudConfig.uploadMultipartFile(file, folder);
 
+            // Get the account to retrieve existing avatar URL if any
             Account account = accountService.getAccount(username);
-            account.setAvatarUrl(keyName);
+            String oldAvatarUrl = account.getAvatarUrl();
+
+            // Upload the new avatar to Azure Blob Storage
+            String fileUrl = cloudService.uploadFile(file, containerName);
+
+            // Extract blob name from the URL for future reference
+            String blobName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
+            String avatarPath = cloudService.getFileUrl(blobName, containerName);
+
+            // Save the new avatar URL to the account
+            account.setAvatarUrl(avatarPath);
             accountService.save(account);
 
+            // Delete old avatar if it exists
+            if (oldAvatarUrl != null && !oldAvatarUrl.isEmpty()) {
+                // Extract old blob name from the path
+                String oldBlobName = oldAvatarUrl.substring(oldAvatarUrl.lastIndexOf("/") + 1);
+                cloudService.deleteFile(oldBlobName, containerName);
+            }
+
             return ResponseEntity.ok().body(Map.of(
-                    "avatarUrl", keyName,
+                    "avatarUrl", avatarPath,
                     "message", "Avatar updated successfully"
             ));
         } catch (IOException e) {
@@ -545,6 +565,90 @@ public class AccountController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error creating task: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/user/tasks/{taskId}")
+    public ResponseEntity<TaskDTO> updateTask(
+            @PathVariable Integer taskId,
+            @RequestBody TaskCreateDTO updateDto,
+            HttpServletRequest request) {
+
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String token = authHeader.substring(7);
+        String username = jwtUtil.extractUsername(token);
+        Account account = accountService.getAccount(username);
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        TaskDTO current = accountService.getTaskDetails(account.getAccountId(), taskId);
+        if (current == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        if (!account.getAccountId().equals(current.getAssignedByAccountId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        TaskDTO updated = accountService.updateTask(taskId, updateDto);
+        return ResponseEntity.ok(updated);
+    }
+
+    @PostMapping("/user/tasks/{taskId}/feedback")
+    public ResponseEntity<?> createTaskFeedback(
+            @PathVariable Integer taskId,
+            @RequestBody TaskFeedbackDTO feedbackDto,
+            HttpServletRequest request) {
+
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String token = authHeader.substring(7);
+        String username = jwtUtil.extractUsername(token);
+        Account account = accountService.getAccount(username);
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        TaskFeedbackDTO created = accountService.createTaskFeedback(
+            taskId,
+            account.getAccountId(),
+            feedbackDto.getComment()
+        );
+
+        if (created == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("You don't have permission to create feedback for this task.");
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @GetMapping("/user/tasks/{taskId}/feedback")
+    public ResponseEntity<List<TaskFeedbackDTO>> viewTaskFeedback(
+            @PathVariable Integer taskId,
+            HttpServletRequest request) {
+
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String token = authHeader.substring(7);
+        String username = jwtUtil.extractUsername(token);
+        var account = accountService.getAccount(username);
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            var feedbacks = accountService.getTaskFeedback(taskId, account.getAccountId());
+            return ResponseEntity.ok(feedbacks);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 

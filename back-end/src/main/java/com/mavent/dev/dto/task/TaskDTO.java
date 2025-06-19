@@ -1,4 +1,4 @@
-package com.mavent.dev.dto;
+package com.mavent.dev.dto.task;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
