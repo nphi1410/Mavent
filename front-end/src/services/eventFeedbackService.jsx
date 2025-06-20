@@ -3,7 +3,7 @@ import axios from 'axios';
 const BASE_URL = 'http://localhost:8080/api/event';
 
 // Hàm fetch feedback theo eventId
-export const getEventFeedback = async (eventId) => {
+export const getEventFeedbackByEventId = async (eventId) => {
     try {
         const response = await axios.get(`${BASE_URL}/${eventId}/feedback`);
         return response.data;
