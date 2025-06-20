@@ -84,6 +84,14 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
     setShowAttendeesModal(false);
   };
 
+  // Hàm xử lý khi attendees được cập nhật
+  const handleAttendeeUpdated = () => {
+    fetchAttendees();
+    if (onTaskUpdated) {
+      onTaskUpdated();
+    }
+  };
+
   // Kiểm tra quyền cập nhật trạng thái
   const canUpdateStatus = (status, newStatus) => {
     if (!currentUser || !task) return false;
@@ -155,7 +163,6 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
   // Hiển thị nút tương ứng với trạng thái và quyền
   const renderActionButton = () => {
     if (!task || !currentUser || updating) return null;
-    console.log(task);
     
     const currentUserId = currentUser.id;
     const isAssignee = currentUserId === task.assignedToAccountId;
@@ -286,7 +293,7 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
                     </div>
                   ) : renderActionButton()}
                 </div>
-              </>
+  </>
             ) : (
               <div className="p-4 text-center">Không tìm thấy thông tin task</div>
             )}
@@ -299,7 +306,11 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
         onClose={handleCloseAttendeesModal}
         attendees={attendees}
         loading={loadingAttendees}
-        taskData={task}  
+        taskData={{
+          ...task,
+          currentUser: currentUser
+        }}
+        onAttendeeUpdated={handleAttendeeUpdated}
       />
     </>
   );

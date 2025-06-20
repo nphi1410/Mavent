@@ -1,106 +1,306 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { getEventMembers, updateTaskAttendees } from '../../services/profileService';
 
-const AttendeesModal = ({ isOpen, onClose, attendees, loading, taskData }) => {
-  if (!isOpen) return null;
-  
-  // Sắp xếp attendees - Leader lên đầu
-  const sortedAttendees = React.useMemo(() => {
-    if (!attendees || !taskData) return attendees || [];
+const AttendeesModal = ({ 
+  isOpen, 
+  onClose, 
+  attendees, 
+  loading, 
+  taskData,
+  onAttendeeUpdated
+}) => {
+  const [editing, setEditing] = useState(false);
+  const [availableMembers, setAvailableMembers] = useState([]);
+  const [selectedAttendees, setSelectedAttendees] = useState([]);
+  const [loadingMembers, setLoadingMembers] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+
+  // Khởi tạo danh sách attendees được chọn từ prop attendees
+  useEffect(() => {
+    if (attendees && attendees.length > 0) {
+      setSelectedAttendees(attendees.map(a => a.accountId));
+    }
+  }, [attendees]);
+
+  // Hàm bắt đầu chỉnh sửa danh sách attendees
+  const handleStartEditing = async () => {
+    if (!taskData || !taskData.eventId) return;
     
-    // Tạo bản sao của mảng để không thay đổi mảng gốc
-    return [...attendees].sort((a, b) => {
-      // Leader luôn đứng đầu
-      if (a.accountId === taskData.assignedToAccountId) return -1;
-      if (b.accountId === taskData.assignedToAccountId) return 1;
-      // Các attendee khác giữ nguyên thứ tự
-      return 0;
+    setEditing(true);
+    setLoadingMembers(true);
+    setError(null);
+    
+    try {
+      const members = await getEventMembers(taskData.eventId);
+      setAvailableMembers(members || []);
+    } catch (err) {
+      console.error("Lỗi khi tải danh sách thành viên:", err);
+      setError("Không thể tải danh sách thành viên sự kiện");
+    } finally {
+      setLoadingMembers(false);
+    }
+  };
+
+  // Hàm để toggle chọn/bỏ chọn attendee
+  const handleAttendeeToggle = (accountId) => {
+    // Không cho phép bỏ chọn người được giao task (leader)
+    if (taskData && accountId === taskData.assignedToAccountId) return;
+    
+    setSelectedAttendees(prev => {
+      if (prev.includes(accountId)) {
+        return prev.filter(id => id !== accountId);
+      } else {
+        return [...prev, accountId];
+      }
     });
-  }, [attendees, taskData]);
+  };
+
+  // Hàm cập nhật danh sách attendees
+  const handleSaveAttendees = async () => {
+    if (!taskData || !taskData.taskId) return;
     
+    setSubmitting(true);
+    setError(null);
+    setSuccess(null);
+    
+    try {
+      await updateTaskAttendees(taskData.taskId, selectedAttendees);
+      setSuccess("Cập nhật người tham gia thành công");
+      setEditing(false);
+      
+      // Thông báo cho component cha để refresh lại danh sách attendees
+      if (onAttendeeUpdated) {
+        onAttendeeUpdated();
+      }
+      
+      // Tự động đóng thông báo thành công sau 3 giây
+      setTimeout(() => {
+        setSuccess(null);
+      }, 3000);
+      
+    } catch (err) {
+      console.error("Lỗi khi cập nhật người tham gia:", err);
+      setError(err.message || "Không thể cập nhật người tham gia");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Hàm hủy chỉnh sửa
+  const handleCancelEditing = () => {
+    setEditing(false);
+    // Reset lại danh sách selected attendees về trạng thái ban đầu
+    if (attendees && attendees.length > 0) {
+      setSelectedAttendees(attendees.map(a => a.accountId));
+    }
+  };
+
+  if (!isOpen) return null;
+
+  const canEdit = taskData && (
+    taskData.assignedToAccountId === (taskData.currentUser?.id || taskData.currentUser?.accountId) || 
+    taskData.assignedByAccountId === (taskData.currentUser?.id || taskData.currentUser?.accountId)
+  );
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[85vh] overflow-y-auto">
         <div className="p-6">
-          <header className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">Danh sách người tham gia</h2>
+          <div className="flex justify-between items-center border-b pb-4 mb-4">
+            <h2 className="text-xl font-semibold">Người tham gia task</h2>
             <button 
-              onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 focus:outline-none"
+              onClick={onClose} 
+              className="text-gray-500 hover:text-gray-700"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-          </header>
+          </div>
 
-          {loading ? (
-            <div className="flex justify-center items-center py-10">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
-          ) : sortedAttendees.length === 0 ? (
-            <div className="text-center text-gray-500 py-10">Không có người tham gia nào.</div>
-          ) : (
-            <div className="bg-white rounded-lg shadow overflow-x-auto">
-              <table className="min-w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STT</th>
-                    <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Họ và tên</th>
-                    <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                    <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vai trò</th>
-                    <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {sortedAttendees.map((attendee, index) => {
-                    const isLeader = taskData && attendee.accountId === taskData.assignedToAccountId;
-                    
-                    return (
-                      <tr 
-                        key={attendee.accountId || index} 
-                        className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} ${isLeader ? 'bg-blue-50' : ''}`}
-                      >
-                        <td className="py-3 px-4">{index + 1}</td>
-                        <td className={`py-3 px-4 ${isLeader ? 'font-semibold' : 'font-medium'}`}>
-                          {attendee.accountName}
-                        </td>
-                        <td className="py-3 px-4">{attendee.email}</td>
-                        <td className="py-3 px-4">
-                          {isLeader ? (
-                            <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                              Leader
-                            </span>
-                          ) : (
-                            <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                              Attendee
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium 
-                            ${attendee.status === 'ACCEPTED' ? 'bg-green-100 text-green-800' : 
-                              attendee.status === 'DECLINED' ? 'bg-red-100 text-red-800' : 
-                              attendee.status === 'ATTENDED' ? 'bg-blue-100 text-blue-800' : 
-                              'bg-yellow-100 text-yellow-800'}`}>
-                            {attendee.status}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+              {error}
             </div>
           )}
 
-          <div className="mt-6 flex justify-end">
-            <button
-              onClick={onClose}
-              className="bg-[#00155c] hover:bg-[#172c70] text-white px-4 py-2 rounded-lg font-medium"
-            >
-              Đóng
-            </button>
-          </div>
+          {success && (
+            <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md">
+              {success}
+            </div>
+          )}
+
+          {!editing ? (
+            <>
+              {loading ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                </div>
+              ) : attendees?.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 gap-3">
+                    {attendees.map(attendee => (
+                      <div 
+                        key={attendee.accountId} 
+                        className={`flex items-center p-3 border rounded-lg ${
+                          taskData && attendee.accountId === taskData.assignedToAccountId 
+                            ? 'bg-blue-50 border-blue-200' 
+                            : 'border-gray-200'
+                        }`}
+                      >
+                        <div className="flex-shrink-0 mr-3">
+                          {attendee.avatarUrl ? (
+                            <img 
+                              src={attendee.avatarUrl} 
+                              alt={attendee.accountName} 
+                              className="h-10 w-10 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-semibold">
+                              {(attendee.accountName || attendee.name || "?").charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-grow">
+                          <div className="font-medium">
+                            {attendee.accountName || attendee.name || "Không có tên"}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {attendee.email || "Không có email"}
+                          </div>
+                        </div>
+                        {taskData && attendee.accountId === taskData.assignedToAccountId && (
+                          <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
+                            Leader
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {canEdit && (
+                    <div className="mt-4 flex justify-center">
+                      <button
+                        onClick={handleStartEditing}
+                        className="px-4 py-2 bg-[#00155c] hover:bg-[#172c70] text-white rounded-lg flex items-center"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                        </svg>
+                        Chỉnh sửa người tham gia
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                  <p>Chưa có người tham gia nào</p>
+                  
+                  {canEdit && (
+                    <button
+                      onClick={handleStartEditing}
+                      className="mt-4 px-4 py-2 bg-[#00155c] hover:bg-[#172c70] text-white rounded-lg"
+                    >
+                      Thêm người tham gia
+                    </button>
+                  )}
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <div className="mb-4 text-sm text-gray-600">
+                Chọn thành viên tham gia task này. Người được giao task (Leader) luôn được đánh dấu tham gia.
+              </div>
+              
+              {loadingMembers ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                </div>
+              ) : (
+                <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-lg mb-4">
+                  {availableMembers.length > 0 ? (
+                    <div className="divide-y">
+                      {availableMembers.map(member => (
+                        <div 
+                          key={member.accountId}
+                          className={`p-3 ${
+                            member.accountId === taskData?.assignedToAccountId
+                              ? 'bg-blue-50'
+                              : 'hover:bg-gray-50'
+                          }`}
+                        >
+                          <label className="flex items-center cursor-pointer w-full">
+                            <input 
+                              type="checkbox"
+                              checked={selectedAttendees.includes(member.accountId)}
+                              onChange={() => handleAttendeeToggle(member.accountId)}
+                              disabled={member.accountId === taskData?.assignedToAccountId}
+                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 rounded"
+                            />
+                            <div className="ml-3 flex items-center flex-grow">
+                              <div className="flex-shrink-0 mr-3">
+                                {member.avatarUrl ? (
+                                  <img 
+                                    src={member.avatarUrl} 
+                                    alt={member.name} 
+                                    className="h-8 w-8 rounded-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-semibold">
+                                    {(member.name || "?").charAt(0).toUpperCase()}
+                                  </div>
+                                )}
+                              </div>
+                              <div>
+                                <div className="font-medium">{member.name || member.fullName}</div>
+                                <div className="text-xs text-gray-500">{member.email}</div>
+                              </div>
+                            </div>
+                            {member.accountId === taskData?.assignedToAccountId && (
+                              <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
+                                Leader
+                              </span>
+                            )}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-4 text-center text-gray-500">
+                      Không có thành viên nào trong sự kiện
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={handleCancelEditing}
+                  disabled={submitting}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={handleSaveAttendees}
+                  disabled={submitting || loadingMembers}
+                  className={`px-4 py-2 rounded-lg ${
+                    submitting || loadingMembers
+                      ? 'bg-gray-400 cursor-not-allowed' 
+                      : 'bg-[#00155c] hover:bg-[#172c70] text-white'
+                  }`}
+                >
+                  {submitting ? 'Đang lưu...' : 'Lưu thay đổi'}
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
