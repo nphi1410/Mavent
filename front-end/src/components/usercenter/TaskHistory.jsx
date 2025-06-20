@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getUserTasks, getUserEvents } from '../../services/profileService';
 import TaskCard from './TaskCard';
 import { useNavigate, Link } from 'react-router-dom';
@@ -9,7 +9,7 @@ const TaskHistory = () => {
 
   const [filters, setFilters] = useState({
     keyword: '',
-    status: '',
+    status: 'DONE,REJECTED,CANCELLED,OVERDUE',
     priority: '',
     sortOrder: '',
     eventName: ''
@@ -23,11 +23,11 @@ const TaskHistory = () => {
   const tasksPerPage = 10;
 
   const navigate = useNavigate();
+  const hasFilteredOnce = useRef(false); // dùng để ngăn filter chạy sau lần load đầu
 
-  // Function to filter completed/inactive tasks
   const filterHistoryTasks = (tasks) => {
-    return tasks.filter(task => 
-      task.status !== 'TODO' && task.status !== 'DOING'
+    return tasks.filter(task =>
+      ['DONE', 'REJECTED', 'CANCELLED', 'OVERDUE'].includes(task.status)
     );
   };
 
@@ -39,13 +39,14 @@ const TaskHistory = () => {
           getUserTasks({}),
           getUserEvents()
         ]);
-        
+
         const taskList = Array.isArray(tasks) ? tasks : [];
         const historyTasks = filterHistoryTasks(taskList);
-        
+
         setDisplayTasks(historyTasks);
         setEvents(Array.isArray(events) ? events : []);
       } catch (err) {
+        console.error('Error in fetchInitialData:', err);
         if (err.response?.status === 401) {
           navigate('/login');
         } else {
@@ -59,28 +60,31 @@ const TaskHistory = () => {
   }, [navigate]);
 
   useEffect(() => {
+    if (!hasFilteredOnce.current) {
+      hasFilteredOnce.current = true;
+      return;
+    }
+
     const fetchFilteredTasks = async () => {
       setFilterLoading(true);
       try {
-        // For history, we only want non-active tasks
-        const statusFilters = filters.status || 'DONE,FEEDBACK_NEEDED,CANCELLED,REJECTED';
-        
+        const statusFilters = filters.status || 'DONE,REJECTED,CANCELLED,OVERDUE';
+
         const response = await getUserTasks({
           ...filters,
-          keyword: filters.keyword || undefined,
           status: statusFilters,
+          keyword: filters.keyword || undefined,
           priority: filters.priority || undefined,
           sortOrder: filters.sortOrder || undefined,
           eventName: filters.eventName || undefined
         });
-        
+
         let filteredTasks = Array.isArray(response) ? response : [];
-        
-        // If no specific status filter is applied, filter for history tasks
+
         if (!filters.status) {
           filteredTasks = filterHistoryTasks(filteredTasks);
         }
-        
+
         setDisplayTasks(filteredTasks);
       } catch (err) {
         console.error('Error fetching filtered tasks:', err);
@@ -110,18 +114,23 @@ const TaskHistory = () => {
     }
   };
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-    </div>
-  );
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
-  if (error) return (
-    <div className="p-10 text-red-600 text-center">
-      Error: {error}
-    </div>
-  );
-
+  if (error) {
+    return (
+      <div className="p-10 text-red-600 text-center">
+        Error: {error}
+      </div>
+    );
+  }
+  console.log('filterLoading:', filterLoading);
+console.log('displayTasks:', displayTasks);
   return (
     <main className="flex-grow p-10 bg-white">
       <div className="p-6 max-w-7xl mx-auto">
@@ -156,9 +165,9 @@ const TaskHistory = () => {
                 options: [
                   { value: '', label: 'All Status' },
                   { value: 'DONE', label: 'Done' },
-                  { value: 'FEEDBACK_NEEDED', label: 'Feedback Needed' },
                   { value: 'REJECTED', label: 'Rejected' },
-                  { value: 'CANCELLED', label: 'Cancelled' }
+                  { value: 'CANCELLED', label: 'Cancelled' },
+                  { value: 'OVERDUE', label: 'Overdue' }  // Thêm OVERDUE nếu được sử dụng
                 ]
               },
               {
