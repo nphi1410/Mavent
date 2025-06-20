@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { getUserTasks, getUserEvents } from '../../services/profileService';
 import TaskCard from './TaskCard';
-import TaskDashboard from './TaskDashboard';
 import { useNavigate, Link } from 'react-router-dom';
 
-const UserTasksContent = () => {
-  const [allTasks, setAllTasks] = useState([]);
+const TaskHistory = () => {
   const [displayTasks, setDisplayTasks] = useState([]);
   const [events, setEvents] = useState([]);
 
@@ -26,9 +24,11 @@ const UserTasksContent = () => {
 
   const navigate = useNavigate();
 
-  // Function to filter active tasks (TODO and DOING)
-  const filterActiveTasks = (tasks) => {
-    return tasks.filter(task => task.status === 'TODO' || task.status === 'DOING');
+  // Function to filter completed/inactive tasks
+  const filterHistoryTasks = (tasks) => {
+    return tasks.filter(task => 
+      task.status !== 'TODO' && task.status !== 'DOING'
+    );
   };
 
   useEffect(() => {
@@ -41,10 +41,9 @@ const UserTasksContent = () => {
         ]);
         
         const taskList = Array.isArray(tasks) ? tasks : [];
-        const activeTasks = filterActiveTasks(taskList);
+        const historyTasks = filterHistoryTasks(taskList);
         
-        setAllTasks(taskList);
-        setDisplayTasks(activeTasks);
+        setDisplayTasks(historyTasks);
         setEvents(Array.isArray(events) ? events : []);
       } catch (err) {
         if (err.response?.status === 401) {
@@ -63,13 +62,13 @@ const UserTasksContent = () => {
     const fetchFilteredTasks = async () => {
       setFilterLoading(true);
       try {
-        // Always filter for active tasks only (TODO and DOING)
-        const statusFilter = filters.status || 'active';
+        // For history, we only want non-active tasks
+        const statusFilters = filters.status || 'DONE,FEEDBACK_NEEDED,CANCELLED,REJECTED';
         
         const response = await getUserTasks({
           ...filters,
           keyword: filters.keyword || undefined,
-          status: statusFilter === 'active' ? 'TODO,DOING' : statusFilter,
+          status: statusFilters,
           priority: filters.priority || undefined,
           sortOrder: filters.sortOrder || undefined,
           eventName: filters.eventName || undefined
@@ -77,9 +76,9 @@ const UserTasksContent = () => {
         
         let filteredTasks = Array.isArray(response) ? response : [];
         
-        // If no specific status filter is applied, filter for active tasks only
-        if (statusFilter === 'active') {
-          filteredTasks = filterActiveTasks(filteredTasks);
+        // If no specific status filter is applied, filter for history tasks
+        if (!filters.status) {
+          filteredTasks = filterHistoryTasks(filteredTasks);
         }
         
         setDisplayTasks(filteredTasks);
@@ -111,32 +110,6 @@ const UserTasksContent = () => {
     }
   };
 
-  // Thêm hàm refreshTasks
-  const refreshTasks = async () => {
-    try {
-      setFilterLoading(true);
-      const response = await getUserTasks({
-        ...filters,
-        keyword: filters.keyword || undefined,
-        status: filters.status === 'active' ? 'TODO,DOING' : filters.status || undefined,
-        priority: filters.priority || undefined,
-        sortOrder: filters.sortOrder || undefined,
-        eventName: filters.eventName || undefined
-      });
-      
-      let filteredTasks = Array.isArray(response) ? response : [];
-      if (filters.status === 'active' || !filters.status) {
-        filteredTasks = filterActiveTasks(filteredTasks);
-      }
-      
-      setDisplayTasks(filteredTasks);
-    } catch (err) {
-      console.error('Error refreshing tasks:', err);
-    } finally {
-      setFilterLoading(false);
-    }
-  };
-
   if (loading) return (
     <div className="flex items-center justify-center h-screen">
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -148,21 +121,16 @@ const UserTasksContent = () => {
       Error: {error}
     </div>
   );
-  // console.log('allTasks:', allTasks);
-
-  // console.log('displayTasks:', displayTasks);
 
   return (
     <main className="flex-grow p-10 bg-white">
       <div className="p-6 max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold">My Active Tasks</h1>
-          <Link to="/profile/tasks/history" className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg">
-            View Task History
+          <h1 className="text-2xl font-bold">Task History</h1>
+          <Link to="/profile/tasks" className="bg-[#00155c] hover:bg-[#172c70] text-white px-4 py-2 rounded-lg">
+            Back to Active Tasks
           </Link>
         </div>
-
-        <TaskDashboard tasks={allTasks} />
 
         {/* Filters */}
         <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
@@ -186,9 +154,11 @@ const UserTasksContent = () => {
                 label: 'Status',
                 name: 'status',
                 options: [
-                  { value: 'active', label: 'Active Tasks' },
-                  { value: 'TODO', label: 'To Do' },
-                  { value: 'DOING', label: 'Doing' }
+                  { value: '', label: 'All Status' },
+                  { value: 'DONE', label: 'Done' },
+                  { value: 'FEEDBACK_NEEDED', label: 'Feedback Needed' },
+                  { value: 'REJECTED', label: 'Rejected' },
+                  { value: 'CANCELLED', label: 'Cancelled' }
                 ]
               },
               {
@@ -260,14 +230,13 @@ const UserTasksContent = () => {
                     key={task.taskId || index}
                     task={task}
                     index={index + 1}
-                    onTaskUpdated={refreshTasks}  // Thêm dòng này
                   />
                 ))}
               </tbody>
             </table>
           </div>
         ) : (
-          <div className="text-center text-gray-500 py-10">No active tasks found.</div>
+          <div className="text-center text-gray-500 py-10">No task history found.</div>
         )}
 
         {/* Pagination */}
@@ -329,4 +298,4 @@ const UserTasksContent = () => {
   );
 };
 
-export default UserTasksContent;
+export default TaskHistory;

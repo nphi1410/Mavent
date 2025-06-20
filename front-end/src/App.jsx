@@ -22,6 +22,8 @@ import ProfilePage from "./pages/ProfilePage";
 import UserEventsPage from "./pages/UserEventsPage";
 import UserDashboardPage from "./pages/UserDashboardPage";
 import UserTasksPage from "./pages/UserTasksPage";
+import TaskHistory from "./components/usercenter/TaskHistory";
+import TaskDetails from "./components/usercenter/TaskDetails";
 import CreateEvent from "./pages/CreateEvent/CreateEvent";
 import CreateTimeline from "./pages/CreateEvent/CreateTimeline";
 import CreateAgenda from "./pages/CreateEvent/CreateAgenda";
@@ -69,7 +71,11 @@ function App() {
             <Route index element={Protect(<ProfilePage />)} />
             <Route path="attended" element={Protect(<UserEventsPage />)} />
             <Route path="dashboard" element={Protect(<UserDashboardPage />)} />
-            <Route path="tasks" element={Protect(<UserTasksPage />)} />
+            <Route path="tasks">
+              <Route index element={Protect(<UserTasksPage />)} />
+              <Route path=":taskId" element={Protect(<TaskDetails />)} />
+              <Route path="history" element={Protect(<TaskHistory />)} />
+            </Route>
           </Route>
         </Route>
         {/* Super Admin Routes */}
