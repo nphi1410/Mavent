@@ -1,8 +1,13 @@
 package com.mavent.dev.service.implement;
 
+import com.mavent.dev.dto.EventMemberDTO;
 import com.mavent.dev.dto.FilterEventDTO;
 import com.mavent.dev.dto.superadmin.EventDTO;
+import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.Event;
+import com.mavent.dev.entity.EventAccountRole;
+import com.mavent.dev.repository.AccountRepository;
+import com.mavent.dev.repository.EventAccountRoleRepository;
 import com.mavent.dev.repository.EventRepository;
 import com.mavent.dev.service.EventService;
 import org.apache.poi.ss.formula.functions.T;
@@ -14,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -129,5 +135,38 @@ public class EventImplement implements EventService {
                 event.getCreatedAt(),
                 event.getUpdatedAt()
         );
+    }
+
+    @Autowired
+    private EventAccountRoleRepository eventAccountRoleRepository;
+
+    @Autowired
+    private AccountRepository accountRepository;
+
+    @Override
+    public boolean checkEventAccess(Integer eventId, Integer accountId) {
+        Optional<EventAccountRole> role = eventAccountRoleRepository.findByEventIdAndAccountId(eventId, accountId);
+        return role.isPresent() && role.get().getIsActive();
+    }
+
+    @Override
+    public List<EventMemberDTO> getEventMembers(Integer eventId) {
+        List<EventAccountRole> members = eventAccountRoleRepository.findByEventId(eventId);
+
+        return members.stream()
+            .map(member -> {
+                EventMemberDTO dto = new EventMemberDTO();
+                Account account = accountRepository.findById(member.getAccountId()).orElse(null);
+                if (account != null) {
+                    dto.setAccountId(account.getAccountId());
+                    dto.setFullName(account.getFullName());
+                    dto.setEmail(account.getEmail());
+                    dto.setAvatarUrl(account.getAvatarUrl());
+                }
+                dto.setRole(member.getEventRole().name());
+                dto.setIsActive(member.getIsActive());
+                return dto;
+            })
+            .collect(Collectors.toList());
     }
 }

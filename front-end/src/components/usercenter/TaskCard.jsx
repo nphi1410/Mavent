@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import TaskDetails from './TaskDetails';
 
 const getPriorityColor = (priority) => {
@@ -38,40 +39,45 @@ const TaskCard = ({ task, index, onTaskUpdated }) => {
     }
   };
 
-  console.log(task);
-  
-
   return (
     <>
-    <tr className={index % 2 === 1 ? 'bg-white' : 'bg-gray-50'}>
-      <td className="py-3 px-4">{index}</td>
-      <td className="py-3 px-4">{task.title}</td>
-      <td className="py-3 px-4">{task.eventName}</td>
-      <td className="py-3 px-4">{new Date(task.dueDate).toLocaleDateString()}</td>
-      <td className="py-3 px-4">
-        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
-          {task.status}
-        </span>
-      </td>
-      <td className={`py-3 px-4 ${getPriorityColor(task.priority)}`}>
-        {task.priority}
-      </td>
-      <td className="py-3 px-4">
-        <button
-          onClick={handleViewDetails}
-          className="text-[#00155c] hover:text-[#172c70] font-medium"
-        >
-          View Details
-        </button>
-      </td>
-    </tr>
-    {/* Modal for task details */}
-      <TaskDetails 
-        taskId={task.taskId} 
-        isOpen={isModalOpen} 
-        onClose={closeModal} 
-        onTaskUpdated={onTaskUpdated}
-      />
+      <tr className={index % 2 === 1 ? 'bg-white' : 'bg-gray-50'}>
+        <td className="py-3 px-4">{index}</td>
+        <td className="py-3 px-4">{task.title}</td>
+        <td className="py-3 px-4">{task.eventName}</td>
+        <td className="py-3 px-4">{new Date(task.dueDate).toLocaleDateString()}</td>
+        <td className="py-3 px-4">
+          <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
+            {task.status}
+          </span>
+        </td>
+        <td className={`py-3 px-4 ${getPriorityColor(task.priority)}`}>
+          {task.priority}
+        </td>
+        <td className="py-3 px-4">
+          <button
+            onClick={handleViewDetails}
+            className="text-[#00155c] hover:text-[#172c70] font-medium"
+          >
+            View Details
+          </button>
+        </td>
+      </tr>
+
+      {/* Sử dụng createPortal để render TaskDetails bên ngoài cấu trúc DOM của bảng */}
+      {isModalOpen &&
+        createPortal(
+          <TaskDetails 
+            taskId={task.taskId}
+            isOpen={isModalOpen}
+            onClose={closeModal}
+            onTaskUpdated={() => {
+              if (onTaskUpdated) onTaskUpdated();
+            }}
+          />,
+          document.body
+        )
+      }
     </>
   );
 };

@@ -161,3 +161,48 @@ export const getTaskAttendees = async (taskId) => {
   }
 };
 
+// Thêm hàm tạo task
+export const createTask = async (taskData) => {
+  try {
+    const response = await Api.post('/user/tasks', taskData);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating task:", error);
+    handleAuthError(error);
+    throw error;
+  }
+};
+
+// Thêm hàm lấy role trong event
+export const getUserRoleInEvent = async (eventId) => {
+  try {
+    const response = await Api.get(`/user/role/${eventId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user role in event:", error);
+    handleAuthError(error);
+    return null;
+  }
+};
+
+export const getEventMembers = async (eventId) => {
+  try {
+    const response = await Api.get(`/events/${eventId}/members`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching event members:", error);
+    handleAuthError(error);
+    return [];
+  }
+};
+
+export const updateTaskAttendees = async (taskId, attendees) => {
+  try {
+    const response = await Api.put(`/user/tasks/${taskId}/attendees`, { attendees });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating task attendees:", error);
+    handleAuthError(error);
+    throw error;
+  }
+};

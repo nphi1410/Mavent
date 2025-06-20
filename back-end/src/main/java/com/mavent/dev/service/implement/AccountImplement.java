@@ -324,6 +324,7 @@ public class AccountImplement implements AccountService, UserDetailsService {
     @Override
     public TaskDTO createTask(TaskCreateDTO taskCreateDTO, Account creator) {
 
+        // Kiểm tra dữ liệu đầu vào - giữ nguyên phần code này
         if (taskCreateDTO.getTitle() == null || taskCreateDTO.getTitle().trim().isEmpty()) {
             throw new IllegalArgumentException("Task title is required");
         }
@@ -334,6 +335,7 @@ public class AccountImplement implements AccountService, UserDetailsService {
             throw new IllegalArgumentException("Due date cannot be in the past");
         }
 
+        // Tạo task mới - giữ nguyên phần code này
         Task task = new Task();
         task.setEventId(taskCreateDTO.getEventId());
         task.setDepartmentId(taskCreateDTO.getDepartmentId());
@@ -350,16 +352,34 @@ public class AccountImplement implements AccountService, UserDetailsService {
 
         Task savedTask = taskRepository.save(task);
 
+        // THÊM: Tự động thêm người được giao task vào danh sách attendees nếu chưa có
+        List<Integer> attendees = new ArrayList<>();
         if (taskCreateDTO.getTaskAttendees() != null && !taskCreateDTO.getTaskAttendees().isEmpty()) {
-            for (Integer attendeeId : taskCreateDTO.getTaskAttendees()) {
-                TaskAttendee taskAttendee = new TaskAttendee();
-                taskAttendee.setTaskId(savedTask.getTaskId());
-                taskAttendee.setAccountId(attendeeId);
-                taskAttendee.setStatus(TaskAttendee.Status.INVITED);
-                taskAttendeeRepository.save(taskAttendee);
-            }
+            attendees.addAll(taskCreateDTO.getTaskAttendees());
         }
-
+        System.out.println("Attendees before adding leader: " + attendees);
+        // Thêm người được giao task (leader) vào danh sách attendees nếu chưa có
+        Integer assignedUserId = taskCreateDTO.getAssignedToAccountId();
+        if (!attendees.contains(assignedUserId)) {
+            attendees.add(assignedUserId);
+        }
+        System.out.println("Attendees after adding leader: " + attendees);
+        // Lưu tất cả attendees vào bảng task_attendees
+        for (Integer attendeeId : attendees) {
+            TaskAttendee taskAttendee = new TaskAttendee();
+            taskAttendee.setTaskId(savedTask.getTaskId());
+            taskAttendee.setAccountId(attendeeId);
+            
+            // Người được giao task sẽ tự động ACCEPTED, những người còn lại ở trạng thái INVITED
+            if (attendeeId.equals(assignedUserId)) {
+                taskAttendee.setStatus(TaskAttendee.Status.ACCEPTED);
+            } else {
+                taskAttendee.setStatus(TaskAttendee.Status.INVITED);
+            }
+            
+            taskAttendeeRepository.save(taskAttendee);
+        }
+        System.out.println("Task attendees saved successfully: " + attendees);
         return convertToTaskDTO(savedTask);
     }
 
@@ -580,6 +600,58 @@ public class AccountImplement implements AccountService, UserDetailsService {
         dto.setCreatedAt(account.getCreatedAt());
         dto.setUpdatedAt(account.getUpdatedAt());
         return dto;
+    }
+
+    @Override
+    @Transactional
+    public void updateTaskAttendees(Integer taskId, Integer assignedToAccountId, List<Integer> attendeeIds) {
+        // Kiểm tra xem task có tồn tại không
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new IllegalArgumentException("Task không tồn tại"));
+        System.out.println("Updating attendees for task ID: " + taskId);
+        // Tạo danh sách attendees mới, đảm bảo leader luôn có trong danh sách
+        List<Integer> newAttendees = new ArrayList<>(attendeeIds);
+        if (!newAttendees.contains(assignedToAccountId)) {
+            newAttendees.add(assignedToAccountId);
+        }
+        System.out.println("New attendees list: " + newAttendees);
+        // Lấy danh sách attendees hiện tại
+        List<TaskAttendee> currentAttendees = taskAttendeeRepository.findByTaskId(taskId);
+        System.out.println("Current attendees before update: " + currentAttendees);
+        // Xóa những attendee không còn trong danh sách mới
+        // (ngoại trừ leader - người luôn phải có trong task)
+        for (TaskAttendee attendee : currentAttendees) {
+            if (!newAttendees.contains(attendee.getAccountId()) && 
+                !attendee.getAccountId().equals(assignedToAccountId)) {
+                taskAttendeeRepository.delete(attendee);
+            }
+        }
+        System.out.println("Current attendees after removal: " + taskAttendeeRepository.findByTaskId(taskId));
+        // Thêm attendees mới
+        for (Integer attendeeId : newAttendees) {
+            // Kiểm tra xem attendee đã tồn tại chưa
+            boolean exists = currentAttendees.stream()
+                    .anyMatch(a -> a.getAccountId().equals(attendeeId));
+            
+            if (!exists) {
+                TaskAttendee newAttendee = new TaskAttendee();
+                newAttendee.setTaskId(taskId);
+                newAttendee.setAccountId(attendeeId);
+                
+                // Người được giao task luôn ở trạng thái ACCEPTED
+                if (attendeeId.equals(assignedToAccountId)) {
+                    newAttendee.setStatus(TaskAttendee.Status.ACCEPTED);
+                } else {
+                    newAttendee.setStatus(TaskAttendee.Status.INVITED);
+                }
+                
+                taskAttendeeRepository.save(newAttendee);
+            }
+        }
+        System.out.println("Attendees updated successfully for task ID: " + taskId);
+        // Cập nhật thời gian sửa đổi của task
+        task.setUpdatedAt(LocalDateTime.now());
+        taskRepository.save(task);
     }
 
 }
