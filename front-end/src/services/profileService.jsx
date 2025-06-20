@@ -147,3 +147,17 @@ export const updateTaskStatus = async (taskId, newStatus) => {
     throw error;
   }
 };
+
+// Thêm hàm này vào cuối file profileService.jsx
+
+export const getTaskAttendees = async (taskId) => {
+  try {
+    const response = await Api.get(`/user/tasks/${taskId}/attendees`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching task attendees:", error);
+    handleAuthError(error);
+    return null;
+  }
+};
+

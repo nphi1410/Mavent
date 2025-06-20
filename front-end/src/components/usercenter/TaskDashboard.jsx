@@ -16,7 +16,7 @@ const TaskDashboard = ({ tasks }) => {
     'Active': tasks.filter(t => t.status === 'TODO').length,
     'Completed': tasks.filter(t => t.status === 'DONE').length,
     'In Progress': tasks.filter(t => t.status === 'DOING').length,
-    'Need-feedback': tasks.filter(t => t.status === 'FEEDBACK_NEEDED').length,
+    'Review': tasks.filter(t => t.status === 'REVIEW').length,
     'Cancelled': tasks.filter(t => t.status === 'CANCELLED' || t.status === 'REJECTED').length
   };
 
@@ -106,7 +106,7 @@ const TaskDashboard = ({ tasks }) => {
         </div>
         <div>
           <div className="text-4xl font-bold">
-            {taskStats['Need-feedback'].count}
+            {taskStats['Review'].count}
           </div>
           <div className="text-gray-600">Need-feedback</div>
         </div>

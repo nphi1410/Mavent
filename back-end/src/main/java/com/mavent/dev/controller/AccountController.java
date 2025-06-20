@@ -4,10 +4,7 @@ import com.mavent.dev.dto.*;
 import com.mavent.dev.dto.superadmin.AccountDTO;
 import com.mavent.dev.dto.superadmin.EventDTO;
 import com.mavent.dev.config.MailConfig;
-import com.mavent.dev.dto.task.TaskCreateDTO;
-import com.mavent.dev.dto.task.TaskDTO;
-import com.mavent.dev.dto.task.TaskFeedbackDTO;
-import com.mavent.dev.dto.task.TaskStatusUpdateDTO;
+import com.mavent.dev.dto.task.*;
 import com.mavent.dev.dto.userAuthentication.*;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.EventAccountRole;
@@ -449,6 +446,38 @@ public class AccountController {
             return ResponseEntity.ok(taskDetails);
         } catch (Exception e) {
             return ResponseEntity.status(500).build();
+        }
+    }
+
+    @GetMapping("/user/tasks/{taskId}/attendees")
+    public ResponseEntity<?> getTaskAttendees(
+            @PathVariable Integer taskId,
+            HttpServletRequest request) {
+
+        // Authenticate user
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String token = authHeader.substring(7);
+        String username = jwtUtil.extractUsername(token);
+        Account account = accountService.getAccount(username);
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        // Check if the user has access to this task (creator or assignee)
+        TaskDTO task = accountService.getTaskDetails(account.getAccountId(), taskId);
+        if (task == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        // Get the task attendees
+        try {
+            List<TaskAttendeeDTO> attendees = accountService.getTaskAttendees(taskId);
+            return ResponseEntity.ok(attendees);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 

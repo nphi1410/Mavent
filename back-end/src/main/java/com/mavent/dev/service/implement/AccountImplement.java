@@ -1,5 +1,6 @@
 package com.mavent.dev.service.implement;
 
+import com.mavent.dev.dto.task.TaskAttendeeDTO;
 import com.mavent.dev.dto.task.TaskFeedbackDTO;
 import com.mavent.dev.entity.*;
 import com.mavent.dev.dto.task.TaskCreateDTO;
@@ -24,15 +25,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.Comparator;
 
 
 @Service
@@ -233,9 +230,15 @@ public class AccountImplement implements AccountService, UserDetailsService {
     public List<TaskDTO> getUserTasks(Integer accountId, String status, String priority, String keyword, String sortOrder, String eventName) {
         List<TaskDTO> tasks = taskRepository.findTasksWithEventAndDepartment(accountId);
 
-        // Filter by status
+        // Filter by status (multi)
         if (status != null && !status.isBlank()) {
-            tasks = tasks.stream().filter(t -> t.getStatus().equalsIgnoreCase(status)).toList();
+            List<String> statusList = Arrays.stream(status.split(","))
+                    .map(String::trim)
+                    .map(String::toUpperCase)
+                    .toList();
+            tasks = tasks.stream()
+                    .filter(t -> statusList.contains(t.getStatus().toUpperCase()))
+                    .toList();
         }
 
         // Filter by priority
@@ -246,13 +249,17 @@ public class AccountImplement implements AccountService, UserDetailsService {
         // Filter by event name
         if (eventName != null && !eventName.isBlank()) {
             String lowerEventName = eventName.toLowerCase();
-            tasks = tasks.stream().filter(t -> t.getEventName() != null && t.getEventName().toLowerCase().contains(lowerEventName)).toList();
+            tasks = tasks.stream()
+                    .filter(t -> t.getEventName() != null && t.getEventName().toLowerCase().contains(lowerEventName))
+                    .toList();
         }
 
         // Search by keyword (in title)
         if (keyword != null && !keyword.isBlank()) {
             String lowerKeyword = keyword.toLowerCase();
-            tasks = tasks.stream().filter(t -> t.getTitle().toLowerCase().contains(lowerKeyword)).toList();
+            tasks = tasks.stream()
+                    .filter(t -> t.getTitle().toLowerCase().contains(lowerKeyword))
+                    .toList();
         }
 
         // Sort by dueDate
@@ -265,6 +272,35 @@ public class AccountImplement implements AccountService, UserDetailsService {
         }
 
         return tasks;
+    }
+
+
+    // Add to AccountImplement.java
+    @Override
+    public List<TaskAttendeeDTO> getTaskAttendees(Integer taskId) {
+        // Verify task exists
+        Task task = taskRepository.findById(taskId)
+            .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
+
+        // Get all attendees for this task
+        List<TaskAttendee> attendees = taskAttendeeRepository.findByTaskId(taskId);
+
+        return attendees.stream().map(attendee -> {
+            TaskAttendeeDTO dto = new TaskAttendeeDTO();
+            dto.setTaskId(attendee.getTaskId());
+            dto.setAccountId(attendee.getAccountId());
+            dto.setStatus(attendee.getStatus().name());
+
+            // Fetch account details
+            Account account = accountRepository.findById(attendee.getAccountId()).orElse(null);
+            if (account != null) {
+                dto.setAccountName(account.getFullName());
+                dto.setEmail(account.getEmail());
+                dto.setAvatarUrl(account.getAvatarUrl());
+            }
+
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     @Override

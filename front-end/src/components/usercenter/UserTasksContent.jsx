@@ -4,9 +4,17 @@ import TaskCard from './TaskCard';
 import TaskDashboard from './TaskDashboard';
 import { useNavigate, Link } from 'react-router-dom';
 
+const parseStatus = (status) => {
+  if (status === 'active') return ['TODO', 'DOING', 'REVIEW'];
+  if (!status) return [];
+  return [status];
+};
+
+
 const UserTasksContent = () => {
   const [allTasks, setAllTasks] = useState([]);
   const [displayTasks, setDisplayTasks] = useState([]);
+  const [filteredTasks, setFilteredTasks] = useState([]); // Thêm state để lưu tasks sau khi lọc
   const [events, setEvents] = useState([]);
 
   const [filters, setFilters] = useState({
@@ -28,7 +36,7 @@ const UserTasksContent = () => {
 
   // Function to filter active tasks (TODO and DOING)
   const filterActiveTasks = (tasks) => {
-    return tasks.filter(task => task.status === 'TODO' || task.status === 'DOING');
+    return tasks.filter(task => task.status === 'TODO' || task.status === 'DOING' || task.status === 'REVIEW');
   };
 
   useEffect(() => {
@@ -39,10 +47,10 @@ const UserTasksContent = () => {
           getUserTasks({}),
           getUserEvents()
         ]);
-        
+
         const taskList = Array.isArray(tasks) ? tasks : [];
         const activeTasks = filterActiveTasks(taskList);
-        
+
         setAllTasks(taskList);
         setDisplayTasks(activeTasks);
         setEvents(Array.isArray(events) ? events : []);
@@ -63,37 +71,50 @@ const UserTasksContent = () => {
     const fetchFilteredTasks = async () => {
       setFilterLoading(true);
       try {
-        // Always filter for active tasks only (TODO and DOING)
-        const statusFilter = filters.status || 'active';
-        
+        // Xử lý status
+        const statusList = parseStatus(filters.status);
+        const statusString = statusList.join(',');
+
         const response = await getUserTasks({
           ...filters,
           keyword: filters.keyword || undefined,
-          status: statusFilter === 'active' ? 'TODO,DOING' : statusFilter,
+          status: statusString || undefined,
           priority: filters.priority || undefined,
           sortOrder: filters.sortOrder || undefined,
           eventName: filters.eventName || undefined
         });
-        
-        let filteredTasks = Array.isArray(response) ? response : [];
-        
-        // If no specific status filter is applied, filter for active tasks only
-        if (statusFilter === 'active') {
-          filteredTasks = filterActiveTasks(filteredTasks);
+
+        let fetchedTasks = Array.isArray(response) ? response : [];
+
+        // Lưu tất cả các task sau khi lọc (cho dashboard)
+        setFilteredTasks(fetchedTasks);
+
+        // Lọc lại để chỉ hiển thị active tasks (TODO, DOING, REVIEW)
+        // QUAN TRỌNG: Luôn áp dụng filters này trừ khi rõ ràng đã chọn status khác
+        if (!filters.status || filters.status === 'active') {
+          fetchedTasks = filterActiveTasks(fetchedTasks);
         }
-        
-        setDisplayTasks(filteredTasks);
+
+        setDisplayTasks(fetchedTasks);
       } catch (err) {
         console.error('Error fetching filtered tasks:', err);
         setDisplayTasks([]);
+        setFilteredTasks([]);
       } finally {
         setFilterLoading(false);
       }
     };
 
-    const timeoutId = setTimeout(fetchFilteredTasks, 300);
-    return () => clearTimeout(timeoutId);
-  }, [filters]);
+    // Chỉ thực hiện filter khi có ít nhất một điều kiện lọc
+    if (filters.status || filters.priority || filters.keyword || filters.eventName || filters.sortOrder) {
+      const timeoutId = setTimeout(fetchFilteredTasks, 300);
+      return () => clearTimeout(timeoutId);
+    } else {
+      // Nếu không có điều kiện lọc, hiển thị các task active (mặc định)
+      setDisplayTasks(filterActiveTasks(allTasks));
+    }
+  }, [filters, allTasks]);
+
 
   const indexOfLastTask = currentPage * tasksPerPage;
   const indexOfFirstTask = indexOfLastTask - tasksPerPage;
@@ -115,21 +136,30 @@ const UserTasksContent = () => {
   const refreshTasks = async () => {
     try {
       setFilterLoading(true);
+
+      const statusList = parseStatus(filters.status);
+      const statusString = statusList.join(',');
+
       const response = await getUserTasks({
         ...filters,
         keyword: filters.keyword || undefined,
-        status: filters.status === 'active' ? 'TODO,DOING' : filters.status || undefined,
+        status: statusString || undefined,
         priority: filters.priority || undefined,
         sortOrder: filters.sortOrder || undefined,
         eventName: filters.eventName || undefined
       });
+
+      let fetchedTasks = Array.isArray(response) ? response : [];
       
-      let filteredTasks = Array.isArray(response) ? response : [];
+      // Cập nhật filteredTasks cho dashboard
+      setFilteredTasks(fetchedTasks);
+      
+      // Lọc cho display tasks nếu cần
       if (filters.status === 'active' || !filters.status) {
-        filteredTasks = filterActiveTasks(filteredTasks);
+        fetchedTasks = filterActiveTasks(fetchedTasks);
       }
-      
-      setDisplayTasks(filteredTasks);
+
+      setDisplayTasks(fetchedTasks);
     } catch (err) {
       console.error('Error refreshing tasks:', err);
     } finally {
@@ -148,9 +178,9 @@ const UserTasksContent = () => {
       Error: {error}
     </div>
   );
-  // console.log('allTasks:', allTasks);
+  console.log('allTasks:', allTasks);
 
-  // console.log('displayTasks:', displayTasks);
+  console.log('displayTasks:', displayTasks);
 
   return (
     <main className="flex-grow p-10 bg-white">
@@ -162,7 +192,11 @@ const UserTasksContent = () => {
           </Link>
         </div>
 
-        <TaskDashboard tasks={allTasks} />
+        {/* Thay đổi từ allTasks sang filteredTasks */}
+        <TaskDashboard 
+          tasks={filters.eventName || filters.priority || filters.keyword ? filteredTasks : allTasks} 
+          isFiltered={!!(filters.eventName || filters.priority || filters.keyword)}
+        />
 
         {/* Filters */}
         <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
@@ -186,7 +220,7 @@ const UserTasksContent = () => {
                 label: 'Status',
                 name: 'status',
                 options: [
-                  { value: 'active', label: 'Active Tasks' },
+                  { value: '', label: 'Active Tasks' },
                   { value: 'TODO', label: 'To Do' },
                   { value: 'DOING', label: 'Doing' }
                 ]
@@ -214,7 +248,7 @@ const UserTasksContent = () => {
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2">
                   <svg className="h-4 w-4 fill-current text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                    <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+                    <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                   </svg>
                 </div>
               </div>
@@ -231,7 +265,7 @@ const UserTasksContent = () => {
             />
             <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
               <svg className="h-4 w-4 fill-current text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"/>
+                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
               </svg>
             </div>
           </div>
@@ -277,11 +311,10 @@ const UserTasksContent = () => {
               <button
                 onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
-                className={`px-3 py-1 rounded ${
-                  currentPage === 1 
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                className={`px-3 py-1 rounded ${currentPage === 1
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     : 'bg-[#00155c] text-white hover:bg-[#172c70]'
-                }`}
+                  }`}
               >
                 Previous
               </button>
@@ -301,7 +334,7 @@ const UserTasksContent = () => {
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2">
                     <svg className="h-4 w-4 fill-current text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                     </svg>
                   </div>
                 </div>
@@ -313,11 +346,10 @@ const UserTasksContent = () => {
               <button
                 onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                 disabled={currentPage === totalPages}
-                className={`px-3 py-1 rounded ${
-                  currentPage === totalPages 
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                className={`px-3 py-1 rounded ${currentPage === totalPages
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     : 'bg-[#00155c] text-white hover:bg-[#172c70]'
-                }`}
+                  }`}
               >
                 Next
               </button>
