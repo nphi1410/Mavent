@@ -17,6 +17,7 @@ public class EventDTO {
     private LocalDateTime startDatetime;
     private LocalDateTime endDatetime;
     private String location;
+    private Integer locationId;
     private String ddayInfo;
     private Integer maxMemberNumber;
     private Integer maxParticipantNumber;

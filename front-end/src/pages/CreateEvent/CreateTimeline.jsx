@@ -8,7 +8,7 @@ import { getEventById } from '../../services/eventService';
 const CreateTimeline = () => {
     const { eventId } = useParams();
     const [event, setEvent] = useState('null');
-    // const navigate = useNavigate();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchEvent = async () => {
@@ -52,11 +52,9 @@ const CreateTimeline = () => {
                     timelineDatetime: stage.startDate, // make sure it's like: 2025-06-15T10:00
                     // createdByAccountId: accountId
                 };
-
-                console.log("Sending DTO:", dto);
                 await createTimelineItem(eventId, dto);
             }
-            alert("Timeline created successfully!");
+            navigate(`/create-event/${eventId}/create-agenda`);
         } catch (error) {
             console.error("Error:", error.response?.data || error.message);
             alert("Error creating timeline. Please try again.");

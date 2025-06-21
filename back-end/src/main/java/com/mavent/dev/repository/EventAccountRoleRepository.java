@@ -1,6 +1,7 @@
 package com.mavent.dev.repository;
 
-
+import com.mavent.dev.dto.EventCountDTO;
+import com.mavent.dev.dto.event.EventAccountRoleDTO;
 import com.mavent.dev.entity.EventAccountRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +39,46 @@ public interface EventAccountRoleRepository extends JpaRepository<EventAccountRo
      * @return list of event-account roles for the account
      */
     List<EventAccountRole> findByAccountId(Integer accountId);
+
+    /**
+     * Find all roles for a specific account using composite key.
+     *
+     * @param accountId the account ID
+     * @return page of event-account roles for the account
+     */
+    @Query(
+            value = """
+                    SELECT 
+                      ear.created_at AS roleCreatedAt,
+                      ear.department_id,
+                      ear.event_role,
+                      ear.is_active,
+                      ear.updated_at AS roleUpdatedAt,
+                      e.event_id,
+                      e.name,
+                      e.start_datetime,
+                      e.end_datetime,
+                      e.status,
+                      e.created_by_account_id,
+                      e.banner_url,
+                      e.poster_url,
+                      e.location_id
+                    FROM event_account_role ear
+                    JOIN events e ON ear.event_id = e.event_id
+                    WHERE ear.account_id = :accountId
+                      AND e.end_datetime <= NOW()
+                    """,
+            countQuery = """
+                    SELECT COUNT(*)
+                    FROM event_account_role ear
+                    JOIN events e ON ear.event_id = e.event_id
+                    WHERE ear.account_id = :accountId
+                      AND e.end_datetime <= NOW()
+                      AND e.is_deleted = false
+                    """,
+            nativeQuery = true
+    )
+    Page<EventAccountRoleDTO> findByAccountId(@Param("accountId") Integer accountId, Pageable pageable);
 
     /**
      * Find roles by event and account using composite key.
@@ -93,20 +134,6 @@ public interface EventAccountRoleRepository extends JpaRepository<EventAccountRo
      */
     @Query("SELECT COUNT(ear) > 0 FROM EventAccountRole ear WHERE ear.eventId = :eventId AND ear.accountId = :accountId AND ear.eventRole = :eventRole")
     boolean hasRoleInEvent(@Param("eventId") Integer eventId, @Param("accountId") Integer accountId, @Param("eventRole") EventAccountRole.EventRole eventRole);    /**
-     * Check if an account is an organizer of an event.
-     * @param eventId the event ID
-     * @param accountId the account ID
-     * @return true if the account is an organizer of the event, false otherwise
-     */    @Query("SELECT COUNT(ear) > 0 FROM EventAccountRole ear WHERE ear.eventId = :eventId AND ear.accountId = :accountId AND ear.eventRole = 'ADMIN'")
-    boolean isOrganizerOfEvent(@Param("eventId") Integer eventId, @Param("accountId") Integer accountId);
-
-    /**
-     * Check if an account is a participant in an event.
-     * @param eventId the event ID
-     * @param accountId the account ID
-     * @return true if the account is a participant in the event, false otherwise
-     */    @Query("SELECT COUNT(ear) > 0 FROM EventAccountRole ear WHERE ear.eventId = :eventId AND ear.accountId = :accountId AND ear.eventRole = 'PARTICIPANT'")
-    boolean isParticipantInEvent(@Param("eventId") Integer eventId, @Param("accountId") Integer accountId);
 
     /**
      * Count participants for an event.
@@ -183,4 +210,22 @@ public interface EventAccountRoleRepository extends JpaRepository<EventAccountRo
                                                     @Param("startDate") java.util.Date startDate,
                                                     @Param("endDate") java.util.Date endDate,
                                                     Pageable pageable);
+
+    @Query(value = """
+                SELECT 
+                    DATE_FORMAT(created_at, '%Y-%m') AS yearMonth,
+                    COUNT(*) AS totalAttendingEvent
+                FROM event_account_role
+                WHERE created_at >= DATE_FORMAT(CURDATE() - INTERVAL 5 MONTH, '%Y-%m-01')
+                  AND created_at <  DATE_FORMAT(CURDATE() + INTERVAL 1 MONTH, '%Y-%m-01')
+                  AND (:accountId IS NULL OR account_id = :accountId)
+                  AND (:eventRole IS NULL OR event_role = :eventRole)
+                GROUP BY yearMonth
+                ORDER BY yearMonth DESC
+            """, nativeQuery = true)
+    List<EventCountDTO> countByAccountId(
+            @Param("accountId") Integer accountId,
+            @Param("eventRole") String eventRole
+    );
+
 }

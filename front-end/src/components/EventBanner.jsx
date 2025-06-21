@@ -2,11 +2,15 @@ import { faCalendar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useState } from "react";
 import { getAccountById } from "../services/accountService";
+import { useNavigate } from "react-router-dom";
+import { registerEvent } from "../services/eventService";
 
 const EventBanner = ({ eventData }) => {
   const [createAccount, setCreateAccount] = useState(null);
-  const PARTICIPANT_ROLE = "participant";
-  const MEMBER_ROLE = "member";
+  const navigate = useNavigate();
+  const PARTICIPANT_ROLE = "PARTICIPANT";
+  const MEMBER_ROLE = "MEMBER";
+  const RECRUITING_STATUS = "RECRUITING";
 
   useEffect(() => {
     const getAccount = async () => {
@@ -23,20 +27,36 @@ const EventBanner = ({ eventData }) => {
     getAccount();
   }, [eventData?.createBy]);
 
-  const handleRegister = (role) => {
+  const handleRegister = async (role) => {
     //check user has logged in
     //if not logged in show message you have to login first, then redirect to login page
     if (!sessionStorage.getItem("isLoggedIn")) {
-      console.log("You have to login first");
+      alert("You have to login first");
+      navigate("/login");
       return;
     }
 
-    if (role === "participant") {
-      //add to registered event dashboard
+    const registerDTO = {
+      eventId: eventData.eventId,
+      username: sessionStorage.getItem("username"),
+      role: role,
+      departmentId: null,
+    };
+
+    if (role === PARTICIPANT_ROLE) {
+      const responseData = await registerEvent(registerDTO);
+      if(responseData.status === 200) {
+        alert("Register successfully!");
+      }
+      console.log("Response from register event:", responseData);
+      
       return;
     }
-    //insert event_account_role
-    //if register as a member, add to registered event dashboard with role member and status pending for interview
+
+    if (role === MEMBER_ROLE) {
+      console.log("Registering for role:", role);
+      console.log("Choose department");
+    }
     console.log("Registering for role:", role);
   };
 
@@ -73,11 +93,11 @@ const EventBanner = ({ eventData }) => {
           <div className="flex flex-col sm:flex-row gap-4 mt-4">
             <button
               onClick={() => handleRegister(PARTICIPANT_ROLE)}
-              className="bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-2 px-4 rounded text-sm sm:text-base"
+              className="flex-1 bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-2 px-4 rounded text-sm sm:text-base"
             >
               Participate Now
             </button>
-            {eventData.status === "RECRUITING" && (
+            {eventData.status === RECRUITING_STATUS && (
               <button
                 onClick={() => handleRegister(MEMBER_ROLE)}
                 className="bg-gray-200 hover:bg-gray-300 transition text-gray-800 font-semibold py-2 px-4 rounded text-sm sm:text-base"

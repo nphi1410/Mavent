@@ -1,4 +1,4 @@
-package com.mavent.dev.dto;
+package com.mavent.dev.dto.task;
 
 public class TaskStatusUpdateDTO {
     private String status;

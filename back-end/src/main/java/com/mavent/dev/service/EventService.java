@@ -1,5 +1,6 @@
 package com.mavent.dev.service;
 
+import com.mavent.dev.dto.EventMemberDTO;
 import com.mavent.dev.dto.FilterEventDTO;
 import com.mavent.dev.dto.superadmin.EventDTO;
 import com.mavent.dev.entity.Event;
@@ -11,12 +12,13 @@ import java.util.List;
 public interface EventService {
     List<EventDTO> getAllEvents();
 
-
     Page<FilterEventDTO> getFilterEvents(String name, String status, List<Integer> tagIds, String sortType, int page, int size, String type, boolean isTrending);
-
 
     EventDTO getEventById(Integer eventId);
 
+    boolean checkEventAccess(Integer eventId, Integer accountId);
+
+    List<EventMemberDTO> getEventMembers(Integer eventId);
 
     Event getEventEntityById(Integer eventId);
 

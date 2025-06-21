@@ -1,5 +1,7 @@
 package com.mavent.dev.service.implement;
 
+import com.mavent.dev.dto.event.EventAccountRoleDTO;
+import com.mavent.dev.entity.Event;
 import com.mavent.dev.entity.EventAccountRole;
 import com.mavent.dev.repository.EventAccountRoleRepository;
 import com.mavent.dev.service.EventAccountRoleService;
@@ -34,6 +36,11 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
     }
 
     @Override
+    public Page<EventAccountRoleDTO> getMembersByAccountIdWithPagination(Integer accountId, Pageable pageable) {
+        return eventAccountRoleRepository.findByAccountId(accountId,pageable);
+    }
+
+    @Override
     public Page<EventAccountRole> searchMembersInEvent(Integer eventId, String searchTerm, Pageable pageable) {
         return eventAccountRoleRepository.findByEventIdWithSearch(eventId, searchTerm, pageable);
     }
@@ -64,7 +71,7 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
             return eventAccountRoleRepository.save(roleToUpdate);
         }
         return null;
-        }
+    }
 
     @Override
     public boolean removeMemberFromEvent(EventAccountRole eventAccountRole) {
@@ -76,7 +83,6 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
         return false;
     }
 
-
     @Override
     public boolean activateDeactivateMember(EventAccountRole eventAccountRole, boolean isActive) {
         Optional<EventAccountRole> member = eventAccountRoleRepository.findByEventIdAndAccountId(eventAccountRole.getEventId(), eventAccountRole.getAccountId());
@@ -87,60 +93,41 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
             return true;
         }
         return false;
-        }
-
     }
 
-//    @Override
-//    public long countMembersByEventId(Integer eventId) {
-//        return eventAccountRoleRepository.findByEventId(eventId).size();
-//    }
-//
-//    @Override
-//    public long countMembersByRole(Integer eventId, EventAccountRole.EventRole role) {
-//        return eventAccountRoleRepository.countByEventIdAndRole(eventId, role);
-//    }
-//
-//    @Override
-//    public long countActiveMembersByEventId(Integer eventId) {
-//        return eventAccountRoleRepository.countByEventIdAndActiveStatus(eventId, true);
-//    }
-//
-//    @Override
-//    public boolean isMemberInEvent(Integer eventId, Integer accountId) {
-//        return eventAccountRoleRepository.existsByEventIdAndAccountId(eventId, accountId);
-//    }
-//
-//    @Override
-//    public boolean hasRoleInEvent(Integer eventId, Integer accountId, EventAccountRole.EventRole role) {
-//        return eventAccountRoleRepository.hasRoleInEvent(eventId, accountId, role);
-//    }
-//
-//    @Override
-//    public boolean isOrganizerOfEvent(Integer eventId, Integer accountId) {
-//        return eventAccountRoleRepository.isOrganizerOfEvent(eventId, accountId);
-//    }
-//
-//    @Override
-//    public boolean isParticipantInEvent(Integer eventId, Integer accountId) {
-//        return eventAccountRoleRepository.isParticipantInEvent(eventId, accountId);
-//    }
-//
-//    @Override
-//    public Page<EventAccountRole> getMembersWithFilters(Integer eventId, Boolean isActive,
-//                                                        EventAccountRole.EventRole role,
-//                                                        Integer departmentId,
-//                                                        String searchTerm,
-//                                                        java.util.Date startDate,
-//                                                        java.util.Date endDate,
-//                                                        Pageable pageable) {
-//    public Page<EventAccountRole> getMembersWithFilters(Integer eventId, Boolean isActive,
-//                                                        EventAccountRole.EventRole role,
-//                                                        Integer departmentId,
-//                                                        String searchTerm,
-//                                                        java.util.Date startDate,
-//                                                        java.util.Date endDate,
-//                                                        Pageable pageable) {
-//        return eventAccountRoleRepository.findByEventIdWithFilters(eventId, isActive, role, departmentId, searchTerm, startDate, endDate, pageable);
-//    }
+    @Override
+    public long countMembersByEventId(Integer eventId) {
+        return eventAccountRoleRepository.findByEventId(eventId).size();
+    }
 
+    @Override
+    public long countMembersByRole(Integer eventId, EventAccountRole.EventRole role) {
+        return eventAccountRoleRepository.countByEventIdAndRole(eventId, role);
+    }
+
+    @Override
+    public long countActiveMembersByEventId(Integer eventId) {
+        return eventAccountRoleRepository.countByEventIdAndActiveStatus(eventId, true);
+    }
+
+    @Override
+    public boolean isMemberInEvent(Integer eventId, Integer accountId) {
+        return eventAccountRoleRepository.existsByEventIdAndAccountId(eventId, accountId);
+    }
+
+    @Override
+    public boolean hasRoleInEvent(Integer eventId, Integer accountId, EventAccountRole.EventRole role) {
+        return eventAccountRoleRepository.hasRoleInEvent(eventId, accountId, role);
+    }
+
+    @Override
+    public Page<EventAccountRole> getMembersWithFilters(Integer eventId, Boolean isActive,
+                                                        EventAccountRole.EventRole role,
+                                                        Integer departmentId,
+                                                        String searchTerm,
+                                                        java.util.Date startDate,
+                                                        java.util.Date endDate,
+                                                        Pageable pageable) {
+        return eventAccountRoleRepository.findByEventIdWithFilters(eventId, isActive, role, departmentId, searchTerm, startDate, endDate, pageable);
+    }
+}
