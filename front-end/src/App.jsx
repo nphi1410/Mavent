@@ -29,6 +29,7 @@ import CreateAgenda from "./pages/CreateEvent/CreateAgenda";
 // Super Admin
 import SuperAdminDashboard from "./pages/superadmin/SuperAdminDashBoard";
 import SuperAdminManageEvents from "./pages/superadmin/SuperAdminManageEvents";
+import SuperAdminPendingEvents from "./pages/superadmin/SuperAdminPendingEvents";
 import SuperAdminManageUsers from "./pages/superadmin/SuperAdminManageUsers";
 import SuperAdminViewEventDetails from "./pages/superadmin/SuperAdminViewEventDetails";
 import SuperAdminEditEvent from "./pages/superadmin/SuperAdminEditEvent";
@@ -76,6 +77,7 @@ function App() {
           <Route path="superadmin">
             <Route index element={SuperAdmin(<SuperAdminDashboard />)} />
             <Route path="events" element={SuperAdmin(<SuperAdminManageEvents />)} />
+            <Route path="events/pending" element={SuperAdmin(<SuperAdminPendingEvents />)} />
             <Route path="users" element={SuperAdmin(<SuperAdminManageUsers />)} />
             <Route
               path="event-detail/:eventId"
