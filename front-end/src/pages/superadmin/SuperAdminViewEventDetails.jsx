@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarAlt, faUser, faClock, faLocationDot } from "@fortawesome/free-solid-svg-icons";
 import SuperAdminSidebar from "../../components/superadmin/SuperAdminSidebar";
 import { getEventById } from "../../services/eventService";
+import SuperAdminHeader from "../../components/superadmin/SuperAdminHeader";
 
 function SuperAdminViewEventDetails() {
     const { eventId } = useParams(); //lấy eventId từ URL
@@ -22,6 +23,7 @@ function SuperAdminViewEventDetails() {
 
     return (
         <div className="h-screen w-screen flex bg-amber-50">
+            <SuperAdminHeader />
             <SuperAdminSidebar />
             <div className='flex flex-col flex-1'>
                 <main className='flex-1 overflow-y-auto p-10 bg-gray-100'>

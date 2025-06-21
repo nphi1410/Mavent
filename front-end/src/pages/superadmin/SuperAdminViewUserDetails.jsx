@@ -7,6 +7,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import SuperAdminSidebar from '../../components/superadmin/SuperAdminSidebar';
 import { getAccountById } from '../../services/accountService';
+import SuperAdminHeader from '../../components/superadmin/SuperAdminHeader';
 
 const SuperAdminViewUserDetails = () => {
     const { id } = useParams();
@@ -30,6 +31,7 @@ const SuperAdminViewUserDetails = () => {
 
     return (
         <div className="h-screen w-screen flex bg-amber-50">
+            <SuperAdminHeader />
             <SuperAdminSidebar />
             <div className="flex flex-col flex-1">
                 <main className="flex-1 overflow-y-auto p-10 bg-gray-100">

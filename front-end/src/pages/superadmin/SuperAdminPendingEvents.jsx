@@ -4,6 +4,7 @@ import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { getEvents, updateEvent } from '../../services/eventService';
 import { getAllLocations } from '../../services/eventLocationService';
 import SuperAdminSidebar from '../../components/superadmin/SuperAdminSidebar';
+import SuperAdminHeader from '../../components/superadmin/SuperAdminHeader';
 
 // Simple Popup Component
 const Popup = ({ message, onClose }) => {
@@ -30,7 +31,6 @@ function SuperAdminPendingEvents() {
     const [locations, setLocations] = useState(new Map()); // Để lưu trữ địa điểm dưới dạng Map (locationId -> locationName)
 
     const [currentPage, setCurrentPage] = useState(1);
-    const [exporting, setExporting] = useState(false);
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
 
@@ -118,6 +118,7 @@ function SuperAdminPendingEvents() {
 
     return (
         <div className="h-screen w-screen flex bg-amber-50">
+            <SuperAdminHeader />
             <SuperAdminSidebar />
             <div className='flex flex-col flex-1'>
                 <main className='flex-1 overflow-y-auto p-10 bg-gray-100'>
