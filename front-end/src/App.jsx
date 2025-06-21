@@ -4,11 +4,11 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 
 // Public
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import Login from "./pages/UserAuthorization/Login";
+import Register from "./pages/UserAuthorization/Register";
 import Logout from "./components/Logout";
-import ResetPassword from "./pages/ResetPassword";
-import ChangePassword from "./pages/ChangePassword";
+import ResetPassword from "./pages/UserAuthorization/ResetPassword";
+import ChangePassword from "./pages/UserAuthorization/ChangePassword";
 import HomePage from "./pages/HomePage";
 import AllEvents from "./pages/AllEvents";
 import EventDetails from "./pages/EventDetails";
@@ -33,6 +33,7 @@ import TaskDetails from "./components/usercenter/TaskDetails";
 import CreateEvent from "./pages/CreateEvent/CreateEvent";
 import CreateTimeline from "./pages/CreateEvent/CreateTimeline";
 import CreateAgenda from "./pages/CreateEvent/CreateAgenda";
+import CreateProposal from "./pages/CreateEvent/CreateProposal";
 
 // Super Admin
 import SuperAdminDashboard from "./pages/superadmin/SuperAdminDashBoard";
@@ -75,6 +76,7 @@ function App() {
           {/* Create Event-Protected Routes */}
           <Route path="create-event">
             <Route index element={Protect(<CreateEvent />)} />
+            <Route path=":eventId/create-proposal" element={Protect(<CreateProposal />)} />
             <Route path=":eventId/create-timeline" element={Protect(<CreateTimeline />)} />
             <Route path=":eventId/create-agenda" element={Protect(<CreateAgenda />)} />
           </Route>
@@ -90,6 +92,7 @@ function App() {
               <Route path="history" element={Protect(<TaskHistory />)} />
             </Route>
           </Route>
+
         </Route>
 
         {/* Super Admin Routes */}

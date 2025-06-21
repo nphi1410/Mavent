@@ -14,10 +14,10 @@ const Header = () => {
 
   const fetchUserProfile = async () => {
     try {
-      if (!sessionStorage.getItem("token")) {
-        navigate("/login");
-        return;
-      }
+      // if (!sessionStorage.getItem("token")) {
+      //   navigate("/login");
+      //   return;
+      // }
       const response = await getUserProfile({ requireAuth: false });
       if (response) {
         setUserData(response);

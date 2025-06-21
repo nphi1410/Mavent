@@ -17,7 +17,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -27,6 +26,12 @@ public class EventImplement implements EventService {
 
     @Autowired
     private EventRepository eventRepository;
+
+    @Autowired
+    private EventAccountRoleRepository eventAccountRoleRepository;
+
+    @Autowired
+    private AccountRepository accountRepository;
 
     @Override
     public Page<FilterEventDTO> getFilterEvents(String name, String status, List<Integer> tagIds, String sortType, int page, int size, String type, boolean isTrending) {
@@ -54,12 +59,10 @@ public class EventImplement implements EventService {
         event.setCreatedAt(java.time.LocalDateTime.now());
         event.setUpdatedAt(java.time.LocalDateTime.now());
 
-        // Lưu vào db
         Event savedEvent = eventRepository.save(event);
 
         return mapToDTO(savedEvent);
     }
-
 
     @Override
     public List<EventDTO> getAllEvents() {
@@ -137,12 +140,6 @@ public class EventImplement implements EventService {
         );
     }
 
-    @Autowired
-    private EventAccountRoleRepository eventAccountRoleRepository;
-
-    @Autowired
-    private AccountRepository accountRepository;
-
     @Override
     public boolean checkEventAccess(Integer eventId, Integer accountId) {
         Optional<EventAccountRole> role = eventAccountRoleRepository.findByEventIdAndAccountId(eventId, accountId);
@@ -154,19 +151,19 @@ public class EventImplement implements EventService {
         List<EventAccountRole> members = eventAccountRoleRepository.findByEventId(eventId);
 
         return members.stream()
-            .map(member -> {
-                EventMemberDTO dto = new EventMemberDTO();
-                Account account = accountRepository.findById(member.getAccountId()).orElse(null);
-                if (account != null) {
-                    dto.setAccountId(account.getAccountId());
-                    dto.setFullName(account.getFullName());
-                    dto.setEmail(account.getEmail());
-                    dto.setAvatarUrl(account.getAvatarUrl());
-                }
-                dto.setRole(member.getEventRole().name());
-                dto.setIsActive(member.getIsActive());
-                return dto;
-            })
-            .collect(Collectors.toList());
+                .map(member -> {
+                    EventMemberDTO dto = new EventMemberDTO();
+                    Account account = accountRepository.findById(member.getAccountId()).orElse(null);
+                    if (account != null) {
+                        dto.setAccountId(account.getAccountId());
+                        dto.setFullName(account.getFullName());
+                        dto.setEmail(account.getEmail());
+                        dto.setAvatarUrl(account.getAvatarUrl());
+                    }
+                    dto.setRole(member.getEventRole().name());
+                    dto.setIsActive(member.getIsActive());
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 }
