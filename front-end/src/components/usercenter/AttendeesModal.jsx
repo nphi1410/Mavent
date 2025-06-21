@@ -97,6 +97,37 @@ const AttendeesModal = ({
     }
   };
 
+  // Hàm hiển thị màu sắc và text cho status
+  const getStatusDisplay = (status) => {
+    switch (status) {
+      case 'INVITED':
+        return {
+          color: 'bg-yellow-100 text-yellow-800',
+          text: 'Đã mời'
+        };
+      case 'ACCEPTED':
+        return {
+          color: 'bg-green-100 text-green-800',
+          text: 'Đã chấp nhận'
+        };
+      case 'DECLINED':
+        return {
+          color: 'bg-red-100 text-red-800',
+          text: 'Từ chối'
+        };
+      case 'ATTENDED':
+        return {
+          color: 'bg-purple-100 text-purple-800',
+          text: 'Đã tham gia'
+        };
+      default:
+        return {
+          color: 'bg-gray-100 text-gray-800',
+          text: status || 'Không xác định'
+        };
+    }
+  };
+
   if (!isOpen) return null;
 
   const canEdit = taskData && (
@@ -141,43 +172,54 @@ const AttendeesModal = ({
               ) : attendees?.length > 0 ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 gap-3">
-                    {attendees.map(attendee => (
-                      <div 
-                        key={attendee.accountId} 
-                        className={`flex items-center p-3 border rounded-lg ${
-                          taskData && attendee.accountId === taskData.assignedToAccountId 
-                            ? 'bg-blue-50 border-blue-200' 
-                            : 'border-gray-200'
-                        }`}
-                      >
-                        <div className="flex-shrink-0 mr-3">
-                          {attendee.avatarUrl ? (
-                            <img 
-                              src={attendee.avatarUrl} 
-                              alt={attendee.accountName} 
-                              className="h-10 w-10 rounded-full object-cover"
-                            />
-                          ) : (
-                            <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-semibold">
-                              {(attendee.accountName || attendee.name || "?").charAt(0).toUpperCase()}
+                    {attendees.map(attendee => {
+                      const statusDisplay = getStatusDisplay(attendee.status);
+                      return (
+                        <div 
+                          key={attendee.accountId} 
+                          className={`flex items-center p-3 border rounded-lg ${
+                            taskData && attendee.accountId === taskData.assignedToAccountId 
+                              ? 'bg-blue-50 border-blue-200' 
+                              : 'border-gray-200'
+                          }`}
+                        >
+                          <div className="flex-shrink-0 mr-3">
+                            {attendee.avatarUrl ? (
+                              <img 
+                                src={attendee.avatarUrl} 
+                                alt={attendee.accountName} 
+                                className="h-10 w-10 rounded-full object-cover"
+                              />
+                            ) : (
+                              <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-semibold">
+                                {(attendee.accountName || attendee.name || "?").charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-grow">
+                            <div className="font-medium">
+                              {attendee.accountName || attendee.name || "Không có tên"}
                             </div>
-                          )}
-                        </div>
-                        <div className="flex-grow">
-                          <div className="font-medium">
-                            {attendee.accountName || attendee.name || "Không có tên"}
+                            <div className="text-sm text-gray-500">
+                              {attendee.email || "Không có email"}
+                            </div>
                           </div>
-                          <div className="text-sm text-gray-500">
-                            {attendee.email || "Không có email"}
+                          <div className="flex flex-col items-end space-y-2">
+                            {/* Hiển thị badge leader */}
+                            {taskData && attendee.accountId === taskData.assignedToAccountId && (
+                              <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
+                                Leader
+                              </span>
+                            )}
+                            
+                            {/* Hiển thị badge status */}
+                            <span className={`px-2 py-1 ${statusDisplay.color} text-xs rounded-full font-medium`}>
+                              {statusDisplay.text}
+                            </span>
                           </div>
                         </div>
-                        {taskData && attendee.accountId === taskData.assignedToAccountId && (
-                          <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
-                            Leader
-                          </span>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                   
                   {canEdit && (
@@ -226,50 +268,66 @@ const AttendeesModal = ({
                 <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-lg mb-4">
                   {availableMembers.length > 0 ? (
                     <div className="divide-y">
-                      {availableMembers.map(member => (
-                        <div 
-                          key={member.accountId}
-                          className={`p-3 ${
-                            member.accountId === taskData?.assignedToAccountId
-                              ? 'bg-blue-50'
-                              : 'hover:bg-gray-50'
-                          }`}
-                        >
-                          <label className="flex items-center cursor-pointer w-full">
-                            <input 
-                              type="checkbox"
-                              checked={selectedAttendees.includes(member.accountId)}
-                              onChange={() => handleAttendeeToggle(member.accountId)}
-                              disabled={member.accountId === taskData?.assignedToAccountId}
-                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 rounded"
-                            />
-                            <div className="ml-3 flex items-center flex-grow">
-                              <div className="flex-shrink-0 mr-3">
-                                {member.avatarUrl ? (
-                                  <img 
-                                    src={member.avatarUrl} 
-                                    alt={member.name} 
-                                    className="h-8 w-8 rounded-full object-cover"
-                                  />
-                                ) : (
-                                  <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-semibold">
-                                    {(member.name || "?").charAt(0).toUpperCase()}
-                                  </div>
+                      {availableMembers.map(member => {
+                        // Tìm thông tin status nếu người này đã là attendee
+                        const existingAttendee = attendees?.find(a => a.accountId === member.accountId);
+                        const status = existingAttendee?.status;
+                        const statusDisplay = status ? getStatusDisplay(status) : null;
+                        
+                        return (
+                          <div 
+                            key={member.accountId}
+                            className={`p-3 ${
+                              member.accountId === taskData?.assignedToAccountId
+                                ? 'bg-blue-50'
+                                : 'hover:bg-gray-50'
+                            }`}
+                          >
+                            <label className="flex items-center cursor-pointer w-full">
+                              <input 
+                                type="checkbox"
+                                checked={selectedAttendees.includes(member.accountId)}
+                                onChange={() => handleAttendeeToggle(member.accountId)}
+                                disabled={member.accountId === taskData?.assignedToAccountId}
+                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 rounded"
+                              />
+                              <div className="ml-3 flex items-center flex-grow">
+                                <div className="flex-shrink-0 mr-3">
+                                  {member.avatarUrl ? (
+                                    <img 
+                                      src={member.avatarUrl} 
+                                      alt={member.name} 
+                                      className="h-8 w-8 rounded-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-semibold">
+                                      {(member.name || "?").charAt(0).toUpperCase()}
+                                    </div>
+                                  )}
+                                </div>
+                                <div>
+                                  <div className="font-medium">{member.name || member.fullName}</div>
+                                  <div className="text-xs text-gray-500">{member.email}</div>
+                                </div>
+                              </div>
+                              <div className="flex flex-col items-end space-y-2">
+                                {member.accountId === taskData?.assignedToAccountId && (
+                                  <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
+                                    Leader
+                                  </span>
+                                )}
+                                
+                                {/* Hiển thị status hiện tại nếu có */}
+                                {statusDisplay && (
+                                  <span className={`ml-2 px-2 py-1 ${statusDisplay.color} text-xs rounded-full font-medium`}>
+                                    {statusDisplay.text}
+                                  </span>
                                 )}
                               </div>
-                              <div>
-                                <div className="font-medium">{member.name || member.fullName}</div>
-                                <div className="text-xs text-gray-500">{member.email}</div>
-                              </div>
-                            </div>
-                            {member.accountId === taskData?.assignedToAccountId && (
-                              <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
-                                Leader
-                              </span>
-                            )}
-                          </label>
-                        </div>
-                      ))}
+                            </label>
+                          </div>
+                        );
+                      })}
                     </div>
                   ) : (
                     <div className="p-4 text-center text-gray-500">
@@ -278,6 +336,15 @@ const AttendeesModal = ({
                   )}
                 </div>
               )}
+              
+              <div className="mt-2 mb-4 bg-yellow-50 p-3 rounded-lg text-sm text-yellow-700">
+                <p className="font-semibold">Lưu ý về trạng thái người tham gia:</p>
+                <ul className="mt-1 list-disc list-inside">
+                  <li>Người được thêm mới sẽ có trạng thái <span className="font-medium">Đã mời</span></li>
+                  <li>Leader luôn có trạng thái <span className="font-medium">Đã chấp nhận</span></li>
+                  <li>Trạng thái hiện tại sẽ được giữ nguyên cho những người đã tham gia</li>
+                </ul>
+              </div>
               
               <div className="flex justify-end space-x-3">
                 <button
@@ -300,6 +367,31 @@ const AttendeesModal = ({
                 </button>
               </div>
             </>
+          )}
+          
+          {/* Giải thích về các trạng thái */}
+          {!editing && attendees?.length > 0 && (
+            <div className="mt-6 pt-4 border-t border-gray-200">
+              <h3 className="text-sm font-semibold text-gray-700 mb-2">Các trạng thái người tham gia:</h3>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex items-center">
+                  <span className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></span>
+                  <span className="text-sm text-gray-600">Đã mời: Chờ phản hồi</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="w-3 h-3 rounded-full bg-green-500 mr-2"></span>
+                  <span className="text-sm text-gray-600">Đã chấp nhận: Đồng ý tham gia</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="w-3 h-3 rounded-full bg-red-500 mr-2"></span>
+                  <span className="text-sm text-gray-600">Từ chối: Không tham gia</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="w-3 h-3 rounded-full bg-purple-500 mr-2"></span>
+                  <span className="text-sm text-gray-600">Đã tham gia: Hoàn thành</span>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </div>
