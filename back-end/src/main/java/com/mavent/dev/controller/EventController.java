@@ -51,7 +51,7 @@ public class EventController {
         try {
             // ✅ Tạo ObjectMapper hỗ trợ LocalDateTime
             ObjectMapper mapper = new ObjectMapper();
-            mapper.registerModule(new JavaTimeModule()); // ⚠️ Đừng quên
+            mapper.registerModule(new JavaTimeModule());
             mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
             // ✅ Parse JSON thành EventDTO
@@ -70,11 +70,10 @@ public class EventController {
             return ResponseEntity.ok(createdEvent);
 
         } catch (Exception e) {
-            e.printStackTrace(); // ✅ In lỗi chi tiết ra console/log
+
             return ResponseEntity.status(500).body("Tạo sự kiện thất bại: " + e.getMessage());
         }
     }
-
 
     // Lấy tất cả sự kiện
     @GetMapping("")
