@@ -59,7 +59,8 @@ public class SecurityConfig {
                                 "/api/document",
                                 "/api/public/**",
                                 "/api/location/**",
-                                "/api/event/*/feedback"
+                                "/api/event/*/feedback",
+                                "/api/proposal"
                         ).permitAll()
                         .requestMatchers("/api/**").hasAnyRole("USER", "SUPER_ADMIN")
                         .requestMatchers("/api/dashboard").hasRole("SUPER_ADMIN")

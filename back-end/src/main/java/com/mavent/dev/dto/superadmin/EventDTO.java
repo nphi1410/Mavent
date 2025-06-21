@@ -1,5 +1,6 @@
 package com.mavent.dev.dto.superadmin;
 
+import com.mavent.dev.dto.event.ProposalDTO;
 import com.mavent.dev.entity.Event.EventStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
