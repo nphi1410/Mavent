@@ -53,9 +53,11 @@ public class EventImplement implements EventService {
         event.setDdayInfo(eventDTO.getDdayInfo());
         event.setMaxMemberNumber(eventDTO.getMaxMemberNumber());
         event.setMaxParticipantNumber(eventDTO.getMaxParticipantNumber());
-        event.setStatus(eventDTO.getStatus());
+        event.setStatus(eventDTO.getStatus()); // Có thể null lúc tạo
+        event.setBannerUrl(eventDTO.getBannerUrl());
+        event.setPosterUrl(eventDTO.getPosterUrl());
         event.setCreatedBy(eventDTO.getCreatedBy());
-        event.setIsDeleted(false); // Khi tạo mặc định là chưa xoá
+        event.setIsDeleted(false);
         event.setCreatedAt(java.time.LocalDateTime.now());
         event.setUpdatedAt(java.time.LocalDateTime.now());
 
@@ -63,6 +65,7 @@ public class EventImplement implements EventService {
 
         return mapToDTO(savedEvent);
     }
+
 
     @Override
     public List<EventDTO> getAllEvents() {
@@ -133,12 +136,15 @@ public class EventImplement implements EventService {
                 event.getMaxMemberNumber(),
                 event.getMaxParticipantNumber(),
                 event.getStatus(),
+                event.getBannerUrl(),
+                event.getPosterUrl(),
                 event.getCreatedBy(),
                 event.getIsDeleted(),
                 event.getCreatedAt(),
                 event.getUpdatedAt()
         );
     }
+
 
     @Override
     public boolean checkEventAccess(Integer eventId, Integer accountId) {
