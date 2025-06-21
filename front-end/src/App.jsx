@@ -113,7 +113,7 @@ function App() {
               element={SuperAdmin(<SuperAdminViewUserDetails />)}
             />
           </Route>
-        </Route>
+        
       </Routes>
     </Router>
   );
