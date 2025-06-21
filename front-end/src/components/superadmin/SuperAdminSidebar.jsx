@@ -37,10 +37,10 @@ function SuperAdminSidebar() {
                 <FontAwesomeIcon icon={faCalendar} />
                 All Events
               </Link>
-              <div className="py-2 flex items-center gap-3 hover:text-black cursor-pointer text-gray-600">
+              <Link to="/superadmin/events/pending" className="py-2 flex items-center gap-3 hover:text-black cursor-pointer text-gray-600">
                 <FontAwesomeIcon icon={faBell} />
                 Pending Events
-              </div>
+              </Link>
             </div>
           )}
         </div>
