@@ -165,7 +165,7 @@ const CreateEvent = () => {
             setSuccessMessage("Tạo sự kiện thành công!");
 
             setTimeout(() => {
-                navigate(`/create-event/${result.eventId}/create-timeline`);
+                navigate(`/create-event/${result.eventId}/create-proposal`);
             }, 500);
         } else {
             setErrorMessage(result.message);
@@ -183,17 +183,22 @@ const CreateEvent = () => {
                 {/* Stepper */}
                 <div className="mt-6 flex justify-center items-center gap-6">
                     <div className="flex items-center gap-2 text-green-600 font-medium">
-                        <div className="w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center">1</div>
+                        <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">1</div>
                         Event Details
                     </div>
                     <div className="h-px w-8 bg-gray-400"></div>
-                    <div className="flex items-center gap-2 text-gray-400 font-medium">
-                        <div className="w-6 h-6 rounded-full border-2 border-gray-400 flex items-center justify-center">2</div>
+                    <div className="flex items-center gap-2 text-green-600 font-medium">
+                        <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">2</div>
+                        Proposal
+                    </div>
+                    <div className="h-px w-8 bg-gray-400"></div>
+                    <div className="flex items-center gap-2 text-green-600 font-medium">
+                        <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">3</div>
                         Timeline
                     </div>
                     <div className="h-px w-8 bg-gray-400"></div>
-                    <div className="flex items-center gap-2 text-gray-400 font-medium">
-                        <div className="w-6 h-6 rounded-full border-2 border-gray-400 flex items-center justify-center">3</div>
+                    <div className="flex items-center gap-2 text-green-600 font-medium">
+                        <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">4</div>
                         Agenda
                     </div>
                 </div>

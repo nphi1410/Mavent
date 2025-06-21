@@ -33,6 +33,7 @@ import TaskDetails from "./components/usercenter/TaskDetails";
 import CreateEvent from "./pages/CreateEvent/CreateEvent";
 import CreateTimeline from "./pages/CreateEvent/CreateTimeline";
 import CreateAgenda from "./pages/CreateEvent/CreateAgenda";
+import CreateProposal from "./pages/CreateEvent/CreateProposal";
 
 // Super Admin
 import SuperAdminDashboard from "./pages/superadmin/SuperAdminDashBoard";
@@ -75,6 +76,7 @@ function App() {
           {/* Create Event-Protected Routes */}
           <Route path="create-event">
             <Route index element={Protect(<CreateEvent />)} />
+            <Route path=":eventId/create-proposal" element={Protect(<CreateProposal />)} />
             <Route path=":eventId/create-timeline" element={Protect(<CreateTimeline />)} />
             <Route path=":eventId/create-agenda" element={Protect(<CreateAgenda />)} />
           </Route>
