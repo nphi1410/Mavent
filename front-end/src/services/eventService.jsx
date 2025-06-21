@@ -52,19 +52,26 @@ export const getEventById = async (id) => {
   }
 };
 
-// ✅ Tạo sự kiện
-export const createEvent = async (eventData) => {
+// ✅ Tạo sự kiện (gửi multipart/form-data)
+export const createEvent = async (eventData, bannerFile, posterFile) => {
   try {
-    const response = await Api.post("/events/create-event", eventData);
+    const formData = new FormData();
+    formData.append("event", JSON.stringify(eventData)); // Dữ liệu JSON
+    formData.append("banner", bannerFile);               // File banner
+    formData.append("poster", posterFile);               // File poster
+
+    const response = await Api.post("/events/create-event", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
 
     const createdEvent = response.data;
-
-    // Nếu EventDTO có id
     const eventId = createdEvent?.eventId;
 
     return {
       success: true,
-      eventId: eventId, // Để navigate khi tạo xong
+      eventId: eventId,
       data: createdEvent,
     };
   } catch (error) {
@@ -76,6 +83,7 @@ export const createEvent = async (eventData) => {
     return { success: false, message: errorMessage };
   }
 };
+
 
 // Cập nhật sự kiện
 export const updateEvent = async (id, eventData) => {
