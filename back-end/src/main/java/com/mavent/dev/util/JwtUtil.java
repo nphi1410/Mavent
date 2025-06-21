@@ -2,6 +2,7 @@ package com.mavent.dev.util;
 
 import com.mavent.dev.config.JwtProperties;
 import com.mavent.dev.entity.Account;
+//import com.mavent.dev.service.AccountService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -14,12 +15,16 @@ import java.util.*;
 @Component
 public class JwtUtil {
 
-    // 🔐 Must be at least 256 bits (32 bytes) for HS256
-//    private static final String SECRET_KEY = "th1s!sma5eNt$ecre7KeytH@T!$Sup3rs3curedAnd$ecr3t";
     private final JwtProperties jwtProperties;
 
-    public JwtUtil(JwtProperties jwtProperties) {
+//    private final AccountService accountService;
+
+    public JwtUtil(
+            JwtProperties jwtProperties
+//            , AccountService accountService
+    ) {
         this.jwtProperties = jwtProperties;
+//        this.accountService = accountService;
     }
 
     private SecretKey getSigningKey() {
@@ -39,7 +44,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    // ✅ Extract username
+    // Extract username
     public String extractUsername(String token) {
         return extractAllClaims(token).getSubject();
     }
@@ -61,15 +66,17 @@ public class JwtUtil {
     // Validate token
     public boolean isTokenValid(String token, Account account) {
         final String username = extractUsername(token);
-        return username.equals(account.getUsername()) && !isTokenExpired(token);
+//        return accountService.getAccount(username) != null && !isTokenExpired(token);
+        return account.getUsername().equals(username) && !isTokenExpired(token);
     }
+
 
     // Check if token is expired
     private boolean isTokenExpired(String token) {
         return extractAllClaims(token).getExpiration().before(new Date());
     }
 
-    // ✅ Extract claims without deprecated APIs
+    //  Extract claims without deprecated APIs
     private Claims extractAllClaims(String token) {
         return Jwts
                 .parser()

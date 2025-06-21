@@ -1,4 +1,5 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
 import useMemberData from './useMemberData';
 import useMemberFilters from './useMemberFilters';
 import useMemberModals from './useMemberModals';
@@ -12,9 +13,23 @@ import memberService from '../services/memberService';
  * @returns {Object} All necessary methods and state for member management
  */
 const useMemberManagement = () => {
+  // Get the event ID from URL parameters
+  const { id } = useParams();
   // Event ID state
-  const [eventId, setEventId] = useState(9);
-
+  const [eventId, setEventId] = useState(id ? parseInt(id) : null);
+  
+  // Loading states for various actions
+  const [isActionLoading, setIsActionLoading] = useState(false);
+  const [actionType, setActionType] = useState(null); // 'ban', 'bulkBan', 'edit', etc.
+  const [actionTargetId, setActionTargetId] = useState(null);
+  
+  // Update eventId when URL param changes
+  useEffect(() => {
+    if (id) {
+      setEventId(parseInt(id));
+    }
+  }, [id]);
+  
   // ------------------------
   // 1. Initialize Hooks
   // ------------------------
@@ -98,11 +113,11 @@ const useMemberManagement = () => {
     page: apiPage,
     size: pageSize
   });
-  
-  const {
+    const {
     members,
     departments,
     loading,
+    departmentsLoading,
     error,
     totalPages,
     totalElements,
@@ -136,7 +151,8 @@ const useMemberManagement = () => {
     updateMember,
     banMember,
     unbanMember,
-    deleteMember
+    deleteMember,
+    bulkBanMembers
   } = actionHook;
 
   // ------------------------
@@ -257,9 +273,13 @@ const useMemberManagement = () => {
     // Open edit modal directly for improved responsiveness
     openEditModal(editableUser);
   };
-
   const handleSaveUser = async () => {
     try {
+      // Set loading state
+      setIsActionLoading(true);
+      setActionType('edit');
+      setActionTargetId(editedUser?.id);
+      
       // console.log('Saving edited user data:', JSON.stringify(editedUser));
       
       // Ensure the isActive field is correctly set based on status
@@ -283,11 +303,19 @@ const useMemberManagement = () => {
       }
     } catch (err) {
       console.error('Error updating member:', err);
+    } finally {
+      setIsActionLoading(false);
+      setActionType(null);
+      setActionTargetId(null);
     }
   };
-
   const handleBanUser = async (member, shouldBeBanned) => {
     try {
+      // Set loading state
+      setIsActionLoading(true);
+      setActionType('ban');
+      setActionTargetId(member?.id);
+      
       // console.log(`Ban User called for ${member.name} with shouldBeBanned=${shouldBeBanned}`);
       // Close any open menus when banning/unbanning
       toggleMenu(null);
@@ -312,6 +340,10 @@ const useMemberManagement = () => {
       }
     } catch (err) {
       console.error('Error banning/unbanning member:', err);
+    } finally {
+      setIsActionLoading(false);
+      setActionType(null);
+      setActionTargetId(null);
     }
   };
 
@@ -324,6 +356,52 @@ const useMemberManagement = () => {
       } catch (err) {
         console.error('Error deleting member:', err);
       }
+    }
+  };
+  // Handle bulk ban operation for multiple members
+  const handleBulkBanUsers = async (memberIds) => {
+    try {
+      if (!memberIds || !Array.isArray(memberIds) || memberIds.length === 0) {
+        console.error('Invalid memberIds for bulk ban:', memberIds);
+        return false;
+      }
+      
+      // Set loading state
+      setIsActionLoading(true);
+      setActionType('bulkBan');
+      
+      console.log(`Attempting to bulk ban ${memberIds.length} members`);
+      
+      // Find the member objects by their IDs
+      const membersToban = currentMembers.filter(member => memberIds.includes(member.id));
+      
+      if (membersToban.length === 0) {
+        console.error('No matching members found to ban');
+        setIsActionLoading(false);
+        setActionType(null);
+        return false;
+      }
+      
+      // Execute bulk ban operation
+      const result = await bulkBanMembers(membersToban);
+      
+      if (result.success) {
+        // Refresh the members list
+        await fetchMembers();
+        setIsActionLoading(false);
+        setActionType(null);
+        return true;
+      } else {
+        console.error('Bulk ban operation failed:', result.message);
+        setIsActionLoading(false);
+        setActionType(null);
+        return false;
+      }
+    } catch (err) {
+      console.error('Error performing bulk ban operation:', err);
+      setIsActionLoading(false);
+      setActionType(null);
+      return false;
     }
   };
 
@@ -378,6 +456,11 @@ const useMemberManagement = () => {
   
   // Sử dụng ref để theo dõi việc fetch dữ liệu ban đầu
   const initialFetchRef = useRef(true);
+    // Thêm function để refresh department data
+  const refreshDepartments = useCallback(() => {
+    console.log('Manually refreshing departments data...');
+    fetchDepartments();
+  }, [fetchDepartments]);
   
   // Initial data fetch - chỉ gọi một lần khi component mount
   useEffect(() => {
@@ -390,18 +473,22 @@ const useMemberManagement = () => {
       initialFetchRef.current = false;
     }
   }, []);
-
   return {
     // Data - tương thích với Members.jsx
     currentMembers,
     filteredMembers,
-    bannedUsers,
-    members,
+    bannedUsers,    members,
     departments,
     loading,
+    departmentsLoading,
     error,
     totalPages,
     totalElements,
+    
+    // Action loading states
+    isActionLoading,
+    actionType,
+    actionTargetId,
     
     // Search and filter state - tương thích với Members.jsx
     searchTerm,
@@ -456,11 +543,13 @@ const useMemberManagement = () => {
     handleUpdateMember,
     handleBanMember,
     handleDeleteMember,
+    handleBulkBanUsers,
     closeDetailModal,
     closeEditModal,
-    clearError,
-    changeEvent,
-    fetchMembers
+    clearError,    changeEvent,
+    fetchMembers,
+    fetchDepartments,
+    refreshDepartments
   };
 };
 

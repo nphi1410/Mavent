@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import SuperAdminSidebar from '../../components/superadmin/SuperAdminSidebar';
 import SuperAdminActionDropdown from '../../components/superadmin/SuperAdminActionDropdown';
 import { getAllAccounts } from '../../services/accountService';
+import SuperAdminHeader from '../../components/superadmin/SuperAdminHeader';
 
 function SuperAdminManageUsers() {
     const [users, setUsers] = useState([]);
@@ -63,6 +64,7 @@ function SuperAdminManageUsers() {
 
     return (
         <div className="h-screen w-screen flex bg-amber-50">
+            <SuperAdminHeader />
             <SuperAdminSidebar />
             <div className="flex flex-col flex-1">
                 <main className="flex-1 overflow-y-auto p-10 bg-gray-100">

@@ -1,9 +1,7 @@
 package com.mavent.dev.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -18,13 +16,21 @@ public class EventFeedback {
 
     @Id
     private Integer eventId;
+
     @Id
     private Integer accountId;
+
     private Integer rating;
+
     private String comment;
-    private LocalDateTime submitted_at;
+
+    @Column(name = "submitted_at")
+    private LocalDateTime submittedAt;
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @EqualsAndHashCode
     public static class PK implements Serializable {
         private Integer eventId;
         private Integer accountId;

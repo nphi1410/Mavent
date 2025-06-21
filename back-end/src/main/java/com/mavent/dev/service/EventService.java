@@ -24,7 +24,6 @@ public interface EventService {
 
     EventDTO updateEvent(Integer eventId, EventDTO eventDTO);
 
-
     Page<T> getEventByDateRange(String type, Boolean isTrending);
 
     EventDTO createEvent(EventDTO eventDTO);
