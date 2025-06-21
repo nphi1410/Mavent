@@ -33,9 +33,8 @@ const MemberDetailModal = ({
     // console.log('MemberDetailModal not rendered: isOpen=', isOpen, 'user=', user ? 'exists' : 'null');
     // For debugging: return a hidden placeholder to confirm the component is mounting
     return <div style={{display: 'none'}}>Modal would render here if isOpen={String(isOpen)} and user exists={String(!!user)}</div>;
-  }  return (
-    <div className="fixed inset-0 flex items-center justify-center z-[9999]" data-testid="member-detail-modal">
-      <div className="absolute inset-0  bg-opacity-40" onClick={(e) => {
+  }  return (    <div className="fixed inset-0 flex items-center justify-center z-[9999]" data-testid="member-detail-modal">
+      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={(e) => {
         e.stopPropagation();
         // console.log("Modal backdrop clicked - closing modal");
         onClose();
@@ -103,10 +102,9 @@ const MemberDetailModal = ({
             <div>
               <span className="text-sm font-medium text-gray-700">Role:</span>
               <div className="text-sm text-gray-900">{user.role}</div>
-            </div>
-            <div>
+            </div>            <div>
               <span className="text-sm font-medium text-gray-700">Department:</span>
-              <div className="text-sm text-gray-900">{user.department}</div>
+              <div className="text-sm text-gray-900">{user.department || 'N/A'}</div>
             </div>
             <div>
               <span className="text-sm font-medium text-gray-700">Date Joined:</span>
@@ -122,21 +120,18 @@ const MemberDetailModal = ({
               </div>
             </div>
           </div>
-        </div>        <div className="p-6 flex space-x-3 bg-gray-50">
-          {/* Edit button - only show if user has edit permission */}
-          {canEdit && canEdit(user.role) && (
-            <button 
-              className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center"
-              onClick={() => {
-                // console.log('Edit button clicked in MemberDetailModal for user:', user.name);
-                onEdit(user);
-                onClose();
-              }}
-            >
-              <FontAwesomeIcon icon={faEdit} className="mr-2" />
-              Edit User
-            </button>
-          )}
+        </div>        <div className="p-6 flex space-x-3 bg-gray-50">          {/* Edit button - always enabled to fix the issue */}
+          <button 
+            className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center"
+            onClick={() => {
+              // console.log('Edit button clicked in MemberDetailModal for user:', user.name);
+              onEdit(user);
+              onClose();
+            }}
+          >
+            <FontAwesomeIcon icon={faEdit} className="mr-2" />
+            Edit User
+          </button>
           
           {/* Ban/Unban button - only show if user has ban permission */}
           {canBanUser && canBanUser(user.role) && (

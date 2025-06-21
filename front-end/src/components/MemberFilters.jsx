@@ -1,7 +1,7 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
-  faSearch, faChevronDown
+  faSearch, faChevronDown, faSpinner
 } from '@fortawesome/free-solid-svg-icons';
 
 const MemberFilters = ({
@@ -10,6 +10,7 @@ const MemberFilters = ({
   roleFilter,
   departmentFilter,
   departments = [],
+  departmentsLoading = false,
   onSearchChange,
   onStatusFilterChange,
   onRoleFilterChange,
@@ -72,12 +73,11 @@ const MemberFilters = ({
               className="text-gray-400 absolute right-2 top-2.5 pointer-events-none" 
             />
           </div>
-          
-          {/* Department filter dropdown */}
-          <div className="relative col-span-2 sm:col-span-1">
-            <select 
+            {/* Department filter dropdown */}
+          <div className="relative col-span-2 sm:col-span-1">            <select 
               className="w-full border rounded-lg px-3 py-2 appearance-none pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               value={departmentFilter || ''}
+              disabled={departmentsLoading}
               onChange={(e) => {
                 const rawValue = e.target.value;
                 console.log("Department selected (raw):", rawValue);
@@ -89,18 +89,29 @@ const MemberFilters = ({
                   onDepartmentFilterChange(value);
                 }
               }}
-            >
-              <option value="">All Departments</option>
-              {Array.isArray(departments) && departments.map(dept => (
-                <option key={dept.departmentId} value={dept.departmentId}>
-                  {dept.name}
-                </option>
-              ))}
+            >              <option value="">All Departments</option>
+              {departmentsLoading ? (
+                <option value="" disabled>Loading departments...</option>              ) : Array.isArray(departments) && departments.length > 0 ? (
+                departments.map(dept => (
+                  <option key={dept.departmentId} value={dept.departmentId}>
+                    {dept.name} {dept.deptNo ? `(${dept.deptNo})` : ''}
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>No departments found</option>
+              )}
             </select>
-            <FontAwesomeIcon 
-              icon={faChevronDown} 
-              className="text-gray-400 absolute right-2 top-2.5 pointer-events-none" 
-            />
+            {departmentsLoading ? (
+              <FontAwesomeIcon 
+                icon={faSpinner}
+                className="text-blue-500 absolute right-2 top-2.5 pointer-events-none animate-spin"
+              />
+            ) : (
+              <FontAwesomeIcon 
+                icon={faChevronDown} 
+                className="text-gray-400 absolute right-2 top-2.5 pointer-events-none" 
+              />
+            )}
           </div>
         </div>
       </div>
