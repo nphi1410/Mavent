@@ -8,6 +8,7 @@ import com.mavent.dev.dto.task.*;
 import com.mavent.dev.dto.userAuthentication.*;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.EventAccountRole;
+import com.mavent.dev.mapper.AccountMapper;
 import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.repository.EventAccountRoleRepository;
 import com.mavent.dev.service.AccountService;
@@ -74,7 +75,8 @@ public class AccountController {
     @GetMapping("/accounts/{id}")
     public ResponseEntity<?> getAccountById(@PathVariable Integer id) {
         try {
-            AccountDTO accountDTO = accountService.getAccountById(id);
+            Account account = accountService.getAccountById(id);
+            AccountDTO accountDTO = AccountMapper.toDTO(account);
             return ResponseEntity.ok(accountDTO);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -124,7 +126,7 @@ public class AccountController {
         session.setAttribute("register_username", request.getUsername());
         session.setAttribute("register_email", request.getEmail());
         session.setAttribute("register_password", passwordEncoder.encode(request.getPassword()));
-        System.out.println("Encoded Password: " + passwordEncoder.encode(request.getPassword()));
+//        System.out.println("Encoded Password: " + passwordEncoder.encode(request.getPassword()));
         session.setAttribute("register_otp", otp);
         session.setAttribute("register_time", System.currentTimeMillis());
 
@@ -137,9 +139,9 @@ public class AccountController {
         String username = (String) session.getAttribute("register_username");
         String email = (String) session.getAttribute("register_email");
         String encodedPassword = (String) session.getAttribute("register_password");
-        System.out.println("Username from session: " + username);
-        System.out.println("Email from session: " + email);
-        System.out.println("Encoded Password from session: " + encodedPassword);
+//        System.out.println("Username from session: " + username);
+//        System.out.println("Email from session: " + email);
+//        System.out.println("Encoded Password from session: " + encodedPassword);
         Long time = (Long) session.getAttribute("register_time");
         if (accountService.isOtpTrue(otpSession, time, request.getOtp()) != null) {
             return ResponseEntity.badRequest().body(accountService.isOtpTrue(otpSession, time, request.getOtp()));
@@ -195,19 +197,7 @@ public class AccountController {
     @PostMapping("/verify-password")
     public ResponseEntity<?> verifyPassword(@RequestBody ChangePasswordDTO changePasswordDTO, HttpServletRequest request) {
         // Lấy token từ header Authorization
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Bạn cần đăng nhập để xác thực mật khẩu");
-        }
-
-        String token = authHeader.substring(7);
-        String username;
-
-        try {
-            username = jwtUtil.extractUsername(token);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token không hợp lệ");
-        }
+        String username = jwtUtil.extractUsername(request.getHeader("Authorization").substring(7));
 
         Account account = accountService.getAccount(username);
         if (account == null) {
@@ -228,7 +218,7 @@ public class AccountController {
         // Lấy token từ header Authorization
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Bạn cần đăng nhập để đổi mật khẩu");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You need to log in to change your password");
         }
 
         String token = authHeader.substring(7);

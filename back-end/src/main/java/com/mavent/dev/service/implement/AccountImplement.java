@@ -6,6 +6,7 @@ import com.mavent.dev.entity.*;
 import com.mavent.dev.dto.task.TaskCreateDTO;
 import com.mavent.dev.dto.superadmin.AccountDTO;
 import com.mavent.dev.repository.*;
+import com.mavent.dev.util.JwtUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
@@ -31,6 +32,9 @@ import java.util.stream.Collectors;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+
 
 @Service
 public class AccountImplement implements AccountService, UserDetailsService {
@@ -43,9 +47,11 @@ public class AccountImplement implements AccountService, UserDetailsService {
 
 //    @Autowired
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
-    public AccountImplement(PasswordEncoder passwordEncoder) {
+    public AccountImplement(PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
@@ -134,10 +140,8 @@ public class AccountImplement implements AccountService, UserDetailsService {
     }
 
     @Override
-    public AccountDTO getAccountById(Integer id) {
-        Account account = accountRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("Account not found with ID: " + id));
-
-        return mapAccountToDTO(account);
+    public Account getAccountById(Integer id) {
+        return accountRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("Account not found with ID: " + id));
     }
 
     @Override
@@ -369,14 +373,14 @@ public class AccountImplement implements AccountService, UserDetailsService {
             TaskAttendee taskAttendee = new TaskAttendee();
             taskAttendee.setTaskId(savedTask.getTaskId());
             taskAttendee.setAccountId(attendeeId);
-            
+
             // Người được giao task sẽ tự động ACCEPTED, những người còn lại ở trạng thái INVITED
             if (attendeeId.equals(assignedUserId)) {
                 taskAttendee.setStatus(TaskAttendee.Status.ACCEPTED);
             } else {
                 taskAttendee.setStatus(TaskAttendee.Status.INVITED);
             }
-            
+
             taskAttendeeRepository.save(taskAttendee);
         }
         System.out.println("Task attendees saved successfully: " + attendees);
@@ -621,7 +625,7 @@ public class AccountImplement implements AccountService, UserDetailsService {
         // Xóa những attendee không còn trong danh sách mới
         // (ngoại trừ leader - người luôn phải có trong task)
         for (TaskAttendee attendee : currentAttendees) {
-            if (!newAttendees.contains(attendee.getAccountId()) && 
+            if (!newAttendees.contains(attendee.getAccountId()) &&
                 !attendee.getAccountId().equals(assignedToAccountId)) {
                 taskAttendeeRepository.delete(attendee);
             }
@@ -632,19 +636,19 @@ public class AccountImplement implements AccountService, UserDetailsService {
             // Kiểm tra xem attendee đã tồn tại chưa
             boolean exists = currentAttendees.stream()
                     .anyMatch(a -> a.getAccountId().equals(attendeeId));
-            
+
             if (!exists) {
                 TaskAttendee newAttendee = new TaskAttendee();
                 newAttendee.setTaskId(taskId);
                 newAttendee.setAccountId(attendeeId);
-                
+
                 // Người được giao task luôn ở trạng thái ACCEPTED
                 if (attendeeId.equals(assignedToAccountId)) {
                     newAttendee.setStatus(TaskAttendee.Status.ACCEPTED);
                 } else {
                     newAttendee.setStatus(TaskAttendee.Status.INVITED);
                 }
-                
+
                 taskAttendeeRepository.save(newAttendee);
             }
         }
@@ -654,5 +658,13 @@ public class AccountImplement implements AccountService, UserDetailsService {
         taskRepository.save(task);
     }
 
+    @Override
+    public Account getAccountByToken(String token) {
+        String username = jwtUtil.extractUsername(token);
+        if (username == null) {
+            return null;
+        }
+        return accountRepository.findByUsername(username);
+    }
 }
 

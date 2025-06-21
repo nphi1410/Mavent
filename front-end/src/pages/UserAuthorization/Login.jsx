@@ -2,7 +2,7 @@ import { jwtDecode } from 'jwt-decode'; // ✅ Correct for named exports
 
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
-import { login } from '../services/AuthService';
+import { login } from '../../services/AuthService';
 import axios from 'axios';
 
 function Login() {
