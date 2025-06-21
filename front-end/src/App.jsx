@@ -15,9 +15,10 @@ import AllEvents from "./pages/AllEvents";
 import EventDetails from "./pages/EventDetails";
 import MeetingListPage from "./pages/MeetingListPage";
 
-// Department and Members
+// Department, Documents, and Members
 import DepartmentManagementPage from "./pages/Departments/DepartmentManagementPage";
 import Members from "./pages/Members/Members";
+import DocumentsPage from "./pages/DocumentsPage";
 
 // Auth
 import ProtectedRoute from "./auth/ProtectedRoute";
@@ -67,10 +68,10 @@ function App() {
           <Route path="events" element={<AllEvents />} />
           <Route path="events/:id" element={<EventDetails />} />
           <Route path="meetings" element={<MeetingListPage />} />
-          
-          {/* Event Member Protected Routes */}
+            {/* Event Member Protected Routes */}
           <Route path="events/:id/departments" element={EventMember(<DepartmentManagementPage />)} />
           <Route path="events/:id/members" element={EventMember(<Members />)} />
+          <Route path="events/:id/documents" element={EventMember(<DocumentsPage />)} />
 
           <Route path="/event/:eventId/feedback" element={<ViewEventFeedback />} />
 
