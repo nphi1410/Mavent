@@ -4,6 +4,7 @@ import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.azure.storage.blob.models.BlobHttpHeaders;
 import com.mavent.dev.service.globalservice.CloudService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -56,6 +57,13 @@ public class CloudImplement implements CloudService {
         // Upload the file
         blobClient.upload(file.getInputStream(), file.getSize(), true);
 
+        BlobHttpHeaders headers = new BlobHttpHeaders()
+                .setContentType(file.getContentType())               // e.g. "image/jpeg"
+                .setContentDisposition(
+                        "inline; filename=\"" + file.getOriginalFilename() + "\""
+                );  // ép browser chỉ hiển thị, không download
+
+        blobClient.setHttpHeaders(headers);
         // Return the URL of the uploaded blob
         return blobClient.getBlobUrl();
     }

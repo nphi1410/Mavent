@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import EventBanner from "../components/EventBanner";
 import Description from "../components/Description";
 import MapGuide from "../components/MapGuide";
@@ -7,6 +7,7 @@ import EventTime from "../components/EventTime";
 import TagsList from "../components/TagsList";
 import OrganizerContact from "../components/OrganizerContact";
 import RelevantEvent from "../components/RelevantEvent";
+import DepartmentList from "../components/department/DepartmentList";
 import { getEventById } from "../services/eventService";
 
 const EventDetails = () => {
@@ -35,7 +36,6 @@ const EventDetails = () => {
 
   if (loading) return <p className="text-center mt-10">Loading...</p>;
   if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
-
   return (
     <div>
         <EventBanner eventData={eventData}/>
@@ -49,6 +49,9 @@ const EventDetails = () => {
             <MapGuide eventData={eventData} />
           </div>
         </section>
+
+        
+
 
         <section className="flex flex-col lg:flex-row justify-between gap-8 px-4 sm:px-6 lg:px-12 py-8">
           <div className="w-full lg:w-1/2">

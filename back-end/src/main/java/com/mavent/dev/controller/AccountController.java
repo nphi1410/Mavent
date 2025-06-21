@@ -4,10 +4,7 @@ import com.mavent.dev.dto.*;
 import com.mavent.dev.dto.superadmin.AccountDTO;
 import com.mavent.dev.dto.superadmin.EventDTO;
 import com.mavent.dev.config.MailConfig;
-import com.mavent.dev.dto.task.TaskCreateDTO;
-import com.mavent.dev.dto.task.TaskDTO;
-import com.mavent.dev.dto.task.TaskFeedbackDTO;
-import com.mavent.dev.dto.task.TaskStatusUpdateDTO;
+import com.mavent.dev.dto.task.*;
 import com.mavent.dev.dto.userAuthentication.*;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.EventAccountRole;
@@ -28,7 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import com.mavent.dev.config.CloudConfig;
+//import com.mavent.dev.config.CloudConfig;
 import com.mavent.dev.service.globalservice.CloudService;
 
 import javax.naming.AuthenticationException;
@@ -442,6 +439,38 @@ public class AccountController {
         }
     }
 
+    @GetMapping("/user/tasks/{taskId}/attendees")
+    public ResponseEntity<?> getTaskAttendees(
+            @PathVariable Integer taskId,
+            HttpServletRequest request) {
+
+        // Authenticate user
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String token = authHeader.substring(7);
+        String username = jwtUtil.extractUsername(token);
+        Account account = accountService.getAccount(username);
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        // Check if the user has access to this task (creator or assignee)
+        TaskDTO task = accountService.getTaskDetails(account.getAccountId(), taskId);
+        if (task == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        // Get the task attendees
+        try {
+            List<TaskAttendeeDTO> attendees = accountService.getTaskAttendees(taskId);
+            return ResponseEntity.ok(attendees);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     @PatchMapping("/user/tasks/{taskId}/status")
     public ResponseEntity<?> updateTaskStatus(
             @PathVariable Integer taskId,
@@ -524,7 +553,7 @@ public class AccountController {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Bạn cần đăng nhập để tạo task");
         }
-
+        System.out.println("Creating task with DTO: " + taskCreateDTO);
         String token = authHeader.substring(7);
         String username;
 
@@ -642,6 +671,39 @@ public class AccountController {
         }
     }
 
+    // Cần thêm endpoint này trong EventController trên backend
+    @GetMapping("/events/{eventId}/members")
+    public ResponseEntity<List<EventMemberDTO>> getEventMembers(@PathVariable Integer eventId, HttpServletRequest request) {
+        // Lấy token từ header Authorization
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String token = authHeader.substring(7);
+        String username;
+
+        try {
+            username = jwtUtil.extractUsername(token);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Account account = accountService.getAccount(username);
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        // Kiểm tra quyền truy cập
+        boolean hasAccess = eventService.checkEventAccess(eventId, account.getAccountId());
+        if (!hasAccess) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        List<EventMemberDTO> members = eventService.getEventMembers(eventId);
+        return ResponseEntity.ok(members);
+    }
+
     @GetMapping("/user/events")
     public ResponseEntity<?> getUserEvents(HttpServletRequest request) {
         // Lấy token từ header Authorization
@@ -725,6 +787,55 @@ public class AccountController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error retrieving user role: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/user/tasks/{taskId}/attendees")
+    public ResponseEntity<?> updateTaskAttendees(
+            @PathVariable Integer taskId,
+            @RequestBody Map<String, List<Integer>> request,
+            HttpServletRequest httpRequest) {
+
+        // Xác thực người dùng từ token
+        String authHeader = httpRequest.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        System.out.println("Updating attendees for task ID: " + taskId);
+        String token = authHeader.substring(7);
+        String username = jwtUtil.extractUsername(token);
+        Account account = accountService.getAccount(username);
+        
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        System.out.println("Account ID: " + account.getAccountId());
+        // Kiểm tra xem người gọi API có phải là người được giao task không
+        TaskDTO task = accountService.getTaskDetails(account.getAccountId(), taskId);
+        System.out.println("Task details: " + task);
+        if (task == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy task");
+        }
+
+        // Chỉ người được giao task hoặc người tạo task mới được phép cập nhật attendees
+        if (!account.getAccountId().equals(task.getAssignedToAccountId()) && 
+            !account.getAccountId().equals(task.getAssignedByAccountId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body("Bạn không có quyền cập nhật người tham gia task này");
+        }
+        System.out.println("Request to update attendees: " + request);
+        List<Integer> attendees = request.get("attendees");
+        if (attendees == null) {
+            return ResponseEntity.badRequest().body("Danh sách người tham gia không hợp lệ");
+        }
+        System.out.println("Attendees to update: " + attendees);
+        try {
+            // Gọi service để cập nhật attendees
+            accountService.updateTaskAttendees(taskId, task.getAssignedToAccountId(), attendees);
+            return ResponseEntity.ok("Cập nhật người tham gia task thành công");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Lỗi khi cập nhật người tham gia: " + e.getMessage());
         }
     }
 }

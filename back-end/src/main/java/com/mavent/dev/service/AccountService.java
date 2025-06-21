@@ -1,5 +1,6 @@
 package com.mavent.dev.service;
 
+import com.mavent.dev.dto.task.TaskAttendeeDTO;
 import com.mavent.dev.dto.task.TaskCreateDTO;
 import com.mavent.dev.dto.task.TaskDTO;
 import com.mavent.dev.dto.superadmin.AccountDTO;
@@ -40,6 +41,8 @@ public interface AccountService extends UserDetailsService {
                                String keyword, String sortOrder, String eventName);
     TaskDTO getTaskDetails(Integer accountId, Integer taskId);
 
+    List<TaskAttendeeDTO> getTaskAttendees(Integer taskId);
+
     TaskDTO createTask(TaskCreateDTO taskCreateDTO, Account creator) throws Exception;
 
     TaskDTO updateTask(Integer taskId, TaskCreateDTO updateDto);
@@ -56,8 +59,10 @@ public interface AccountService extends UserDetailsService {
 
     List<AccountDTO> getAllAccounts();
 
+    void updateTaskAttendees(Integer taskId, Integer assignedToAccountId, List<Integer> attendeeIds);
+
     Account getAccountById(Integer id);
-    
+
     Account getAccountByToken(String token);
 }
 

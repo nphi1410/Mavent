@@ -6,6 +6,8 @@ import SuperAdminSidebar from '../../components/superadmin/SuperAdminSidebar';
 import SuperAdminActionDropdown from '../../components/superadmin/SuperAdminActionDropdown';
 import { useNavigate } from 'react-router-dom';
 import { exportEventsToExcel } from '../../services/export/eventExportService';
+import { getAllLocations } from '../../services/eventLocationService';
+import SuperAdminHeader from '../../components/superadmin/SuperAdminHeader';
 
 function SuperAdminManageEvents() {
     const [openId, setOpenId] = useState(null);
@@ -13,6 +15,7 @@ function SuperAdminManageEvents() {
     const [statusFilter, setStatusFilter] = useState("All Statuses");
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [events, setEvents] = useState([]);
+    const [locations, setLocations] = useState(new Map());
 
     const [currentPage, setCurrentPage] = useState(1);
     const [exporting, setExporting] = useState(false);
@@ -25,11 +28,31 @@ function SuperAdminManageEvents() {
 
     const navigate = useNavigate();
 
+    const fetchLocations = async () => {
+        try {
+            const data = await getAllLocations();
+            const locationMap = new Map();
+            data.forEach(loc => {
+                // Đảm bảo rằng API của bạn trả về `locationId` và `locationName`
+                if (loc.locationId && loc.locationName) {
+                    locationMap.set(loc.locationId, loc.locationName);
+                } else {
+                    console.warn("Dữ liệu địa điểm không đúng định dạng:", loc);
+                }
+            });
+            setLocations(locationMap);
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách địa điểm:", error);
+            // Có thể đặt popup thông báo lỗi cho người dùng ở đây
+        }
+    };
+
     useEffect(() => {
         const fetchEvents = async () => {
             const data = await getEvents();
             setEvents(data);
         };
+        fetchLocations();
         fetchEvents();
     }, []);
 
@@ -62,6 +85,7 @@ function SuperAdminManageEvents() {
 
     return (
         <div className="h-screen w-screen flex bg-amber-50">
+            <SuperAdminHeader />
             <SuperAdminSidebar />
             <div className='flex flex-col flex-1'>
                 <main className='flex-1 overflow-y-auto p-10 bg-gray-100'>
@@ -129,7 +153,9 @@ function SuperAdminManageEvents() {
                                                 <td className="p-2 font-medium text-black whitespace-nowrap">{event.name}</td>
                                                 <td className="p-2 whitespace-nowrap text-gray-600">{event.startDatetime.slice(0, 10)}</td>
                                                 <td className="p-2 whitespace-nowrap text-gray-600">{event.endDatetime.slice(0, 10)}</td>
-                                                <td className="p-2 whitespace-nowrap text-gray-600">{event.location}</td>
+                                                <td className="p-2 whitespace-nowrap text-gray-600">
+                                                    {locations.get(event.locationId) || event.location || "Unknown"}
+                                                </td>
                                                 <td className="p-2 whitespace-nowrap text-gray-600">
                                                     <span className={`text-xs font-semibold px-2 py-1 rounded-full
                                                         ${event.status === "RECRUITING" ? "bg-blue-100 text-blue-600"
