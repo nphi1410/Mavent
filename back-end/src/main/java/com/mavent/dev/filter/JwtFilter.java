@@ -52,7 +52,7 @@ public class JwtFilter extends OncePerRequestFilter {
             try {
                 final String username = jwtUtil.extractUsername(token);
                 if (!jwtUtil.isTokenValid(token, accountService.getAccount(username))) {
-//                    System.out.println("Invalid token for user: " + username); // Debugging line for invalid token
+                    System.out.println("JwtFilter: Invalid token for user: " + username); // Debugging line for invalid token
                     SecurityContextHolder.getContext().setAuthentication(null);
                 }
 //            else {
@@ -73,6 +73,8 @@ public class JwtFilter extends OncePerRequestFilter {
             } catch (Exception e) {
                 System.err.println("JwtFilter.java: " + e.getMessage());
             }
+        } else {
+            System.out.println("JwtFilter: No JWT token found in request headers");
         }
 
         filterChain.doFilter(request, response);

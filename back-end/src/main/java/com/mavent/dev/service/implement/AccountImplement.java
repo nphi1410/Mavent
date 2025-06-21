@@ -5,6 +5,7 @@ import com.mavent.dev.entity.*;
 import com.mavent.dev.dto.task.TaskCreateDTO;
 import com.mavent.dev.dto.superadmin.AccountDTO;
 import com.mavent.dev.repository.*;
+import com.mavent.dev.util.JwtUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
@@ -46,9 +47,11 @@ public class AccountImplement implements AccountService, UserDetailsService {
 
 //    @Autowired
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
-    public AccountImplement(PasswordEncoder passwordEncoder) {
+    public AccountImplement(PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
@@ -137,10 +140,8 @@ public class AccountImplement implements AccountService, UserDetailsService {
     }
 
     @Override
-    public AccountDTO getAccountById(Integer id) {
-        Account account = accountRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("Account not found with ID: " + id));
-
-        return mapAccountToDTO(account);
+    public Account getAccountById(Integer id) {
+        return accountRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("Account not found with ID: " + id));
     }
 
     @Override
@@ -546,5 +547,13 @@ public class AccountImplement implements AccountService, UserDetailsService {
         return dto;
     }
 
+    @Override
+    public Account getAccountByToken(String token) {
+        String username = jwtUtil.extractUsername(token);
+        if (username == null) {
+            return null;
+        }
+        return accountRepository.findByUsername(username);
+    }
 }
 

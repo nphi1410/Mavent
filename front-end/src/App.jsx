@@ -4,11 +4,11 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 
 // Public
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import Login from "./pages/UserAuthorization/Login";
+import Register from "./pages/UserAuthorization/Register";
 import Logout from "./components/Logout";
-import ResetPassword from "./pages/ResetPassword";
-import ChangePassword from "./pages/ChangePassword";
+import ResetPassword from "./pages/UserAuthorization/ResetPassword";
+import ChangePassword from "./pages/UserAuthorization/ChangePassword";
 import HomePage from "./pages/HomePage";
 import AllEvents from "./pages/AllEvents";
 import EventDetails from "./pages/EventDetails";
@@ -71,6 +71,7 @@ function App() {
             <Route path="dashboard" element={Protect(<UserDashboardPage />)} />
             <Route path="tasks" element={Protect(<UserTasksPage />)} />
           </Route>
+
         </Route>
         {/* Super Admin Routes */}
         <Route path="superadmin" element={<SuperAdminLayout />}>

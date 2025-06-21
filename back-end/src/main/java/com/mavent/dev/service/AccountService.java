@@ -56,6 +56,8 @@ public interface AccountService extends UserDetailsService {
 
     List<AccountDTO> getAllAccounts();
 
-    AccountDTO getAccountById(Integer id);
+    Account getAccountById(Integer id);
+    
+    Account getAccountByToken(String token);
 }
 

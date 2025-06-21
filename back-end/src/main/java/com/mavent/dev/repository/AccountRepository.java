@@ -15,16 +15,9 @@ import java.util.Optional;
 public interface AccountRepository extends JpaRepository<Account, Integer> {
 
     Account findByUsername(String username);
-
-
     List<Account> findAllByIsDeletedFalse();
-
     long countByIsDeletedFalse();
-
-
     Account findByEmail(String email);
-
-
     boolean existsByUsername(String username);
 
     /**
@@ -34,14 +27,10 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
      * @return true if email exists, false otherwise
      */
     boolean existsByEmail(String email);
-
-
     List<Account> findBySystemRole(Account.SystemRole systemRole);
-
 
     @Query("SELECT a FROM Account a WHERE LOWER(a.fullName) LIKE LOWER(CONCAT('%', :name, '%'))")
     List<Account> findByFullNameContainingIgnoreCase(@Param("name") String name);
-
 
     @Query("SELECT a FROM Account a WHERE a.isDeleted = false")
     List<Account> findActiveAccounts();
@@ -55,14 +44,11 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     @Query("SELECT DISTINCT a FROM Account a JOIN EventAccountRole er ON a.accountId = er.id.accountId WHERE er.id.eventId = :eventId")
     List<Account> findAccountsByEventId(@Param("eventId") Integer eventId);
 
-
     @Query("SELECT DISTINCT a FROM Account a JOIN EventAccountRole er ON a.accountId = er.id.accountId WHERE er.departmentId = :departmentId")
     List<Account> findAccountsByDepartmentId(@Param("departmentId") Integer departmentId);
 
-
     @Query("SELECT COUNT(a) FROM Account a WHERE a.isDeleted = false")
     long countActiveAccounts();
-
 
     @Query("SELECT a FROM Account a WHERE a.isDeleted = false")
     Page<Account> findActiveAccounts(Pageable pageable);
@@ -76,7 +62,6 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
      */
     @Query("SELECT a FROM Account a WHERE LOWER(a.fullName) LIKE LOWER(CONCAT('%', :name, '%'))")
     Page<Account> findByFullNameContainingIgnoreCase(@Param("name") String name, Pageable pageable);
-
 
     long countBySystemRole(Account.SystemRole systemRole);
 }
