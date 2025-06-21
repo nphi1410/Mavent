@@ -68,7 +68,7 @@ const TaskHistory = () => {
     const fetchFilteredTasks = async () => {
       setFilterLoading(true);
       try {
-        const statusFilters = filters.status || 'DONE,REJECTED,CANCELLED,OVERDUE';
+        const statusFilters = filters.status || 'DONE,REJECTED,CANCELLED';
 
         const response = await getUserTasks({
           ...filters,
@@ -157,7 +157,12 @@ console.log('displayTasks:', displayTasks);
               {
                 label: 'Event',
                 name: 'eventName',
-                options: [{ value: '', label: 'All Events' }, ...events.map(e => ({ value: e.eventId, label: e.eventName }))]
+                options: [
+                  { value: '', label: 'All Events' },
+                  ...events
+                    .filter(e => e.role !== 'PARTICIPANT')
+                    .map(e => ({ value: e.eventId, label: e.eventName }))
+                ]
               },
               {
                 label: 'Status',
@@ -221,16 +226,16 @@ console.log('displayTasks:', displayTasks);
           <div className="text-center text-gray-500 py-10">Loading tasks...</div>
         ) : displayTasks.length > 0 ? (
           <div className="bg-white rounded-lg shadow overflow-x-auto">
-            <table className="min-w-full">
+            <table className="min-w-full table-fixed"> {/* Thêm table-fixed */}
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event</th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                  <th className="w-12 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
+                  <th className="w-80 md:w-80 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th className="w-36 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event</th>
+                  <th className="w-32 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
+                  <th className="w-24 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="w-24 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+                  <th className="w-32 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">

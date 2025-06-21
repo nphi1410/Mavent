@@ -40,7 +40,7 @@ public class DepartmentImplement implements DepartmentService {
         department.setCreatedAt(now);
         department.setUpdatedAt(now);
 
-       Department savedDepartment = departmentRepository.save(department);
+        Department savedDepartment = departmentRepository.save(department);
         return DepartmentMapper.toDTO(savedDepartment);
     }
 

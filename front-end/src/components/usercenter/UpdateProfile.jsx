@@ -89,7 +89,7 @@ const UpdateProfile = ({ userData, onClose, onUpdate }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50 overflow-y-auto p-4">
+    <div className="fixed inset-0 backdrop-blur-[0px] bg-gray-900/40 z-[9999] flex justify-center items-center p-4 overflow-y-auto">
       <div className="my-8 bg-white rounded-xl p-6 sm:p-8 max-w-2xl w-full shadow-[0_0_15px_rgba(0,0,0,0.1)] border border-gray-100">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Update Profile</h2>
