@@ -1,3 +1,5 @@
+import { jwtDecode } from 'jwt-decode'; // ✅ Correct for named exports
+
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import { login } from '../services/AuthService';
@@ -9,13 +11,13 @@ function Login() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleLoginFormSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
       const response = await axios.post(
-        "http://localhost:8080/api/login",
+        "http://localhost:8080/api/public/login",
         {
           username,
           password
@@ -28,14 +30,29 @@ function Login() {
         }
       );
 
-      if (response.status === 200) {
-        // Lưu minimal info vào sessionStorage
-        sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('username', username);
+      if (response.status === 200 && response.data.token) {
+        const token = response.data.token;
+        const decoded = jwtDecode(token);
+        const roles = decoded.roles || [];
+        // console.log("Decoded JWT:", decoded);
+        // console.log("User roles:", roles);
 
-        // Sử dụng navigate thay vì window.location để chuyển trang mượt hơn
-        console.log("Login successful:", response.data);
-        navigate(`${response.data}`);
+        // Store token and basic info
+        sessionStorage.setItem("token", token);
+        sessionStorage.setItem("isLoggedIn", "true");
+        sessionStorage.setItem("username", decoded.sub);
+        console.log(decoded.sub);
+
+        // Redirect based on role
+        if (roles.includes("ROLE_SUPER_ADMIN")) {
+          console.log("Super Admin logged in");
+          navigate("/superadmin");
+        } else if (roles.includes("ROLE_USER")) {
+          console.log("User logged in");
+          navigate("/profile");
+        } else {
+          navigate("/home");
+        }
       }
     } catch (error) {
       console.error("Login failed:", error);
@@ -47,11 +64,10 @@ function Login() {
   return (
     <div className="flex items-center justify-center min-h-screen w-full bg-blue-900">
       <div className="flex w-8/12 h-9/12 bg-white rounded-[40px] overflow-hidden">
-        {/* Left Panel */}
-        <div className="w-1/2 flex items-center justify-center border-r border-black">
+        {/* Left Panel */}        <div className="w-1/2 flex items-center justify-center border-r border-black">
           {/* <p className="text-center text-sm">Ảnh sự kiện gần nhất hiện tại</p> */}
           <img
-            src="https://scontent.fhan2-5.fna.fbcdn.net/v/t39.30808-6/500241004_1167279355199938_6596002086529846154_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=foSz0fJFckoQ7kNvwE6hEnf&_nc_oc=Adm5W8dX4GHiM5e4sh_OLjySpiV9QVHGJ0GceqZZXKagDzagOh4stGKqJlEM-wVHC6c&_nc_zt=23&_nc_ht=scontent.fhan2-5.fna&_nc_gid=x7PXBO4qz810RpaQdUQ3uA&oh=00_AfKQrOCrJ1yNRqgI6MFQXENOMN6G-RxlyOvEydCPmYfehw&oe=6838E740"
+            src="/images/fptu-showcase.png"
             alt="Event"
             className="w-full h-full object-cover rounded-l-[30px]" />
         </div>
@@ -60,7 +76,7 @@ function Login() {
         <div className="w-1/2 flex flex-col items-center justify-center p-8 space-y-5">
           <h1 className="text-5xl font-semibold text-center pb-4 text-blue-900">WELCOME TO MAVENT</h1>
 
-          <form onSubmit={handleSubmit} className="flex flex-col items-center space-y-4 w-full">
+          <form onSubmit={handleLoginFormSubmit} className="flex flex-col items-center space-y-4 w-full">
             <input
               type="text"
               name="username"
@@ -91,7 +107,7 @@ function Login() {
             {error && <div className="text-red-600 text-sm mt-2">{error}</div>}
           </form>
 
-          <Link to="/about" className="text-xs text-blue-900 hover:underline">
+          <Link to="/reset-password-request" className="text-xs text-blue-900 hover:underline">
             Forgot Password?
           </Link>
 

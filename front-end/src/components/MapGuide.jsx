@@ -5,6 +5,7 @@ import L from "leaflet";
 
 import markerIconUrl from "leaflet/dist/images/marker-icon.png";
 import markerShadowUrl from "leaflet/dist/images/marker-shadow.png";
+import { getLocationById } from "../services/EventLocationService";
 
 const DefaultIcon = L.icon({
   iconUrl: markerIconUrl,
@@ -13,19 +14,24 @@ const DefaultIcon = L.icon({
 
 L.Marker.prototype.options.icon = DefaultIcon;
 
-const MapGuide = () => {
-  const locationName = "21.013221321252136, 105.52370094691307";
+const MapGuide = ({ eventData }) => {
   const [position, setPosition] = useState(null);
 
   useEffect(() => {
-    const coords = locationName
-      .split(",")
-      .map((coord) => parseFloat(coord.trim()));
-    if (coords.length === 2 && !coords.some(isNaN)) {
-      setPosition({ lat: coords[0], lon: coords[1] });
-    } else {
-      console.error("Invalid coordinates");
-    }
+    const fetchPosition = async () => {
+      try {
+        if (eventData.locationId === null) {
+          setPosition(null);
+          return;
+        }
+        const location = await getLocationById(eventData.locationId);
+        setPosition(location);
+      } catch (err) {
+        console.error("Failed to fetch location:", err);
+      }
+    };
+
+    fetchPosition();
   }, []);
 
   return (
@@ -37,16 +43,16 @@ const MapGuide = () => {
       <div className="relative w-full h-96 overflow-hidden rounded-2xl ring-1 ring-gray-200 shadow-md">
         {position ? (
           <MapContainer
-            center={[position.lat, position.lon]}
-            zoom={20}
+            center={[position.latitude, position.longitude]}
+            zoom={18}
             className="h-full w-full"
           >
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            <Marker position={[position.lat, position.lon]}>
-              <Popup>Gamma Building</Popup>
+            <Marker position={[position.latitude, position.longitude]}>
+              <Popup>{position.locationName}</Popup>
             </Marker>
           </MapContainer>
         ) : (
@@ -56,9 +62,11 @@ const MapGuide = () => {
         )}
       </div>
 
-      <div className="mt-6 px-5 py-4 bg-white border border-gray-200 rounded-xl shadow-sm text-center text-gray-800 font-semibold text-lg">
-        Tầng 5, hội trường tòa nhà Gamma - FPT University, Hòa Lạc, Hà Nội
-      </div>
+      {position && (
+        <div className="mt-6 px-5 py-4 bg-white border border-gray-200 rounded-xl shadow-sm text-center text-gray-800 font-semibold text-lg">
+          {position.locationName}
+        </div>
+      )}
     </section>
   );
 };

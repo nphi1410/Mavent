@@ -8,6 +8,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
 @Entity
 @Table(name = "events")
 @Data
@@ -35,6 +37,9 @@ public class Event {
     @Column(name = "location")
     private String location;
 
+    @Column(name = "location_id")
+    private Integer locationId;
+
     @Column(name = "dday_info", columnDefinition = "TEXT")
     private String ddayInfo;
 
@@ -48,9 +53,8 @@ public class Event {
     @Column(name = "status")
     private EventStatus status = EventStatus.PENDING;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "created_by_account_id")
-//    private Account createdBy;
+    @Column(name = "created_by_account_id")
+    private Integer createdBy;
 
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
@@ -63,12 +67,11 @@ public class Event {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-//    // Relationships
-//    @OneToMany(mappedBy = "event", fetch = FetchType.LAZY)
-//    private List<EventAccountRole> eventAccountRoles;
-//
-//    @OneToMany(mappedBy = "event", fetch = FetchType.LAZY)
-//    private List<Department> departments;
+    @Column(name = "banner_url")
+    private String bannerUrl;
+
+    @Column(name = "poster_url")
+    private String posterUrl;
 
     public enum EventStatus {
         RECRUITING, UPCOMING, ONGOING, ENDED, CANCELLED, PENDING, REVIEWING

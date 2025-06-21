@@ -1,10 +1,12 @@
 package com.mavent.dev.service.implement;
 
+import com.mavent.dev.dto.event.EventAccountRoleDTO;
+import com.mavent.dev.entity.Event;
 import com.mavent.dev.entity.EventAccountRole;
-import com.mavent.dev.entity.EventAccountRoleId;
 import com.mavent.dev.repository.EventAccountRoleRepository;
 import com.mavent.dev.service.EventAccountRoleService;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,25 +17,27 @@ import java.util.Optional;
 @Service
 public class EventAccountRoleServiceImpl implements EventAccountRoleService {
 
-    private final EventAccountRoleRepository eventAccountRoleRepository;
-
-    public EventAccountRoleServiceImpl(EventAccountRoleRepository eventAccountRoleRepository) {
-        this.eventAccountRoleRepository = eventAccountRoleRepository;
-    }
+    @Autowired
+    private EventAccountRoleRepository eventAccountRoleRepository;
 
     @Override
     public List<EventAccountRole> getMembersByEventId(Integer eventId) {
-        return eventAccountRoleRepository.findByIdEventId(eventId);
+        return eventAccountRoleRepository.findByEventId(eventId);
     }
 
     @Override
     public Page<EventAccountRole> getMembersByEventIdWithPagination(Integer eventId, Pageable pageable) {
-        return eventAccountRoleRepository.findByIdEventId(eventId, pageable);
+        return eventAccountRoleRepository.findByEventId(eventId, pageable);
     }
 
     @Override
     public List<EventAccountRole> getMembersByAccountId(Integer accountId) {
-        return eventAccountRoleRepository.findByIdAccountId(accountId);
+        return eventAccountRoleRepository.findByAccountId(accountId);
+    }
+
+    @Override
+    public Page<EventAccountRoleDTO> getMembersByAccountIdWithPagination(Integer accountId, Pageable pageable) {
+        return eventAccountRoleRepository.findByAccountId(accountId,pageable);
     }
 
     @Override
@@ -43,12 +47,12 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
 
     @Override
     public List<EventAccountRole> getMembersByEventIdAndRole(Integer eventId, EventAccountRole.EventRole role) {
-        return eventAccountRoleRepository.findByIdEventIdAndEventRole(eventId, role);
+        return eventAccountRoleRepository.findByEventIdAndEventRole(eventId, role);
     }
 
     @Override
     public List<EventAccountRole> getActiveMembersByEventId(Integer eventId) {
-        return eventAccountRoleRepository.findByIdEventIdAndIsActive(eventId, true);
+        return eventAccountRoleRepository.findByEventIdAndIsActive(eventId, true);
     }
 
     @Override
@@ -57,8 +61,8 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
     }
 
     @Override
-    public EventAccountRole updateMemberRole(EventAccountRoleId id, EventAccountRole updatedRole) {
-        Optional<EventAccountRole> existingRole = eventAccountRoleRepository.findById(id);
+    public EventAccountRole updateMemberRole(EventAccountRole updatedRole) {
+        Optional<EventAccountRole> existingRole = eventAccountRoleRepository.findByEventIdAndAccountId(updatedRole.getEventId(), updatedRole.getAccountId());
         if (existingRole.isPresent()) {
             EventAccountRole roleToUpdate = existingRole.get();
             roleToUpdate.setEventRole(updatedRole.getEventRole());
@@ -70,17 +74,18 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
     }
 
     @Override
-    public boolean removeMemberFromEvent(EventAccountRoleId id) {
-        if (eventAccountRoleRepository.existsById(id)) {
-            eventAccountRoleRepository.deleteById(id);
+    public boolean removeMemberFromEvent(EventAccountRole eventAccountRole) {
+        Optional<EventAccountRole> member = eventAccountRoleRepository.findByEventIdAndAccountId(eventAccountRole.getEventId(), eventAccountRole.getAccountId());
+        if (member.isPresent()) {
+            eventAccountRoleRepository.delete(member.get());
             return true;
         }
         return false;
     }
 
     @Override
-    public boolean activateDeactivateMember(EventAccountRoleId id, boolean isActive) {
-        Optional<EventAccountRole> member = eventAccountRoleRepository.findById(id);
+    public boolean activateDeactivateMember(EventAccountRole eventAccountRole, boolean isActive) {
+        Optional<EventAccountRole> member = eventAccountRoleRepository.findByEventIdAndAccountId(eventAccountRole.getEventId(), eventAccountRole.getAccountId());
         if (member.isPresent()) {
             EventAccountRole memberToUpdate = member.get();
             memberToUpdate.setIsActive(isActive);
@@ -92,7 +97,7 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
 
     @Override
     public long countMembersByEventId(Integer eventId) {
-        return eventAccountRoleRepository.findByIdEventId(eventId).size();
+        return eventAccountRoleRepository.findByEventId(eventId).size();
     }
 
     @Override
@@ -107,7 +112,7 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
 
     @Override
     public boolean isMemberInEvent(Integer eventId, Integer accountId) {
-        return eventAccountRoleRepository.existsByIdEventIdAndIdAccountId(eventId, accountId);
+        return eventAccountRoleRepository.existsByEventIdAndAccountId(eventId, accountId);
     }
 
     @Override
@@ -116,23 +121,13 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
     }
 
     @Override
-    public boolean isOrganizerOfEvent(Integer eventId, Integer accountId) {
-        return eventAccountRoleRepository.isOrganizerOfEvent(eventId, accountId);
-    }
-
-    @Override
-    public boolean isParticipantInEvent(Integer eventId, Integer accountId) {
-        return eventAccountRoleRepository.isParticipantInEvent(eventId, accountId);
-    }
-
-    @Override
-    public Page<EventAccountRole> getMembersWithFilters(Integer eventId, Boolean isActive, 
-                                                       EventAccountRole.EventRole role, 
-                                                       Integer departmentId, 
-                                                       String searchTerm,
-                                                       java.util.Date startDate,
-                                                       java.util.Date endDate,
-                                                       Pageable pageable) {
+    public Page<EventAccountRole> getMembersWithFilters(Integer eventId, Boolean isActive,
+                                                        EventAccountRole.EventRole role,
+                                                        Integer departmentId,
+                                                        String searchTerm,
+                                                        java.util.Date startDate,
+                                                        java.util.Date endDate,
+                                                        Pageable pageable) {
         return eventAccountRoleRepository.findByEventIdWithFilters(eventId, isActive, role, departmentId, searchTerm, startDate, endDate, pageable);
     }
 }

@@ -1,34 +1,128 @@
 import Api from "../config/Api";
 
-//Lấy toàn bộ danh sách sự kiện
+// Lọc sự kiện theo các tiêu chí
+export const getFilterEvents = async ({
+  name,
+  status,
+  tagIds,
+  sortType,
+  page,
+  size,
+  type,
+  isTrending,
+}) => {
+  try {
+    const body = {
+      name,
+      status,
+      tagIds: tagIds && tagIds.length > 0 ? tagIds : [],
+      sortType,
+      page,
+      size,
+      type,
+      isTrending,
+    };
+    const res = await Api.post("/events/filter", body);
+    return res.data;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+};
+
+// Lấy toàn bộ danh sách sự kiện
 export const getEvents = async () => {
-    try {
-        const response = await Api.get('/events');
-        return response.data; // array of EventDTO
-    } catch (error) {
-        console.error('Error fetching events:', error);
-        return [];
-    }
+  try {
+    const response = await Api.get("/events");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    return [];
+  }
 };
 
-//Lấy thông tin 1 sự kiện theo ID
+// Lấy sự kiện theo ID
 export const getEventById = async (id) => {
-    try {
-        const response = await Api.get(`/events/${id}`);
-        return response.data; // single EventDTO
-    } catch (error) {
-        console.error(`Error fetching event with ID ${id}:`, error);
-        return null;
-    }
+  try {
+    const response = await Api.get(`/events/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching event with ID ${id}:`, error);
+    return null;
+  }
 };
 
-// Update event
-export const updateEvent = async (id, eventData) => {
-    try {
-        const response = await Api.put(`/events/${id}`, eventData);
-        return response.data; // updated EventDTO
-    } catch (error) {
-        console.error(`Error updating event with ID ${id}:`, error);
-        return null;
-    }
+// ✅ Tạo sự kiện
+export const createEvent = async (eventData) => {
+  try {
+    const response = await Api.post("/events/create-event", eventData);
+
+    const createdEvent = response.data;
+
+    // Nếu EventDTO có id
+    const eventId = createdEvent?.eventId;
+
+    return {
+      success: true,
+      eventId: eventId, // Để navigate khi tạo xong
+      data: createdEvent,
+    };
+  } catch (error) {
+    console.error("Error creating event:", error);
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Đã có lỗi không mong muốn xảy ra.";
+    return { success: false, message: errorMessage };
+  }
 };
+
+// Cập nhật sự kiện
+export const updateEvent = async (id, eventData) => {
+  try {
+    const response = await Api.put(`/events/${id}`, eventData);
+    return response.data;
+  } catch (error) {
+    console.error(`Error updating event with ID ${id}:`, error);
+    return null;
+  }
+};
+
+// Lấy trending events
+export const getTrendingEvents = async (type) => {
+  try {
+    const response = await Api.get(`/events/trending/${type}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching trending events:", error);
+    return [];
+  }
+};
+
+export const registerEvent = async (eventRegisterDTO) => {
+  try {
+    // console.log(eventRegisterDTO);
+
+    const response = await Api.post(`/events/register`, eventRegisterDTO);
+    return response;
+  } catch (error) {
+    console.error(
+      `Error registering for event with ID ${eventRegisterDTO}:`,
+      error
+    );
+    return null;
+  }
+};
+
+export const getAttendingEvent = async (accountId, pageable) => {
+  try {
+    const response = await Api.get(`/events/attending/${accountId}`, {
+      params: pageable,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching attending events:", error);
+    return [];
+  }
+};
+

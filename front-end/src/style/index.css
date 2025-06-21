@@ -1,78 +1,141 @@
 @import "tailwindcss";
 
-body {
-  @apply text-gray-600;
-}
-
-/* 
 :root {
-    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-    line-height: 1.5;
-    font-weight: 400;
-    color-scheme: light dark;
-     color: rgba(255, 255, 255, 0.87);
-    background-color: #242424;
-
-
-    font-family: 'Pin-Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Helvetica, 'ヒラギノ角ゴ Pro W3', 'メイリオ', Meiryo, 'ＭＳ Ｐゴシック', Arial, sans-serif !important;
-
-    font-synthesis: none;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-    font-weight: 500;
-     color: #646cff;
-    text-decoration: inherit; 
-}
-a:hover {
-    color: #535bf2; 
+  --primary: #3b82f6; /* blue-500 */
+  --primary-dark: #2563eb; /* blue-600 */
+  --secondary: #6b7280; /* gray-500 */
+  --secondary-dark: #4b5563; /* gray-600 */
+  --error: #ef4444; /* red-500 */
+  --error-dark: #dc2626; /* red-600 */
 }
 
 body {
-    margin: 0;
-    display: flex;
-    place-items: center;
-    min-width: 320px;
-    min-height: 100vh;
+  background-color: #f9fafb; /* bg-gray-50 */
+  color: #111827; /* text-gray-900 */
 }
 
-h1 {
-    font-size: 3.2em;
-    line-height: 1.1;
+.btn {
+  padding-left: 1rem; /* px-4 */
+  padding-right: 1rem;
+  padding-top: 0.5rem; /* py-2 */
+  padding-bottom: 0.5rem;
+  border-radius: 0.375rem; /* rounded-md */
+  font-weight: 500; /* font-medium */
+  transition-property: color, background-color, border-color; /* transition-colors */
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+  
+.btn-primary {
+  background-color: var(--primary); /* bg-primary */
+  color: white; /* text-white */
 }
 
-button {
-    border-radius: 8px;
-    border: 1px solid transparent;
-    padding: 0.6em 1.2em;
-    font-size: 1em;
-    font-weight: 500;
-    font-family: inherit;
-     background-color: #1a1a1a; 
-    cursor: pointer;
-    transition: border-color 0.25s;
+.btn-primary:hover {
+  background-color: var(--primary-dark); /* hover:bg-primary-dark */
 }
-button:hover {
-    border-color: #646cff;
-} 
-
-button:focus,
-button:focus-visible {
-    outline: 4px auto -webkit-focus-ring-color;
+  
+.btn-secondary {
+  background-color: var(--secondary); /* bg-secondary */
+  color: white; /* text-white */
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+.btn-secondary:hover {
+  background-color: var(--secondary-dark); /* hover:bg-secondary-dark */
+}
+  
+.card {
+  border-radius: 0.5rem; /* rounded-lg */
+  border-width: 1px; /* border */
+  border-color: #e5e7eb; /* border-gray-200 */
+  background-color: white; /* bg-white */
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); /* shadow-sm */
+}
+  
+.input {
+  border-radius: 0.375rem; /* rounded-md */
+  border-width: 1px; /* border */
+  border-color: #d1d5db; /* border-gray-300 */
+  padding-left: 0.75rem; /* px-3 */
+  padding-right: 0.75rem;
+  padding-top: 0.5rem; /* py-2 */
+  padding-bottom: 0.5rem;
+}
+
+.input:focus {
+  outline: none; /* focus:outline-none */
+  border-color: var(--primary); /* focus:border-primary */
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25); /* focus:ring-2 focus:ring-primary */
+}
+
+/* Responsive utilities */
+.container {
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: 1rem;
+  padding-left: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container {
+    max-width: 640px;
   }
-  a:hover {
-    color: #747bff;
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
   }
-  button {
-    background-color: #f9f9f9;
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
   }
-} */
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1280px;
+  }
+}
+
+/* Error page styles */
+.error-container {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.error-icon {
+  color: var(--error);
+  font-size: 5rem;
+  margin-bottom: 1rem;
+}
+
+.error-title {
+  color: var(--error-dark);
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.error-message {
+  color: #4b5563;
+  margin-bottom: 1.5rem;
+}
+
+.home-button {
+  background-color: #1e40af;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.home-button:hover {
+  background-color: #1e3a8a;
+}
+
+

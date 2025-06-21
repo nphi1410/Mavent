@@ -1,7 +1,4 @@
 import React, { useState, useEffect } from 'react';
-// Giả sử profileService.updateProfile đã được import ở ProfileContent và truyền xuống qua props
-// Hoặc nếu bạn muốn gọi trực tiếp từ đây, bạn cần import:
-// import { updateProfile } from '../../services/profileService'; 
 import { updateProfile } from '../../services/profileService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSave, faXmark } from '@fortawesome/free-solid-svg-icons';
@@ -13,24 +10,23 @@ const UpdateProfile = ({ userData, onClose, onUpdate }) => {
     fullName: userData?.fullName || '',
     studentId: userData?.studentId || '',
     gender: userData?.gender || '',
-    email: userData?.email || '', // Email thường không cho sửa
-    phoneNumber: userData?.phoneNumber || '', 
+    email: userData?.email || '',
+    phoneNumber: userData?.phoneNumber || '',
     dateOfBirth: userData?.dateOfBirth ? new Date(userData.dateOfBirth) : null
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null); // Lỗi cục bộ cho form này
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     setFormData({
-        fullName: userData?.fullName || '',
-        studentId: userData?.studentId || '',
-        gender: userData?.gender || '',
-        email: userData?.email || '',
-        phoneNumber: userData?.phoneNumber || '', // Khớp với key trong userData
-        dateOfBirth: userData?.dateOfBirth ? new Date(userData.dateOfBirth) : null
+      fullName: userData?.fullName || '',
+      studentId: userData?.studentId || '',
+      gender: userData?.gender || '',
+      email: userData?.email || '',
+      phoneNumber: userData?.phoneNumber || '',
+      dateOfBirth: userData?.dateOfBirth ? new Date(userData.dateOfBirth) : null
     });
   }, [userData]);
-
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -50,38 +46,58 @@ const UpdateProfile = ({ userData, onClose, onUpdate }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError(null); // Xóa lỗi cũ
+    setError(null);
 
     try {
+      // Add gender validation
+      if (!formData.gender) {
+        setError('Please select your gender.');
+        setLoading(false);
+        return;
+      }
+
+      if (formData.fullName.length > 100) {
+        setError('Full name không được quá 100 ký tự.');
+        setLoading(false);
+        return;
+      }
+
+      if (!/^0\d{9}$/.test(formData.phoneNumber)) {
+        setError('Số điện thoại phải bắt đầu bằng số 0 và có đúng 10 chữ số.');
+        setLoading(false);
+        return;
+      }
+
+      if (!/^[A-Za-z]{2}\d{6}$/.test(formData.studentId)) {
+        setError('Mã số sinh viên phải gồm 2 chữ cái và 6 chữ số, ví dụ: SE123456.');
+        setLoading(false);
+        return;
+      }
+
       const dataToSubmit = {
         ...formData,
-        dateOfBirth: formData.dateOfBirth ? formData.dateOfBirth.toISOString().split('T')[0] : null // Gửi YYYY-MM-DD
+        dateOfBirth: formData.dateOfBirth ? formData.dateOfBirth.toISOString().split('T')[0] : null
       };
-      
-
 
       console.log('UpdateProfile.jsx: Đang gửi dữ liệu lên service:', dataToSubmit);
-      onUpdate(dataToSubmit); 
-      // onClose(); // Cha sẽ quyết định đóng modal sau khi onUpdate của nó xử lý xong
-
+      onUpdate(dataToSubmit);
     } catch (err) {
       console.error('UpdateProfile.jsx: Lỗi khi chuẩn bị dữ liệu hoặc gọi onUpdate:', err);
       setError(err.message || 'Lỗi không xác định khi chuẩn bị dữ liệu.');
-      setLoading(false); // Dừng loading nếu có lỗi ở đây
+      setLoading(false);
     }
-    
   };
 
   return (
     <div className="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50 overflow-y-auto p-4">
       <div className="my-8 bg-white rounded-xl p-6 sm:p-8 max-w-2xl w-full shadow-[0_0_15px_rgba(0,0,0,0.1)] border border-gray-100">
         <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Update Profile</h2>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700" disabled={loading}>
-                <FontAwesomeIcon icon={faXmark} size="lg" />
-            </button>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Update Profile</h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700" disabled={loading}>
+            <FontAwesomeIcon icon={faXmark} size="lg" />
+          </button>
         </div>
-        
+
         {error && (
           <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
             {error}
@@ -119,25 +135,36 @@ const UpdateProfile = ({ userData, onClose, onUpdate }) => {
               />
             </div>
 
-            <div className="w-full"> {/* DatePicker nên chiếm full width nếu không bị giới hạn bởi grid */}
+            <div className="w-full relative">
               <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700 mb-1">
                 Date of Birth
               </label>
-              <DatePicker
-                id="dateOfBirth"
-                selected={formData.dateOfBirth}
-                onChange={handleDateChange}
-                dateFormat="dd/MM/yyyy" // Định dạng phổ biến ở Việt Nam
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholderText="Select date of birth"
-                maxDate={new Date()} // Không cho chọn ngày tương lai
-                showYearDropdown
-                scrollableYearDropdown
-                yearDropdownItemNumber={100} // Số năm hiển thị trong dropdown
-                peekNextMonth
-                showMonthDropdown
-                dropdownMode="select"
-              />
+              <div className="relative z-[1000]">
+                <DatePicker
+                  id="dateOfBirth"
+                  selected={formData.dateOfBirth}
+                  onChange={handleDateChange}
+                  dateFormat="dd/MM/yyyy"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholderText="Select date of birth"
+                  maxDate={new Date()}
+                  showYearDropdown
+                  scrollableYearDropdown
+                  yearDropdownItemNumber={100}
+                  peekNextMonth
+                  showMonthDropdown
+                  dropdownMode="select"
+                  popperPlacement="bottom-start"
+                  popperModifiers={[
+                    {
+                      name: "offset",
+                      options: {
+                        offset: [0, 10]
+                      }
+                    }
+                  ]}
+                />
+              </div>
             </div>
 
             <div>
@@ -152,7 +179,7 @@ const UpdateProfile = ({ userData, onClose, onUpdate }) => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Select gender</option>
-                <option value="MALE">Male</option> {/* Sử dụng giá trị enum của backend nếu có */}
+                <option value="MALE">Male</option>
                 <option value="FEMALE">Female</option>
                 <option value="OTHER">Other</option>
               </select>
@@ -166,9 +193,9 @@ const UpdateProfile = ({ userData, onClose, onUpdate }) => {
                 id="email"
                 type="email"
                 name="email"
-                value={formData.email} // Email thường không được phép thay đổi
+                value={formData.email}
                 className="w-full px-3 py-2 border border-gray-200 rounded-md shadow-sm bg-gray-100 text-gray-500 cursor-not-allowed"
-                disabled // Vô hiệu hóa trường email
+                disabled
               />
             </div>
 
@@ -179,7 +206,7 @@ const UpdateProfile = ({ userData, onClose, onUpdate }) => {
               <input
                 id="phoneNumber"
                 type="tel"
-                name="phoneNumber" // Khớp với key trong formData
+                name="phoneNumber"
                 value={formData.phoneNumber}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

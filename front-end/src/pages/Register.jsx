@@ -9,6 +9,7 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [registerError, setRegisterError] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -22,12 +23,18 @@ const Register = () => {
     } else {
       setPasswordError("");
     }
-  };
+  }
 
   const sendOtp = async (e) => {
     e?.preventDefault();
+    if (password !== confirmPassword) {
+      setPasswordError("Passwords do not match");
+      return;
+    }
     try {
-      const response = await axios.post("http://localhost:8080/api/send-otp", {
+      setIsLoading(true);
+      setRegisterError("");
+      const response = await axios.post("http://localhost:8080/api/public/send-register-otp", {
         username,
         email,
         password
@@ -41,18 +48,21 @@ const Register = () => {
         setRegisterError("");
       }
     } catch (error) {
+      console.log(error)
       if (error.response?.status === 400) {
-        setRegisterError("Username or email already exists.");
+        setRegisterError(response?.data);
       } else {
         setRegisterError("Failed to send OTP. Please try again.");
       }
     }
+    setIsLoading(false);
   };
 
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:8080/api/register", {
+      setIsLoading(true);
+      const response = await axios.post("http://localhost:8080/api/public/register", {
         otp
       }, {
         headers: { "Content-Type": "application/json" },
@@ -60,7 +70,10 @@ const Register = () => {
       });
 
       if (response.status === 200) {
-        navigate("/login");
+        setIsRegistered(true);
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000); // Redirect after 2 seconds      
       }
     } catch (error) {
       if (error.response?.status === 400) {
@@ -69,8 +82,10 @@ const Register = () => {
         setRegisterError("Registration failed. Try again later.");
       }
     }
+    setIsLoading(false);
   };
 
+  
   return (
     <div className="flex items-center justify-center min-h-screen bg-blue-900">
       <div className="bg-white p-10 rounded-2xl shadow-md w-full max-w-3xl">
@@ -88,6 +103,8 @@ const Register = () => {
                 className="pl-4 p-2 border border-blue-400 rounded-full"
                 onChange={(e) => setUsername(e.target.value)}
                 value={username}
+                required
+                disabled={otpSent}
               />
 
               <label className="mb-1 mt-4 text-sm font-medium text-gray-700 pl-2.5">Email:</label>
@@ -97,6 +114,8 @@ const Register = () => {
                 className="pl-4 p-2 border border-blue-400 rounded-full"
                 onChange={(e) => setEmail(e.target.value)}
                 value={email}
+                required
+                disabled={otpSent}
               />
             </div>
 
@@ -108,6 +127,7 @@ const Register = () => {
                 className="pl-4 p-2 border border-blue-400 rounded-full"
                 onChange={(e) => setPassword(e.target.value)}
                 value={password}
+                required
               />
 
               <label className="mb-1 mt-4 text-sm font-medium text-gray-700 pl-2.5">Confirm password:</label>
@@ -117,6 +137,7 @@ const Register = () => {
                 className="pl-4 p-2 border border-blue-400 rounded-full"
                 onChange={confirmPasswordChange}
                 value={confirmPassword}
+                required
               />
               {passwordError && (
                 <div className="text-red-600 text-sm mt-2">{passwordError}</div>
@@ -149,10 +170,18 @@ const Register = () => {
             </div>
           )}
 
+          { isLoading && (
+            <div className="text-blue-600 text-sm text-center mt-4">
+              {otpSent ? "Registering..." : "Sending OTP..."}
+            </div>
+          )}
+
           <div className="flex justify-center mt-6">
             <button
               type="submit"
               className="bg-blue-900 text-white px-6 py-2 rounded-full hover:bg-blue-950 transition"
+              // onClick={isRegistered ? `disabled` : ""}
+              id='register-button'
             >
               {otpSent ? "Register" : "Send OTP"}
             </button>

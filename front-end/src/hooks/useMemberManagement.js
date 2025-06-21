@@ -1,4 +1,5 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
 import useMemberData from './useMemberData';
 import useMemberFilters from './useMemberFilters';
 import useMemberModals from './useMemberModals';
@@ -12,9 +13,18 @@ import memberService from '../services/memberService';
  * @returns {Object} All necessary methods and state for member management
  */
 const useMemberManagement = () => {
+  // Get the event ID from URL parameters
+  const { id } = useParams();
   // Event ID state
-  const [eventId, setEventId] = useState(9);
-
+  const [eventId, setEventId] = useState(id ? parseInt(id) : null);
+  
+  // Update eventId when URL param changes
+  useEffect(() => {
+    if (id) {
+      setEventId(parseInt(id));
+    }
+  }, [id]);
+  
   // ------------------------
   // 1. Initialize Hooks
   // ------------------------
@@ -50,19 +60,18 @@ const useMemberManagement = () => {
       lastFetchTimeRef.current = now;
       
       if (process.env.NODE_ENV === 'development') {
-        console.log(`Triggering fetch #${fetchCallbackCountRef.current}, interval: ${timeSinceLastFetch}ms`);
-        console.log('Current filter values:', {
-          searchTerm: filterHook?.filterValues?.searchTerm,
-          statusFilter: filterHook?.filterValues?.statusFilter,
-          roleFilter: filterHook?.filterValues?.roleFilter,
-          departmentFilter: filterHook?.filterValues?.departmentFilter
-        });
+        // console.log(`Triggering fetch #${fetchCallbackCountRef.current}, interval: ${timeSinceLastFetch}ms`);        // console.log('Current filter values:', {
+        //   searchTerm: filterHook?.filterValues?.searchTerm,
+        //   statusFilter: filterHook?.filterValues?.statusFilter,
+        //   roleFilter: filterHook?.filterValues?.roleFilter,
+        //   departmentFilter: filterHook?.filterValues?.departmentFilter
+        // });
       }
       
       fetchMembers();
     } else {
       if (process.env.NODE_ENV === 'development') {
-        console.log(`Filter change debounced - too many requests or too soon`);
+        // console.log(`Filter change debounced - too many requests or too soon`);
       }
     }
   });
@@ -155,69 +164,128 @@ const useMemberManagement = () => {
   // ------------------------
   // 3. Integration Methods
   // ------------------------
+  
+  // Simplified and fixed version of handleViewUser
+  const handleViewUser = (user) => {
+    // console.log('handleViewUser called with user:', user);
 
-  const handleViewUser = async (user) => {
     try {
       // Close any open menus when viewing user details
       toggleMenu(null);
       
-      const response = await memberService.getMemberDetails(eventId, user.accountId);
+      // Create a clean copy of the user object to avoid reference issues
+      const userCopy = {...user};
       
-      if (response.success && response.data) {
-        // Transform API data to match front-end expectations
-        const transformedUser = {
-          ...response.data,
-          id: response.data.accountId,
-          name: response.data.fullName,
-          role: response.data.eventRole,
-          status: response.data.isActive ? 'Active' : 'Inactive',
-          department: response.data.departmentName || 'N/A',
-          isBanned: !response.data.isActive,
-          // Format date of birth if available
-          dateOfBirth: response.data.dateOfBirth ? new Date(response.data.dateOfBirth).toLocaleDateString('vi-VN') : null,
-          // Make sure we have access to all properties
-          studentId: response.data.studentId || null,
-          gender: response.data.gender || null,
-          avatarUrl: response.data.avatarUrl || null
+      // Make sure we have an accountId
+      if (!userCopy.accountId && userCopy.id) {
+        // console.log('Using id as accountId since accountId is missing');
+        userCopy.accountId = userCopy.id;
+      }
+      
+      // Create a clean user object for the modal, even if we're missing data
+      const modalUser = {
+        ...userCopy,
+        id: userCopy.accountId || userCopy.id || Math.random().toString(36).substr(2, 9),
+        name: userCopy.name || userCopy.fullName || 'Unknown User',
+        role: userCopy.role || userCopy.eventRole || 'N/A',
+        status: userCopy.status || (userCopy.isActive ? 'Active' : 'Inactive') || 'N/A',
+        department: userCopy.department || userCopy.departmentName || 'N/A',
+        isBanned: userCopy.isBanned !== undefined ? userCopy.isBanned : !userCopy.isActive,
+        email: userCopy.email || 'N/A',
+      };
+      
+      // console.log('Opening modal with cleaned user data:', modalUser);
+      
+      // Force modal to open immediately with what we have
+      openUserDetailModal(modalUser);
+      
+      // If we have an accountId, fetch additional details from API
+      if (userCopy.accountId) {
+        // console.log('Fetching additional details from API...');
+        
+        // Use a separate async function for the API call
+        const fetchDetails = async () => {
+          try {
+            const response = await memberService.getMemberDetails(eventId, userCopy.accountId);
+            
+            if (response.success && response.data) {
+              // Transform API data to match front-end expectations
+              const transformedUser = {
+                ...response.data,
+                id: response.data.accountId,
+                name: response.data.fullName,
+                role: response.data.eventRole,
+                status: response.data.isActive ? 'Active' : 'Inactive',
+                department: response.data.departmentName || 'N/A',
+                isBanned: !response.data.isActive,
+                // Format date of birth if available
+                dateOfBirth: response.data.dateOfBirth ? 
+                  new Date(response.data.dateOfBirth).toLocaleDateString('vi-VN') : null,
+                // Make sure we have access to all properties
+                studentId: response.data.studentId || null,
+                gender: response.data.gender || null,
+                avatarUrl: response.data.avatarUrl || null
+              };
+              
+              // console.log('API returned user details:', transformedUser);
+              openUserDetailModal(transformedUser);
+            }
+          } catch (err) {
+            console.error('Error fetching user details from API:', err);
+          }
         };
         
-        // Open detail modal with user data
-        openUserDetailModal(transformedUser);
+        // Execute the async function
+        fetchDetails();
       }
     } catch (err) {
-      console.error('Error fetching member details:', err);
+      console.error('Error in handleViewUser:', err);
     }
   };
 
   const handleEditUser = (user) => {
+    // console.log('handleEditUser called with user:', user);
     // Close any open menus when editing
     toggleMenu(null);
-    // Open edit modal with user data
-    openEditModal(user);
+    
+    // Create a clean copy of the user object to avoid reference issues
+    const userCopy = {...user};
+    
+    // Chuẩn bị dữ liệu user cho edit modal
+    const editableUser = {
+      ...userCopy,
+      id: userCopy.accountId || userCopy.id,
+      name: userCopy.fullName || userCopy.name,
+      role: userCopy.eventRole || userCopy.role,
+      status: userCopy.isActive !== undefined ? (userCopy.isActive ? 'Active' : 'Inactive') : userCopy.status,
+      department: userCopy.departmentName || userCopy.department || 'N/A',
+      isBanned: userCopy.isBanned !== undefined ? userCopy.isBanned : !userCopy.isActive
+    };
+    
+    // console.log('Opening edit modal with user:', editableUser);
+    
+    // Open edit modal directly for improved responsiveness
+    openEditModal(editableUser);
   };
 
   const handleSaveUser = async () => {
     try {
-      console.log('Saving edited user data:', JSON.stringify(editedUser));
-      console.log('Status value:', editedUser.status);
-      console.log('isActive value:', editedUser.isActive);
-      console.log('ID values:', {accountId: editedUser.accountId || editedUser.id, eventId: eventId});
-      console.log('Available departments:', departments);
+      // console.log('Saving edited user data:', JSON.stringify(editedUser));
       
       // Ensure the isActive field is correctly set based on status
       if (editedUser.isActive === undefined && editedUser.status) {
         const isActive = editedUser.status === 'Active';
-        console.log(`Setting missing isActive to ${isActive} based on status ${editedUser.status}`);
+        // console.log(`Setting missing isActive to ${isActive} based on status ${editedUser.status}`);
         editedUser.isActive = isActive;
       }
       
       const result = await updateMember(editedUser, departments);
       
       if (result.success) {
-        console.log('Member updated successfully:', result.data);
+        // console.log('Member updated successfully:', result.data);
         
         // Force a full refresh of the members list to ensure UI updates
-        console.log('Forcing complete refresh of member list');
+        // console.log('Forcing complete refresh of member list');
         await fetchMembers();
         closeEditModal();
       } else {
@@ -230,7 +298,7 @@ const useMemberManagement = () => {
 
   const handleBanUser = async (member, shouldBeBanned) => {
     try {
-      console.log(`Ban User called for ${member.name} with shouldBeBanned=${shouldBeBanned}`);
+      // console.log(`Ban User called for ${member.name} with shouldBeBanned=${shouldBeBanned}`);
       // Close any open menus when banning/unbanning
       toggleMenu(null);
       
@@ -238,19 +306,19 @@ const useMemberManagement = () => {
       // If shouldBeBanned is true, we want to ban the user
       // If shouldBeBanned is false, we want to unban the user
       if (shouldBeBanned) {
-        console.log('Calling banMember for', member.name);
+        // console.log('Calling banMember for', member.name);
         success = await banMember(member);
       } else {
-        console.log('Calling unbanMember for', member.name);
+        // console.log('Calling unbanMember for', member.name);
         success = await unbanMember(member);
       }
       
       // Refresh member list on success
       if (success) {
-        console.log('Ban operation successful, refreshing members list');
+        // console.log('Ban operation successful, refreshing members list');
         await fetchMembers();
       } else {
-        console.log('Ban operation failed, not refreshing members list');
+        // console.log('Ban operation failed, not refreshing members list');
       }
     } catch (err) {
       console.error('Error banning/unbanning member:', err);
