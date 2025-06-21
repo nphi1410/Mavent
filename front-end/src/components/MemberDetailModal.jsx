@@ -34,7 +34,7 @@ const MemberDetailModal = ({
     // For debugging: return a hidden placeholder to confirm the component is mounting
     return <div style={{display: 'none'}}>Modal would render here if isOpen={String(isOpen)} and user exists={String(!!user)}</div>;
   }  return (    <div className="fixed inset-0 flex items-center justify-center z-[9999]" data-testid="member-detail-modal">
-      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={(e) => {
+      <div className="absolute inset-0 bg-opacity-50" onClick={(e) => {
         e.stopPropagation();
         // console.log("Modal backdrop clicked - closing modal");
         onClose();
