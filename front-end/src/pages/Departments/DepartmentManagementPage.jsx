@@ -889,12 +889,7 @@ const DepartmentManagementPage = () => {
       <div className="p-6 bg-white rounded-lg shadow-md">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold text-gray-800">Manage Departments</h1>
-          <div>
-            <Link to={`/events/${eventId}/departments`} className="text-blue-600 hover:text-blue-800 text-sm font-medium mr-2">
-              <FontAwesomeIcon icon={faArrowLeft} className="mr-1" />
-              Back to Departments
-            </Link>
-          </div>
+      
         </div>
         <hr className="mb-6" />
 

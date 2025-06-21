@@ -12,13 +12,14 @@ import ChangePassword from "./pages/ChangePassword";
 import HomePage from "./pages/HomePage";
 import AllEvents from "./pages/AllEvents";
 import EventDetails from "./pages/EventDetails";
-import EventDepartmentsPage from "./pages/Departments/EventDepartmentsPage";
+
 import DepartmentManagementPage from "./pages/Departments/DepartmentManagementPage";
 import Members from "./pages/Members/Members";
 
 // Auth
 import ProtectedRoute from "./auth/ProtectedRoute";
 import SuperAdminRoute from "./auth/SuperAdminRoute";
+import EventMemberRoute from "./auth/EventMemberRoute";
 
 // User
 import ProfilePage from "./pages/ProfilePage";
@@ -39,6 +40,7 @@ import SuperAdminViewUserDetails from "./pages/superadmin/SuperAdminViewUserDeta
 // Higher Order Components for Route Protection
 const Protect = (Component) => <ProtectedRoute children={Component} />;
 const SuperAdmin = (Component) => <SuperAdminRoute children={Component} />;
+const EventMember = (Component) => <EventMemberRoute children={Component} />;
 
 function App() {
   return (
@@ -49,20 +51,23 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="/reset-password-request" element={<ResetPassword />} />
-        <Route path="/change-password" element={<ChangePassword />} />
-
+        <Route path="/change-password" element={<ChangePassword />} />{" "}
         <Route path="/" element={<MainLayout />}>
-          <Route index element={<HomePage />} />          <Route path="events" element={<AllEvents />} />          <Route path="events/:id" element={<EventDetails />} />
-          <Route path="events/:id/departments" element={<EventDepartmentsPage />} />
-          <Route path="events/:id/departments/manage" element={Protect(<DepartmentManagementPage />)} />
-          <Route path="events/:id/members" element={Protect(<Members />)} />
-
+          <Route index element={<HomePage />} />{" "}
+          <Route path="events" element={<AllEvents />} />{" "}
+          <Route path="events/:id" element={<EventDetails />} />          <Route
+            path="events/:id/departments"
+            element={EventMember(<DepartmentManagementPage />)}
+          />
+          <Route path="events/:id/members" element={EventMember(<Members />)} />
           {/* Event-Protected Routes */}
           <Route path="create-event">
             <Route index element={Protect(<CreateEvent />)} />
-            <Route path=":eventId/create-timeline" element={Protect(<CreateTimeline />)} />
+            <Route
+              path=":eventId/create-timeline"
+              element={Protect(<CreateTimeline />)}
+            />
           </Route>
-
           {/* User-Protected Routes */}
           <Route path="profile">
             <Route index element={Protect(<ProfilePage />)} />
@@ -70,12 +75,17 @@ function App() {
             <Route path="dashboard" element={Protect(<UserDashboardPage />)} />
             <Route path="tasks" element={Protect(<UserTasksPage />)} />
           </Route>
-
           {/* Super Admin Routes */}
           <Route path="superadmin">
             <Route index element={SuperAdmin(<SuperAdminDashboard />)} />
-            <Route path="events" element={SuperAdmin(<SuperAdminManageEvents />)} />
-            <Route path="users" element={SuperAdmin(<SuperAdminManageUsers />)} />
+            <Route
+              path="events"
+              element={SuperAdmin(<SuperAdminManageEvents />)}
+            />
+            <Route
+              path="users"
+              element={SuperAdmin(<SuperAdminManageUsers />)}
+            />
             <Route
               path="event-detail/:eventId"
               element={SuperAdmin(<SuperAdminViewEventDetails />)}

@@ -22,7 +22,7 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {  // Lấy event ID từ 
       name: 'departments',
       displayName: 'Departments',
       icon: <FontAwesomeIcon icon={faSitemap} />,
-      link: `/events/${eventId}/departments/manage`,
+      link: `/events/${eventId}/departments`,
     }
   ];
   // Không hiển thị phần Settings

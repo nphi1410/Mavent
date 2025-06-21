@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Sidebar from './AdminSidebar';
-import AdminNavbar from './AdminNavbar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars } from '@fortawesome/free-solid-svg-icons';
 
@@ -32,12 +31,11 @@ const addKeyframesToDocument = () => {
 addKeyframesToDocument();
 
 const Layout = ({ children, activeItem }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);  const location = useLocation();
-  // Kiểm tra xem có phải đang ở trang quản lý (members hoặc departments)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);  const location = useLocation();  // Kiểm tra xem có phải đang ở trang quản lý (members hoặc departments)
   const isManagementPage = 
     location.pathname.includes('/members') || 
     (location.pathname.includes('/event') && location.pathname.includes('/members')) ||
-    location.pathname.includes('/departments/manage');
+    location.pathname.includes('/departments');
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -53,7 +51,7 @@ const Layout = ({ children, activeItem }) => {
     );
   }
 
-  // Nếu là trang quản lý, render với Sidebar và AdminNavbar
+  // Nếu là trang quản lý, render với Sidebar
   return (    <div className="flex min-h-screen bg-gray-50">      {/* Mobile Sidebar Overlay with blur effect */}
       {isSidebarOpen && (
         <div 
@@ -84,10 +82,8 @@ const Layout = ({ children, activeItem }) => {
           </button>
         )}
       </div>
-      
-      {/* Main Content */}
+        {/* Main Content */}
       <div className="flex-1 lg:ml-64 min-w-0 transition-all duration-300">
-        <AdminNavbar onMenuClick={toggleSidebar} />
         <main className="p-3 sm:p-4 lg:p-6">
           {children}
         </main>
