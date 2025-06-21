@@ -1,4 +1,5 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
 import useMemberData from './useMemberData';
 import useMemberFilters from './useMemberFilters';
 import useMemberModals from './useMemberModals';
@@ -12,9 +13,18 @@ import memberService from '../services/memberService';
  * @returns {Object} All necessary methods and state for member management
  */
 const useMemberManagement = () => {
+  // Get the event ID from URL parameters
+  const { id } = useParams();
   // Event ID state
-  const [eventId, setEventId] = useState(9);
-
+  const [eventId, setEventId] = useState(id ? parseInt(id) : null);
+  
+  // Update eventId when URL param changes
+  useEffect(() => {
+    if (id) {
+      setEventId(parseInt(id));
+    }
+  }, [id]);
+  
   // ------------------------
   // 1. Initialize Hooks
   // ------------------------

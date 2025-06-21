@@ -16,4 +16,11 @@ public interface DepartmentService {
     DepartmentResponseDTO updateDepartment(Integer departmentId, DepartmentRequestDTO departmentRequestDTO);
 
     void deleteDepartment(Integer departmentId);
+
+    /**
+     * Count the number of members in a department
+     * @param departmentId the department ID
+     * @return the number of members in the department
+     */
+    long countMembersByDepartmentId(Integer departmentId);
 }

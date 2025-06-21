@@ -59,10 +59,21 @@ public class DepartmentImplement implements DepartmentService {
 
         return DepartmentMapper.toDTO(updatedDepartment);
     }
+
     @Override
     public void deleteDepartment(Integer departmentId) {
         Department department = departmentRepository.findById(departmentId)
                 .orElseThrow(() -> new EntityNotFoundException("Department not found"));
         departmentRepository.delete(department);
+    }
+
+    @Override
+    public long countMembersByDepartmentId(Integer departmentId) {
+        // Check if department exists
+        if (!departmentRepository.existsById(departmentId)) {
+            throw new EntityNotFoundException("Department not found with id: " + departmentId);
+        }
+        // Use the repository method to get the count
+        return departmentRepository.countMembersByDepartmentId(departmentId);
     }
 }

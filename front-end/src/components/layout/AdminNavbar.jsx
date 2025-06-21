@@ -10,13 +10,15 @@ const AdminNavbar = ({ onMenuClick }) => {
   const [userData, setUserData] = useState(null);
   const [eventData, setEventData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isSidebarVisible, setIsSidebarVisible] = useState(false);
   const navigate = useNavigate();
-
-  // Extract eventId from URL path /event/{eventId}/members
+  // Extract eventId from URL path /events/{eventId}/members or /events/{eventId}/departments/manage
   const getEventIdFromUrl = () => {
     const path = window.location.pathname;
-    const match = path.match(/\/event\/(\d+)\/members/);
-    return match ? parseInt(match[1]) : null;
+    const membersMatch = path.match(/\/events\/(\d+)\/members/);
+    const departmentsMatch = path.match(/\/events\/(\d+)\/departments\/manage/);
+    return membersMatch ? parseInt(membersMatch[1]) : 
+           departmentsMatch ? parseInt(departmentsMatch[1]) : null;
   };
 
   useEffect(() => {
@@ -116,22 +118,26 @@ const AdminNavbar = ({ onMenuClick }) => {
                 <FontAwesomeIcon icon={faSignOutAlt} className="h-4 w-4 lg:h-5 lg:w-5" />
               </button>
             </div>
-          </div>
-
-          {/* Mobile Menu Button */}
+          </div>          {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center space-x-2">
-            {/* Sidebar Toggle Button */}
+            {/* Sidebar Toggle Button - Updated with better visibility */}
             <button
-              onClick={onMenuClick}
-              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors lg:hidden"
+              onClick={() => {
+                setIsSidebarVisible(!isSidebarVisible);
+                onMenuClick(); // Call the parent function to toggle sidebar
+              }}
+              className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-colors lg:hidden relative"
+              aria-label="Toggle sidebar"
             >
               <FontAwesomeIcon icon={faBars} className="h-5 w-5" />
+              <span className="absolute -top-1 -right-1 h-2 w-2 bg-blue-500 rounded-full animate-pulse"></span>
             </button>
             
             {/* More Options */}
             <button
               onClick={toggleMobileMenu}
               className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              aria-label="Toggle user menu"
             >
               <FontAwesomeIcon 
                 icon={isMobileMenuOpen ? faTimes : faUser} 

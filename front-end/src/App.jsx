@@ -12,6 +12,9 @@ import ChangePassword from "./pages/ChangePassword";
 import HomePage from "./pages/HomePage";
 import AllEvents from "./pages/AllEvents";
 import EventDetails from "./pages/EventDetails";
+import EventDepartmentsPage from "./pages/Departments/EventDepartmentsPage";
+import DepartmentManagementPage from "./pages/Departments/DepartmentManagementPage";
+import Members from "./pages/Members/Members";
 
 // Auth
 import ProtectedRoute from "./auth/ProtectedRoute";
@@ -49,9 +52,10 @@ function App() {
         <Route path="/change-password" element={<ChangePassword />} />
 
         <Route path="/" element={<MainLayout />}>
-          <Route index element={<HomePage />} />
-          <Route path="events" element={<AllEvents />} />
-          <Route path="events/:id" element={<EventDetails />} />
+          <Route index element={<HomePage />} />          <Route path="events" element={<AllEvents />} />          <Route path="events/:id" element={<EventDetails />} />
+          <Route path="events/:id/departments" element={<EventDepartmentsPage />} />
+          <Route path="events/:id/departments/manage" element={Protect(<DepartmentManagementPage />)} />
+          <Route path="events/:id/members" element={Protect(<Members />)} />
 
           {/* Event-Protected Routes */}
           <Route path="create-event">
