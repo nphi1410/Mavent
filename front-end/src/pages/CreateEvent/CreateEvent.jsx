@@ -1,3 +1,4 @@
+// 🔁 Các import giữ nguyên
 import React, { useState, useEffect } from "react";
 import { createEvent } from "../../services/eventService";
 import { getAllLocations } from "../../services/eventLocationService";
@@ -7,16 +8,17 @@ const CreateEvent = () => {
     const [formData, setFormData] = useState({
         name: "",
         description: "",
-        startDatetime: "", // Khởi tạo là chuỗi rỗng để dễ dàng bind với input datetime-local
-        endDatetime: "",   // Khởi tạo là chuỗi rỗng để dễ dàng bind với input datetime-local
+        startDatetime: "",
+        endDatetime: "",
         locationId: "",
         ddayInfo: "",
         maxMemberNumber: 0,
         maxParticipantNumber: 0,
         status: "PENDING",
-        bannerUrl: "",
-        posterUrl: "",
     });
+
+    const [bannerFile, setBannerFile] = useState(null);
+    const [posterFile, setPosterFile] = useState(null);
 
     const navigate = useNavigate();
 
@@ -30,127 +32,69 @@ const CreateEvent = () => {
             const data = await getAllLocations();
             setLocations(data);
         };
-
         fetchLocations();
     }, []);
 
-
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-        // Xóa thông báo lỗi cũ khi người dùng bắt đầu nhập lại
+        setFormData((prev) => ({ ...prev, [name]: value }));
         setErrorMessage("");
         setSuccessMessage("");
     };
 
     const handleNumberChange = (e) => {
         const { name, value } = e.target;
-        // Đảm bảo giá trị là số nguyên không âm
         const parsedValue = parseInt(value, 10);
-        setFormData(prev => ({ ...prev, [name]: isNaN(parsedValue) || parsedValue < 0 ? 0 : parsedValue }));
+        setFormData((prev) => ({
+            ...prev,
+            [name]: isNaN(parsedValue) || parsedValue < 0 ? 0 : parsedValue,
+        }));
         setErrorMessage("");
         setSuccessMessage("");
     };
 
     const handleDateChange = (name, value) => {
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData((prev) => ({ ...prev, [name]: value }));
         setErrorMessage("");
         setSuccessMessage("");
     };
 
-    // Hàm kiểm tra URL cơ bản
-    const isValidUrl = (string) => {
-        try {
-            new URL(string);
-            return true;
-        } catch (_) {
-            return false;
-        }
-    };
-
-    // Hàm validate dữ liệu form
     const validateForm = () => {
-        // Reset thông báo lỗi
-        setErrorMessage("");
-
         const {
             name,
             description,
             startDatetime,
             endDatetime,
-            location,
+            locationId,
             maxMemberNumber,
             maxParticipantNumber,
-            bannerUrl,
-            posterUrl
         } = formData;
 
-        if (!name.trim()) {
-            setErrorMessage("Tên sự kiện không được để trống.");
-            return false;
-        }
-        if (!description.trim()) {
-            setErrorMessage("Mô tả sự kiện không được để trống.");
-            return false;
-        }
-        if (!location.trim()) {
-            setErrorMessage("Địa điểm sự kiện không được để trống.");
-            return false;
-        }
+        if (!name.trim()) return setError("Tên sự kiện không được để trống.");
+        if (!description.trim()) return setError("Mô tả không được để trống.");
+        if (!locationId) return setError("Vui lòng chọn địa điểm.");
 
-        // Validate ngày giờ
-        if (!startDatetime) {
-            setErrorMessage("Thời gian bắt đầu không được để trống.");
-            return false;
-        }
-        if (!endDatetime) {
-            setErrorMessage("Thời gian kết thúc không được để trống.");
-            return false;
-        }
+        if (!startDatetime) return setError("Thời gian bắt đầu không được để trống.");
+        if (!endDatetime) return setError("Thời gian kết thúc không được để trống.");
 
-        const startDate = new Date(startDatetime);
-        const endDate = new Date(endDatetime);
+        const start = new Date(startDatetime);
+        const end = new Date(endDatetime);
+        if (end <= start) return setError("Thời gian kết thúc phải sau thời gian bắt đầu.");
 
-        if (isNaN(startDate.getTime())) { // Kiểm tra ngày hợp lệ
-            setErrorMessage("Thời gian bắt đầu không hợp lệ.");
-            return false;
-        }
-        if (isNaN(endDate.getTime())) { // Kiểm tra ngày hợp lệ
-            setErrorMessage("Thời gian kết thúc không hợp lệ.");
-            return false;
-        }
+        if (maxMemberNumber < 0) return setError("Số thành viên tối đa không được âm.");
+        if (maxParticipantNumber < 0) return setError("Số người tham gia tối đa không được âm.");
+        if (maxParticipantNumber < maxMemberNumber)
+            return setError("Số người tham gia không được nhỏ hơn số thành viên.");
 
-        if (endDate <= startDate) {
-            setErrorMessage("Thời gian kết thúc phải sau thời gian bắt đầu.");
-            return false;
-        }
-
-        // Validate số lượng
-        if (maxMemberNumber < 0) {
-            setErrorMessage("Số thành viên tối đa không được âm.");
-            return false;
-        }
-        if (maxParticipantNumber < 0) {
-            setErrorMessage("Số người tham gia tối đa không được âm.");
-            return false;
-        }
-        if (maxParticipantNumber < maxMemberNumber) {
-            setErrorMessage("Số người tham gia tối đa không được nhỏ hơn số thành viên tối đa.");
-            return false;
-        }
-
-
-        // Validate URL ảnh (nếu có)
-        if (bannerUrl && !isValidUrl(bannerUrl)) {
-            setErrorMessage("URL Banner không hợp lệ. Vui lòng nhập một URL ảnh hợp lệ.");
-            return false;
-        }
-        if (posterUrl && !isValidUrl(posterUrl)) {
-            setErrorMessage("URL Poster không hợp lệ. Vui lòng nhập một URL ảnh hợp lệ.");
-            return false;
-        }
+        if (!bannerFile) return setError("Vui lòng chọn ảnh banner.");
+        if (!posterFile) return setError("Vui lòng chọn ảnh poster.");
 
         return true;
+    };
+
+    const setError = (msg) => {
+        setErrorMessage(msg);
+        return false;
     };
 
     const handleSubmit = async (e) => {
@@ -159,16 +103,20 @@ const CreateEvent = () => {
         setErrorMessage("");
         setSuccessMessage("");
 
-        const result = await createEvent(formData);
+        if (!validateForm()) {
+            setLoading(false);
+            return;
+        }
+
+        const result = await createEvent(formData, bannerFile, posterFile);
 
         if (result.success) {
             setSuccessMessage("Tạo sự kiện thành công!");
-
             setTimeout(() => {
                 navigate(`/create-event/${result.eventId}/create-proposal`);
-            }, 500);
+            }, 800);
         } else {
-            setErrorMessage(result.message);
+            setErrorMessage(result.message || "Đã xảy ra lỗi.");
         }
 
         setLoading(false);
@@ -204,7 +152,6 @@ const CreateEvent = () => {
                 </div>
             </div>
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="max-w-4xl mx-auto mt-10 space-y-8">
                 <div className="bg-white shadow rounded-xl p-6 space-y-6">
                     {/* Event Name */}
@@ -355,59 +302,47 @@ const CreateEvent = () => {
                         </input>
                     </div>
 
-                    {/* Banner */}
+                    {/* Banner Image Upload */}
                     <div>
-                        <label htmlFor="bannerUrl" className="block text-sm font-medium text-gray-700 mb-1">
-                            Banner URL
-                        </label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Banner</label>
                         <input
-                            type="text"
-                            id="bannerUrl"
-                            name="bannerUrl"
-                            className="w-full border border-gray-300 rounded-lg p-2"
-                            value={formData.bannerUrl}
-                            onChange={handleChange}
-                            placeholder="e.g., https://example.com/banner.jpg"
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => setBannerFile(e.target.files[0])}
                         />
+                        {bannerFile && (
+                            <p className="text-sm text-gray-500 mt-1">{bannerFile.name}</p>
+                        )}
                     </div>
 
-                    {/* Poster */}
+                    {/* Poster Image Upload */}
                     <div>
-                        <label htmlFor="posterUrl" className="block text-sm font-medium text-gray-700 mb-1">
-                            Poster URL
-                        </label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Poster</label>
                         <input
-                            type="text"
-                            id="posterUrl"
-                            name="posterUrl"
-                            className="w-full border border-gray-300 rounded-lg p-2"
-                            value={formData.posterUrl}
-                            onChange={handleChange}
-                            placeholder="e.g., https://example.com/poster.png"
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => setPosterFile(e.target.files[0])}
                         />
+                        {posterFile && (
+                            <p className="text-sm text-gray-500 mt-1">{posterFile.name}</p>
+                        )}
                     </div>
                 </div>
 
-                {/* Error/Success Message */}
                 {errorMessage && (
-                    <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-md">
-                        {errorMessage}
-                    </div>
+                    <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-md">{errorMessage}</div>
                 )}
                 {successMessage && (
-                    <div className="mt-4 p-3 bg-green-100 text-green-700 rounded-md">
-                        {successMessage}
-                    </div>
+                    <div className="mt-4 p-3 bg-green-100 text-green-700 rounded-md">{successMessage}</div>
                 )}
 
-                {/* Submit Button */}
                 <div className="text-center mt-8">
                     <button
                         type="submit"
                         className="cursor-pointer bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={loading}
                     >
-                        {loading ? "Đang tạo..." : "Create Event & Next to Timeline"}
+                        {loading ? "Đang tạo..." : "Create Event & Next to Proposal"}
                     </button>
                 </div>
             </form>

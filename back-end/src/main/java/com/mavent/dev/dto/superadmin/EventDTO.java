@@ -1,5 +1,6 @@
 package com.mavent.dev.dto.superadmin;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.mavent.dev.dto.event.ProposalDTO;
 import com.mavent.dev.entity.Event.EventStatus;
 import lombok.AllArgsConstructor;
@@ -15,14 +16,21 @@ public class EventDTO {
     private Integer eventId;
     private String name;
     private String description;
+
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime startDatetime;
+
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime endDatetime;
+
     private String location;
     private Integer locationId;
     private String ddayInfo;
     private Integer maxMemberNumber;
     private Integer maxParticipantNumber;
     private EventStatus status;
+    private String bannerUrl;
+    private String posterUrl;
     private Integer createdBy;
     private Boolean isDeleted;
     private LocalDateTime createdAt;
