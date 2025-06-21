@@ -29,6 +29,7 @@
     "react-dom": "^19.1.0",
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.6.1",
+    "recharts": "^2.15.3",
     "swiper": "^11.2.8",
     "webextension-polyfill": "^0.12.0"
   },
