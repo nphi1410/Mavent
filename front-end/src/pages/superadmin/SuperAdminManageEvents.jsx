@@ -6,7 +6,8 @@ import SuperAdminSidebar from '../../components/superadmin/SuperAdminSidebar';
 import SuperAdminActionDropdown from '../../components/superadmin/SuperAdminActionDropdown';
 import { useNavigate } from 'react-router-dom';
 import { exportEventsToExcel } from '../../services/export/eventExportService';
-import { getAllLocations } from '../../services/eventLocationService'
+import { getAllLocations } from '../../services/eventLocationService';
+import SuperAdminHeader from '../../components/superadmin/SuperAdminHeader';
 
 function SuperAdminManageEvents() {
     const [openId, setOpenId] = useState(null);
@@ -84,6 +85,7 @@ function SuperAdminManageEvents() {
 
     return (
         <div className="h-screen w-screen flex bg-amber-50">
+            <SuperAdminHeader />
             <SuperAdminSidebar />
             <div className='flex flex-col flex-1'>
                 <main className='flex-1 overflow-y-auto p-10 bg-gray-100'>

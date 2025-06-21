@@ -190,6 +190,57 @@ const useMemberActions = (eventId = 1) => {
     }
   }, [eventId]);
 
+  // Bulk ban multiple members at once
+  const bulkBanMembers = useCallback(async (members) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      if (!members || !Array.isArray(members) || members.length === 0) {
+        console.error('Invalid members array provided to bulkBanMembers:', members);
+        setError('Invalid members data');
+        return { success: false, message: 'Invalid members data' };
+      }
+      
+      // Create an array of promises for all the ban operations
+      const banPromises = members.map(member => {
+        const banData = {
+          eventId: eventId,
+          accountId: member.accountId || member.id,
+          isBanned: true,
+          reason: 'Bulk banned by admin'
+        };
+        
+        return memberService.banMember(banData);
+      });
+      
+      // Execute all ban operations in parallel
+      const results = await Promise.allSettled(banPromises);
+      
+      // Check if all operations were successful
+      const allSuccessful = results.every(result => result.status === 'fulfilled' && result.value.success);
+      
+      if (!allSuccessful) {
+        const failedCount = results.filter(result => result.status !== 'fulfilled' || !result.value.success).length;
+        setError(`${failedCount} thao tác không thành công`);
+        
+        return { 
+          success: false, 
+          message: `${failedCount} thao tác không thành công`,
+          results
+        };
+      }
+      
+      return { success: true, message: 'Đã cấm tất cả thành viên thành công', results };
+    } catch (err) {
+      console.error('Error in bulk ban operation:', err);
+      setError(err.response?.data?.message || 'Không thể thực hiện hành động hàng loạt');
+      return { success: false, message: 'Không thể thực hiện hành động hàng loạt', error: err };
+    } finally {
+      setLoading(false);
+    }
+  }, [eventId]);
+
   // View user details (chỉ trả về accountId để parent hook có thể gọi fetchMemberDetails)
   const viewUserDetails = useCallback((user) => {
     return user.accountId || user.id;
@@ -203,6 +254,7 @@ const useMemberActions = (eventId = 1) => {
     unbanMember,
     deleteMember,
     viewUserDetails,
+    bulkBanMembers,
     clearError: () => setError(null)
   };
 };

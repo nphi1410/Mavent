@@ -59,8 +59,10 @@ public interface AccountService extends UserDetailsService {
 
     List<AccountDTO> getAllAccounts();
 
-    AccountDTO getAccountById(Integer id);
-
     void updateTaskAttendees(Integer taskId, Integer assignedToAccountId, List<Integer> attendeeIds);
+
+    Account getAccountById(Integer id);
+
+    Account getAccountByToken(String token);
 }
 

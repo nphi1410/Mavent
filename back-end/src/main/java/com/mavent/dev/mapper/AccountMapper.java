@@ -1,7 +1,8 @@
 package com.mavent.dev.mapper;
 
-import com.mavent.dev.dto.account.AccountDTO;
+//import com.mavent.dev.dto.account.AccountDTO;
 import com.mavent.dev.entity.Account;
+import com.mavent.dev.dto.superadmin.AccountDTO;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,9 +17,14 @@ public class AccountMapper {
                 account.getUsername(),
                 account.getEmail(),
                 account.getFullName(),
-                account.getPhoneNumber(),
-                account.getSystemRole().name(),
+                account.getSystemRole(),
                 account.getAvatarUrl(),
+                account.getPhoneNumber(),
+                account.getGender(),
+                account.getStudentId(),
+                account.getDateOfBirth(),
+                account.getCreatedAt(),
+                account.getUpdatedAt(),
                 account.getIsDeleted()
         );
     }
@@ -35,7 +41,7 @@ public class AccountMapper {
         account.setPhoneNumber(accountDTO.getPhoneNumber());
 
         if (accountDTO.getSystemRole() != null) {
-            account.setSystemRole(Account.SystemRole.valueOf(accountDTO.getSystemRole()));
+            account.setSystemRole(accountDTO.getSystemRole());
         }
 
         account.setAvatarUrl(accountDTO.getAvatarUrl());
@@ -58,7 +64,7 @@ public class AccountMapper {
         account.setPhoneNumber(accountDTO.getPhoneNumber());
 
         if (accountDTO.getSystemRole() != null) {
-            account.setSystemRole(Account.SystemRole.valueOf(accountDTO.getSystemRole()));
+            account.setSystemRole(accountDTO.getSystemRole());
         }
         account.setAvatarUrl(accountDTO.getAvatarUrl());
 

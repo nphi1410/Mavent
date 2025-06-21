@@ -2,12 +2,14 @@ package com.mavent.dev.dto.superadmin;
 
 import com.mavent.dev.entity.Account.Gender;
 import com.mavent.dev.entity.Account.SystemRole;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class AccountDTO {
     private Integer accountId;
     private String username;
@@ -21,4 +23,6 @@ public class AccountDTO {
     private LocalDate dateOfBirth;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Boolean isDeleted;
+
 }

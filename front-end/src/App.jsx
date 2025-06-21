@@ -2,14 +2,13 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 // Layout
 import MainLayout from "./layouts/MainLayout";
-import SuperAdminLayout from "./layouts/SuperAdminLayout";
 
 // Public
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import Login from "./pages/UserAuthorization/Login";
+import Register from "./pages/UserAuthorization/Register";
 import Logout from "./components/Logout";
-import ResetPassword from "./pages/ResetPassword";
-import ChangePassword from "./pages/ChangePassword";
+import ResetPassword from "./pages/UserAuthorization/ResetPassword";
+import ChangePassword from "./pages/UserAuthorization/ChangePassword";
 import HomePage from "./pages/HomePage";
 import AllEvents from "./pages/AllEvents";
 import EventDetails from "./pages/EventDetails";
@@ -35,6 +34,7 @@ import TaskDetails from "./components/usercenter/TaskDetails";
 import CreateEvent from "./pages/CreateEvent/CreateEvent";
 import CreateTimeline from "./pages/CreateEvent/CreateTimeline";
 import CreateAgenda from "./pages/CreateEvent/CreateAgenda";
+import CreateProposal from "./pages/CreateEvent/CreateProposal";
 
 // Super Admin
 import SuperAdminDashboard from "./pages/superadmin/SuperAdminDashBoard";
@@ -68,7 +68,9 @@ function App() {
           <Route path="events" element={<AllEvents />} />
           <Route path="events/:id" element={<EventDetails />} />
           <Route path="meetings" element={<MeetingListPage />} />
-            {/* Event Member Protected Routes */}
+          <Route path="event/:eventId/feedback" element={<ViewEventFeedback />} />
+
+          {/* Event Member Protected Routes */}
           <Route path="events/:id/departments" element={EventMember(<DepartmentManagementPage />)} />
           <Route path="events/:id/members" element={EventMember(<Members />)} />
           <Route path="events/:id/documents" element={EventMember(<DocumentsPage />)} />
@@ -78,6 +80,7 @@ function App() {
           {/* Create Event-Protected Routes */}
           <Route path="create-event">
             <Route index element={Protect(<CreateEvent />)} />
+            <Route path=":eventId/create-proposal" element={Protect(<CreateProposal />)} />
             <Route path=":eventId/create-timeline" element={Protect(<CreateTimeline />)} />
             <Route path=":eventId/create-agenda" element={Protect(<CreateAgenda />)} />
           </Route>
@@ -93,30 +96,22 @@ function App() {
               <Route path="history" element={Protect(<TaskHistory />)} />
             </Route>
           </Route>
+
         </Route>
 
-          {/* Super Admin Routes */}
-          <Route path="superadmin">
-            <Route index element={SuperAdmin(<SuperAdminDashboard />)} />
-            <Route path="events" element={SuperAdmin(<SuperAdminManageEvents />)} />
-            <Route path="events/pending" element={SuperAdmin(<SuperAdminPendingEvents />)} />
-            <Route path="users" element={SuperAdmin(<SuperAdminManageUsers />)} />
-            <Route
-              path="event-detail/:eventId"
-              element={SuperAdmin(<SuperAdminViewEventDetails />)}
-            />
-            <Route
-              path="edit-event/:eventId"
-              element={SuperAdmin(<SuperAdminEditEvent />)}
-            />
-            <Route
-              path="user-detail/:id"
-              element={SuperAdmin(<SuperAdminViewUserDetails />)}
-            />
-          </Route>
-        
+        {/* Super Admin Routes */}
+        <Route path="superadmin">
+          <Route index element={SuperAdmin(<SuperAdminDashboard />)} />
+          <Route path="events" element={SuperAdmin(<SuperAdminManageEvents />)} />
+          <Route path="events/pending" element={SuperAdmin(<SuperAdminPendingEvents />)} />
+          <Route path="users" element={SuperAdmin(<SuperAdminManageUsers />)} />
+          <Route path="event-detail/:eventId" element={SuperAdmin(<SuperAdminViewEventDetails />)} />
+          <Route path="edit-event/:eventId" element={SuperAdmin(<SuperAdminEditEvent />)} />
+          <Route path="user-detail/:id" element={SuperAdmin(<SuperAdminViewUserDetails />)} />
+        </Route>
       </Routes>
     </Router>
+
   );
 }
 
