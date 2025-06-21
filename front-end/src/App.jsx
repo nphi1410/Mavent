@@ -44,6 +44,7 @@ import SuperAdminViewEventDetails from "./pages/superadmin/SuperAdminViewEventDe
 import SuperAdminEditEvent from "./pages/superadmin/SuperAdminEditEvent";
 import SuperAdminViewUserDetails from "./pages/superadmin/SuperAdminViewUserDetails";
 import ViewEventFeedback from "./pages/ViewEventFeedback.jsx";
+import ParticipantFeedbackEvent from "./pages/ParticipantFeedbackEvent.jsx";
 
 // Higher Order Components for Route Protection
 const Protect = (Component) => <ProtectedRoute children={Component} />;
@@ -80,6 +81,9 @@ function App() {
             <Route path=":eventId/create-timeline" element={Protect(<CreateTimeline />)} />
             <Route path=":eventId/create-agenda" element={Protect(<CreateAgenda />)} />
           </Route>
+
+          {/* Participant Create Event Feedback Routes */}
+          <Route path="create-feedback" element={Protect(<ParticipantFeedbackEvent />)} />
 
           {/* User Profile Routes */}
           <Route path="profile">
