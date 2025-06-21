@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { getTaskDetails, updateTaskStatus, getUserProfile, getTaskAttendees } from '../../services/profileService';
 import AttendeesModal from './AttendeesModal';
+import UpdateTaskModal from './UpdateTaskModal';
+import TaskFeedbackModal from './TaskFeedbackModal';
 
 const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
+  // State hiện tại
   const [task, setTask] = useState(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -14,6 +17,12 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
   const [attendees, setAttendees] = useState([]);
   const [loadingAttendees, setLoadingAttendees] = useState(false);
   const [showAttendeesModal, setShowAttendeesModal] = useState(false);
+  
+  // Thêm state cho update modal
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  
+  // Thêm state cho feedback modal
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
   // Lấy thông tin người dùng hiện tại
   useEffect(() => {
@@ -210,11 +219,46 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
     return null;
   };
 
+  // Hàm mở modal cập nhật task
+  const handleOpenUpdateModal = () => {
+    setShowUpdateModal(true);
+  };
+
+  // Hàm đóng modal cập nhật task
+  const handleCloseUpdateModal = () => {
+    setShowUpdateModal(false);
+  };
+
+  // Hàm xử lý khi task được cập nhật
+  const handleTaskUpdated = async () => {
+    await fetchTaskDetails();
+    if (onTaskUpdated) {
+      onTaskUpdated();
+    }
+  };
+
+  // Kiểm tra quyền cập nhật task
+  const canUpdateTask = () => {
+    if (!currentUser || !task) return false;
+    
+    // Chỉ người tạo task mới có quyền cập nhật
+    return currentUser.id === task.assignedByAccountId;
+  };
+
+  // Thêm hàm để mở/đóng modal phản hồi
+  const handleOpenFeedbackModal = () => {
+    setShowFeedbackModal(true);
+  };
+
+  const handleCloseFeedbackModal = () => {
+    setShowFeedbackModal(false);
+  };
+
   if (!isOpen) return null;
 
   return (
     <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4 overflow-y-auto">
+      <div className="fixed inset-0 backdrop-blur-[0px] bg-gray-900/40 z-[9999] flex justify-center items-center p-4 overflow-y-auto">
         <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
           <div className="p-6">
             <header className="flex justify-between items-center mb-4">
@@ -237,8 +281,39 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
                   </svg>
                   Người tham gia
                 </button>
-                <button className="text-[#00155c] hover:text-[#172c70] font-medium">
-                  Xem phản hồi →
+                
+                {/* Nút chỉnh sửa task - chỉ hiển thị nếu có quyền */}
+                {task && canUpdateTask() && (
+                  <button 
+                    onClick={handleOpenUpdateModal}
+                    className="text-[#00155c] hover:text-[#172c70] font-medium flex items-center"
+                  >
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      className="h-5 w-5 mr-1" 
+                      viewBox="0 0 20 20" 
+                      fill="currentColor"
+                    >
+                      <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                    </svg>
+                    Chỉnh sửa
+                  </button>
+                )}
+                
+                {/* Cập nhật nút xem phản hồi */}
+                <button 
+                  onClick={handleOpenFeedbackModal}
+                  className="text-[#00155c] hover:text-[#172c70] font-medium flex items-center"
+                >
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    className="h-5 w-5 mr-1" 
+                    viewBox="0 0 20 20" 
+                    fill="currentColor"
+                  >
+                    <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
+                  </svg>
+                  Xem phản hồi
                 </button>
               </div>
             </header>
@@ -278,6 +353,11 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
                   <div>
                     <strong>Trạng thái:</strong> {task.status}
                   </div>
+                  
+                  {/* Thêm hiển thị department */}
+                  <div>
+                    <strong>Phòng ban:</strong> {task.departmentName || 'Chưa chọn phòng ban'}
+                  </div>
                 </div>
 
                 <div className="mb-6">
@@ -293,7 +373,7 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
                     </div>
                   ) : renderActionButton()}
                 </div>
-  </>
+              </>
             ) : (
               <div className="p-4 text-center">Không tìm thấy thông tin task</div>
             )}
@@ -301,6 +381,7 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
         </div>
       </div>
 
+      {/* Modal attendees */}
       <AttendeesModal
         isOpen={showAttendeesModal}
         onClose={handleCloseAttendeesModal}
@@ -311,6 +392,21 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
           currentUser: currentUser
         }}
         onAttendeeUpdated={handleAttendeeUpdated}
+      />
+
+      {/* Modal cập nhật task */}
+      <UpdateTaskModal
+        isOpen={showUpdateModal}
+        onClose={handleCloseUpdateModal}
+        taskData={{ ...task, currentUser }}
+        onTaskUpdated={handleTaskUpdated}
+      />
+
+      {/* Thêm TaskFeedbackModal */}
+      <TaskFeedbackModal
+        taskId={taskId}
+        isOpen={showFeedbackModal}
+        onClose={handleCloseFeedbackModal}
       />
     </>
   );

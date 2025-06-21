@@ -393,6 +393,8 @@ public class AccountImplement implements AccountService, UserDetailsService {
         task.setDescription(updateDto.getDescription());
         task.setPriority(Task.Priority.valueOf(updateDto.getPriority()));
         task.setDueDate(updateDto.getDueDate());
+        task.setAssignedToAccountId(updateDto.getAssignedToAccountId());
+        task.setDepartmentId(updateDto.getDepartmentId());
 
         // Cập nhật thời gian sửa đổi
         task.setUpdatedAt(LocalDateTime.now());

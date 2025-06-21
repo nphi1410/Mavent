@@ -602,7 +602,7 @@ public class AccountController {
             @PathVariable Integer taskId,
             @RequestBody TaskCreateDTO updateDto,
             HttpServletRequest request) {
-
+        System.out.println(updateDto);
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -623,6 +623,7 @@ public class AccountController {
         }
 
         TaskDTO updated = accountService.updateTask(taskId, updateDto);
+        System.out.println(updated);
         return ResponseEntity.ok(updated);
     }
 
@@ -702,12 +703,6 @@ public class AccountController {
         Account account = accountService.getAccount(username);
         if (account == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        // Kiểm tra quyền truy cập
-        boolean hasAccess = eventService.checkEventAccess(eventId, account.getAccountId());
-        if (!hasAccess) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         List<EventMemberDTO> members = eventService.getEventMembers(eventId);

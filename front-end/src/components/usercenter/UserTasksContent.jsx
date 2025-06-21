@@ -1,30 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { getUserTasks, getUserEvents } from '../../services/profileService';
+import { getUserTasks, getUserEvents, getUserProfile } from '../../services/profileService';
 import TaskCard from './TaskCard';
 import TaskDashboard from './TaskDashboard';
 import { useNavigate, Link } from 'react-router-dom';
 import CreateTaskModal from './CreateTaskModal';
 
 const parseStatus = (status) => {
-  if (status === 'active') return ['TODO', 'DOING', 'REVIEW'];
+  if (status === 'active') return ['TODO', 'DOING', 'REVIEW', 'OVERDUE'];
   if (!status) return [];
   return [status];
 };
 
-
 const UserTasksContent = () => {
   const [allTasks, setAllTasks] = useState([]);
   const [displayTasks, setDisplayTasks] = useState([]);
-  const [filteredTasks, setFilteredTasks] = useState([]); // Thêm state để lưu tasks sau khi lọc
+  const [filteredTasks, setFilteredTasks] = useState([]);
   const [events, setEvents] = useState([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
 
   const [filters, setFilters] = useState({
     keyword: '',
     status: '',
     priority: '',
     sortOrder: '',
-    eventName: ''
+    eventName: '',
+    role: ''
   });
 
   const [loading, setLoading] = useState(true);
@@ -36,9 +37,8 @@ const UserTasksContent = () => {
 
   const navigate = useNavigate();
 
-  // Function to filter active tasks (TODO and DOING)
   const filterActiveTasks = (tasks) => {
-    return tasks.filter(task => task.status === 'TODO' || task.status === 'DOING' || task.status === 'REVIEW');
+    return tasks.filter(task => ['TODO', 'DOING', 'REVIEW', 'OVERDUE'].includes(task.status));
   };
 
   useEffect(() => {
@@ -49,10 +49,8 @@ const UserTasksContent = () => {
           getUserTasks({}),
           getUserEvents()
         ]);
-
         const taskList = Array.isArray(tasks) ? tasks : [];
         const activeTasks = filterActiveTasks(taskList);
-
         setAllTasks(taskList);
         setDisplayTasks(activeTasks);
         setEvents(Array.isArray(events) ? events : []);
@@ -73,7 +71,6 @@ const UserTasksContent = () => {
     const fetchFilteredTasks = async () => {
       setFilterLoading(true);
       try {
-        // Xử lý status
         const statusList = parseStatus(filters.status);
         const statusString = statusList.join(',');
 
@@ -88,15 +85,25 @@ const UserTasksContent = () => {
 
         let fetchedTasks = Array.isArray(response) ? response : [];
 
-        // Lưu tất cả các task sau khi lọc (cho dashboard)
-        setFilteredTasks(fetchedTasks);
+        // Filter by role (only on frontend)
+        if (filters.role && userProfile) {
+          const userId = userProfile.id;
+          if (filters.role === 'CREATOR') {
+            fetchedTasks = fetchedTasks.filter(task => task.assignedByAccountId === userId);
+          } else if (filters.role === 'LEADER') {
+            fetchedTasks = fetchedTasks.filter(task => task.assignedToAccountId === userId);
+          } else if (filters.role === 'ASSIGNEE') {
+            fetchedTasks = fetchedTasks.filter(task =>
+              task.assignedByAccountId !== userId &&
+              task.assignedToAccountId !== userId
+            );
+          }
+        }
 
-        // Lọc lại để chỉ hiển thị active tasks (TODO, DOING, REVIEW)
-        // QUAN TRỌNG: Luôn áp dụng filters này trừ khi rõ ràng đã chọn status khác
+        setFilteredTasks(fetchedTasks);
         if (!filters.status || filters.status === 'active') {
           fetchedTasks = filterActiveTasks(fetchedTasks);
         }
-
         setDisplayTasks(fetchedTasks);
       } catch (err) {
         console.error('Error fetching filtered tasks:', err);
@@ -107,16 +114,20 @@ const UserTasksContent = () => {
       }
     };
 
-    // Chỉ thực hiện filter khi có ít nhất một điều kiện lọc
-    if (filters.status || filters.priority || filters.keyword || filters.eventName || filters.sortOrder) {
+    if (
+      filters.status ||
+      filters.priority ||
+      filters.keyword ||
+      filters.eventName ||
+      filters.sortOrder ||
+      filters.role
+    ) {
       const timeoutId = setTimeout(fetchFilteredTasks, 300);
       return () => clearTimeout(timeoutId);
     } else {
-      // Nếu không có điều kiện lọc, hiển thị các task active (mặc định)
       setDisplayTasks(filterActiveTasks(allTasks));
     }
-  }, [filters, allTasks]);
-
+  }, [filters, allTasks, userProfile]);
 
   const indexOfLastTask = currentPage * tasksPerPage;
   const indexOfFirstTask = indexOfLastTask - tasksPerPage;
@@ -134,7 +145,6 @@ const UserTasksContent = () => {
     }
   };
 
-  // Thêm hàm refreshTasks
   const refreshTasks = async () => {
     try {
       setFilterLoading(true);
@@ -152,15 +162,26 @@ const UserTasksContent = () => {
       });
 
       let fetchedTasks = Array.isArray(response) ? response : [];
-      
-      // Cập nhật filteredTasks cho dashboard
-      setFilteredTasks(fetchedTasks);
-      
-      // Lọc cho display tasks nếu cần
-      if (filters.status === 'active' || !filters.status) {
-        fetchedTasks = filterActiveTasks(fetchedTasks);
+
+      // Apply role filter again
+      if (filters.role && userProfile) {
+        const userId = userProfile.id;
+        if (filters.role === 'CREATOR') {
+          fetchedTasks = fetchedTasks.filter(task => task.assignedByAccountId === userId);
+        } else if (filters.role === 'LEADER') {
+          fetchedTasks = fetchedTasks.filter(task => task.assignedToAccountId === userId);
+        } else if (filters.role === 'ASSIGNEE') {
+          fetchedTasks = fetchedTasks.filter(task =>
+            task.assignedByAccountId !== userId &&
+            task.assignedToAccountId !== userId
+          );
+        }
       }
 
+      setFilteredTasks(fetchedTasks);
+      if (!filters.status || filters.status === 'active') {
+        fetchedTasks = filterActiveTasks(fetchedTasks);
+      }
       setDisplayTasks(fetchedTasks);
     } catch (err) {
       console.error('Error refreshing tasks:', err);
@@ -172,20 +193,21 @@ const UserTasksContent = () => {
   const openCreateModal = () => setIsCreateModalOpen(true);
   const closeCreateModal = () => setIsCreateModalOpen(false);
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-    </div>
-  );
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const profile = await getUserProfile();
+        setUserProfile(profile);
+      } catch (err) {
+        console.error('Error fetching user profile:', err);
+      }
+    };
 
-  if (error) return (
-    <div className="p-10 text-red-600 text-center">
-      Error: {error}
-    </div>
-  );
-  console.log('allTasks:', allTasks);
+    fetchUserProfile();
+  }, []);
 
-  console.log('displayTasks:', displayTasks);
+  if (loading) return <div className="text-center py-10">Loading...</div>;
+  if (error) return <div className="text-center text-red-500 py-10">{error}</div>;
 
   return (
     <main className="flex-grow p-10 bg-white">
@@ -193,14 +215,7 @@ const UserTasksContent = () => {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold">My Active Tasks</h1>
           <div className="flex gap-4">
-            {/* Thêm nút Create Task */}
-            <button 
-              onClick={openCreateModal}
-              className="bg-[#00155c] hover:bg-[#172c70] text-white px-4 py-2 rounded-lg flex items-center"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-              </svg>
+            <button onClick={openCreateModal} className="bg-[#00155c] hover:bg-[#172c70] text-white px-4 py-2 rounded-lg">
               Create Task
             </button>
             <Link to="/profile/tasks/history" className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg">
@@ -209,10 +224,10 @@ const UserTasksContent = () => {
           </div>
         </div>
 
-        {/* Thay đổi từ allTasks sang filteredTasks */}
-        <TaskDashboard 
-          tasks={filters.eventName || filters.priority || filters.keyword ? filteredTasks : allTasks} 
-          isFiltered={!!(filters.eventName || filters.priority || filters.keyword)}
+        <TaskDashboard
+          tasks={filters.eventName ? filteredTasks : allTasks}
+          isFiltered={!!filters.eventName}
+          currentUserId={userProfile?.id}
         />
 
         {/* Filters */}
@@ -231,7 +246,12 @@ const UserTasksContent = () => {
               {
                 label: 'Event',
                 name: 'eventName',
-                options: [{ value: '', label: 'All Events' }, ...events.map(e => ({ value: e.eventId, label: e.eventName }))]
+                options: [
+                  { value: '', label: 'All Events' },
+                  ...events
+                    .filter(e => e.role !== 'PARTICIPANT')
+                    .map(e => ({ value: e.eventId, label: e.eventName }))
+                ]
               },
               {
                 label: 'Status',
@@ -239,17 +259,30 @@ const UserTasksContent = () => {
                 options: [
                   { value: '', label: 'Active Tasks' },
                   { value: 'TODO', label: 'To Do' },
-                  { value: 'DOING', label: 'Doing' }
+                  { value: 'DOING', label: 'Doing' },
+                  { value: 'REVIEW', label: 'Review' },
+                  { value: 'OVERDUE', label: 'Overdue' }
                 ]
               },
               {
                 label: 'Priority',
                 name: 'priority',
                 options: [
-                  { value: '', label: 'Priority' },
+                  { value: '', label: 'All Priorities' },
+                  { value: 'CRITICAL', label: 'Critical' },
                   { value: 'HIGH', label: 'High' },
                   { value: 'MEDIUM', label: 'Medium' },
                   { value: 'LOW', label: 'Low' }
+                ]
+              },
+              {
+                label: 'Role',
+                name: 'role',
+                options: [
+                  { value: '', label: 'All Roles' },
+                  { value: 'CREATOR', label: 'CREATOR' },
+                  { value: 'LEADER', label: 'LEADER' },
+                  { value: 'ASSIGNEE', label: 'ASSIGNEE' }
                 ]
               }
             ].map(({ label, name, options }) => (
@@ -293,25 +326,27 @@ const UserTasksContent = () => {
           <div className="text-center text-gray-500 py-10">Loading tasks...</div>
         ) : displayTasks.length > 0 ? (
           <div className="bg-white rounded-lg shadow overflow-x-auto">
-            <table className="min-w-full">
+            <table className="min-w-full table-fixed"> {/* Thêm table-fixed để kiểm soát chiều rộng cột */}
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event</th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                  <th className="w-12 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
+                  <th className="w-48 md:w-64 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th className="w-36 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event</th>
+                  <th className="w-32 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
+                  <th className="w-24 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="w-24 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+                  <th className="w-24 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                  <th className="w-32 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {currentTasks.map((task, index) => (
+                {currentTasks.map((task, idx) => (
                   <TaskCard
-                    key={task.taskId || index}
+                    key={task.taskId}
                     task={task}
-                    index={index + 1}
-                    onTaskUpdated={refreshTasks}  // Thêm dòng này
+                    index={indexOfFirstTask + idx + 1}
+                    onTaskUpdated={refreshTasks}
+                    currentUserId={userProfile?.id}
                   />
                 ))}
               </tbody>
@@ -321,17 +356,17 @@ const UserTasksContent = () => {
           <div className="text-center text-gray-500 py-10">No active tasks found.</div>
         )}
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="mt-8 flex justify-center">
             <div className="py-4 px-6 flex justify-center items-center gap-4">
               <button
                 onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
-                className={`px-3 py-1 rounded ${currentPage === 1
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                className={`px-3 py-1 rounded ${
+                  currentPage === 1 
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
                     : 'bg-[#00155c] text-white hover:bg-[#172c70]'
-                  }`}
+                }`}
               >
                 Previous
               </button>
@@ -351,7 +386,7 @@ const UserTasksContent = () => {
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2">
                     <svg className="h-4 w-4 fill-current text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
                     </svg>
                   </div>
                 </div>
@@ -363,10 +398,11 @@ const UserTasksContent = () => {
               <button
                 onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                 disabled={currentPage === totalPages}
-                className={`px-3 py-1 rounded ${currentPage === totalPages
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                className={`px-3 py-1 rounded ${
+                  currentPage === totalPages 
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
                     : 'bg-[#00155c] text-white hover:bg-[#172c70]'
-                  }`}
+                }`}
               >
                 Next
               </button>
@@ -374,9 +410,8 @@ const UserTasksContent = () => {
           </div>
         )}
 
-        {/* Thêm Modal Create Task */}
-        <CreateTaskModal 
-          isOpen={isCreateModalOpen} 
+        <CreateTaskModal
+          isOpen={isCreateModalOpen}
           onClose={closeCreateModal}
           onTaskCreated={refreshTasks}
         />
