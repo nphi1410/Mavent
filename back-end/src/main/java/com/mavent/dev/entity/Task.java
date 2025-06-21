@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "tasks")
 @Data
+
 public class Task {
 
     @Id
@@ -44,8 +45,14 @@ public class Task {
     @Column(name = "priority")
     private Priority priority;
 
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
     public enum Status {
-        TODO, DOING, DONE, FEEDBACK_NEEDED, REJECTED, CANCELLED
+        TODO, DOING, DONE, REVIEW, REJECTED, CANCELLED, OVERDUE
     }
 
     public enum Priority {

@@ -1,5 +1,6 @@
 package com.mavent.dev.service;
 
+import com.mavent.dev.dto.event.EventAccountRoleDTO;
 import com.mavent.dev.entity.EventAccountRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +14,8 @@ public interface EventAccountRoleService {
     Page<EventAccountRole> getMembersByEventIdWithPagination(Integer eventId, Pageable pageable);
 
     List<EventAccountRole> getMembersByAccountId(Integer accountId);
+
+    Page<EventAccountRoleDTO> getMembersByAccountIdWithPagination(Integer accountId, Pageable pageable);
 
     // Tìm kiếm và lọc members
     Page<EventAccountRole> searchMembersInEvent(Integer eventId, String searchTerm, Pageable pageable);
@@ -41,10 +44,6 @@ public interface EventAccountRoleService {
     boolean isMemberInEvent(Integer eventId, Integer accountId);
 
     boolean hasRoleInEvent(Integer eventId, Integer accountId, EventAccountRole.EventRole role);
-
-    boolean isOrganizerOfEvent(Integer eventId, Integer accountId);
-
-    boolean isParticipantInEvent(Integer eventId, Integer accountId);
 
     // Lấy member với filters
     Page<EventAccountRole> getMembersWithFilters(Integer eventId, Boolean isActive,

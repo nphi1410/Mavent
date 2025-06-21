@@ -1,5 +1,6 @@
 package com.mavent.dev.service;
 
+import com.mavent.dev.dto.EventMemberDTO;
 import com.mavent.dev.dto.FilterEventDTO;
 import com.mavent.dev.dto.superadmin.EventDTO;
 import com.mavent.dev.entity.Event;
@@ -15,10 +16,14 @@ public interface EventService {
 
     EventDTO getEventById(Integer eventId);
 
+    boolean checkEventAccess(Integer eventId, Integer accountId);
+
+    List<EventMemberDTO> getEventMembers(Integer eventId);
+
     Event getEventEntityById(Integer eventId);
 
-
     EventDTO updateEvent(Integer eventId, EventDTO eventDTO);
+
 
     Page<T> getEventByDateRange(String type, Boolean isTrending);
 

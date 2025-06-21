@@ -1,5 +1,7 @@
 package com.mavent.dev.service.implement;
 
+import com.mavent.dev.dto.event.EventAccountRoleDTO;
+import com.mavent.dev.entity.Event;
 import com.mavent.dev.entity.EventAccountRole;
 import com.mavent.dev.repository.EventAccountRoleRepository;
 import com.mavent.dev.service.EventAccountRoleService;
@@ -31,6 +33,11 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
     @Override
     public List<EventAccountRole> getMembersByAccountId(Integer accountId) {
         return eventAccountRoleRepository.findByAccountId(accountId);
+    }
+
+    @Override
+    public Page<EventAccountRoleDTO> getMembersByAccountIdWithPagination(Integer accountId, Pageable pageable) {
+        return eventAccountRoleRepository.findByAccountId(accountId,pageable);
     }
 
     @Override
@@ -111,16 +118,6 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
     @Override
     public boolean hasRoleInEvent(Integer eventId, Integer accountId, EventAccountRole.EventRole role) {
         return eventAccountRoleRepository.hasRoleInEvent(eventId, accountId, role);
-    }
-
-    @Override
-    public boolean isOrganizerOfEvent(Integer eventId, Integer accountId) {
-        return eventAccountRoleRepository.isOrganizerOfEvent(eventId, accountId);
-    }
-
-    @Override
-    public boolean isParticipantInEvent(Integer eventId, Integer accountId) {
-        return eventAccountRoleRepository.isParticipantInEvent(eventId, accountId);
     }
 
     @Override

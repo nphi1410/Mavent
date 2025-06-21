@@ -5,15 +5,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
-public class JwtBlacklistService {
+public interface JwtBlacklistService {
 
-    private final Set<String> blacklistedTokens = ConcurrentHashMap.newKeySet();
+    final Set<String> blacklistedTokens = Set.of();
 
-    public void blacklistToken(String token) {
-        blacklistedTokens.add(token);
-    }
+    public void blacklistToken(String token);
 
-    public boolean isTokenBlacklisted(String token) {
-        return blacklistedTokens.contains(token);
-    }
+    public boolean isTokenBlacklisted(String token);
 }

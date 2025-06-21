@@ -1,7 +1,11 @@
 package com.mavent.dev.service;
 
+import com.mavent.dev.dto.task.TaskAttendeeDTO;
+import com.mavent.dev.dto.task.TaskCreateDTO;
+import com.mavent.dev.dto.task.TaskDTO;
 import com.mavent.dev.dto.superadmin.AccountDTO;
 import com.mavent.dev.dto.UserProfileDTO;
+import com.mavent.dev.dto.task.TaskFeedbackDTO;
 import com.mavent.dev.entity.Account;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,13 +37,30 @@ public interface AccountService extends UserDetailsService {
 
     void updateAvatar(String username, String imageUrl);
 
-    List<com.mavent.dev.dto.TaskDTO> getUserTasks(Integer accountId, String status, String priority,
-                                                  String keyword, String sortOrder, String eventName);
+    List<TaskDTO> getUserTasks(Integer accountId, String status, String priority,
+                               String keyword, String sortOrder, String eventName);
+    TaskDTO getTaskDetails(Integer accountId, Integer taskId);
+
+    List<TaskAttendeeDTO> getTaskAttendees(Integer taskId);
+
+    TaskDTO createTask(TaskCreateDTO taskCreateDTO, Account creator) throws Exception;
+
+    TaskDTO updateTask(Integer taskId, TaskCreateDTO updateDto);
+
+    TaskDTO updateTaskStatus(Integer taskId, String newStatus);
+
+    boolean hasCreateTaskPermission(Integer eventId, Integer accountId);
+
+    TaskFeedbackDTO createTaskFeedback(Integer taskId, Integer feedbackById, String comment);
+
+    List<TaskFeedbackDTO> getTaskFeedback(Integer taskId, Integer accountId);
 
     String getRandomPassword(int length);
 
     List<AccountDTO> getAllAccounts();
 
     AccountDTO getAccountById(Integer id);
+
+    void updateTaskAttendees(Integer taskId, Integer assignedToAccountId, List<Integer> attendeeIds);
 }
 
