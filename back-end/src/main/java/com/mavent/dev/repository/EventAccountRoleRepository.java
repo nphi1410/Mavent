@@ -66,14 +66,14 @@ public interface EventAccountRoleRepository extends JpaRepository<EventAccountRo
                     FROM event_account_role ear
                     JOIN events e ON ear.event_id = e.event_id
                     WHERE ear.account_id = :accountId
-                      AND e.end_datetime <= NOW()
+                      AND e.end_datetime >= NOW()
                     """,
             countQuery = """
                     SELECT COUNT(*)
                     FROM event_account_role ear
                     JOIN events e ON ear.event_id = e.event_id
                     WHERE ear.account_id = :accountId
-                      AND e.end_datetime <= NOW()
+                      AND e.end_datetime >= NOW()
                       AND e.is_deleted = false
                     """,
             nativeQuery = true

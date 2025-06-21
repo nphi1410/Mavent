@@ -33,7 +33,9 @@ import SuperAdminViewEventDetails from "./pages/superadmin/SuperAdminViewEventDe
 import SuperAdminEditEvent from "./pages/superadmin/SuperAdminEditEvent";
 import SuperAdminViewUserDetails from "./pages/superadmin/SuperAdminViewUserDetails";
 import SuperAdminLayout from "./layouts/SuperAdminLayout";
-import MeetingListPage from "./pages/MeetingListPage";
+import MeetingListPage from "./pages/meetingPages/MeetingListPage";
+import MeetingEditPage from "./pages/meetingPages/EditMeetingPage";
+import MeetingDetailsModal from "./components/MeetingDetailsModal";
 
 // Higher Order Components for Route Protection
 const Protect = (Component) => <ProtectedRoute children={Component} />;
@@ -55,6 +57,7 @@ function App() {
           <Route path="events" element={<AllEvents />} />
           <Route path="events/:id" element={<EventDetails />} />
           <Route path="meetings" element={<MeetingListPage />} />
+          <Route path="meetings/edit/:id" element={<MeetingEditPage />} />
 
           {/* Event-Protected Routes */}
           <Route path="create-event">

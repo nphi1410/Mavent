@@ -2,7 +2,7 @@ import React from "react";
 import { faCalendar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
-import { separateDayMonthYear } from "../../utils/SeparateDayMonthYear";
+import { separateDayMonthYear } from "../../utils/DateConvert";
 
 const CardSmall = ({event }) => {
   const navigate = useNavigate();

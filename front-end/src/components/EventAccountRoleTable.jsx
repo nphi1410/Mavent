@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import EventAccountRoleTicket from "./EventAccountRoleTicket";
+import { vietnameseDate } from "../utils/DateConvert";
 
 const EventAccountRoleTable = ({ eventData = [] }) => {
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -16,7 +17,7 @@ const EventAccountRoleTable = ({ eventData = [] }) => {
     <>
       <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-md">
         <table className="min-w-full bg-white text-sm text-gray-700">
-          <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
+          <thead className="bg-gray-100 text-gray-600 uppercase">
             <tr>
               <th className="px-4 py-3 text-center">#</th>
               <th className="px-4 py-3 text-left">Event</th>
@@ -32,26 +33,36 @@ const EventAccountRoleTable = ({ eventData = [] }) => {
               <tr
                 key={idx}
                 onClick={() => setSelectedEvent(event)}
-                className="cursor-pointer border-t border-gray-100 hover:bg-blue-50 transition"
+                className="cursor-pointer border-t h-12 border-gray-100 hover:bg-blue-50 transition"
               >
                 <td className="px-4 py-2 text-center">{idx + 1}</td>
-                <td className="px-4 py-2">{event.name}</td>
-                <td className="px-4 py-2">{new Date(event.startDatetime).toLocaleString()}</td>
+                <td className="px-4 py-2 font-semibold">{event.name}</td>
+                <td className="px-4 py-2">
+                  {vietnameseDate(event.startDatetime, true)}
+                </td>
                 <td className="px-4 py-2">
                   <span className="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-2 py-1 rounded-lg">
                     {event.eventRole}
                   </span>
                 </td>
                 <td className="px-4 py-2 text-center">
-                  <span className={`inline-block text-xs font-semibold px-2 py-1 rounded-full ${
-                    event.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                  }`}>
+                  <span
+                    className={`inline-block text-xs font-semibold px-2 py-1 rounded-full ${
+                      event.isActive
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                  >
                     {event.isActive ? "Yes" : "No"}
                   </span>
                 </td>
-                <td className="px-4 py-2">{new Date(event.roleUpdatedAt).toLocaleString()}</td>
+                <td className="px-4 py-2">
+                  {new Date(event.roleUpdatedAt).toLocaleString()}
+                </td>
                 <td className="px-4 py-2 text-center">
-                  <button className="text-red-600 hover:underline text-sm">Cancel</button>
+                  <button className="text-red-600 hover:underline text-sm">
+                    Cancel
+                  </button>
                 </td>
               </tr>
             ))}
@@ -61,7 +72,10 @@ const EventAccountRoleTable = ({ eventData = [] }) => {
 
       {selectedEvent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm transition duration-1000">
-          <EventAccountRoleTicket event={selectedEvent} onClose={() => setSelectedEvent(null)} />
+          <EventAccountRoleTicket
+            event={selectedEvent}
+            onClose={() => setSelectedEvent(null)}
+          />
         </div>
       )}
     </>

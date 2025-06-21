@@ -2,7 +2,7 @@
 
 import Api from "../config/Api";
 
-const BASE_URL = "/api/meetings";
+const BASE_URL = "/meetings";
 
 export const getAllMeetings = async () => {
   const response = await Api.get(BASE_URL);
