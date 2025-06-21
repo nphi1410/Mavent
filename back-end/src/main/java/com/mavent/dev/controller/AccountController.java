@@ -811,7 +811,7 @@ public class AccountController {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        
+        System.out.println("Updating attendees for task ID: " + taskId);
         String token = authHeader.substring(7);
         String username = jwtUtil.extractUsername(token);
         Account account = accountService.getAccount(username);
@@ -819,25 +819,26 @@ public class AccountController {
         if (account == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        
+        System.out.println("Account ID: " + account.getAccountId());
         // Kiểm tra xem người gọi API có phải là người được giao task không
         TaskDTO task = accountService.getTaskDetails(account.getAccountId(), taskId);
+        System.out.println("Task details: " + task);
         if (task == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy task");
         }
-        
+
         // Chỉ người được giao task hoặc người tạo task mới được phép cập nhật attendees
         if (!account.getAccountId().equals(task.getAssignedToAccountId()) && 
             !account.getAccountId().equals(task.getAssignedByAccountId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body("Bạn không có quyền cập nhật người tham gia task này");
         }
-        
+        System.out.println("Request to update attendees: " + request);
         List<Integer> attendees = request.get("attendees");
         if (attendees == null) {
             return ResponseEntity.badRequest().body("Danh sách người tham gia không hợp lệ");
         }
-        
+        System.out.println("Attendees to update: " + attendees);
         try {
             // Gọi service để cập nhật attendees
             accountService.updateTaskAttendees(taskId, task.getAssignedToAccountId(), attendees);
