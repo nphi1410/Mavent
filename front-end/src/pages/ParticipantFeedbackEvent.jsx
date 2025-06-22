@@ -1,31 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faCalendarAlt,
     faMapMarkerAlt,
     faUsers,
-    faClock,
     faStar as faStarSolid,
     faPaperPlane,
     faCheckCircle,
     faCommentDots,
 } from '@fortawesome/free-solid-svg-icons';
+import { createEventFeedback } from '../services/eventFeedbackService';
+import { getEventById } from '../services/eventService'; // Hàm lấy chi tiết event
 
-const ParticipantFeedbackEvent = () => {
+const ParticipantFeedbackEvent = ({ accountId = 1 }) => {
+    const { eventId } = useParams();
+    const [event, setEvent] = useState(null);
+
     const [rating, setRating] = useState(0);
     const [hoverRating, setHoverRating] = useState(0);
     const [comment, setComment] = useState('');
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState('');
 
-    const eventData = {
-        title: 'Hội thảo Công Nghệ Mùa Hè 2025',
-        date: '20/06/2025',
-        location: 'Đại học Bách Khoa, TP.HCM',
-        attendees: 150,
-        category: 'Công nghệ - Đổi mới',
-        image: 'https://images.unsplash.com/photo-1542751110-97427bbecf20',
-    };
+    useEffect(() => {
+        const fetchEvent = async () => {
+            try {
+                const data = await getEventById(eventId);
+                setEvent(data);
+            } catch (err) {
+                setError('Không thể tải thông tin sự kiện.');
+            }
+        };
+        fetchEvent();
+    }, [eventId]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -33,67 +42,79 @@ const ParticipantFeedbackEvent = () => {
         if (comment.trim().length < 10) return alert('Bình luận tối thiểu 10 ký tự');
 
         setIsSubmitting(true);
-
-        setTimeout(() => {
-            setIsSubmitting(false);
+        try {
+            await createEventFeedback(eventId, {
+                eventId,
+                accountId,
+                rating,
+                comment,
+            });
             setIsSubmitted(true);
             setTimeout(() => {
                 setIsSubmitted(false);
                 setRating(0);
                 setComment('');
-            }, 5000);
-        }, 1500);
+            }, 100000000);
+        } catch (err) {
+            setError(err.message || 'Lỗi không xác định');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    const getRatingText = (stars) => {
-        return {
-            1: 'Không hài lòng',
-            2: 'Kém',
-            3: 'Bình thường',
-            4: 'Tốt',
-            5: 'Xuất sắc',
-        }[stars] || '';
-    };
+    const getRatingText = (stars) => ({
+        1: 'Không hài lòng',
+        2: 'Kém',
+        3: 'Bình thường',
+        4: 'Tốt',
+        5: 'Xuất sắc',
+    }[stars] || '');
 
-    const getRatingColor = (stars) => {
-        return {
-            1: 'text-red-500',
-            2: 'text-orange-500',
-            3: 'text-yellow-500',
-            4: 'text-blue-500',
-            5: 'text-green-500',
-        }[stars] || '';
-    };
+    const getRatingColor = (stars) => ({
+        1: 'text-red-500',
+        2: 'text-orange-500',
+        3: 'text-yellow-500',
+        4: 'text-blue-500',
+        5: 'text-green-500',
+    }[stars] || '');
+
+    if (!event) {
+        return (
+            <div className="text-center p-10 text-gray-500">
+                Đang tải thông tin sự kiện...
+            </div>
+        );
+    }
 
     return (
         <div className="relative">
             {/* Hero */}
             <div className="relative h-96 lg:h-[500px] overflow-hidden">
-                <img src={eventData.image} alt={eventData.title} className="w-full h-full object-cover" />
+                <img src={event.bannerUrl || 'https://images.unsplash.com/photo-1542751110-97427bbecf20'} alt={event.title} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-8">
                     <div className="max-w-7xl mx-auto">
                         <div className="flex items-center space-x-2 mb-4">
                             <span className="bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-                                {eventData.category}
+                                {event.category || 'Sự kiện'}
                             </span>
                             <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
                                 Đã kết thúc
                             </span>
                         </div>
-                        <h1 className="text-3xl lg:text-5xl font-bold text-white mb-4">{eventData.title}</h1>
+                        <h1 className="text-3xl lg:text-5xl font-bold text-white mb-4">{event.title}</h1>
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-white/90">
                             <div className="flex items-center space-x-2">
                                 <FontAwesomeIcon icon={faCalendarAlt} className="w-5 h-5 text-purple-400" />
-                                <span>{eventData.date}</span>
+                                <span>{new Date(event.startTime).toLocaleDateString()}</span>
                             </div>
                             <div className="flex items-center space-x-2">
                                 <FontAwesomeIcon icon={faMapMarkerAlt} className="w-5 h-5 text-purple-400" />
-                                <span>{eventData.location}</span>
+                                <span>{event.location || 'N/A'}</span>
                             </div>
                             <div className="flex items-center space-x-2">
                                 <FontAwesomeIcon icon={faUsers} className="w-5 h-5 text-purple-400" />
-                                <span>{eventData.attendees} người tham dự</span>
+                                <span>{event.maxParticipants} người tham dự</span>
                             </div>
                         </div>
                     </div>
@@ -118,7 +139,7 @@ const ParticipantFeedbackEvent = () => {
                             <p className="text-sm text-gray-500">Đánh giá: {rating}/5 - {getRatingText(rating)}</p>
                         </div>
                     ) : (
-                        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-2xl shadow-gray-500 overflow-hidden">
+                        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-2xl overflow-hidden">
                             <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 text-white">
                                 <div className="flex items-center space-x-3 mb-1">
                                     <FontAwesomeIcon icon={faCommentDots} className="w-6 h-6" />
@@ -147,17 +168,15 @@ const ParticipantFeedbackEvent = () => {
                                             </button>
                                         ))}
                                     </div>
-
-                                    {/* Smooth rating text transition */}
                                     <div className="h-6 mt-3 overflow-hidden relative">
                                         <div
-                                            className={`absolute left-1/2 -translate-x-1/2 transition-all duration-500 ${(hoverRating || rating) > 0 ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-6'
-                                                } font-semibold ${getRatingColor(hoverRating || rating)}`}
+                                            className={`absolute left-1/2 -translate-x-1/2 transition-all duration-500 ${(hoverRating || rating) > 0 ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-6'} font-semibold ${getRatingColor(hoverRating || rating)}`}
                                         >
                                             {(hoverRating || rating) > 0 && `${getRatingText(hoverRating || rating)} (${hoverRating || rating}/5)`}
                                         </div>
                                     </div>
                                 </div>
+
                                 {/* Comment */}
                                 <div>
                                     <label className="block font-medium text-gray-700 mb-1">Bình luận chi tiết</label>
@@ -172,6 +191,7 @@ const ParticipantFeedbackEvent = () => {
                                     {comment.length > 0 && comment.length < 10 && (
                                         <p className="text-red-500 text-sm">Cần thêm {10 - comment.length} ký tự nữa</p>
                                     )}
+                                    {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
                                 </div>
 
                                 {/* Submit */}
@@ -200,7 +220,6 @@ const ParticipantFeedbackEvent = () => {
                             </div>
                         </form>
                     )}
-
                 </div>
             </div>
         </div>

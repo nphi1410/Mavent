@@ -83,7 +83,7 @@ function App() {
           </Route>
 
           {/* Participant Create Event Feedback Routes */}
-          <Route path="create-feedback" element={Protect(<ParticipantFeedbackEvent />)} />
+          <Route path="events/:eventId/create-feedback" element={Protect(<ParticipantFeedbackEvent />)} />
 
           {/* User Profile Routes */}
           <Route path="profile">
