@@ -40,10 +40,9 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
   const [isBulkActionOpen, setIsBulkActionOpen] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [processingBulkAction, setProcessingBulkAction] = useState(false);  const [previewDocument, setPreviewDocument] = useState(null);
-  const [detailDocument, setDetailDocument] = useState(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [detailDocument, setDetailDocument] = useState(null);  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const documentsPerPage = 6;
+  const [documentsPerPage, setDocumentsPerPage] = useState(6);
 
   // Show notification utility function - reusable for all notifications
   const showNotification = (message, type = 'success') => {
@@ -517,14 +516,18 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
       }
     });
   };
-
   // Update checks when the current page or documents list changes
   useEffect(() => {
     setIsSelectAll(
       currentDocuments.length > 0 && 
       currentDocuments.every(doc => selectedDocuments.includes(doc.documentId))
     );
-  }, [currentPage, documents, selectedDocuments, currentDocuments]);
+    
+    // Ensure current page is valid after filtering or changing items per page
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, documents, selectedDocuments, currentDocuments, totalPages, documentsPerPage]);
   // Confirmation dialog component
   const ConfirmDialog = ({ isOpen, title, message, confirmButtonText, onConfirm, onCancel }) => {
     if (!isOpen) return null;
@@ -1049,24 +1052,179 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
             </div>
           </div>
         ))}
-      </div>
-        {/* Pagination */}
+      </div>        {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center mt-6">
-          <div className="flex flex-wrap justify-center gap-1 md:gap-0 md:border md:border-gray-300 md:rounded-md md:overflow-hidden">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNumber) => (
-              <button
-                key={pageNumber}
-                onClick={() => paginate(pageNumber)}
-                className={`px-3 py-2 rounded-md md:rounded-none ${
-                  pageNumber === currentPage
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white border border-gray-200 md:border-0 text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                {pageNumber}
-              </button>
-            ))}
+        <div className="flex flex-col items-center mt-6 space-y-3">
+          {/* Page information */}
+          <div className="text-sm text-gray-600">
+            Page {currentPage} of {totalPages}
+            <span className="ml-1">({sortedDocuments.length} total documents)</span>
+          </div>
+          
+          {/* Pagination controls */}
+          <div className="flex flex-wrap justify-center items-center gap-1">
+            {/* First page button */}
+            <button
+              onClick={() => paginate(1)}
+              disabled={currentPage === 1}
+              className={`px-2 py-2 rounded-md flex items-center ${
+                currentPage === 1
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+              }`}
+              title="First Page"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M15.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414zm-6 0a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 011.414 1.414L5.414 10l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+            
+            {/* Previous page button */}
+            <button
+              onClick={() => paginate(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={`px-2 py-2 rounded-md flex items-center ${
+                currentPage === 1
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+              }`}
+              title="Previous Page"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+            </button>
+            
+            {/* Page numbers - with ellipsis for many pages */}
+            <div className="flex border border-gray-300 rounded-md overflow-hidden">
+              {totalPages <= 7 ? (
+                // Show all pages if there are 7 or fewer
+                Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNumber) => (
+                  <button
+                    key={pageNumber}
+                    onClick={() => paginate(pageNumber)}
+                    className={`px-3 py-2 ${
+                      pageNumber === currentPage
+                        ? 'bg-blue-600 text-white font-medium'
+                        : 'bg-white text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    {pageNumber}
+                  </button>
+                ))
+              ) : (
+                // Show limited pages with ellipsis for many pages
+                <>
+                  {/* First page always shown */}
+                  <button
+                    onClick={() => paginate(1)}
+                    className={`px-3 py-2 ${
+                      1 === currentPage
+                        ? 'bg-blue-600 text-white font-medium'
+                        : 'bg-white text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    1
+                  </button>
+                  
+                  {/* Left ellipsis if needed */}
+                  {currentPage > 3 && (
+                    <span className="px-3 py-2 bg-white text-gray-600">
+                      ...
+                    </span>
+                  )}
+                  
+                  {/* Pages around current page */}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter(page => {
+                      if (page === 1 || page === totalPages) return false;
+                      return Math.abs(page - currentPage) < 2;
+                    })
+                    .map(pageNumber => (
+                      <button
+                        key={pageNumber}
+                        onClick={() => paginate(pageNumber)}
+                        className={`px-3 py-2 ${
+                          pageNumber === currentPage
+                            ? 'bg-blue-600 text-white font-medium'
+                            : 'bg-white text-gray-600 hover:bg-gray-50'
+                        }`}
+                      >
+                        {pageNumber}
+                      </button>
+                    ))
+                  }
+                  
+                  {/* Right ellipsis if needed */}
+                  {currentPage < totalPages - 2 && (
+                    <span className="px-3 py-2 bg-white text-gray-600">
+                      ...
+                    </span>
+                  )}
+                  
+                  {/* Last page always shown */}
+                  <button
+                    onClick={() => paginate(totalPages)}
+                    className={`px-3 py-2 ${
+                      totalPages === currentPage
+                        ? 'bg-blue-600 text-white font-medium'
+                        : 'bg-white text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    {totalPages}
+                  </button>
+                </>
+              )}
+            </div>
+            
+            {/* Next page button */}
+            <button
+              onClick={() => paginate(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={`px-2 py-2 rounded-md flex items-center ${
+                currentPage === totalPages
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+              }`}
+              title="Next Page"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+              </svg>
+            </button>
+            
+            {/* Last page button */}
+            <button
+              onClick={() => paginate(totalPages)}
+              disabled={currentPage === totalPages}
+              className={`px-2 py-2 rounded-md flex items-center ${
+                currentPage === totalPages
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+              }`}
+              title="Last Page"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4.293 15.707a1 1 0 001.414 0l5-5a1 1 0 000-1.414l-5-5a1 1 0 00-1.414 1.414L8.586 10 4.293 14.293a1 1 0 000 1.414zm6 0a1 1 0 001.414 0l5-5a1 1 0 000-1.414l-5-5a1 1 0 10-1.414 1.414L14.586 10l-4.293 4.293a1 1 0 000 1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
+            {/* Items per page selector */}
+          <div className="flex items-center text-sm text-gray-600">
+            <span className="mr-2">Items per page:</span>
+            <select 
+              className="border border-gray-300 rounded px-2 py-1"
+              value={documentsPerPage}
+              onChange={(e) => {
+                setDocumentsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+            >
+              <option value="6">6</option>
+              <option value="12">12</option>
+              <option value="24">24</option>
+              <option value="48">48</option>
+            </select>
           </div>
         </div>
       )}
