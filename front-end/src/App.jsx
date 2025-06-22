@@ -96,7 +96,6 @@ function App() {
               <Route path="history" element={Protect(<TaskHistory />)} />
             </Route>
           </Route>
-
         </Route>
 
         {/* Super Admin Routes */}

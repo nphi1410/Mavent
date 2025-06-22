@@ -29,16 +29,26 @@ public class DocumentController {
     @GetMapping("/latest")
     public ResponseEntity<List<Document>> getFiveImage() {
         return ResponseEntity.ok(documentService.getFiveImage());
-    }
-
-    @PostMapping
+    }    @PostMapping
     public ResponseEntity<DocumentResponseDTO> uploadDocument(
             @RequestParam("file") MultipartFile file,
             @Valid @RequestPart("request") DocumentRequestDTO requestDTO,
             @AuthenticationPrincipal UserDetails userDetails) throws IOException {
         
-        // Extract account ID from authenticated user
-        Integer accountId = Integer.parseInt(userDetails.getUsername());
+        Integer accountId;
+        
+        // First try to get account ID from authenticated user
+        if (userDetails != null) {
+            accountId = Integer.parseInt(userDetails.getUsername());
+        } else {
+            // Fall back to the uploaderAccountId from the request if authentication is missing
+            accountId = requestDTO.getUploaderAccountId();
+            
+            if (accountId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(null);
+            }
+        }
 
         DocumentResponseDTO response = documentService.uploadDocument(file, requestDTO, accountId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);

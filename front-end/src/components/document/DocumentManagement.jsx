@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faFileAlt, faFilePdf, faFileCsv, faDownload, faEye } from '@fortawesome/free-solid-svg-icons';
+import { 
+  faSearch, 
+  faFileAlt, 
+  faFilePdf, 
+  faFileCsv, 
+  faDownload, 
+  faEye, 
+  faFilter,
+  faSort
+} from '@fortawesome/free-solid-svg-icons';
+import { getDocumentsByEvent } from '../../services/documentService.jsx';
+import { getUserProfile } from '../../services/profileService.jsx';
 import DocumentList from './DocumentList';
 import DocumentUpload from './DocumentUpload';
 
@@ -10,12 +21,41 @@ const DocumentManagement = ({ eventId }) => {
   const [selectedFileType, setSelectedFileType] = useState('all');
   const [selectedDateRange, setSelectedDateRange] = useState('all');
   const [sortBy, setSortBy] = useState('dateNewest');
-  
+  const [departments, setDepartments] = useState([{ id: 'all', name: 'All Departments' }]);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [filtersVisible, setFiltersVisible] = useState(false);
   useEffect(() => {
     if (eventId) {
       console.log(`Loading document management for event ID: ${eventId}`);
-      // In a real implementation, you would fetch departments and documents related to this event
-      // Example:
+      
+      // Ensure user profile is loaded to get accountId
+      const ensureUserProfile = async () => {
+        try {
+          if (!sessionStorage.getItem('accountId')) {
+            const profile = await getUserProfile();
+            if (profile && profile.id) {
+              sessionStorage.setItem("accountId", profile.id);
+              console.log("User accountId stored in session:", profile.id);
+            }
+          }
+        } catch (error) {
+          console.error("Error ensuring user profile:", error);
+        }
+      };
+      
+      ensureUserProfile();
+      
+      // Fetch departments for this event (in a full implementation)
+      // For now, we'll use our sample departments
+      setDepartments([
+        { id: 'all', name: 'All Departments' },
+        ...additionalDepartments.map(dept => ({
+          ...dept,
+          id: dept.id.toString() // Convert to string to match the API format
+        }))
+      ]);
+      
+      // In a real implementation with departments API:
       // const fetchDepartments = async () => {
       //   try {
       //     const response = await getDepartmentsByEventId(eventId);
@@ -29,10 +69,8 @@ const DocumentManagement = ({ eventId }) => {
       // fetchDepartments();
     }
   }, [eventId]);
-  
-  // Sample departments data - replace with actual data fetching in production
-  const departments = [
-    { id: 'all', name: 'All Departments' },
+    // Additional department data - will be merged with departments from API
+  const additionalDepartments = [
     { id: 'marketing', name: 'Marketing Department' },
     { id: 'finance', name: 'Finance Department' },
     { id: 'hr', name: 'Human Resources Department' },
@@ -72,7 +110,7 @@ const DocumentManagement = ({ eventId }) => {
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 my-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">All Department Documents</h2>
+      {/* <h2 className="text-2xl font-bold text-gray-800 mb-6">All Department Documents</h2> */}
       
       {/* Search Bar */}
       <div className="relative mb-6">
@@ -144,9 +182,12 @@ const DocumentManagement = ({ eventId }) => {
           </select>
         </div>
       </div>
-      
-      {/* Document Upload Area */}
-      <DocumentUpload eventId={eventId} departmentId={selectedDepartment !== 'all' ? selectedDepartment : null} />
+        {/* Document Upload Area */}
+      <DocumentUpload 
+        eventId={eventId} 
+        departmentId={selectedDepartment !== 'all' ? selectedDepartment : null} 
+        onUploadComplete={() => setRefreshTrigger(prev => prev + 1)}
+      />
       
       {/* Document List */}
       <DocumentList 
@@ -156,6 +197,7 @@ const DocumentManagement = ({ eventId }) => {
         dateFilter={selectedDateRange}
         sortBy={sortBy}
         eventId={eventId}
+        refreshTrigger={refreshTrigger}
       />
     </div>
   );
