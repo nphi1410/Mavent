@@ -9,7 +9,7 @@ const TaskHistory = () => {
 
   const [filters, setFilters] = useState({
     keyword: '',
-    status: 'DONE,REJECTED,CANCELLED,OVERDUE',
+    status: 'DONE,REJECTED,CANCELLED',
     priority: '',
     sortOrder: '',
     eventName: ''
@@ -23,11 +23,11 @@ const TaskHistory = () => {
   const tasksPerPage = 10;
 
   const navigate = useNavigate();
-  const hasFilteredOnce = useRef(false); // dùng để ngăn filter chạy sau lần load đầu
+  const hasFilteredOnce = useRef(false); 
 
   const filterHistoryTasks = (tasks) => {
     return tasks.filter(task =>
-      ['DONE', 'REJECTED', 'CANCELLED', 'OVERDUE'].includes(task.status)
+      ['DONE', 'REJECTED', 'CANCELLED'].includes(task.status)
     );
   };
 
@@ -172,7 +172,6 @@ console.log('displayTasks:', displayTasks);
                   { value: 'DONE', label: 'Done' },
                   { value: 'REJECTED', label: 'Rejected' },
                   { value: 'CANCELLED', label: 'Cancelled' },
-                  { value: 'OVERDUE', label: 'Overdue' }  // Thêm OVERDUE nếu được sử dụng
                 ]
               },
               {
@@ -180,6 +179,7 @@ console.log('displayTasks:', displayTasks);
                 name: 'priority',
                 options: [
                   { value: '', label: 'Priority' },
+                  { value: 'CRITICAL', label: 'Critical' },
                   { value: 'HIGH', label: 'High' },
                   { value: 'MEDIUM', label: 'Medium' },
                   { value: 'LOW', label: 'Low' }
@@ -235,6 +235,7 @@ console.log('displayTasks:', displayTasks);
                   <th className="w-32 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
                   <th className="w-24 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                   <th className="w-24 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+                  <th className="w-24 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
                   <th className="w-32 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                 </tr>
               </thead>

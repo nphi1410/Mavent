@@ -335,14 +335,14 @@ const AttendeesModal = ({
                 </div>
               )}
 
-              <div className="mt-2 mb-4 bg-yellow-50 p-3 rounded-lg text-sm text-yellow-700">
+              {/* <div className="mt-2 mb-4 bg-yellow-50 p-3 rounded-lg text-sm text-yellow-700">
                 <p className="font-semibold">Note about participant statuses:</p>
                 <ul className="mt-1 list-disc list-inside">
                   <li>Newly added members will have the status <span className="font-medium">Invited</span></li>
                   <li>The Leader will always have the status <span className="font-medium">Accepted</span></li>
                   <li>The current status will remain unchanged for members who have already joined</li>
                 </ul>
-              </div>
+              </div> */}
 
 
               <div className="flex justify-end space-x-3">
