@@ -16,7 +16,8 @@ import {
   faTimes, 
   faCheckSquare,
   faEllipsisH,
-  faExclamationTriangle
+  faExclamationTriangle,
+  faUser
 } from '@fortawesome/free-solid-svg-icons';
 import { 
   getDocumentsByEvent,
@@ -280,15 +281,33 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
     
     return <FontAwesomeIcon icon={faFileAlt} className="text-gray-600" />;
   };
-
   // User initials for avatar
   const getInitials = (name) => {
     if (!name) return 'U';
-    return name
-      .split(' ')
-      .map((part) => part.charAt(0))
-      .join('')
-      .toUpperCase();
+    try {
+      return name
+        .split(' ')
+        .map((part) => part.charAt(0))
+        .join('')
+        .toUpperCase();
+    } catch (error) {
+      console.error('Error generating initials:', error);
+      return 'U';
+    }
+  };
+  
+  // Handle avatar loading errors
+  const handleAvatarError = (e, name) => {
+    try {
+      e.target.style.display = 'none';
+      e.target.parentNode.classList.add('bg-blue-600', 'text-white');
+      e.target.parentNode.innerHTML = getInitials(name || 'Unknown');
+    } catch (error) {
+      console.error('Error handling avatar fallback:', error);
+      // Just in case there's an error with the DOM manipulation
+      e.target.parentNode.classList.add('bg-gray-400');
+      e.target.parentNode.innerHTML = 'U';
+    }
   };
 
   // Toggle selection of a single document
@@ -481,13 +500,12 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
           <div className="text-gray-500 text-sm">
             {sortedDocuments.length} document{sortedDocuments.length !== 1 ? 's' : ''} found
           </div>
-        </div>
-          {/* Document Cards */}
+        </div>          {/* Document Cards */}
         {currentDocuments.map((doc) => (
-          <div key={doc.documentId} className="border border-gray-200 rounded-lg mb-4 hover:shadow-md transition-shadow bg-white overflow-hidden">
-            <div className="flex flex-col md:flex-row items-start md:items-center p-4 gap-3">
+          <div key={doc.documentId} className="border border-gray-200 rounded-lg mb-4 hover:shadow-md transition-shadow bg-white overflow-hidden">            
+            <div className="flex flex-col md:flex-row items-start md:items-center p-4 gap-3 w-full">
               {/* First Row: Icon, Title, Actions */}
-              <div className="flex w-full items-center">
+              <div className="flex w-full items-center overflow-hidden">
                 {/* Checkbox and File Type Icon */}
                 <div className="flex items-center space-x-3 shrink-0">
                   <input 
@@ -499,18 +517,18 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
                   <div className="h-10 w-10 flex items-center justify-center bg-gray-100 rounded-lg">
                     {getFileIcon(doc.fileType)}
                   </div>
-                </div>
-                  {/* Document Name and Size */}                <div className="flex-1 min-w-0 px-3 max-w-full">
-                  <h3 className="text-lg font-medium text-gray-900 truncate">{doc.title}</h3>                  <p className="text-sm text-gray-500">
-                    {getSimpleFileType(doc.fileType)} {doc.fileSizeFormatted ? `• ${doc.fileSizeFormatted}` : ''}
-                  </p>
-                  {doc.description && (
-                    <p className="text-xs text-gray-600 mt-1 truncate">{doc.description}</p>
-                  )}
-                </div>
-                
-                {/* Action Buttons */}
-                <div className="flex space-x-2 ml-auto shrink-0">
+                </div>{/* Document Name and Size */}
+                  <div className="flex-1 min-w-0 px-3 overflow-hidden">
+                    <h3 className="text-lg font-medium text-gray-900 truncate max-w-full">{doc.title}</h3>
+                    <p className="text-sm text-gray-500 truncate">
+                      {getSimpleFileType(doc.fileType)} {doc.fileSizeFormatted ? `• ${doc.fileSizeFormatted}` : ''}
+                    </p>
+                    {/* {doc.description && (
+                      <p className="text-xs text-gray-600 mt-1 truncate">{doc.description}</p>
+                    )} */}
+                  </div>
+                  {/* Action Buttons */}
+                <div className="flex space-x-2 ml-auto shrink-0 pl-2">
                   <button 
                     className="p-2 text-gray-600 hover:text-blue-600 transition-colors rounded-full hover:bg-blue-50" 
                     title="Preview Document"
@@ -534,21 +552,35 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
                   </button>
                 </div>
               </div>
-                {/* Second Row: Author and Date */}
-              <div className="flex w-full mt-2 md:mt-0 border-t md:border-t-0 pt-2 md:pt-0 justify-between items-center">
+                {/* Second Row: Author and Date */}         
+                <div className="flex w-full mt-2 md:mt-0 border-t md:border-t-0 pt-2 md:pt-0 justify-between items-center">
                 {/* Date Added */}
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-gray-500 mr-2">
                   Added: <span className="font-medium">
                     {doc.createdAt ? new Date(doc.createdAt).toLocaleDateString() : 'Unknown'}
                   </span>
-                </div>
-
-                {/* Author Information */}
-                <div className="flex items-center space-x-3 shrink-0">
-                  <div className="h-8 w-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-medium">
-                    {getInitials(doc.uploaderName || 'Unknown')}
+                </div>                {/* Author Information */}
+                <div className="flex items-center space-x-3 shrink-0">                  <div className="h-8 w-8 rounded-full overflow-hidden flex items-center justify-center text-sm font-medium shadow-sm">
+                    {doc.uploaderAvatar ? (
+                      <img 
+                        src={doc.uploaderAvatar} 
+                        alt={doc.uploaderName || 'Unknown'} 
+                        className="h-full w-full object-cover"
+                        onError={(e) => handleAvatarError(e, doc.uploaderName)}
+                      />
+                    ) : doc.uploaderName ? (
+                      // Second option: Use initials if no avatar but name exists
+                      <div className="h-full w-full bg-blue-600 text-white flex items-center justify-center">
+                        {getInitials(doc.uploaderName)}
+                      </div>
+                    ) : (
+                      // Third option: Default user icon if neither avatar nor valid name
+                      <div className="h-full w-full bg-gray-400 text-white flex items-center justify-center">
+                        <FontAwesomeIcon icon={faUser} className="h-3.5 w-3.5" />
+                      </div>
+                    )}
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 max-w-[150px] sm:max-w-[200px]">
                     <p className="text-sm font-medium text-gray-900 truncate">{doc.uploaderName || 'Unknown'}</p>
                     <p className="text-xs text-gray-500 truncate">{doc.departmentName || 'No Department'}</p>
                   </div>

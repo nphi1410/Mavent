@@ -12,6 +12,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { getDocumentsByEvent } from '../../services/documentService.jsx';
 import { getUserProfile } from '../../services/profileService.jsx';
+import { getDepartmentsByEventId } from '../../services/departmentService.jsx';
 import DocumentList from './DocumentList';
 import DocumentUpload from './DocumentUpload';
 
@@ -20,11 +21,10 @@ const DocumentManagement = ({ eventId }) => {
   const [selectedDepartment, setSelectedDepartment] = useState('all');
   const [selectedFileType, setSelectedFileType] = useState('all');
   const [selectedDateRange, setSelectedDateRange] = useState('all');
-  const [sortBy, setSortBy] = useState('dateNewest');
-  const [departments, setDepartments] = useState([{ id: 'all', name: 'All Departments' }]);
+  const [sortBy, setSortBy] = useState('dateNewest');  const [departments, setDepartments] = useState([{ id: 'all', name: 'All Departments' }]);
+  const [loadingDepartments, setLoadingDepartments] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [filtersVisible, setFiltersVisible] = useState(false);
-  useEffect(() => {
+  const [filtersVisible, setFiltersVisible] = useState(false);useEffect(() => {
     if (eventId) {
       console.log(`Loading document management for event ID: ${eventId}`);
       
@@ -44,40 +44,35 @@ const DocumentManagement = ({ eventId }) => {
       };
       
       ensureUserProfile();
+        // Fetch departments from the API for this event
+      const fetchDepartments = async () => {
+        setLoadingDepartments(true);
+        try {
+          const response = await getDepartmentsByEventId(eventId);
+          if (response && response.length > 0) {
+            setDepartments([
+              { id: 'all', name: 'All Departments' },
+              ...response.map(dept => ({
+                id: dept.departmentId.toString(),
+                name: dept.name || 'Unknown Department'
+              }))
+            ]);
+            console.log('Departments loaded successfully:', response.length);
+          } else {
+            console.log('No departments found for this event');
+            setDepartments([{ id: 'all', name: 'All Departments' }]);
+          }
+        } catch (error) {
+          console.error('Error fetching departments:', error);
+          // Fallback to empty departments list with just "All Departments"
+          setDepartments([{ id: 'all', name: 'All Departments' }]);
+        } finally {
+          setLoadingDepartments(false);
+        }
+      };
       
-      // Fetch departments for this event (in a full implementation)
-      // For now, we'll use our sample departments
-      setDepartments([
-        { id: 'all', name: 'All Departments' },
-        ...additionalDepartments.map(dept => ({
-          ...dept,
-          id: dept.id.toString() // Convert to string to match the API format
-        }))
-      ]);
-      
-      // In a real implementation with departments API:
-      // const fetchDepartments = async () => {
-      //   try {
-      //     const response = await getDepartmentsByEventId(eventId);
-      //     if (response && response.length > 0) {
-      //       setDepartments([{ id: 'all', name: 'All Departments' }, ...response]);
-      //     }
-      //   } catch (error) {
-      //     console.error('Error fetching departments:', error);
-      //   }
-      // };
-      // fetchDepartments();
-    }
-  }, [eventId]);
-    // Additional department data - will be merged with departments from API
-  const additionalDepartments = [
-    { id: 'marketing', name: 'Marketing Department' },
-    { id: 'finance', name: 'Finance Department' },
-    { id: 'hr', name: 'Human Resources Department' },
-    { id: 'culture', name: 'Culture Department' },
-    { id: 'operations', name: 'Operations Department' },
-    { id: 'it', name: 'IT Department' }
-  ];
+      fetchDepartments();
+    }  }, [eventId]);
 
   // Sample file types - replace with actual data in production
   const fileTypes = [
@@ -128,17 +123,21 @@ const DocumentManagement = ({ eventId }) => {
       
       {/* Filter and Sort Controls */}
       <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
-        <div className="flex flex-wrap gap-3">
-          <div className="filter-group">
+        <div className="flex flex-wrap gap-3">          <div className="filter-group">
             <label className="block text-sm font-medium text-gray-700 mb-1">Filter by:</label>
             <select
               value={selectedDepartment}
               onChange={(e) => setSelectedDepartment(e.target.value)}
               className="bg-white border border-gray-300 rounded-md py-2 px-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              disabled={loadingDepartments}
             >
-              {departments.map(dept => (
-                <option key={dept.id} value={dept.id}>{dept.name}</option>
-              ))}
+              {loadingDepartments ? (
+                <option>Loading departments...</option>
+              ) : (
+                departments.map(dept => (
+                  <option key={dept.id} value={dept.id}>{dept.name}</option>
+                ))
+              )}
             </select>
           </div>
           
