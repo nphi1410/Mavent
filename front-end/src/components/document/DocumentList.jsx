@@ -290,7 +290,111 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
       console.error('Error updating document:', error);
       return false;
     }
+  };  // File type filter - returns types matching fileTypes array in DocumentManagement.jsx
+  const getFileExtension = (fileType) => {
+    if (!fileType) return '';
+    
+    const lowerType = fileType.toLowerCase();
+    
+    // PDF documents
+    if (
+      lowerType.includes('pdf') || 
+      lowerType.endsWith('.pdf')
+    ) {
+      return 'pdf';
+    }
+    
+    // Word documents (doc, docx, rtf, odt, etc.)
+    if (
+      lowerType.includes('word') || 
+      lowerType.includes('document') || 
+      lowerType.includes('doc') ||
+      lowerType.includes('rtf') || 
+      lowerType.includes('odt') || 
+      lowerType.includes('text/richtext') ||
+      lowerType.endsWith('.doc') || 
+      lowerType.endsWith('.docx') || 
+      lowerType.endsWith('.rtf') || 
+      lowerType.endsWith('.odt') ||
+      lowerType.endsWith('.dot') ||
+      lowerType.endsWith('.dotx')
+    ) {
+      return 'doc';
+    }
+    
+    // Spreadsheet formats (xlsx, xls, csv, ods, etc.)
+    if (
+      lowerType.includes('excel') || 
+      lowerType.includes('spreadsheet') || 
+      lowerType.includes('csv') ||
+      lowerType.includes('sheet') || 
+      lowerType.includes('xls') || 
+      lowerType.includes('ods') ||
+      lowerType.includes('numbers') ||
+      lowerType.endsWith('.xlsx') || 
+      lowerType.endsWith('.xls') || 
+      lowerType.endsWith('.csv') || 
+      lowerType.endsWith('.ods') ||
+      lowerType.endsWith('.tsv')
+    ) {
+      return 'csv';
+    }
+    
+    // Image formats (jpg, jpeg, png, gif, svg, webp, etc.)
+    if (
+      lowerType.includes('image') || 
+      lowerType.includes('jpeg') || 
+      lowerType.includes('jpg') ||
+      lowerType.includes('png') || 
+      lowerType.includes('gif') || 
+      lowerType.includes('bmp') ||
+      lowerType.includes('svg') || 
+      lowerType.includes('webp') || 
+      lowerType.includes('tiff') ||
+      lowerType.includes('ico') ||
+      lowerType.endsWith('.jpg') || 
+      lowerType.endsWith('.jpeg') || 
+      lowerType.endsWith('.png') || 
+      lowerType.endsWith('.gif') ||
+      lowerType.endsWith('.svg') ||
+      lowerType.endsWith('.webp') ||
+      lowerType.endsWith('.bmp') ||
+      lowerType.endsWith('.tiff') ||
+      lowerType.endsWith('.ico')
+    ) {
+      return 'image';
+    }
+    
+    // Archive formats
+    if (
+      lowerType.includes('zip') || 
+      lowerType.includes('archive') || 
+      lowerType.includes('compressed') ||
+      lowerType.includes('rar') || 
+      lowerType.includes('tar') || 
+      lowerType.includes('7z') ||
+      lowerType.endsWith('.zip') || 
+      lowerType.endsWith('.rar') || 
+      lowerType.endsWith('.tar') || 
+      lowerType.endsWith('.gz') ||
+      lowerType.endsWith('.7z')
+    ) {
+      return 'zip';
+    }
+    
+    // Text files
+    if (
+      lowerType.includes('text/plain') || 
+      lowerType.includes('txt') ||
+      lowerType.endsWith('.txt')
+    ) {
+      return 'txt';
+    }
+    
+    // If no match, return 'other'
+    return 'other';
   };
+  
   // Apply filters and search
   const filteredDocuments = documents.filter(doc => {
     // Search filter
@@ -301,113 +405,10 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
     // Department filter
     const matchesDepartment = departmentFilter === 'all' || 
       (doc.departmentId && doc.departmentId.toString() === departmentFilter);
-    
-    // File type filter
-    const getFileExtension = (fileType) => {
-      if (!fileType) return '';
       
-      const lowerType = fileType.toLowerCase();
-      
-      // Document types (doc, docx, rtf, odt, etc.)
-      if (
-        lowerType.includes('pdf') || 
-        lowerType.endsWith('.pdf')
-      ) {
-        return 'pdf';
-      }
-      
-      // Document types (doc, docx, rtf, odt, etc.)
-      if (
-        lowerType.includes('word') || 
-        lowerType.includes('document') || 
-        lowerType.includes('doc') ||
-        lowerType.includes('rtf') || 
-        lowerType.includes('odt') || 
-        lowerType.includes('text/richtext') ||
-        lowerType.endsWith('.doc') || 
-        lowerType.endsWith('.docx') || 
-        lowerType.endsWith('.rtf') || 
-        lowerType.endsWith('.odt') ||
-        lowerType.endsWith('.dot') ||
-        lowerType.endsWith('.dotx')
-      ) {
-        return 'doc';
-      }
-      
-      // Spreadsheet formats (xlsx, xls, csv, ods, etc.)
-      if (
-        lowerType.includes('excel') || 
-        lowerType.includes('spreadsheet') || 
-        lowerType.includes('csv') ||
-        lowerType.includes('sheet') || 
-        lowerType.includes('xls') || 
-        lowerType.includes('ods') ||
-        lowerType.includes('numbers') ||
-        lowerType.endsWith('.xlsx') || 
-        lowerType.endsWith('.xls') || 
-        lowerType.endsWith('.csv') || 
-        lowerType.endsWith('.ods') ||
-        lowerType.endsWith('.tsv')
-      ) {
-        return 'csv';
-      }
-      
-      // Image formats (jpg, jpeg, png, gif, svg, webp, etc.)
-      if (
-        lowerType.includes('image') || 
-        lowerType.includes('jpeg') || 
-        lowerType.includes('jpg') ||
-        lowerType.includes('png') || 
-        lowerType.includes('gif') || 
-        lowerType.includes('bmp') ||
-        lowerType.includes('svg') || 
-        lowerType.includes('webp') || 
-        lowerType.includes('tiff') ||
-        lowerType.includes('ico') ||
-        lowerType.endsWith('.jpg') || 
-        lowerType.endsWith('.jpeg') || 
-        lowerType.endsWith('.png') || 
-        lowerType.endsWith('.gif') ||
-        lowerType.endsWith('.svg') ||
-        lowerType.endsWith('.webp') ||
-        lowerType.endsWith('.bmp') ||
-        lowerType.endsWith('.tiff') ||
-        lowerType.endsWith('.ico')
-      ) {
-        return 'image';
-      }
-      
-      // Archive formats
-      if (
-        lowerType.includes('zip') || 
-        lowerType.includes('archive') || 
-        lowerType.includes('compressed') ||
-        lowerType.includes('rar') || 
-        lowerType.includes('tar') || 
-        lowerType.includes('7z') ||
-        lowerType.endsWith('.zip') || 
-        lowerType.endsWith('.rar') || 
-        lowerType.endsWith('.tar') || 
-        lowerType.endsWith('.gz') ||
-        lowerType.endsWith('.7z')
-      ) {
-        return 'zip';
-      }
-      
-      // Text files
-      if (
-        lowerType.includes('text/plain') || 
-        lowerType.includes('txt') ||
-        lowerType.endsWith('.txt')
-      ) {
-        return 'txt';
-      }
-      
-      // If no match, return 'other'
-      return 'other';
-    };
-    
     const fileExtension = getFileExtension(doc.fileType);
+    
+    // Simple match since getFileExtension now returns values consistent with fileTypes in DocumentManagement.jsx
     const matchesFileType = fileTypeFilter === 'all' || fileExtension === fileTypeFilter;
     
     // Date filter - this is a simplified version
@@ -463,116 +464,34 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
   const indexOfFirstDocument = indexOfLastDocument - documentsPerPage;
   const currentDocuments = sortedDocuments.slice(indexOfFirstDocument, indexOfLastDocument);
   const totalPages = Math.ceil(sortedDocuments.length / documentsPerPage);
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);  // Get simplified file type name
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);  
+  
+  // Get simplified file type name  
   const getSimpleFileType = (fileType) => {
     if (!fileType) return 'File';
     
-    const lowerType = fileType.toLowerCase();
+    // First use getFileExtension to get the standardized file type
+    const fileExtension = getFileExtension(fileType);
     
-    // Document types
-    if (lowerType.includes('pdf') || lowerType.endsWith('.pdf')) 
-      return 'PDF';
-      
-    // Spreadsheet types
-    if (
-      lowerType.includes('spreadsheet') || 
-      lowerType.includes('excel') || 
-      lowerType.includes('sheet') ||
-      lowerType.includes('csv') ||
-      lowerType.includes('xls') ||
-      lowerType.endsWith('.xlsx') || 
-      lowerType.endsWith('.xls') || 
-      lowerType.endsWith('.csv') || 
-      lowerType.endsWith('.ods') ||
-      lowerType.endsWith('.tsv')
-    ) 
-      return 'EXCEL';
-      
-    // Document types
-    if (
-      lowerType.includes('word') || 
-      lowerType.includes('doc') ||
-      lowerType.includes('document') ||
-      lowerType.includes('rtf') ||
-      lowerType.includes('odt') ||
-      lowerType.endsWith('.doc') || 
-      lowerType.endsWith('.docx') || 
-      lowerType.endsWith('.rtf') || 
-      lowerType.endsWith('.odt')
-    ) 
-      return 'WORD';
-      
-    // Image types  
-    if (
-      lowerType.includes('image') || 
-      lowerType.includes('jpeg') || 
-      lowerType.includes('png') || 
-      lowerType.includes('jpg') ||
-      lowerType.includes('gif') ||
-      lowerType.includes('svg') ||
-      lowerType.includes('webp') ||
-      lowerType.includes('bmp') ||
-      lowerType.endsWith('.jpg') || 
-      lowerType.endsWith('.jpeg') || 
-      lowerType.endsWith('.png') || 
-      lowerType.endsWith('.gif') ||
-      lowerType.endsWith('.svg') ||
-      lowerType.endsWith('.webp') ||
-      lowerType.endsWith('.bmp')
-    ) 
-      return 'IMAGE';
-      
-    // Archive types  
-    if (
-      lowerType.includes('zip') || 
-      lowerType.includes('archive') || 
-      lowerType.includes('compressed') ||
-      lowerType.includes('rar') ||
-      lowerType.includes('tar') ||
-      lowerType.includes('7z') ||
-      lowerType.endsWith('.zip') || 
-      lowerType.endsWith('.rar') || 
-      lowerType.endsWith('.tar') || 
-      lowerType.endsWith('.gz') ||
-      lowerType.endsWith('.7z')
-    ) 
-      return 'ZIP';
-      
-    // Code types  
-    if (
-      lowerType.includes('html') || 
-      lowerType.includes('javascript') || 
-      lowerType.includes('code') ||
-      lowerType.includes('css') ||
-      lowerType.includes('xml') ||
-      lowerType.includes('json') ||
-      lowerType.endsWith('.html') ||
-      lowerType.endsWith('.js') ||
-      lowerType.endsWith('.css') ||
-      lowerType.endsWith('.xml') ||
-      lowerType.endsWith('.json')
-    ) 
-      return 'CODE';
-      
-    // Text types  
-    if (
-      lowerType.includes('text') || 
-      lowerType.includes('plain') ||
-      lowerType.includes('txt') ||
-      lowerType.endsWith('.txt')
-    ) 
-      return 'TEXT';
-    
-    // Extract extension if possible
-    const parts = fileType.split('.');
-    if (parts.length > 1) {
-      return parts[parts.length - 1].toUpperCase();
+    // Then map to display format
+    switch(fileExtension) {
+      case 'pdf':
+        return 'PDF';
+      case 'doc':
+        return 'Document';
+      case 'csv':
+        return 'Spreadsheet';
+      case 'image':
+        return 'Image';
+      case 'zip':
+        return 'Archive';
+      case 'txt':
+        return 'Text File';
+      case 'other':
+      default:
+        return 'File';
     }
-    
-    return 'OTHER';
-  };
-  // Get file icon based on file type
+  };  // Get file icon based on file type
   const getFileIcon = (fileType) => {
     if (!fileType) return <FontAwesomeIcon icon={faFile} className="text-gray-600" />;
     
@@ -582,18 +501,17 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
     switch(simpleType) {
       case 'PDF':
         return <FontAwesomeIcon icon={faFilePdf} className="text-red-600" />;
-      case 'EXCEL':
-        return <FontAwesomeIcon icon={faFileExcel} className="text-green-600" />;
-      case 'WORD':
+      case 'Document':
         return <FontAwesomeIcon icon={faFileWord} className="text-blue-600" />;
-      case 'IMAGE':
+      case 'Spreadsheet':
+        return <FontAwesomeIcon icon={faFileExcel} className="text-green-600" />;
+      case 'Image':
         return <FontAwesomeIcon icon={faFileImage} className="text-purple-600" />;
-      case 'ZIP':
+      case 'Archive':
         return <FontAwesomeIcon icon={faFileArchive} className="text-orange-600" />;
-      case 'CODE':
-        return <FontAwesomeIcon icon={faFileCode} className="text-yellow-600" />;
-      case 'TEXT':
+      case 'Text File':
         return <FontAwesomeIcon icon={faFileAlt} className="text-blue-gray-600" />;
+      case 'File':
       default:
         return <FontAwesomeIcon icon={faFileAlt} className="text-gray-600" />;
     }

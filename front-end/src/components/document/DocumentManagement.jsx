@@ -72,17 +72,16 @@ const DocumentManagement = ({ eventId }) => {
       };
       
       fetchDepartments();
-    }  }, [eventId]);
-  // File types based on improved categorization logic
+    }  }, [eventId]);  // File types based on improved categorization logic from getFileExtension function
   const fileTypes = [
     { id: 'all', name: 'All File Types' },
-    { id: 'doc', name: 'Documents' },
-    { id: 'pdf', name: 'PDF' },
-    { id: 'csv', name: 'Spreadsheets' },
-    { id: 'image', name: 'Images' },
-    { id: 'zip', name: 'Archives' },
-    { id: 'txt', name: 'Text Files' },
-    { id: 'other', name: 'Other' }
+    { id: 'doc', name: 'Documents (.doc, .docx, etc.)' },
+    { id: 'pdf', name: 'PDF Files (.pdf)' },
+    { id: 'csv', name: 'Spreadsheets (.xlsx, .csv, etc.)' },
+    { id: 'image', name: 'Images (.jpg, .png, etc.)' },
+    { id: 'zip', name: 'Archives (.zip, .rar, etc.)' },
+    { id: 'txt', name: 'Text Files (.txt)' },
+    { id: 'other', name: 'Other File Types' }
   ];
 
   // Sample date ranges
