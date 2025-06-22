@@ -49,22 +49,22 @@ public class EventController {
             @RequestPart("poster") MultipartFile poster
     ) {
         try {
-            // ✅ Tạo ObjectMapper hỗ trợ LocalDateTime
+            //Tạo ObjectMapper hỗ trợ LocalDateTime
             ObjectMapper mapper = new ObjectMapper();
             mapper.registerModule(new JavaTimeModule());
             mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-            // ✅ Parse JSON thành EventDTO
+            //Parse JSON thành EventDTO
             EventDTO eventDTO = mapper.readValue(eventJson, EventDTO.class);
 
-            // ✅ Upload ảnh
+            //Upload ảnh
             String bannerUrl = cloudService.uploadFile(banner, "event-banner");
             String posterUrl = cloudService.uploadFile(poster, "event-poster");
 
             eventDTO.setBannerUrl(bannerUrl);
             eventDTO.setPosterUrl(posterUrl);
 
-            // ✅ Lưu event
+            //Lưu event
             EventDTO createdEvent = eventService.createEvent(eventDTO);
 
             return ResponseEntity.ok(createdEvent);
