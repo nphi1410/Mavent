@@ -94,3 +94,14 @@ export const getImages = async () => {
     return [];
   }
 };
+
+// Update document details (title, description)
+export const updateDocument = async (documentId, updateData) => {
+  try {
+    const response = await Api.put(`/documents/${documentId}`, updateData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating document:", error);
+    throw error;
+  }
+};

@@ -21,10 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -206,18 +203,53 @@ public class DocumentImplement implements DocumentService {
             String containerName,
             String contentDisposition) throws IOException {
         return cloudService.uploadFileWithContentDisposition(file, containerName, contentDisposition);
-    }    // Helper method to fetch related entities and map documents to DTOs
+    }    // Helper method to fetch related entities and map documents to DTOs    @Override
+    public DocumentResponseDTO updateDocument(Integer documentId, DocumentRequestDTO request) {
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new IllegalArgumentException("Document not found: " + documentId));
+
+        // Update title if provided
+        if (request.getTitle() != null && !request.getTitle().isEmpty()) {
+            document.setTitle(request.getTitle());
+        }
+        
+        // Update description if provided
+        if (request.getDescription() != null) {
+            document.setDescription(request.getDescription());
+        }
+        
+        // Update updatedAt timestamp
+        document.setUpdatedAt(LocalDateTime.now());
+        
+        // Save updated document
+        Document savedDocument = documentRepository.save(document);
+        
+        // Get related entities for response
+        Department department = null;
+        if (savedDocument.getDepartmentId() != null) {
+            department = departmentRepository.findById(savedDocument.getDepartmentId()).orElse(null);
+        }
+        
+        Account uploader = null;
+        if (savedDocument.getUploaderAccountId() != null) {
+            uploader = accountRepository.findById(savedDocument.getUploaderAccountId()).orElse(null);
+        }
+        
+        // Return mapped response DTO
+        return DocumentMapper.toResponseDTO(savedDocument, department, uploader);
+    }
+
     private List<DocumentResponseDTO> mapDocumentsToResponseDTOs(List<Document> documents) {
         // Get unique department IDs and account IDs
         List<Integer> departmentIds = documents.stream()
                 .map(Document::getDepartmentId)
-                .filter(id -> id != null)
+                .filter(Objects::nonNull)
                 .distinct()
                 .collect(Collectors.toList());
 
         List<Integer> accountIds = documents.stream()
                 .map(Document::getUploaderAccountId)
-                .filter(id -> id != null)
+                .filter(Objects::nonNull)
                 .distinct()
                 .collect(Collectors.toList());
 

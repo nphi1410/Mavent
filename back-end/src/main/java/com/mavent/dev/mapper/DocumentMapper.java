@@ -14,7 +14,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-public class DocumentMapper {    public static DocumentResponseDTO toResponseDTO(Document document, Department department, Account uploader) {
+public class DocumentMapper {
+    public static DocumentResponseDTO toResponseDTO(Document document, Department department, Account uploader) {
         String departmentName = department != null ? department.getName() : null;
         String uploaderName = uploader != null ?
                 uploader.getFullName() :
@@ -23,7 +24,7 @@ public class DocumentMapper {    public static DocumentResponseDTO toResponseDTO
         // Extract file name from path for potential future use
         String fileName = document.getFilePath() != null ?
                 document.getFilePath().substring(document.getFilePath().lastIndexOf("/") + 1) : null;
-                
+
         return DocumentResponseDTO.builder()
                 .documentId(document.getDocumentId())
                 .eventId(document.getEventId())
@@ -32,7 +33,7 @@ public class DocumentMapper {    public static DocumentResponseDTO toResponseDTO
                 .uploaderAccountId(document.getUploaderAccountId())
                 .uploaderName(uploaderName)
                 .title(document.getTitle())
-                .filePath(document.getFilePath())                .fileUrl(document.getFilePath()) // Use same URL for now, preview endpoint will generate SAS token when needed
+                .filePath(document.getFilePath()).fileUrl(document.getFilePath()) // Use same URL for now, preview endpoint will generate SAS token when needed
                 .fileType(document.getFileType())
                 .description(document.getDescription())
                 .createdAt(document.getCreatedAt())

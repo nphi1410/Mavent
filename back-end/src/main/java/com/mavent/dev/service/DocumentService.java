@@ -29,4 +29,6 @@ public interface DocumentService {
             String containerName,
             String contentDisposition
     ) throws IOException;
+
+    DocumentResponseDTO updateDocument(Integer documentId, DocumentRequestDTO request);
 }

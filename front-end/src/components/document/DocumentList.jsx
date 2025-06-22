@@ -17,13 +17,16 @@ import {
   faCheckSquare,
   faEllipsisH,
   faExclamationTriangle,
-  faUser
+  faUser,
+  faPen,
+  faEdit
 } from '@fortawesome/free-solid-svg-icons';
 import { 
   getDocumentsByEvent,
   getDocumentsByDepartment,
   getDocumentPreviewUrl,
-  deleteDocument
+  deleteDocument,
+  updateDocument
 } from '../../services/documentService.jsx';
 
 const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter, sortBy, eventId, refreshTrigger }) => {
@@ -36,8 +39,10 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
   const [isSelectAll, setIsSelectAll] = useState(false);
   const [isBulkActionOpen, setIsBulkActionOpen] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
-  const [processingBulkAction, setProcessingBulkAction] = useState(false);
-  const [previewDocument, setPreviewDocument] = useState(null);
+  const [processingBulkAction, setProcessingBulkAction] = useState(false);  const [previewDocument, setPreviewDocument] = useState(null);
+  const [detailDocument, setDetailDocument] = useState(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const documentsPerPage = 6;
 
   // Fetch documents when the component mounts or when filters change
@@ -89,6 +94,14 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
         0% { transform: translateY(0); opacity: 1; }
         100% { transform: translateY(-20px); opacity: 0; }
       }
+      .animate-fade-in-out {
+        animation: fadeIn 0.5s;
+        transition: opacity 0.5s ease-out;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
     `;
     document.head.appendChild(style);
     
@@ -96,8 +109,13 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
       document.head.removeChild(style);
     };
   }, []);
+    // Handle opening document detail modal
+  const handleOpenDetail = (document) => {
+    setDetailDocument(document);
+    setIsDetailModalOpen(true);
+  };
   
-  // Handle document preview
+  // Handle actual document preview
   const handlePreview = async (documentId) => {
     try {
       const previewData = await getDocumentPreviewUrl(documentId);
@@ -136,7 +154,6 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
       console.error('Error downloading document:', error);
     }
   };
-
   // Handle document delete
   const handleDelete = async (documentId) => {
     try {
@@ -147,6 +164,34 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
       setSelectedDocuments(selectedDocuments.filter(id => id !== documentId));
     } catch (error) {
       console.error('Error deleting document:', error);
+    }
+  };
+  
+  // Handle document update
+  const handleUpdateDocument = async (documentId, updatedData) => {
+    try {
+      // Call the API to update the document
+      const updatedDocument = await updateDocument(documentId, updatedData);
+      
+      // Update the documents state with the updated document
+      setDocuments(prevDocuments => 
+        prevDocuments.map(doc => 
+          doc.documentId === documentId 
+            ? { ...doc, ...updatedDocument } 
+            : doc
+        )
+      );
+      
+      // If we were viewing the document details, update that too
+      if (detailDocument && detailDocument.documentId === documentId) {
+        setDetailDocument(prev => ({ ...prev, ...updatedDocument }));
+      }
+      
+      // Return true to indicate success
+      return true;
+    } catch (error) {
+      console.error('Error updating document:', error);
+      return false;
     }
   };
 
@@ -381,7 +426,6 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
       currentDocuments.every(doc => selectedDocuments.includes(doc.documentId))
     );
   }, [currentPage, documents, selectedDocuments, currentDocuments]);
-
   // Confirmation dialog component
   const ConfirmDialog = ({ isOpen, title, message, confirmButtonText, onConfirm, onCancel }) => {
     if (!isOpen) return null;
@@ -404,6 +448,324 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
             >
               {confirmButtonText}
             </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+  // Document edit modal component
+  const DocumentEditModal = ({ isOpen, document, onClose, onSave }) => {
+    if (!isOpen || !document) return null;
+    
+    const [formData, setFormData] = useState({
+      title: document.title || '',
+      description: document.description || ''
+    });
+    
+    const [errors, setErrors] = useState({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [saveError, setSaveError] = useState('');
+    
+    // Reset form data when document changes
+    useEffect(() => {
+      if (document) {
+        setFormData({
+          title: document.title || '',
+          description: document.description || ''
+        });
+        setErrors({});
+        setSaveError('');
+      }
+    }, [document]);
+    
+    const validateForm = () => {
+      const newErrors = {};
+      
+      if (!formData.title.trim()) {
+        newErrors.title = 'Document title is required';
+      } else if (formData.title.trim().length > 100) {
+        newErrors.title = 'Title must be less than 100 characters';
+      }
+      
+      if (formData.description && formData.description.length > 500) {
+        newErrors.description = 'Description must be less than 500 characters';
+      }
+      
+      setErrors(newErrors);
+      return Object.keys(newErrors).length === 0;
+    };
+    
+    const handleChange = (e) => {
+      const { name, value } = e.target;
+      setFormData(prev => ({ ...prev, [name]: value }));
+      
+      // Clear error for this field
+      if (errors[name]) {
+        setErrors(prev => ({ ...prev, [name]: '' }));
+      }
+    };
+      const handleSubmit = async (e) => {
+      e.preventDefault();
+      
+      if (!validateForm()) {
+        return;
+      }
+      
+      setIsSubmitting(true);
+      setSaveError('');
+      
+      try {
+        const success = await onSave(document.documentId, {
+          title: formData.title.trim(),
+          description: formData.description.trim()
+        });
+        
+        if (success) {
+          onClose();
+        } else {
+          setSaveError('Failed to update document. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error updating document:', error);
+        setSaveError('An unexpected error occurred. Please try again.');
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+    
+    return (
+      <div className="fixed inset-0 backdrop-blur-lg bg-black/50 flex items-center justify-center z-9999 p-4">
+        <div className="bg-white rounded-lg shadow-xl p-6 max-w-lg w-full">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Edit Document</h2>
+            <button 
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100"
+            >
+              <FontAwesomeIcon icon={faTimes} />
+            </button>
+          </div>
+          
+          {saveError && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md">
+              {saveError}
+            </div>
+          )}
+          
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-medium mb-2">
+                Title <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                disabled={isSubmitting}
+                className={`w-full px-3 py-2 border ${errors.title ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                required
+              />
+              {errors.title && (
+                <p className="mt-1 text-sm text-red-500">{errors.title}</p>
+              )}
+            </div>
+            
+            <div className="mb-6">
+              <label className="block text-gray-700 text-sm font-medium mb-2">
+                Description
+              </label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                disabled={isSubmitting}
+                rows="4"
+                className={`w-full px-3 py-2 border ${errors.description ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              ></textarea>
+              {errors.description && (
+                <p className="mt-1 text-sm text-red-500">{errors.description}</p>
+              )}
+              <p className="mt-1 text-xs text-gray-500">
+                {formData.description ? formData.description.length : 0}/500 characters
+              </p>
+            </div>
+            
+            <div className="flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isSubmitting}
+                className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center"
+              >
+                {isSubmitting ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Saving...
+                  </>
+                ) : 'Save Changes'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  };
+  
+  // Document detail modal component
+  const DocumentDetailModal = ({ isOpen, document, onClose, onPreview, onDownload, onEdit, onDelete }) => {
+    if (!isOpen || !document) return null;
+    return (
+  <div className="fixed inset-0 backdrop-blur-lg bg-black/50 flex items-center justify-center z-9999 p-4 overflow-y-auto">
+    <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto flex flex-col">
+      {/* Header */}
+          <div className="border-b px-6 py-4 flex justify-between items-center sticky top-0 bg-white z-10 shadow-sm">
+            <div className="flex items-center">
+              <div className="h-12 w-12 mr-4 flex-shrink-0 bg-gray-100 rounded-lg flex items-center justify-center">
+                {getFileIcon(document.fileType)}
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800">{document.title}</h2>
+                <p className="text-sm text-gray-500">
+                  {getSimpleFileType(document.fileType)} {document.fileSizeFormatted ? `• ${document.fileSizeFormatted}` : ''}
+                </p>
+              </div>
+            </div>
+            <button 
+              onClick={onClose}
+              className="text-gray-500 hover:text-gray-700 focus:outline-none p-2 rounded-full hover:bg-gray-100"
+            >
+              <FontAwesomeIcon icon={faTimes} className="h-5 w-5" />
+            </button>
+          </div>
+          
+          {/* Content */}
+          <div className="px-6 py-4 flex-1 overflow-y-auto">
+            {/* Main info */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              {/* Left Column */}
+              <div>
+                 <div className="mb-4">
+                  <h3 className="text-sm text-gray-500 mb-1">Document ID</h3>
+                  <p className="text-gray-800 font-mono text-sm">{document.documentId}</p>
+                </div>
+               
+                <div className="mb-4">
+                  <h3 className="text-sm text-gray-500 mb-1">Uploader's Department</h3>
+                  <p className="text-gray-800">{document.departmentName || "No department assigned"}</p>
+                </div>
+                <div className="mb-4">
+                  <h3 className="text-sm text-gray-500 mb-1">Upload Date</h3>
+                  <p className="text-gray-800">{document.createdAt ? new Date(document.createdAt).toLocaleString() : 'Unknown'}</p>
+                </div>
+              </div>
+              
+              {/* Right Column */}
+              <div>
+                <div className="mb-4">
+                  <h3 className="text-sm text-gray-500 mb-1">Uploader</h3>
+                  <div className="flex items-center mt-1">
+                    <div className="h-8 w-8 rounded-full overflow-hidden flex items-center justify-center text-sm font-medium shadow-sm mr-3">
+                      {document.uploaderAvatar ? (
+                        <img 
+                          src={document.uploaderAvatar} 
+                          alt={document.uploaderName || 'Unknown'} 
+                          className="h-full w-full object-cover"
+                          onError={(e) => handleAvatarError(e, document.uploaderName)}
+                        />
+                      ) : document.uploaderName ? (
+                        <div className="h-full w-full bg-blue-600 text-white flex items-center justify-center">
+                          {getInitials(document.uploaderName)}
+                        </div>
+                      ) : (
+                        <div className="h-full w-full bg-gray-400 text-white flex items-center justify-center">
+                          <FontAwesomeIcon icon={faUser} className="h-3.5 w-3.5" />
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-800">{document.uploaderName || 'Unknown'}</p>
+                      <p className="text-sm text-gray-500">{document.uploaderEmail || ''}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mb-4">
+                  <h3 className="text-sm text-gray-500 mb-1">Last Updated</h3>
+                  <p className="text-gray-800">{document.updatedAt ? new Date(document.updatedAt).toLocaleString() : 'Not updated since upload'}</p>
+                </div>
+                
+                 <div className="mb-4">
+                  <h3 className="text-sm text-gray-500 mb-1">Description</h3>
+                  <p className="text-gray-800">{document.description || "No description provided"}</p>
+                </div>
+               
+              </div>
+            </div>
+            
+            {/* Tags or additional metadata could go here */}
+            {document.tags && document.tags.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm text-gray-500 mb-2">Tags</h3>
+                <div className="flex flex-wrap gap-2">
+                  {document.tags.map((tag, index) => (
+                    <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-md">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="border-t px-6 py-4 bg-gray-50 sticky bottom-0 flex flex-wrap justify-between items-center gap-3">
+            <div>
+              <button
+                onClick={() => onDelete(document.documentId)}
+                className="px-4 py-2 border border-red-300 text-red-600 rounded-md hover:bg-red-50 transition-colors flex items-center"
+              >
+                <FontAwesomeIcon icon={faTrash} className="mr-2" />
+                Delete
+              </button>
+            </div>
+            
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => onPreview(document.documentId)}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md transition-colors flex items-center"
+              >
+                <FontAwesomeIcon icon={faEye} className="mr-2" />
+                Preview
+              </button>
+              
+              <button
+                onClick={() => onDownload(document.documentId)}
+                className="px-4 py-2 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-md transition-colors flex items-center"
+              >
+                <FontAwesomeIcon icon={faDownload} className="mr-2" />
+                Download
+              </button>
+              
+              <button
+                onClick={() => onEdit(document)}
+                className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md transition-colors flex items-center"
+              >
+                <FontAwesomeIcon icon={faFileAlt} className="mr-2" />
+                Edit Details
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -528,11 +890,10 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
                     )} */}
                   </div>
                   {/* Action Buttons */}
-                <div className="flex space-x-2 ml-auto shrink-0 pl-2">
-                  <button 
+                <div className="flex space-x-2 ml-auto shrink-0 pl-2">                  <button 
                     className="p-2 text-gray-600 hover:text-blue-600 transition-colors rounded-full hover:bg-blue-50" 
-                    title="Preview Document"
-                    onClick={() => handlePreview(doc.documentId)}
+                    title="View Document Details"
+                    onClick={() => handleOpenDetail(doc)}
                   >
                     <FontAwesomeIcon icon={faEye} />
                   </button>
@@ -611,14 +972,71 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
         </div>
       )}
       
-      {/* Confirmation Dialog */}
-      <ConfirmDialog
+      {/* Confirmation Dialog */}      <ConfirmDialog
         isOpen={isConfirmDialogOpen}
         title="Confirm Delete"
         message={`Are you sure you want to delete ${selectedDocuments.length} selected document(s)? This action cannot be undone.`}
         confirmButtonText={processingBulkAction ? "Deleting..." : "Delete"}
         onConfirm={handleBulkDelete}
         onCancel={() => setIsConfirmDialogOpen(false)}
+      />
+      
+      {/* Document Detail Modal */}      <DocumentDetailModal
+        isOpen={isDetailModalOpen}
+        document={detailDocument}
+        onClose={() => setIsDetailModalOpen(false)}
+        onPreview={(documentId) => handlePreview(documentId)}
+        onDownload={(documentId) => handleDownload(documentId)}
+        onEdit={(document) => {
+          // Store the document and open edit modal
+          setDetailDocument(document);
+          setIsDetailModalOpen(false);
+          setIsEditModalOpen(true);
+        }}
+        onDelete={(documentId) => {
+          // First close the detail modal
+          setIsDetailModalOpen(false);
+          
+          // Then delete the document
+          handleDelete(documentId);
+        }}
+      />
+        {/* Document Edit Modal */}
+      <DocumentEditModal
+        isOpen={isEditModalOpen}
+        document={detailDocument}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          // Reopen the detail modal if user cancels the edit
+          setIsDetailModalOpen(true);
+        }}        onSave={async (documentId, formData) => {
+          // Call our handler to update the document
+          const success = await handleUpdateDocument(documentId, formData);
+          
+          if (success) {
+            // Close edit modal
+            setIsEditModalOpen(false);
+            
+            // Show updated document details with a short delay to allow state update
+            setTimeout(() => {
+              setIsDetailModalOpen(true);
+            }, 100);
+            
+            // Add notification feedback - in a real app, you might use a toast library
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in-out';
+            notification.textContent = 'Document updated successfully';
+            document.body.appendChild(notification);
+            
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+              notification.classList.add('opacity-0');
+              setTimeout(() => document.body.removeChild(notification), 500);
+            }, 3000);
+          }
+          
+          return success;
+        }}
       />
     </div>
   );

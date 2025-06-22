@@ -35,7 +35,9 @@ public class DocumentController {    @Autowired
     @GetMapping("/latest")
     public ResponseEntity<List<Document>> getFiveImage() {
         return ResponseEntity.ok(documentService.getFiveImage());
-    }    @PostMapping
+    }
+
+    @PostMapping
     public ResponseEntity<DocumentResponseDTO> uploadDocument(
             @RequestParam("file") MultipartFile file,
             @Valid @RequestPart("request") DocumentRequestDTO requestDTO,
@@ -79,6 +81,12 @@ public class DocumentController {    @Autowired
 
         List<DocumentResponseDTO> documents = documentService.getDocumentsByDepartment(eventId, departmentId);
         return ResponseEntity.ok(documents);
+    }
+
+    @PutMapping("/{documentId}")
+    public ResponseEntity<DocumentResponseDTO> updateDocument(@PathVariable Integer documentId, @RequestBody DocumentRequestDTO request) {
+        DocumentResponseDTO updated = documentService.updateDocument(documentId, request);
+        return ResponseEntity.ok(updated);
     }
 
     @GetMapping("/{documentId}")
