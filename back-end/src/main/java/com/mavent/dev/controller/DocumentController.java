@@ -3,16 +3,18 @@ package com.mavent.dev.controller;
 import com.mavent.dev.dto.document.DocumentPreviewUrlDTO;
 import com.mavent.dev.dto.document.DocumentRequestDTO;
 import com.mavent.dev.dto.document.DocumentResponseDTO;
+import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.Document;
+import com.mavent.dev.service.AccountService;
 import com.mavent.dev.service.DocumentService;
+import com.mavent.dev.util.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,10 +23,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/documents")
-public class DocumentController {
-
-    @Autowired
+public class DocumentController {    @Autowired
     private DocumentService documentService;
+    
+    @Autowired
+    private AccountService accountService;
+    
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @GetMapping("/latest")
     public ResponseEntity<List<Document>> getFiveImage() {
@@ -33,15 +39,17 @@ public class DocumentController {
     public ResponseEntity<DocumentResponseDTO> uploadDocument(
             @RequestParam("file") MultipartFile file,
             @Valid @RequestPart("request") DocumentRequestDTO requestDTO,
-            @AuthenticationPrincipal UserDetails userDetails) throws IOException {
+            HttpServletRequest request) throws IOException {
         
+        // Get authenticated account using JWT token from request
+        Account account = getAuthenticatedAccount(request);
         Integer accountId;
         
-        // First try to get account ID from authenticated user
-        if (userDetails != null) {
-            accountId = Integer.parseInt(userDetails.getUsername());
+        if (account != null) {
+            // Use accountId from authenticated user
+            accountId = account.getAccountId();
         } else {
-            // Fall back to the uploaderAccountId from the request if authentication is missing
+            // Fall back to the uploaderAccountId from the request
             accountId = requestDTO.getUploaderAccountId();
             
             if (accountId == null) {
@@ -107,7 +115,24 @@ public class DocumentController {
         }
     }
 
-    
+      // Helper method to get authenticated account from JWT token
+    private Account getAuthenticatedAccount(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return null;
+        }
+
+        String token = authHeader.substring(7);
+        String username;
+
+        try {
+            username = jwtUtil.extractUsername(token);
+            return accountService.getAccount(username);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     // Inner class for error responses
     @Data
     @AllArgsConstructor

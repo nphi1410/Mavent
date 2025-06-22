@@ -1,5 +1,16 @@
 import api from '../config/Api';
 
+// Get the latest 5 images for the homepage
+export const getImages = async () => {
+  try {
+    const response = await api.get("/documents/latest");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching document images:", error);
+    return [];
+  }
+};
+
 // Get all documents for an event
 export const getDocumentsByEventId = async (eventId) => {
   try {
