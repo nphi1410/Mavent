@@ -45,6 +45,51 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const documentsPerPage = 6;
 
+  // Show notification utility function - reusable for all notifications
+  const showNotification = (message, type = 'success') => {
+    // Create notification element
+    const notification = document.createElement('div');
+    
+    // Set appropriate styling based on notification type
+    let bgColor = 'bg-green-600';
+    let textColor = 'text-white';
+    let icon = '';
+    
+    switch(type) {
+      case 'error':
+        bgColor = 'bg-red-600';
+        icon = `<svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>`;
+        break;
+      case 'warning':
+        bgColor = 'bg-yellow-500';
+        icon = `<svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>`;
+        break;
+      case 'info':
+        bgColor = 'bg-blue-600';
+        icon = `<svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zm-1 4a1 1 0 00-1 1v3a1 1 0 102 0v-3a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>`;
+        break;
+      default: // success
+        icon = `<svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>`;
+    }
+    
+    // Set notification styling and content
+    notification.className = `fixed bottom-4 right-4 ${bgColor} ${textColor} px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in-out flex items-center`;
+    notification.innerHTML = `${icon}<span>${message}</span>`;
+    
+    // Add to DOM
+    document.body.appendChild(notification);
+    
+    // Remove after delay
+    setTimeout(() => {
+      notification.classList.add('opacity-0');
+      setTimeout(() => {
+        if (document.body.contains(notification)) {
+          document.body.removeChild(notification);
+        }
+      }, 500);
+    }, 3000);
+  };
+
   // Fetch documents when the component mounts or when filters change
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -153,17 +198,70 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
     } catch (error) {
       console.error('Error downloading document:', error);
     }
-  };
+  };  // State for delete confirmation dialog
+  const [deleteConfirmation, setDeleteConfirmation] = useState({
+    isOpen: false,
+    documentId: null,
+    documentTitle: ''
+  });
+    // Close modal with Escape key and handle body scroll lock
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape' && deleteConfirmation.isOpen) {
+        setDeleteConfirmation({ isOpen: false, documentId: null, documentTitle: '' });
+      }
+    };
+    
+    // Add event listener when the modal is open
+    if (deleteConfirmation.isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      // Prevent scrolling on body when modal is open
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Re-enable scrolling when modal is closed
+      document.body.style.overflow = 'auto';
+    }
+    
+    // Cleanup
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'auto'; // Ensure scrolling is re-enabled
+    };
+  }, [deleteConfirmation.isOpen]);
+
   // Handle document delete
   const handleDelete = async (documentId) => {
+    const doc = documents.find(d => d.documentId === documentId);
+    const docTitle = doc ? doc.title : 'this document';
+    
+    // Open confirmation dialog instead of window.confirm
+    setDeleteConfirmation({
+      isOpen: true,
+      documentId: documentId,
+      documentTitle: docTitle
+    });
+  };
+    // Handle confirmation dialog confirm button
+  const handleConfirmDelete = async () => {
+    const { documentId, documentTitle } = deleteConfirmation;
+    
+    // Close the confirmation dialog first to improve UI responsiveness
+    setDeleteConfirmation({ isOpen: false, documentId: null, documentTitle: '' });
+    
     try {
       await deleteDocument(documentId);
+      
       // Update the documents list
       setDocuments(documents.filter(doc => doc.documentId !== documentId));
+      
       // Also remove from selected documents if it's there
       setSelectedDocuments(selectedDocuments.filter(id => id !== documentId));
+      
+      // Show success notification
+      showNotification(`Document "${documentTitle}" was successfully deleted`, 'success');
     } catch (error) {
       console.error('Error deleting document:', error);
+      showNotification('Failed to delete document. Please try again.', 'error');
     }
   };
   
@@ -399,9 +497,10 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
       // Clear selections after successful deletion
       clearSelections();
       
-      console.log(`Successfully deleted ${selectedDocuments.length} documents`);
+      showNotification(`Successfully deleted ${selectedDocuments.length} documents`, 'success');
     } catch (error) {
       console.error('Error deleting documents:', error);
+      showNotification('Error deleting documents. Please try again.', 'error');
     } finally {
       setProcessingBulkAction(false);
     }
@@ -1000,8 +1099,7 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
           // Then delete the document
           handleDelete(documentId);
         }}
-      />
-        {/* Document Edit Modal */}
+      />        {/* Document Edit Modal */}
       <DocumentEditModal
         isOpen={isEditModalOpen}
         document={detailDocument}
@@ -1022,22 +1120,69 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
               setIsDetailModalOpen(true);
             }, 100);
             
-            // Add notification feedback - in a real app, you might use a toast library
-            const notification = document.createElement('div');
-            notification.className = 'fixed bottom-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in-out';
-            notification.textContent = 'Document updated successfully';
-            document.body.appendChild(notification);
-            
-            // Remove notification after 3 seconds
-            setTimeout(() => {
-              notification.classList.add('opacity-0');
-              setTimeout(() => document.body.removeChild(notification), 500);
-            }, 3000);
+            // Show success notification
+            showNotification('Document updated successfully', 'success');
           }
           
           return success;
         }}
       />
+        {/* Delete Confirmation Dialog */}
+      {deleteConfirmation.isOpen && (
+        <div className="fixed inset-0 z-40 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            {/* Background overlay, click to close */}
+            <div 
+              className="fixed inset-0 backdrop-blur-lg bg-black/50 bg-opacity-75 transition-opacity" 
+              aria-hidden="true"
+              onClick={() => setDeleteConfirmation({ isOpen: false, documentId: null, documentTitle: '' })}
+            ></div>
+            
+            {/* This element centers the modal contents. */}
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            
+            {/* Modal panel */}
+            <div 
+              className="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+              onClick={(e) => e.stopPropagation()} // Prevent clicks from passing through to the overlay
+            >
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="sm:flex sm:items-start">
+                  <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                    <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
+                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                    <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">Delete Document</h3>
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500">
+                        Are you sure you want to delete "{deleteConfirmation.documentTitle}"? This action cannot be undone.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button
+                  type="button"
+                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
+                  onClick={handleConfirmDelete}
+                >
+                  Delete
+                </button>
+                <button
+                  type="button"
+                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  onClick={() => setDeleteConfirmation({ isOpen: false, documentId: null, documentTitle: '' })}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
