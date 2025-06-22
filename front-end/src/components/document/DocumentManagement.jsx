@@ -73,13 +73,16 @@ const DocumentManagement = ({ eventId }) => {
       
       fetchDepartments();
     }  }, [eventId]);
-
-  // Sample file types - replace with actual data in production
+  // File types based on improved categorization logic
   const fileTypes = [
     { id: 'all', name: 'All File Types' },
-    { id: 'doc', name: 'DOC' },
+    { id: 'doc', name: 'Documents' },
     { id: 'pdf', name: 'PDF' },
-    { id: 'csv', name: 'CSV' }
+    { id: 'csv', name: 'Spreadsheets' },
+    { id: 'image', name: 'Images' },
+    { id: 'zip', name: 'Archives' },
+    { id: 'txt', name: 'Text Files' },
+    { id: 'other', name: 'Other' }
   ];
 
   // Sample date ranges
