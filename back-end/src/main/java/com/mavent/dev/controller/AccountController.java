@@ -245,49 +245,24 @@ public class AccountController {
 
     @GetMapping("/user/profile")
     public ResponseEntity<UserProfileDTO> getUserProfile(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        String token = authHeader.substring(7); // Strip "Bearer "
-        String username;
-
-        try {
-            username = jwtUtil.extractUsername(token);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        Account account = accountService.getAccount(username);
-
+        Account account = getAuthenticatedAccount(request);
         if (account == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        UserProfileDTO profile = accountService.getUserProfile(username);
+        
+        UserProfileDTO profile = accountService.getUserProfile(account.getUsername());
         return ResponseEntity.ok(profile);
     }
 
     @PutMapping("/user/profile")
     public ResponseEntity<?> updateProfile(@RequestBody UserProfileDTO userProfileDTO, HttpServletRequest request) {
-        // Lấy token từ header Authorization
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        Account account = getAuthenticatedAccount(request);
+        if (account == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Bạn cần đăng nhập để cập nhật hồ sơ");
         }
 
-        String token = authHeader.substring(7);
-        String username;
-
         try {
-            username = jwtUtil.extractUsername(token);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token không hợp lệ");
-        }
-
-        try {
-            UserProfileDTO updatedProfile = accountService.updateProfile(username, userProfileDTO);
+            UserProfileDTO updatedProfile = accountService.updateProfile(account.getUsername(), userProfileDTO);
             return ResponseEntity.ok(updatedProfile);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -297,43 +272,24 @@ public class AccountController {
 
     @PostMapping("/user/avatar")
     public ResponseEntity<?> updateAvatar(@RequestParam("file") MultipartFile file, HttpServletRequest request) {
-        // Lấy token từ header Authorization
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        Account account = getAuthenticatedAccount(request);
+        if (account == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Bạn cần đăng nhập để cập nhật avatar");
-        }
-
-        String token = authHeader.substring(7);
-        String username;
-
-        try {
-            username = jwtUtil.extractUsername(token);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token không hợp lệ");
         }
 
         try {
             String containerName = "maventcontainer";
-
-
-            // Get the account to retrieve existing avatar URL if any
-            Account account = accountService.getAccount(username);
             String oldAvatarUrl = account.getAvatarUrl();
 
-            // Upload the new avatar to Azure Blob Storage
             String fileUrl = cloudService.uploadFile(file, containerName);
 
-            // Extract blob name from the URL for future reference
             String blobName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
             String avatarPath = cloudService.getFileUrl(blobName, containerName);
 
-            // Save the new avatar URL to the account
             account.setAvatarUrl(avatarPath);
             accountService.save(account);
 
-            // Delete old avatar if it exists
             if (oldAvatarUrl != null && !oldAvatarUrl.isEmpty()) {
-                // Extract old blob name from the path
                 String oldBlobName = oldAvatarUrl.substring(oldAvatarUrl.lastIndexOf("/") + 1);
                 cloudService.deleteFile(oldBlobName, containerName);
             }
@@ -357,24 +313,9 @@ public class AccountController {
             @RequestParam(required = false) String sortOrder,
             @RequestParam(required = false) String eventName) {
 
-        // Lấy token từ header Authorization
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        String token = authHeader.substring(7);
-        String username;
-
-        try {
-            username = jwtUtil.extractUsername(token);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        Account account = accountService.getAccount(username);
+        Account account = getAuthenticatedAccount(request);
         if (account == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         EventDTO event = null;
@@ -408,24 +349,9 @@ public class AccountController {
             @PathVariable Integer taskId,
             HttpServletRequest request) {
 
-        // Lấy token từ header Authorization
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        String token = authHeader.substring(7);
-        String username;
-
-        try {
-            username = jwtUtil.extractUsername(token);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        Account account = accountService.getAccount(username);
+        Account account = getAuthenticatedAccount(request);
         if (account == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         try {
@@ -444,25 +370,16 @@ public class AccountController {
             @PathVariable Integer taskId,
             HttpServletRequest request) {
 
-        // Authenticate user
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        String token = authHeader.substring(7);
-        String username = jwtUtil.extractUsername(token);
-        Account account = accountService.getAccount(username);
+        Account account = getAuthenticatedAccount(request);
         if (account == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        // Check if the user has access to this task (creator or assignee)
         TaskDTO task = accountService.getTaskDetails(account.getAccountId(), taskId);
         if (task == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        // Get the task attendees
         try {
             List<TaskAttendeeDTO> attendees = accountService.getTaskAttendees(taskId);
             return ResponseEntity.ok(attendees);
@@ -477,28 +394,12 @@ public class AccountController {
             @RequestBody TaskStatusUpdateDTO statusUpdateDTO,
             HttpServletRequest request) {
 
-        // Lấy token từ header Authorization
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        Account account = getAuthenticatedAccount(request);
+        if (account == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Bạn cần đăng nhập để cập nhật trạng thái task");
         }
 
-        String token = authHeader.substring(7);
-        String username;
-
         try {
-            username = jwtUtil.extractUsername(token);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token không hợp lệ");
-        }
-
-        Account account = accountService.getAccount(username);
-        if (account == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tài khoản không tồn tại");
-        }
-
-        try {
-            // Lấy thông tin task hiện tại qua AccountService
             TaskDTO currentTask = accountService.getTaskDetails(account.getAccountId(), taskId);
             if (currentTask == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -508,7 +409,6 @@ public class AccountController {
             String newStatus = statusUpdateDTO.getStatus();
             String currentStatus = currentTask.getStatus();
 
-            // Kiểm tra luồng cập nhật trạng thái hợp lệ
             boolean isValidTransition = false;
             boolean needsCreatorPermission = false;
 
@@ -516,9 +416,16 @@ public class AccountController {
                 isValidTransition = true;
             } else if ("DOING".equals(currentStatus) && "REVIEW".equals(newStatus)) {
                 isValidTransition = true;
+            } else if ("OVERDUE".equals(currentStatus) && "REVIEW".equals(newStatus)) {
+                isValidTransition = true;
             } else if ("REVIEW".equals(currentStatus) && "DONE".equals(newStatus)) {
                 isValidTransition = true;
                 needsCreatorPermission = true;
+            } else if ("CANCELLED".equals(newStatus)) {
+                if (!List.of("DONE", "REJECTED", "CANCELLED").contains(currentStatus)) {
+                    isValidTransition = true;
+                    needsCreatorPermission = true;
+                }
             }
 
             if (!isValidTransition) {
@@ -526,15 +433,24 @@ public class AccountController {
                         .body("Không thể chuyển trạng thái từ " + currentStatus + " sang " + newStatus);
             }
 
-            // Nếu cần quyền người giao task, kiểm tra thông qua AccountService (bằng DTO)
             if (needsCreatorPermission) {
                 if (!account.getAccountId().equals(currentTask.getAssignedByAccountId())) {
+                    if ("CANCELLED".equals(newStatus)) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                .body("Chỉ người tạo task mới có thể hủy task này");
+                    } else {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                .body("Chỉ người tạo task mới có thể chuyển trạng thái task này sang " + newStatus);
+                    }
+                }
+            } else {
+                if (!account.getAccountId().equals(currentTask.getAssignedToAccountId()) &&
+                        !account.getAccountId().equals(currentTask.getAssignedByAccountId())) {
                     return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                            .body("Chỉ người giao task mới có thể chuyển trạng thái task này sang DONE");
+                            .body("Chỉ người được giao hoặc người tạo task mới có thể chuyển trạng thái này");
                 }
             }
 
-            // Thực hiện cập nhật trạng thái qua AccountService
             TaskDTO updatedTask = accountService.updateTaskStatus(taskId, newStatus);
             return ResponseEntity.ok(updatedTask);
         } catch (Exception e) {
@@ -548,25 +464,9 @@ public class AccountController {
             @RequestBody TaskCreateDTO taskCreateDTO,
             HttpServletRequest request) {
 
-        // Lấy token từ header Authorization
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Bạn cần đăng nhập để tạo task");
-        }
-        System.out.println("Creating task with DTO: " + taskCreateDTO);
-        String token = authHeader.substring(7);
-        String username;
-
-        try {
-            username = jwtUtil.extractUsername(token);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token không hợp lệ");
-        }
-
-        Account account = accountService.getAccount(username);
+        Account account = getAuthenticatedAccount(request);
         if (account == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("You must be logged in to create tasks.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Bạn cần đăng nhập để tạo task");
         }
 
         boolean hasPermission = accountService.hasCreateTaskPermission(taskCreateDTO.getEventId(), account.getAccountId());
@@ -592,14 +492,8 @@ public class AccountController {
             @PathVariable Integer taskId,
             @RequestBody TaskCreateDTO updateDto,
             HttpServletRequest request) {
-        System.out.println(updateDto);
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        String token = authHeader.substring(7);
-        String username = jwtUtil.extractUsername(token);
-        Account account = accountService.getAccount(username);
+
+        Account account = getAuthenticatedAccount(request);
         if (account == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -623,13 +517,7 @@ public class AccountController {
             @RequestBody TaskFeedbackDTO feedbackDto,
             HttpServletRequest request) {
 
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        String token = authHeader.substring(7);
-        String username = jwtUtil.extractUsername(token);
-        Account account = accountService.getAccount(username);
+        Account account = getAuthenticatedAccount(request);
         if (account == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -652,13 +540,7 @@ public class AccountController {
             @PathVariable Integer taskId,
             HttpServletRequest request) {
 
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        String token = authHeader.substring(7);
-        String username = jwtUtil.extractUsername(token);
-        var account = accountService.getAccount(username);
+        Account account = getAuthenticatedAccount(request);
         if (account == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -675,24 +557,9 @@ public class AccountController {
     // Cần thêm endpoint này trong EventController trên backend
     @GetMapping("/events/{eventId}/members")
     public ResponseEntity<List<EventMemberDTO>> getEventMembers(@PathVariable Integer eventId, HttpServletRequest request) {
-        // Lấy token từ header Authorization
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        String token = authHeader.substring(7);
-        String username;
-
-        try {
-            username = jwtUtil.extractUsername(token);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        Account account = accountService.getAccount(username);
+        Account account = getAuthenticatedAccount(request);
         if (account == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         List<EventMemberDTO> members = eventService.getEventMembers(eventId);
@@ -701,24 +568,9 @@ public class AccountController {
 
     @GetMapping("/user/events")
     public ResponseEntity<?> getUserEvents(HttpServletRequest request) {
-        // Lấy token từ header Authorization
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Bạn cần đăng nhập để xem sự kiện");
-        }
-
-        String token = authHeader.substring(7);
-        String username;
-
-        try {
-            username = jwtUtil.extractUsername(token);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token không hợp lệ");
-        }
-
-        Account account = accountService.getAccount(username);
+        Account account = getAuthenticatedAccount(request);
         if (account == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tài khoản không tồn tại");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Bạn cần đăng nhập để xem sự kiện");
         }
 
         List<UserEventDTO> events = accountService.getUserEvents(account.getAccountId());
@@ -736,30 +588,12 @@ public class AccountController {
      */
     @GetMapping("/user/role/{eventId}")
     public ResponseEntity<?> getUserRoleInEvent(@PathVariable Integer eventId, HttpServletRequest request) {
-        // Lấy token từ header Authorization
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("User must be logged in");
-        }
-
-        String token = authHeader.substring(7);
-        String username;
-
-        try {
-            username = jwtUtil.extractUsername(token);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token không hợp lệ");
+        Account account = getAuthenticatedAccount(request);
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User must be logged in");
         }
 
         try {
-            // Get account by username
-            Account account = accountService.getAccount(username);
-            if (account == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("Account not found");
-            }
-
             // Find user's role in the event
             Optional<EventAccountRole> userRole = eventAccountRoleRepository
                     .findByEventIdAndAccountId(eventId, account.getAccountId());
@@ -791,46 +625,50 @@ public class AccountController {
             @RequestBody Map<String, List<Integer>> request,
             HttpServletRequest httpRequest) {
 
-        // Xác thực người dùng từ token
-        String authHeader = httpRequest.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        System.out.println("Updating attendees for task ID: " + taskId);
-        String token = authHeader.substring(7);
-        String username = jwtUtil.extractUsername(token);
-        Account account = accountService.getAccount(username);
-        
+        Account account = getAuthenticatedAccount(httpRequest);
         if (account == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        System.out.println("Account ID: " + account.getAccountId());
-        // Kiểm tra xem người gọi API có phải là người được giao task không
+
         TaskDTO task = accountService.getTaskDetails(account.getAccountId(), taskId);
-        System.out.println("Task details: " + task);
         if (task == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy task");
         }
 
-        // Chỉ người được giao task hoặc người tạo task mới được phép cập nhật attendees
         if (!account.getAccountId().equals(task.getAssignedToAccountId()) && 
             !account.getAccountId().equals(task.getAssignedByAccountId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body("Bạn không có quyền cập nhật người tham gia task này");
         }
-        System.out.println("Request to update attendees: " + request);
+
         List<Integer> attendees = request.get("attendees");
         if (attendees == null) {
             return ResponseEntity.badRequest().body("Danh sách người tham gia không hợp lệ");
         }
-        System.out.println("Attendees to update: " + attendees);
+
         try {
-            // Gọi service để cập nhật attendees
             accountService.updateTaskAttendees(taskId, task.getAssignedToAccountId(), attendees);
             return ResponseEntity.ok("Cập nhật người tham gia task thành công");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Lỗi khi cập nhật người tham gia: " + e.getMessage());
+        }
+    }
+
+    private Account getAuthenticatedAccount(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return null;
+        }
+
+        String token = authHeader.substring(7);
+        String username;
+
+        try {
+            username = jwtUtil.extractUsername(token);
+            return accountService.getAccount(username);
+        } catch (Exception e) {
+            return null;
         }
     }
 }

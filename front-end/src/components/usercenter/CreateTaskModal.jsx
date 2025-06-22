@@ -182,8 +182,6 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
     if (!formData.description.trim()) errors.description = 'Description must not be empty';
     if (!formData.dueDate) errors.dueDate = 'Due date is required';
     if (!formData.assignedToAccountId) errors.assignedToAccountId = 'Please select a task assignee';
-    if (!formData.departmentId) errors.departmentId = 'Please select a department'; // Added validation for department
-
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -209,7 +207,7 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
       eventId: selectedEvent.eventId,
       assignedToAccountId: parseInt(assignedId),
       taskAttendees: attendees.map(id => parseInt(id)),
-      departmentId: parseInt(formData.departmentId)
+      departmentId: formData.departmentId ? parseInt(formData.departmentId) : null
     };
 
     console.log("Submitting task with data:", taskData);
@@ -372,14 +370,14 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
                           <option value="LOW">LOW</option>
                           <option value="MEDIUM">MEDIUM</option>
                           <option value="HIGH">HIGH</option>
+                          <option value="CRITICAL">CRITICAL</option>
                         </select>
                       </div>
                     </div>
 
-                    {/* Thêm dropdown chọn department */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Department <span className="text-red-500">*</span>
+                        Department 
                       </label>
                       <select
                         value={formData.departmentId}

@@ -28,7 +28,7 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
 """)
     List<TaskDTO> findTasksWithEventAndDepartment(@Param("accountId") Integer accountId);
 
-    @Query("SELECT t FROM Task t WHERE t.dueDate < :now AND t.status NOT IN ('OVERDUE', 'DONE', 'CANCELLED')")
+    @Query("SELECT t FROM Task t WHERE t.dueDate < :now AND t.status NOT IN ('REVIEW', 'OVERDUE', 'DONE', 'CANCELLED', 'REJECTED')")
     List<Task> findTasksWithDueDateBeforeAndNotOverdue(@Param("now") LocalDateTime now);
 
 }

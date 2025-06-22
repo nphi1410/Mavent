@@ -10,12 +10,14 @@ const TaskCard = ({ task, index, onTaskUpdated, currentUserId }) => {
     REVIEW: 'bg-purple-100 text-purple-800',
     DONE: 'bg-green-100 text-green-800',
     CANCELLED: 'bg-red-100 text-red-800',
-    OVERDUE: 'bg-red-100 text-red-800'
+    OVERDUE: 'bg-red-100 text-red-800',
+    REJECTED: 'bg-red-100 text-red-800'
   };
 
   const priorityClasses = {
-    HIGH: 'bg-red-100 text-red-800',
-    MEDIUM: 'bg-orange-100 text-orange-800',
+    CRITICAL: 'bg-red-200 text-red-900',
+    HIGH: 'bg-orange-100 text-orange-800',
+    MEDIUM: 'bg-yellow-100 text-yellow-800',
     LOW: 'bg-blue-100 text-blue-800'
   };
 
@@ -59,7 +61,6 @@ const TaskCard = ({ task, index, onTaskUpdated, currentUserId }) => {
     <>
       <tr>
         <td className="py-3 px-4 whitespace-nowrap">{index}</td>
-        {/* Chỉnh sửa cách hiển thị tên task - thêm style width cố định */}
         <td className="py-3 px-4">
           <div className="truncate w-full max-w-[350px]" title={task.title}>
             {task.title}
@@ -83,7 +84,6 @@ const TaskCard = ({ task, index, onTaskUpdated, currentUserId }) => {
             {task.priority}
           </span>
         </td>
-        {/* Thêm cột vai trò */}
         <td className="font-semibold py-3 px-4 whitespace-nowrap">
           <span className={`px-2 py-1 rounded-full text-xs ${getRoleClasses()}`}>
             {getUserRole()}

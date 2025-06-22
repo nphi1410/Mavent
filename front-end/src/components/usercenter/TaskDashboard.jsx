@@ -86,7 +86,7 @@ const TaskDashboard = ({ tasks, isFiltered, currentUserId }) => {
 
       {isFiltered && (
         <div className="mt-3 text-sm text-gray-500">
-          * Hiển thị thống kê cho sự kiện đã chọn
+          * Display statistics for the selected event.
         </div>
       )}
     </div>
