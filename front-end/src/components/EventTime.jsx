@@ -1,5 +1,5 @@
 import React from "react";
-import { separateDayMonthYear } from "../utils/SeparateDayMonthYear";
+import { separateDayMonthYear } from "../utils/DateConvert";
 
 const EventTime = ({eventData}) => {
   

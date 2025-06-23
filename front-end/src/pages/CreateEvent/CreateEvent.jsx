@@ -1,4 +1,3 @@
-// 🔁 Các import giữ nguyên
 import React, { useState, useEffect } from "react";
 import { createEvent } from "../../services/eventService";
 import { getAllLocations } from "../../services/eventLocationService";

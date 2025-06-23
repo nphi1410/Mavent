@@ -55,7 +55,12 @@ const EventBanner = ({ eventData }) => {
 
     if (role === MEMBER_ROLE) {
       console.log("Registering for role:", role);
-      console.log("Choose department");
+      // console.log("Choose department");
+      const responseData = await registerEvent(registerDTO);
+      if(responseData.status === 200) {
+        alert("Register successfully!");
+      }
+      console.log("Response from register event:", responseData);
     }
     console.log("Registering for role:", role);
   };

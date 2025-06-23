@@ -51,12 +51,13 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(Customizer.withDefaults())  // new lambda style to disable CSRF
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
+                .csrf(AbstractHttpConfigurer::disable)                .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/events/**",
                                 "/api/tags",
                                 "/api/document",
+                                "/api/documents/**",
+
                                 "/api/public/**",
                                 "/api/location/**",
                                 "/api/event/*/feedback",

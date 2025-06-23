@@ -31,11 +31,12 @@ const addKeyframesToDocument = () => {
 addKeyframesToDocument();
 
 const Layout = ({ children, activeItem }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);  const location = useLocation();  // Kiểm tra xem có phải đang ở trang quản lý (members hoặc departments)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);  const location = useLocation();  // Kiểm tra xem có phải đang ở trang quản lý (members, departments hoặc documents)
   const isManagementPage = 
     location.pathname.includes('/members') || 
     (location.pathname.includes('/event') && location.pathname.includes('/members')) ||
-    location.pathname.includes('/departments');
+    location.pathname.includes('/departments') ||
+    location.pathname.includes('/documents');
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);

@@ -81,21 +81,34 @@ const EventMemberRoute = ({ children }) => {
           console.log('EventMemberRoute - Unexpected role format:', typeof role);
           userRole = '';
         }
+          // Check if this is the documents route
+        const isDocumentsRoute = location.pathname.includes('documents');
+        console.log('EventMemberRoute - Is documents route:', isDocumentsRoute);
         
-        // Only allow ADMIN role for this route
         let isAuth = false;
         
-        // Check if user has specifically the ADMIN role
-        if (userRole === "ADMIN") {
-          console.log('EventMemberRoute - User has exact ADMIN role');
-          isAuth = true;
-        }
-        // Also check for variations of ADMIN in case the API returns it differently
-        else if (userRole.includes("ADMIN") && !userRole.includes("DEPARTMENT")) {
-          console.log('EventMemberRoute - User has role containing ADMIN:', userRole);
-          isAuth = true;
+        if (isDocumentsRoute) {
+          // For document routes, allow access to any role in the event
+          if (userRole && userRole.length > 0) {
+            console.log('EventMemberRoute - User has a role for documents access:', userRole);
+            isAuth = true;
+          } else {
+            console.log('EventMemberRoute - User does not have any role for documents access');
+          }
         } else {
-          console.log('EventMemberRoute - User role is not ADMIN, access denied');
+          // For other routes, only allow ADMIN role
+          // Check if user has specifically the ADMIN role
+          if (userRole === "ADMIN") {
+            console.log('EventMemberRoute - User has exact ADMIN role');
+            isAuth = true;
+          }
+          // Also check for variations of ADMIN in case the API returns it differently
+          else if (userRole.includes("ADMIN") && !userRole.includes("DEPARTMENT")) {
+            console.log('EventMemberRoute - User has role containing ADMIN:', userRole);
+            isAuth = true;
+          } else {
+            console.log('EventMemberRoute - User role is not ADMIN, access denied');
+          }
         }
         
         console.log('EventMemberRoute - User role:', userRole);

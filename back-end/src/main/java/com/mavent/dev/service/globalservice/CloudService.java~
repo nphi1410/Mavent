@@ -1,7 +1,0 @@
-package com.mavent.dev.service.globalservice;
-
-
-public interface CloudService {
-    
-
-}
