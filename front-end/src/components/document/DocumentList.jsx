@@ -858,7 +858,7 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
                
                 <div className="mb-4">
                   <h3 className="text-sm text-gray-500 mb-1">Uploader's Department</h3>
-                  <p className="text-gray-800">{document.departmentName || "No department assigned"}</p>
+                  <p className="text-gray-800">{document.departmentName || "No department"}</p>
                 </div>
                 <div className="mb-4">
                   <h3 className="text-sm text-gray-500 mb-1">Upload Date</h3>

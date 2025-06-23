@@ -98,14 +98,15 @@ export const useUserPermissions = (eventId = null) => {
     if (!userRole) return false;
     return hasMinimumRole(userRole, minimumRole);
   };
-
   // Check if user is admin or department manager
   const isAdminOrManager = () => {
+    console.log('Checking if user is admin or manager, role:', userRole);
     return hasRole('DEPARTMENT_MANAGER');
   };
   // Check if user is admin (using hasRole and also checking sessionStorage)
   const isAdmin = () => {
     const sessionRole = sessionStorage.getItem('userRole');
+    console.log('Checking if user is admin, role:', userRole, 'session role:', sessionRole);
     return hasRole('ADMIN') || sessionRole === 'ADMIN';
   };
 
