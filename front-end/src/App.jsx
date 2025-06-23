@@ -84,7 +84,7 @@ function App() {
           <Route path="events/:id/documents" element={EventMember(<DocumentsPage />)} />
           <Route path="events/:id/requests" element={EventMember(<RequestsPage />)} />
 
-          <Route path="/event/:eventId/feedback" element={<ViewEventFeedback />} />
+          <Route path="/event/:eventId/feedback" element={EventMember(<ViewEventFeedback />)} />
           <Route path="event/:id/account/:accountId/request" element={(<RequestHistory />)} />
 
           {/* Create Event-Protected Routes */}

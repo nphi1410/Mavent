@@ -36,7 +36,8 @@ const Layout = ({ children, activeItem }) => {
     location.pathname.includes('/members') || 
     (location.pathname.includes('/event') && location.pathname.includes('/members')) ||
     location.pathname.includes('/departments') ||
-    location.pathname.includes('/documents');
+    location.pathname.includes('/documents') ||
+    location.pathname.includes('/requests');
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
