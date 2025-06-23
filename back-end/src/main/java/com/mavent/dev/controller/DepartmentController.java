@@ -1,8 +1,7 @@
 package com.mavent.dev.controller;
 
-import com.mavent.dev.entity.Department;
-import com.mavent.dev.repository.DepartmentRepository;
 import com.mavent.dev.dto.common.ApiResponseDTO;
+import com.mavent.dev.entity.Department;
 import com.mavent.dev.service.DepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,28 +18,9 @@ public class DepartmentController {
    private DepartmentService departmentService;
 
     @GetMapping("/departments")
-    public ResponseEntity<ApiResponseDTO<List<Department>>> getDepartmentsByEvent(
+    public ResponseEntity<List<Department>> getDepartmentsByEvent(
             @RequestParam Integer eventId) {
-        try {
-            List<Department> departments = departmentService.getAllDepartmentsByEvent(eventId);
-
-            ApiResponseDTO<List<Department>> response = ApiResponseDTO.<List<Department>>builder()
-                    .success(true)
-                    .message("Departments retrieved successfully")
-                    .data(departments)
-                    .timestamp(LocalDateTime.now().toString())
-                    .build();
-
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            ApiResponseDTO<List<Department>> response = ApiResponseDTO.<List<Department>>builder()
-                    .success(false)
-                    .message("Error retrieving departments: " + e.getMessage())
-                    .timestamp(LocalDateTime.now().toString())
-                    .build();
-
-            return ResponseEntity.status(500).body(response);
-        }
+        return ResponseEntity.ok(departmentService.getAllDepartmentsByEvent(eventId));
     }
 
     @PostMapping("department/create")

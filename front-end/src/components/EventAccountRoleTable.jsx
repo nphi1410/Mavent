@@ -25,18 +25,21 @@ const EventAccountRoleTable = ({ eventData = [] }) => {
               <th className="px-4 py-3 text-left">Role</th>
               <th className="px-4 py-3 text-center">Active</th>
               <th className="px-4 py-3 text-left">Updated</th>
-              <th className="px-4 py-3 text-center">Action</th>
             </tr>
           </thead>
           <tbody>
             {eventData.map((event, idx) => (
               <tr
                 key={idx}
-                onClick={() => setSelectedEvent(event)}
                 className="cursor-pointer border-t h-12 border-gray-100 hover:bg-blue-50 transition"
               >
                 <td className="px-4 py-2 text-center">{idx + 1}</td>
-                <td className="px-4 py-2 font-semibold">{event.name}</td>
+                <td
+                  onClick={() => setSelectedEvent(event)}
+                  className="px-4 py-2 font-semibold"
+                >
+                  {event.name}
+                </td>
                 <td className="px-4 py-2">
                   {vietnameseDate(event.startDatetime, true)}
                 </td>
@@ -58,11 +61,6 @@ const EventAccountRoleTable = ({ eventData = [] }) => {
                 </td>
                 <td className="px-4 py-2">
                   {new Date(event.roleUpdatedAt).toLocaleString()}
-                </td>
-                <td className="px-4 py-2 text-center">
-                  <button className="text-red-600 hover:underline text-sm">
-                    Cancel
-                  </button>
                 </td>
               </tr>
             ))}

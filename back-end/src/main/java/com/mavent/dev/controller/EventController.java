@@ -1,10 +1,10 @@
 package com.mavent.dev.controller;
 
+import com.mavent.dev.dto.EventCountDTO;
 import com.mavent.dev.dto.EventRegisterDTO;
 import com.mavent.dev.dto.FilterEventDTO;
 import com.mavent.dev.dto.FilterRequestDTO;
 import com.mavent.dev.dto.event.EventAccountRoleDTO;
-import com.mavent.dev.dto.superadmin.AccountDTO;
 import com.mavent.dev.dto.superadmin.EventDTO;
 import com.mavent.dev.entity.Event;
 import com.mavent.dev.entity.EventAccountRole;
@@ -67,21 +67,61 @@ public class EventController {
         eventAccountRole.setEventRole(eventRegisterDto.getRole());
         eventAccountRole.setAccountId(accountId);
         eventAccountRole.setCreatedAt(LocalDateTime.now());
-        if(eventRegisterDto.getRole().equals(EventAccountRole.EventRole.PARTICIPANT)){
+//        if(eventRegisterDto.getRole().equals(EventAccountRole.EventRole.PARTICIPANT)){
             return ResponseEntity.ok(eventAccountRoleService.addMemberToEvent(eventAccountRole).toString());
-        }
+//        }
 
         // chua xu ly register as member
-        eventAccountRole.setDepartmentId(eventRegisterDto.getDepartmentId());
+//        eventAccountRole.setDepartmentId(eventRegisterDto.getDepartmentId());
 
-        return ResponseEntity.ok(eventRegisterDto.toString());
+//        return ResponseEntity.ok(eventRegisterDto.toString());
     }
 
     @GetMapping("/attending/{accountId}")
-    public ResponseEntity<Page<EventAccountRoleDTO>> getAttendingEvent(@PathVariable Integer accountId, Pageable pageable){
-        Page<EventAccountRoleDTO> eventAccountRolePage = eventAccountRoleService.getMembersByAccountIdWithPagination(accountId,pageable);
+    public ResponseEntity<Page<EventAccountRoleDTO>> getAttendingEvent(
+            @PathVariable Integer accountId,
+            @RequestParam(required = false) String searchTitle,
+            @RequestParam(required = false) String role,
+            Pageable pageable) {
+
+        Page<EventAccountRoleDTO> eventAccountRolePage =
+                eventAccountRoleService.getMembersByAccountIdWithPagination(accountId, searchTitle, role, pageable);
+
         return ResponseEntity.ok(eventAccountRolePage);
     }
+
+    @GetMapping("/joining/{accountId}")
+    public ResponseEntity<List<EventAccountRoleDTO>> getEventListByAccountId(@PathVariable Integer accountId){
+        return ResponseEntity.ok(eventAccountRoleService.getByAccountIdOnRole(accountId));
+    }
+
+
+    @GetMapping("/attending/summary/{accountId}")
+    public ResponseEntity<List<EventCountDTO>> getAttendingMonthlySummary(@PathVariable Integer accountId, @RequestParam String eventRole) {
+        return ResponseEntity.ok(eventAccountRoleService.getMonthlyStatistic(accountId, eventRole));
+    }
+
+    @GetMapping("/summary")
+    public ResponseEntity<List<EventCountDTO>> getMonthlySummary(@RequestParam String status) {
+        return ResponseEntity.ok(eventService.getMonthlyStatistic(status));
+    }
+
+    @GetMapping("/count")
+    public ResponseEntity<Integer> countAttendanceByAccountId(@RequestParam Integer accountId,
+                                                              @RequestParam(required = false) EventAccountRole.EventRole eventRole,
+                                                              @RequestParam boolean countCurrentMonth) {
+        return ResponseEntity.ok(eventAccountRoleService.countAttendanceByAccountId(
+                accountId, eventRole, countCurrentMonth));
+    }
+
+    @GetMapping("/account")
+    public ResponseEntity<Page<EventAccountRole>> getByAccountId(
+            @RequestParam Integer accountId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(eventAccountRoleService.getByAccountIdAndPage(accountId, pageable));
+    }
+
 
     //Get Event By ID
     @GetMapping("/{id}")

@@ -57,7 +57,7 @@ function App() {
           <Route path="events" element={<AllEvents />} />
           <Route path="events/:id" element={<EventDetails />} />
           <Route path="meetings" element={<MeetingListPage />} />
-          <Route path="meetings/edit/:id" element={<MeetingEditPage />} />
+          <Route path="meetings/edit" element={<MeetingEditPage />} />
 
           {/* Event-Protected Routes */}
           <Route path="create-event">

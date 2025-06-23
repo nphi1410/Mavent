@@ -126,3 +126,51 @@ export const getAttendingEvent = async (accountId, pageable) => {
   }
 };
 
+export const getJoiningEvent = async (accountId) => {
+  try {
+    const response = await Api.get(`/events/joining/${accountId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching attending events:", error);
+    return [];
+  }
+};
+
+export const getAttendingSummary = async (accountId, eventRole) => {
+  try {
+    const response = await Api.get(`/events/attending/summary/${accountId}`, {
+      params: { eventRole },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching location:", error);
+    return [];
+  }
+};
+
+export const getSummary = async (status) => {
+  try {
+    const response = await Api.get(`/events/summary`, {
+      params: { status },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching location:", error);
+    return [];
+  }
+};
+
+export const countAttendanceByAccountId = async (accountId, eventRole, countCurrentMonth) => {
+  const response = await Api.get("/events/count", {
+    params: { accountId, eventRole, countCurrentMonth },
+  });
+  return response.data;
+};
+
+export const getEventRolesByAccount = async (accountId, page = 0, size = 1, sort = "createdAt,desc") => {
+  const response = await Api.get("/events/account", {
+    params: { accountId, page, size, sort },
+  });
+  return response.data;
+};
+

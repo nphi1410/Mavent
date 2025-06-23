@@ -1,21 +1,25 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   getMeetingById,
   createMeeting,
   updateMeeting,
 } from "../../services/meetingService";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { getDepartments } from "../../services/departmentService";
 
 const statusOptions = ["SCHEDULED", "CANCELLED", "COMPLETED", "POSTPONED"];
 
 const EditMeetingPage = () => {
-  const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const id = searchParams.get("meetingId");
+  const isEdit = id && !isNaN(parseInt(id)); // Only if id is a valid number
+  const eventId = searchParams.get("eventId");
+  const [departments, setDepartments] = useState([]);
   const navigate = useNavigate();
-  const isEdit = id !== "-1";
 
   const [formData, setFormData] = useState({
-    eventId: "",
+    eventId: eventId,
     departmentId: "",
     title: "",
     description: "",
@@ -24,14 +28,26 @@ const EditMeetingPage = () => {
     location: "",
     meetingLink: "",
     status: "SCHEDULED",
-    organizerAccountId: "",
+    organizerAccountId: sessionStorage.getItem("accountId"),
     notes: "",
   });
 
   const [loading, setLoading] = useState(isEdit);
 
   useEffect(() => {
-    if (isEdit) {
+    getDepartments(eventId)
+      .then((data) => {
+        setDepartments(data);
+      })
+      .catch((err) => {
+        console.error("Error loading departments:", err);
+        alert("Failed to load departments.");
+      })
+      .finally(() => setLoading(false));
+  }, [eventId]);
+
+  useEffect(() => {
+    if (isEdit && id) {
       getMeetingById(id)
         .then((data) => {
           setFormData({
@@ -46,7 +62,7 @@ const EditMeetingPage = () => {
         })
         .finally(() => setLoading(false));
     }
-  }, [id]);
+  }, [isEdit, id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -101,18 +117,31 @@ const EditMeetingPage = () => {
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <InputField name="eventId" value={formData.eventId} type="hidden" />
         <InputField
-          label="Event ID"
-          name="eventId"
-          value={formData.eventId}
-          onChange={handleChange}
+          name="organizerAccountId"
+          value={formData.organizerAccountId}
+          type="hidden"
         />
-        <InputField
-          label="Department ID"
-          name="departmentId"
-          value={formData.departmentId}
-          onChange={handleChange}
-        />
+        <div>
+          <label className="block text-sm font-medium">Department</label>
+          <select
+            name="departmentId"
+            value={formData.departmentId}
+            onChange={(e) => handleChange(e)}
+            className="mt-1 w-full border rounded-md px-3 py-2"
+          >
+            <option value="">All</option>
+            {departments.map((department) => (
+              <option
+                key={department.departmentId}
+                value={department.departmentId}
+              >
+                {department.name}
+              </option>
+            ))}
+          </select>
+        </div>
         <InputField
           label="Title"
           name="title"
@@ -131,12 +160,7 @@ const EditMeetingPage = () => {
           value={formData.meetingLink}
           onChange={handleChange}
         />
-        <InputField
-          label="Organizer Account ID"
-          name="organizerAccountId"
-          value={formData.organizerAccountId}
-          onChange={handleChange}
-        />
+
         <InputField
           label="Meeting Time"
           name="meetingDatetime"
@@ -153,21 +177,23 @@ const EditMeetingPage = () => {
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium">Status</label>
-        <select
-          name="status"
-          value={formData.status}
-          onChange={handleChange}
-          className="mt-1 w-full border rounded-md px-3 py-2"
-        >
-          {statusOptions.map((status) => (
-            <option key={status} value={status}>
-              {status}
-            </option>
-          ))}
-        </select>
-      </div>
+      {isEdit && (
+        <div>
+          <label className="block text-sm font-medium">Status</label>
+          <select
+            name="status"
+            value={formData.status}
+            onChange={handleChange}
+            className="mt-1 w-full border rounded-md px-3 py-2"
+          >
+            {statusOptions.map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div>
         <label className="block text-sm font-medium">Description</label>
@@ -203,7 +229,14 @@ const EditMeetingPage = () => {
   );
 };
 
-const InputField = ({ label, name, value, onChange, type = "text", required }) => (
+const InputField = ({
+  label,
+  name,
+  value,
+  onChange,
+  type = "text",
+  required,
+}) => (
   <div>
     <label className="block text-sm font-medium">{label}</label>
     <input
@@ -212,7 +245,7 @@ const InputField = ({ label, name, value, onChange, type = "text", required }) =
       value={value || ""}
       onChange={onChange}
       className="mt-1 w-full border rounded-md px-3 py-2"
-      required = {required}
+      required={required}
     />
   </div>
 );

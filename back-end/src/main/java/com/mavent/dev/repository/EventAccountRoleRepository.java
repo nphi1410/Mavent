@@ -67,6 +67,13 @@ public interface EventAccountRoleRepository extends JpaRepository<EventAccountRo
                     JOIN events e ON ear.event_id = e.event_id
                     WHERE ear.account_id = :accountId
                       AND e.end_datetime >= NOW()
+                      AND e.is_deleted = false
+                      AND (
+                        :eventName IS NULL OR LOWER(e.name) LIKE LOWER(CONCAT('%', :eventName, '%'))
+                      )
+                      AND (
+                        :role IS NULL OR ear.event_role = :role
+                      )
                     """,
             countQuery = """
                     SELECT COUNT(*)
@@ -75,10 +82,22 @@ public interface EventAccountRoleRepository extends JpaRepository<EventAccountRo
                     WHERE ear.account_id = :accountId
                       AND e.end_datetime >= NOW()
                       AND e.is_deleted = false
+                      AND (
+                        :eventName IS NULL OR LOWER(e.name) LIKE LOWER(CONCAT('%', :eventName, '%'))
+                      )
+                      AND (
+                        :role IS NULL OR ear.event_role = :role
+                      )
                     """,
             nativeQuery = true
     )
-    Page<EventAccountRoleDTO> findByAccountId(@Param("accountId") Integer accountId, Pageable pageable);
+    Page<EventAccountRoleDTO> findPageByAccountId(
+            @Param("accountId") Integer accountId,
+            @Param("eventName") String eventName,
+            @Param("role") String role,
+            Pageable pageable
+    );
+
 
     /**
      * Find roles by event and account using composite key.
@@ -214,18 +233,45 @@ public interface EventAccountRoleRepository extends JpaRepository<EventAccountRo
     @Query(value = """
                 SELECT 
                     DATE_FORMAT(created_at, '%Y-%m') AS yearMonth,
-                    COUNT(*) AS totalAttendingEvent
+                    COUNT(*) AS totalEvent
                 FROM event_account_role
-                WHERE created_at >= DATE_FORMAT(CURDATE() - INTERVAL 5 MONTH, '%Y-%m-01')
+                WHERE created_at >= DATE_FORMAT(CURDATE() - INTERVAL 6 MONTH, '%Y-%m-01')
                   AND created_at <  DATE_FORMAT(CURDATE() + INTERVAL 1 MONTH, '%Y-%m-01')
                   AND (:accountId IS NULL OR account_id = :accountId)
                   AND (:eventRole IS NULL OR event_role = :eventRole)
                 GROUP BY yearMonth
                 ORDER BY yearMonth DESC
             """, nativeQuery = true)
-    List<EventCountDTO> countByAccountId(
+    List<EventCountDTO> monthlySummaryByAccountId(
             @Param("accountId") Integer accountId,
             @Param("eventRole") String eventRole
     );
+
+    @Query("""
+                SELECT COUNT(e) 
+                FROM EventAccountRole e 
+                WHERE e.accountId = :accountId 
+                  AND (:eventRole IS NULL OR e.eventRole = :eventRole)
+                  AND (
+                    :countCurrentMonth IS FALSE OR 
+                    (FUNCTION('MONTH', e.createdAt) = FUNCTION('MONTH', CURRENT_DATE) 
+                     AND FUNCTION('YEAR', e.createdAt) = FUNCTION('YEAR', CURRENT_DATE))
+                  )
+            """)
+    Integer countAttendanceByAccountId(
+            @Param("accountId") Integer accountId,
+            @Param("eventRole") EventAccountRole.EventRole eventRole,
+            @Param("countCurrentMonth") boolean countCurrentMonth
+    );
+
+    Page<EventAccountRole> findByAccountId(@Param("accountId") Integer accountId, Pageable pageable);
+
+    @Query(value = """
+            SELECT ear.account_id, ear.event_role, e.event_id, e.name
+            FROM events e
+            JOIN event_account_role ear ON e.event_id = ear.event_id
+            WHERE ear.account_id = :accountId
+            """, nativeQuery = true)
+    List<EventAccountRoleDTO> findByAccountIdWithoutParticipant(@Param("accountId") Integer accountId);
 
 }
