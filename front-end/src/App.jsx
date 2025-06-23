@@ -18,6 +18,7 @@ import MeetingListPage from "./pages/meetingPages/MeetingListPage";
 import DepartmentManagementPage from "./pages/Departments/DepartmentManagementPage";
 import Members from "./pages/Members/Members";
 import DocumentsPage from "./pages/DocumentsPage";
+import EventDetailsByRoles from "./pages/eventDetailsByRoles/eventDetailsByRoles.jsx";
 
 // Auth
 import ProtectedRoute from "./auth/ProtectedRoute";
@@ -48,6 +49,7 @@ import SuperAdminLayout from "./layouts/SuperAdminLayout";
 import MeetingEditPage from "./pages/meetingPages/EditMeetingPage";
 import ViewEventFeedback from "./pages/ViewEventFeedback.jsx";
 import ParticipantFeedbackEvent from "./pages/ParticipantFeedbackEvent.jsx";
+import RequestHistory from "./pages/request/member/RequestHistory.jsx";
 
 // Higher Order Components for Route Protection
 const Protect = (Component) => <ProtectedRoute children={Component} />;
@@ -70,6 +72,7 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="events" element={<AllEvents />} />
           <Route path="events/:id" element={<EventDetails />} />
+          <Route path="events/:id/staff/:role" element={<EventDetailsByRoles />} />
           <Route path="meetings" element={<MeetingListPage />} />
           <Route path="meetings/edit" element={<MeetingEditPage />} />
           <Route path="event/:eventId/feedback" element={<ViewEventFeedback />} />
@@ -80,6 +83,7 @@ function App() {
           <Route path="events/:id/documents" element={EventMember(<DocumentsPage />)} />
 
           <Route path="/event/:eventId/feedback" element={<ViewEventFeedback />} />
+          <Route path="event/:id/account/:accountId/request" element={(<RequestHistory />)} />
 
           {/* Create Event-Protected Routes */}
           <Route path="create-event">

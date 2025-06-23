@@ -1,12 +1,13 @@
 package com.mavent.dev.service.implement;
 
 import com.mavent.dev.dto.request.CreateRequestDTO;
+import com.mavent.dev.dto.request.RequestDTO;
 import com.mavent.dev.dto.request.UpdateRequestDTO;
-import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.Request;
 import com.mavent.dev.mapper.RequestMapper;
 import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.repository.RequestRepository;
+import com.mavent.dev.service.AccountService;
 import com.mavent.dev.service.RequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,16 +20,22 @@ public class RequestImplement implements RequestService {
     @Autowired
     RequestRepository requestRepository;
     @Autowired
-    AccountRepository accountRepository;
+    private AccountService accountService;
 
     @Override
-    public List<Request> getRequestByAccountAndEventId(Integer accountId, Integer eventId) {
-        return requestRepository.findByRequestByAccountIdAndEventId(accountId, eventId);
+    public List<RequestDTO> getRequestByAccountAndEventId(Integer accountId, Integer eventId) {
+        return RequestMapper.toDTOList(requestRepository.findByRequestByAccountIdAndEventId(accountId, eventId), accountService);
     }
 
     @Override
-    public List<Request> getRequestsByEventId(Integer eventId) {
-        return requestRepository.findByEventId(eventId);
+    public List<RequestDTO> getRequestsByEventId(Integer eventId) {
+        System.out.println("Fetching requests for event ID: " + eventId);
+        return RequestMapper.toDTOList(requestRepository.findByEventId(eventId), accountService);
+    }
+
+    @Override
+    public List<RequestDTO> getRequestByEventIdAndDepartmentId(Integer eventId, Integer departmentId) {
+        return RequestMapper.toDTOList(requestRepository.findByEventIdAndDepartmentId(eventId, departmentId), accountService);
     }
 
     @Override
@@ -50,9 +57,9 @@ public class RequestImplement implements RequestService {
     }
 
     @Override
-    public boolean updateRequest(UpdateRequestDTO requestDTO) {
+    public boolean updateRequest(UpdateRequestDTO requestDTO, Integer requestId) {
         try {
-            Request request = requestRepository.findByRequestId(requestDTO.getRequestId());
+            Request request = requestRepository.findByRequestId(requestId);
             if (request == null) {
                 return false;
             }
@@ -60,17 +67,11 @@ public class RequestImplement implements RequestService {
             request.setResponseByAccountId(requestDTO.getResponseByAccountId());
             request.setResponseContent(requestDTO.getResponseContent());
             request.setUpdatedAt(LocalDateTime.now());
-            System.out.println("Updating request: " + requestDTO.getRequestId());
-//            return requestRepository.updateRequestByRequestId(
-//                    request.getRequestId(),
-//                    requestDTO.getStatus(),
-//                    requestDTO.getResponseContent(),
-//                    requestDTO.getResponseByAccountId()
-//            );
+//            System.out.println("Updating request: " + requestDTO.getRequestId());
             requestRepository.save(request);
-            System.out.println("Request updated successfully: " + requestDTO.getRequestId());
-            Request newRequest = requestRepository.findByRequestId(requestDTO.getRequestId());
-            System.out.println("New Request Details: " + newRequest.getStatus());
+//            System.out.println("Request updated successfully: " + requestDTO.getRequestId());
+//            Request newRequest = requestRepository.findByRequestId(requestId);
+//            System.out.println("New Request Details: " + newRequest.getStatus());
             return true;
         } catch (Exception e) {
             e.printStackTrace();

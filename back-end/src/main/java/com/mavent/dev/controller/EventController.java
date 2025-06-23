@@ -7,17 +7,23 @@ import com.mavent.dev.dto.EventCountDTO;
 import com.mavent.dev.dto.EventRegisterDTO;
 import com.mavent.dev.dto.FilterEventDTO;
 import com.mavent.dev.dto.FilterRequestDTO;
+import com.mavent.dev.dto.department.UserEventInfoDTO;
 import com.mavent.dev.dto.event.EventAccountRoleDTO;
 import com.mavent.dev.dto.superadmin.EventDTO;
+import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.Event;
 import com.mavent.dev.entity.EventAccountRole;
 import com.mavent.dev.service.AccountService;
+import com.mavent.dev.service.DepartmentService;
 import com.mavent.dev.service.EventAccountRoleService;
 import com.mavent.dev.service.EventService;
 import com.mavent.dev.service.globalservice.CloudService;
+import com.mavent.dev.util.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -77,6 +83,12 @@ public class EventController {
     }
 
     // Lấy tất cả sự kiện
+    @Autowired
+    private DepartmentService departmentService;
+
+    @Autowired
+    private JwtUtil jwt;
+    //Get All Event
     @GetMapping("")
     public List<EventDTO> getAllEvents() {
         return eventService.getAllEvents();
@@ -176,4 +188,33 @@ public class EventController {
         EventDTO updated = eventService.updateEvent(eventId, eventDTO);
         return ResponseEntity.ok(updated);
     }
+
+    @GetMapping("/{eventId}/user")
+    public ResponseEntity<?> getUserInformationInEvent(
+            @PathVariable Integer eventId,
+            HttpServletRequest request) {
+        try {
+            // Kiểm tra quyền truy cập sự kiện
+            Account account = accountService.getAccount(jwt.extractUsername(request.getHeader("Authorization").substring(7)));
+            System.out.println("Account ID: " + account.getAccountId());
+//            boolean hasAccess = eventService.checkEventAccess(eventId, account.getAccountId());
+//            if (!hasAccess) {
+//                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Bạn không có quyền truy cập sự kiện này");
+//            }
+
+            // Lấy thông tin phòng ban của người dùng trong sự kiện
+            UserEventInfoDTO department = eventAccountRoleService.getUserEventInfo(eventId, account.getAccountId());
+            if (department == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy phòng ban cho người dùng trong sự kiện này");
+            }
+
+            return ResponseEntity.ok(department);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi lấy thông tin phòng ban: " + e.getMessage());
+        }
+    }
+
+
+
+
 }

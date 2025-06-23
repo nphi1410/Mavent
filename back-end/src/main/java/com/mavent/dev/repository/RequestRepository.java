@@ -9,6 +9,7 @@ import java.util.List;
 public interface RequestRepository extends JpaRepository<Request, Integer> {
     List<Request> findByRequestByAccountIdAndEventId(Integer requestByAccountId, Integer eventId);
     List<Request> findByEventId(Integer requestByEventId);
+    List<Request> findByEventIdAndDepartmentId(Integer eventId, Integer departmentId);
     Request findByRequestId(Integer requestId);
 //    boolean updateRequestByRequestId(Integer requestId, String status, String responseContent, Integer responseByAccountId);
 }
