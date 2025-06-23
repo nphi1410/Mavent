@@ -18,7 +18,9 @@ import com.mavent.dev.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -81,13 +83,31 @@ public class AccountController {
 
     @PostMapping("/public/login")
     public ResponseEntity<?> authenticate(@RequestBody AuthRequestDTO authRequestDTO) throws AuthenticationException {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(authRequestDTO.getUsername(), authRequestDTO.getPassword())
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            authRequestDTO.getUsername(),
+                            authRequestDTO.getPassword()
+                    )
+            );
 
-        Account account = accountService.getAccount(authRequestDTO.getUsername());
-        String jwt = jwtUtil.generateToken(account);
-        return ResponseEntity.ok(new AuthResponseDTO(jwt));
+            Account account = accountService.getAccount(authRequestDTO.getUsername());
+            String jwt = jwtUtil.generateToken(account);
+            return ResponseEntity.ok(new AuthResponseDTO(jwt));
+            // If successful, continue to generate JWT or login response
+        } catch (BadCredentialsException e) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid username or password");
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body("Username not found");
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Authentication failed: " + e.getMessage());
+        }
     }
 
     @PostMapping("/public/logout")
