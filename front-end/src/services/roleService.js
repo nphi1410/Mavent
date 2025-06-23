@@ -107,7 +107,8 @@ export const hasMinimumRole = (userRole, minimumRole) => {
   // Debug logs để kiểm tra
   console.log('hasMinimumRole - userRole:', userRole);
   console.log('hasMinimumRole - minimumRole:', minimumRole);
-  
+  console.log('hasMinimumRole - userLevel:', ROLE_HIERARCHY[userRole] || 0);
+  console.log('hasMinimumRole - minimumLevel:', ROLE_HIERARCHY[minimumRole] || 0);
   // Kiểm tra xem user có role ADMIN trong session storage không
   const sessionRole = sessionStorage.getItem('userRole');
   if (sessionRole === 'ADMIN') {
