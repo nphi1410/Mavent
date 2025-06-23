@@ -83,9 +83,9 @@ const DepartmentFormModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center z-9999">
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black opacity-50" onClick={onClose}></div>
+      <div className="absolute inset-0 bg-black opacity-50 " onClick={onClose}></div>
       
       {/* Modal */}
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md z-10 p-6">

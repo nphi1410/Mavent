@@ -14,9 +14,10 @@ import AllEvents from "./pages/AllEvents";
 import EventDetails from "./pages/EventDetails";
 import MeetingListPage from "./pages/meetingPages/MeetingListPage";
 
-// Department and Members
+// Department, Documents, and Members
 import DepartmentManagementPage from "./pages/Departments/DepartmentManagementPage";
 import Members from "./pages/Members/Members";
+import DocumentsPage from "./pages/DocumentsPage";
 
 // Auth
 import ProtectedRoute from "./auth/ProtectedRoute";
@@ -76,6 +77,9 @@ function App() {
           {/* Event Member Protected Routes */}
           <Route path="events/:id/departments" element={EventMember(<DepartmentManagementPage />)} />
           <Route path="events/:id/members" element={EventMember(<Members />)} />
+          <Route path="events/:id/documents" element={EventMember(<DocumentsPage />)} />
+
+          <Route path="/event/:eventId/feedback" element={<ViewEventFeedback />} />
 
           {/* Create Event-Protected Routes */}
           <Route path="create-event">
@@ -99,7 +103,6 @@ function App() {
               <Route path="history" element={Protect(<TaskHistory />)} />
             </Route>
           </Route>
-
         </Route>
 
         {/* Super Admin Routes */}

@@ -3,7 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faUsers, 
   faTimes, 
-  faSitemap
+  faSitemap,
+  faFileAlt
 } from '@fortawesome/free-solid-svg-icons';
 
 // Sidebar component for admin dashboard
@@ -11,8 +12,7 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {  // Lấy event ID từ 
   const pathname = window.location.pathname;
   const eventIdMatch = pathname.match(/\/events\/(\d+)/);
   const eventId = eventIdMatch ? eventIdMatch[1] : '9'; // Mặc định là 9 nếu không tìm thấy
-  
-  // Main section items
+    // Main section items
   const mainItems = [    {
       name: 'members',
       displayName: 'Members',
@@ -23,6 +23,12 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {  // Lấy event ID từ 
       displayName: 'Departments',
       icon: <FontAwesomeIcon icon={faSitemap} />,
       link: `/events/${eventId}/departments`,
+    },
+    {
+      name: 'documents',
+      displayName: 'Documents',
+      icon: <FontAwesomeIcon icon={faFileAlt} />,
+      link: `/events/${eventId}/documents`,
     }
   ];
   // Không hiển thị phần Settings
