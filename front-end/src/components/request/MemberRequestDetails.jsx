@@ -143,7 +143,7 @@ export default function RequestDetailsPopup({ isOpen, onClose, requestData, requ
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Answered By:</label>
                                     <div className="bg-white rounded-lg px-4 py-3 shadow-sm">
-                                        <span className="text-gray-800">{answeredByAccount?.username ? answeredByAccount?.username : "Not yet"}</span>
+                                        <span className="text-gray-800">{data.responseByUsername ? data.responseByUsername : "Not yet"}</span>
                                     </div>
                                 </div>
 
@@ -172,7 +172,7 @@ export default function RequestDetailsPopup({ isOpen, onClose, requestData, requ
                             {/* Description */}
                             <div>
                                 <div className="bg-white rounded-lg p-4 shadow-sm min-h-[200px]">
-                                    <p className="text-gray-800 leading-relaxed">{data.content}</p>
+                                    <p className="text-gray-800 leading-relaxed">{data.requestContent}</p>
                                 </div>
                             </div>
                         </div>
