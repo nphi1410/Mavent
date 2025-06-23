@@ -18,6 +18,7 @@ import MeetingListPage from "./pages/meetingPages/MeetingListPage";
 import DepartmentManagementPage from "./pages/Departments/DepartmentManagementPage";
 import Members from "./pages/Members/Members";
 import DocumentsPage from "./pages/DocumentsPage";
+import EventDetailsByRoles from "./pages/eventDetailsByRoles/eventDetailsByRoles.jsx";
 
 // Auth
 import ProtectedRoute from "./auth/ProtectedRoute";
@@ -71,6 +72,7 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="events" element={<AllEvents />} />
           <Route path="events/:id" element={<EventDetails />} />
+          <Route path="events/:id/staff" element={<EventDetailsByRoles />} />
           <Route path="meetings" element={<MeetingListPage />} />
           <Route path="meetings/edit" element={<MeetingEditPage />} />
           <Route path="event/:eventId/feedback" element={<ViewEventFeedback />} />
