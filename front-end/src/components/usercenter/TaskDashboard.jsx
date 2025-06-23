@@ -1,128 +1,94 @@
 import React from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+  faClipboardList, 
+  faClock, 
+  faPenToSquare, 
+  faClockRotateLeft
+} from '@fortawesome/free-solid-svg-icons';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const TaskDashboard = ({ tasks }) => {
-  const totalTasks = tasks.length;
+const TaskDashboard = ({ tasks, isFiltered, currentUserId }) => {
+  const todoTasks = tasks.filter(task => task.status === 'TODO');
+  const doingTasks = tasks.filter(task => task.status === 'DOING');
+  const reviewTasks = tasks.filter(task => task.status === 'REVIEW');
+  // const completedTasks = tasks.filter(task => task.status === 'DONE');
+  const overdueTasks = tasks.filter(task => task.status === 'OVERDUE');
   
-  // Calculate task statistics with percentages
-  const calculatePercentage = (count) => {
-    return totalTasks === 0 ? 0 : Math.round((count / totalTasks) * 100);
-  };
-
-  const taskCounts = {
-    'Active': tasks.filter(t => t.status === 'TODO').length,
-    'Completed': tasks.filter(t => t.status === 'DONE').length,
-    'In Progress': tasks.filter(t => t.status === 'DOING').length,
-    'Need-feedback': tasks.filter(t => t.status === 'FEEDBACK_NEEDED').length,
-    'Cancelled': tasks.filter(t => t.status === 'CANCELLED' || t.status === 'REJECTED').length
-  };
-
-  // Pre-calculate all percentages
-  const taskStats = Object.entries(taskCounts).reduce((acc, [key, count]) => {
-    acc[key] = {
-      count,
-      percentage: calculatePercentage(count)
-    };
-    return acc;
-  }, {});
-
-  const chartData = {
-    labels: Object.keys(taskStats).map(label => `${label} ${taskStats[label].percentage}%`),
-    datasets: [{
-      data: Object.values(taskStats).map(stat => stat.percentage),
-      backgroundColor: [
-        '#4F46E5', // primary blue
-        '#818CF8', // lighter blue
-        '#6366F1', // medium blue
-        '#C7D2FE', // very light blue
-        '#E0E7FF', // lightest blue
-      ],
-      borderWidth: 0,
-    }]
-  };
-
   return (
-    <div className="grid grid-cols-2 gap-6 mb-8">
-      {/* Adjust height for the chart container */}
-      <div className="bg-white rounded-lg p-6 shadow-sm flex items-center justify-center h-56">
-        {totalTasks > 0 ? (
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="w-80">
-              <Doughnut
-                data={chartData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  cutout: '75%',
-                  plugins: {
-                    legend: {
-                      position: 'right',
-                      labels: {
-                        usePointStyle: true,
-                        padding: 15,
-                        font: {
-                          size: 12
-                        }
-                      }
-                    },
-                    tooltip: {
-                      callbacks: {
-                        label: function(context) {
-                          const label = context.label.split(' ')[0];
-                          return `${label}: ${taskStats[label].count} (${context.raw}%)`;
-                        }
-                      }
-                    }
-                  }
-                }}
+    <div className="mb-8">
+      {/* <h2 className="text-xl font-semibold mb-4">Task Overview</h2> */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Card đếm task ToDo */}
+        <div className="rounded-lg p-4 bg-yellow-50">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-sm font-medium text-yellow-700">TO DO</h3>
+              <p className="text-2xl font-bold text-yellow-900">{todoTasks.length}</p>
+            </div>
+            <div className="p-2 bg-yellow-100 rounded-lg">
+              <FontAwesomeIcon icon="fa-solid fa-file" className="h-7 w-7 text-yellow-500"/>
+            </div>
+          </div>
+        </div>
+
+        {/* Card đếm task Doing */}
+        <div className="rounded-lg p-4 bg-blue-50">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-sm font-medium text-blue-700">IN PROGRESS</h3>
+              <p className="text-2xl font-bold text-blue-900">{doingTasks.length}</p>
+            </div>
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <FontAwesomeIcon 
+                icon={faClock} 
+                className="h-7 w-7 text-blue-500" 
               />
             </div>
           </div>
-        ) : (
-          <div className="text-gray-500">No data available</div>
-        )}
+        </div>
+
+        {/* Card đếm task Review */}
+        <div className="rounded-lg p-4 bg-purple-50">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-sm font-medium text-purple-700">REVIEWING</h3>
+              <p className="text-2xl font-bold text-purple-900">{reviewTasks.length}</p>
+            </div>
+            <div className="p-2 bg-purple-100 rounded-lg">
+              <FontAwesomeIcon 
+                icon={faPenToSquare} 
+                className="h-7 w-7 text-purple-500" 
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Card đếm task Overdue */}
+        <div className="rounded-lg p-4 bg-red-50">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-sm font-medium text-red-700">OVERDUE</h3>
+              <p className="text-2xl font-bold text-red-900">{overdueTasks.length}</p>
+            </div>
+            <div className="p-2 bg-red-100 rounded-lg">
+              <FontAwesomeIcon 
+                icon={faClockRotateLeft} 
+                className="h-7 w-7 text-red-500" 
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Adjust height for the stats container to match chart height */}
-      <div className="bg-white rounded-lg p-6 shadow-sm grid grid-cols-3 gap-4 h-56">
-        <div>
-          <div className="text-4xl font-bold">{totalTasks}</div>
-          <div className="text-gray-600">Total task</div>
+      {isFiltered && (
+        <div className="mt-3 text-sm text-gray-500">
+          * Display statistics for the selected event.
         </div>
-        <div>
-          <div className="text-4xl font-bold">
-            {taskStats['Active'].count}
-          </div>
-          <div className="text-gray-600">Active task</div>
-        </div>
-        <div>
-          <div className="text-4xl font-bold">
-            {taskStats['Completed'].count}
-          </div>
-          <div className="text-gray-600">Completed task</div>
-        </div>
-        <div>
-          <div className="text-4xl font-bold">
-            {taskStats['Need-feedback'].count}
-          </div>
-          <div className="text-gray-600">Need-feedback</div>
-        </div>
-        <div>
-          <div className="text-4xl font-bold">
-            {taskStats['In Progress'].count}
-          </div>
-          <div className="text-gray-600">In-progress task</div>
-        </div>
-        <div>
-          <div className="text-4xl font-bold">
-            {taskStats['Cancelled'].count}
-          </div>
-          <div className="text-gray-600">Cancelled task</div>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

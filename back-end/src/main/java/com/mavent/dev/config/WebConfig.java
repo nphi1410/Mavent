@@ -11,7 +11,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**") // Apply to all routes
                 .allowedOrigins(System.getenv("FRONTEND_URL")) // React dev server
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH") // Allowed HTTP methods
                 .allowedHeaders("*")
                 .allowCredentials(true); // Required if you're using cookies/session auth
     }

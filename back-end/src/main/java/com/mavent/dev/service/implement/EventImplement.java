@@ -1,9 +1,14 @@
 package com.mavent.dev.service.implement;
 
 import com.mavent.dev.dto.EventCountDTO;
+import com.mavent.dev.dto.EventMemberDTO;
 import com.mavent.dev.dto.FilterEventDTO;
 import com.mavent.dev.dto.superadmin.EventDTO;
+import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.Event;
+import com.mavent.dev.entity.EventAccountRole;
+import com.mavent.dev.repository.AccountRepository;
+import com.mavent.dev.repository.EventAccountRoleRepository;
 import com.mavent.dev.repository.EventRepository;
 import com.mavent.dev.service.EventService;
 import org.apache.poi.ss.formula.functions.T;
@@ -13,8 +18,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,6 +27,12 @@ public class EventImplement implements EventService {
 
     @Autowired
     private EventRepository eventRepository;
+
+    @Autowired
+    private EventAccountRoleRepository eventAccountRoleRepository;
+
+    @Autowired
+    private AccountRepository accountRepository;
 
     @Override
     public Page<FilterEventDTO> getFilterEvents(String name, String status, List<Integer> tagIds, String sortType, int page, int size, String type, boolean isTrending) {
@@ -39,16 +50,18 @@ public class EventImplement implements EventService {
         event.setStartDatetime(eventDTO.getStartDatetime());
         event.setEndDatetime(eventDTO.getEndDatetime());
         event.setLocation(eventDTO.getLocation());
+        event.setLocationId(eventDTO.getLocationId());
         event.setDdayInfo(eventDTO.getDdayInfo());
         event.setMaxMemberNumber(eventDTO.getMaxMemberNumber());
         event.setMaxParticipantNumber(eventDTO.getMaxParticipantNumber());
-        event.setStatus(eventDTO.getStatus());
+        event.setStatus(eventDTO.getStatus()); // Có thể null lúc tạo
+        event.setBannerUrl(eventDTO.getBannerUrl());
+        event.setPosterUrl(eventDTO.getPosterUrl());
         event.setCreatedBy(eventDTO.getCreatedBy());
-        event.setIsDeleted(false); // Khi tạo mặc định là chưa xoá
+        event.setIsDeleted(false);
         event.setCreatedAt(java.time.LocalDateTime.now());
         event.setUpdatedAt(java.time.LocalDateTime.now());
 
-        // Lưu vào db
         Event savedEvent = eventRepository.save(event);
 
         return mapToDTO(savedEvent);
@@ -124,14 +137,45 @@ public class EventImplement implements EventService {
                 event.getStartDatetime(),
                 event.getEndDatetime(),
                 event.getLocation(),
+                event.getLocationId(),
                 event.getDdayInfo(),
                 event.getMaxMemberNumber(),
                 event.getMaxParticipantNumber(),
                 event.getStatus(),
+                event.getBannerUrl(),
+                event.getPosterUrl(),
                 event.getCreatedBy(),
                 event.getIsDeleted(),
                 event.getCreatedAt(),
                 event.getUpdatedAt()
         );
+    }
+
+
+    @Override
+    public boolean checkEventAccess(Integer eventId, Integer accountId) {
+        Optional<EventAccountRole> role = eventAccountRoleRepository.findByEventIdAndAccountId(eventId, accountId);
+        return role.isPresent() && role.get().getIsActive();
+    }
+
+    @Override
+    public List<EventMemberDTO> getEventMembers(Integer eventId) {
+        List<EventAccountRole> members = eventAccountRoleRepository.findByEventId(eventId);
+
+        return members.stream()
+                .map(member -> {
+                    EventMemberDTO dto = new EventMemberDTO();
+                    Account account = accountRepository.findById(member.getAccountId()).orElse(null);
+                    if (account != null) {
+                        dto.setAccountId(account.getAccountId());
+                        dto.setFullName(account.getFullName());
+                        dto.setEmail(account.getEmail());
+                        dto.setAvatarUrl(account.getAvatarUrl());
+                    }
+                    dto.setRole(member.getEventRole().name());
+                    dto.setIsActive(member.getIsActive());
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 }

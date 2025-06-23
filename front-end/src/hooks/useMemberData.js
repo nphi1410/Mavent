@@ -5,11 +5,11 @@ import memberService from '../services/memberService';
  * Hook để quản lý dữ liệu member và department.
  * Hook này chỉ tập trung vào việc tải và chuyển đổi dữ liệu.
  */
-const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
-  // Data states
+const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {  // Data states
   const [members, setMembers] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [departmentsLoading, setDepartmentsLoading] = useState(false); // Thêm state loading riêng cho departments
   const [error, setError] = useState(null);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
@@ -156,25 +156,72 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
     } finally {
       setLoading(false);
     }
-  }, [eventId, page, size, searchTerm, statusFilter, roleFilter, departmentFilter]);
-
-  // Fetch departments từ API
+  }, [eventId, page, size, searchTerm, statusFilter, roleFilter, departmentFilter]);  
+    // Fetch departments từ API  
   const fetchDepartments = useCallback(async () => {
     try {
-      const response = await memberService.getDepartments(eventId);
-      if (response.success && response.data) {
-        setDepartments(response.data);
+      console.log('Fetching departments for eventId:', eventId);
+      
+      // Hiển thị trạng thái loading
+      setDepartmentsLoading(true);
+      
+      // Gọi API để lấy departments thực tế từ sự kiện
+      try {
+        // Gọi service để lấy dữ liệu
+        const response = await memberService.getDepartments(eventId);
+        console.log('Department API response structure:', response);
+        
+        let departmentsData = [];
+        
+        // Kiểm tra tất cả các cấu trúc phản hồi có thể
+        if (response && Array.isArray(response)) {
+          departmentsData = response;
+        } else if (response && response.data && Array.isArray(response.data)) {
+          departmentsData = response.data;
+        } else if (response && response.data && response.data.content && Array.isArray(response.data.content)) {
+          departmentsData = response.data.content;
+        } else if (response && response.content && Array.isArray(response.content)) {
+          departmentsData = response.content;
+        }
+          
+        if (departmentsData.length > 0) {
+          console.log('Successfully received departments data:', departmentsData.length, 'departments');
+          console.log('First department example:', departmentsData[0]);
+          setDepartments(departmentsData);
+        } else {
+          console.warn('API returned empty departments array, trying alternative approach...');
+          // Thử gọi trực tiếp API thay thế
+          try {
+            const altResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL || ''}/api/events/${eventId}/departments`);
+            const altData = await altResponse.json();
+            console.log('Alternative API response:', altData);
+            
+            if (altData && Array.isArray(altData)) {
+              console.log('Successfully received departments from alternative API');
+              setDepartments(altData);
+            } else if (altData && altData.data && Array.isArray(altData.data)) {
+              console.log('Successfully received departments from alternative API');
+              setDepartments(altData.data);
+            } else {              console.log('Alternative API also returned empty data');
+              setDepartments([]);
+            }
+          } catch (altErr) {
+            console.error('Error in alternative API call:', altErr);
+            setDepartments([]);
+          }
+        }
+      } catch (apiErr) {
+        console.error('API error in fetchDepartments:', apiErr);
+        // Không sử dụng fake data nữa, trả về mảng rỗng khi có lỗi
+        setDepartments([]);
+      } finally {
+        // Tắt trạng thái loading dù thành công hay thất bại
+        setDepartmentsLoading(false);
       }
     } catch (err) {
-      console.error('Error fetching departments:', err);
-      // Set default departments if API fails
-      setDepartments([
-        { departmentId: 1, name: 'Marketing' },
-        { departmentId: 2, name: 'HR' },
-        { departmentId: 3, name: 'IT' },
-        { departmentId: 4, name: 'Finance' },
-        { departmentId: 5, name: 'Sales' }
-      ]);
+      console.error('Unexpected error in fetchDepartments function:', err);
+      setDepartments([]);
+      setDepartmentsLoading(false);
     }
   }, [eventId]);
 
@@ -375,13 +422,13 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
     acc[member.id] = member.isBanned || false;
     return acc;
   }, {});
-
   // Return public API
   return {
     // Data
     members,
     departments,
     loading,
+    departmentsLoading,
     error,
     totalPages,
     totalElements,

@@ -2,7 +2,7 @@ import { jwtDecode } from 'jwt-decode'; // ✅ Correct for named exports
 
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
-import { login } from '../services/AuthService';
+import { login } from '../../services/AuthService';
 import axios from 'axios';
 
 function Login() {
@@ -49,9 +49,9 @@ function Login() {
           navigate("/superadmin");
         } else if (roles.includes("ROLE_USER")) {
           console.log("User logged in");
-          navigate("/profile");
+          navigate("/");
         } else {
-          navigate("/home");
+          navigate("/");
         }
       }
     } catch (error) {

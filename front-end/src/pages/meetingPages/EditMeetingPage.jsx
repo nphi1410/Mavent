@@ -6,7 +6,7 @@ import {
   updateMeeting,
 } from "../../services/meetingService";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { getDepartments } from "../../services/departmentService";
+import { getDepartmentsByEventId } from "../../services/departmentService";
 
 const statusOptions = ["SCHEDULED", "CANCELLED", "COMPLETED", "POSTPONED"];
 
@@ -35,7 +35,7 @@ const EditMeetingPage = () => {
   const [loading, setLoading] = useState(isEdit);
 
   useEffect(() => {
-    getDepartments(eventId)
+    getDepartmentsByEventId(eventId)
       .then((data) => {
         setDepartments(data);
       })

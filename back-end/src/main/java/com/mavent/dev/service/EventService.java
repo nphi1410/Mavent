@@ -1,6 +1,5 @@
 package com.mavent.dev.service;
 
-import com.mavent.dev.dto.EventCountDTO;
 import com.mavent.dev.dto.FilterEventDTO;
 import com.mavent.dev.dto.superadmin.EventDTO;
 import com.mavent.dev.entity.Event;
@@ -27,7 +26,5 @@ public interface EventService {
     Page<T> getEventByDateRange(String type, Boolean isTrending);
 
     EventDTO createEvent(EventDTO eventDTO);
-
-    List<EventCountDTO> getMonthlyStatistic(String status);
 
 }

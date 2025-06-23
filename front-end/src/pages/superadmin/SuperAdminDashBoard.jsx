@@ -17,6 +17,7 @@ import {
     Filler
 } from 'chart.js';
 import SuperAdminSidebar from "../../components/superadmin/SuperAdminSidebar";
+import SuperAdminHeader from "../../components/superadmin/SuperAdminHeader";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler);
 
@@ -25,9 +26,13 @@ const SuperAdminDashboard = () => {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [showEventChart, setShowEventChart] = useState(false);
+    // Set initial state to true to show the chart by default
+    const [showEventChart, setShowEventChart] = useState(true);
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [selectedMonthIndex, setSelectedMonthIndex] = useState(null);
+    // New state to manage which stat box is selected
+    const [selectedStatIndex, setSelectedStatIndex] = useState(0); // Default to 'Total Events' chart
+
     const eventLineRef = useRef(null);
 
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -55,10 +60,10 @@ const SuperAdminDashboard = () => {
     }, []);
 
     const statsConfig = [
-        { title: "Total Events", icon: faCalendarAlt, value: metrics.totalEvents, onClick: () => setShowEventChart(!showEventChart) },
-        { title: "Total Accounts", icon: faUser, value: metrics.totalAccounts, onClick: null },
-        { title: "Upcoming Events", icon: faClock, value: metrics.totalUpcomingEvents, onClick: null },
-        { title: "Ongoing Events", icon: faClock, value: metrics.totalOngoingEvents, onClick: null },
+        { key: 'totalEvents', title: "Total Events", icon: faCalendarAlt, value: metrics.totalEvents, onClick: () => { setShowEventChart(true); setSelectedStatIndex(0); } },
+        { key: 'totalAccounts', title: "Total Accounts", icon: faUser, value: metrics.totalAccounts, onClick: () => { setShowEventChart(false); setSelectedStatIndex(1); } },
+        { key: 'upcomingEvents', title: "Upcoming Events", icon: faClock, value: metrics.totalUpcomingEvents, onClick: () => { setShowEventChart(false); setSelectedStatIndex(2); } },
+        { key: 'ongoingEvents', title: "Ongoing Events", icon: faClock, value: metrics.totalOngoingEvents, onClick: () => { setShowEventChart(false); setSelectedStatIndex(3); } },
     ];
 
     const getMonthlyCounts = () => {
@@ -145,6 +150,7 @@ const SuperAdminDashboard = () => {
 
     return (
         <div className="h-screen w-screen flex bg-amber-50">
+            <SuperAdminHeader />
             <SuperAdminSidebar />
             <div className="flex flex-col flex-1">
                 <main className="flex-1 overflow-y-auto p-10 bg-gray-100">
@@ -160,9 +166,10 @@ const SuperAdminDashboard = () => {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-6">
                                     {statsConfig.map((stat, i) => (
                                         <div
-                                            key={i}
+                                            key={stat.key} // Use stat.key for better identification
                                             onClick={stat.onClick}
-                                            className={`bg-zinc-100 p-6 rounded-xl shadow ${stat.onClick ? 'cursor-pointer' : ''}`}
+                                            className={`bg-zinc-100 p-6 rounded-xl shadow ${stat.onClick ? 'cursor-pointer' : ''} 
+                                            ${selectedStatIndex === i ? 'border-2 border-blue-500 bg-blue-50' : ''}`}
                                         >
                                             <div className="flex justify-between">
                                                 <h2>{stat.title}</h2>
