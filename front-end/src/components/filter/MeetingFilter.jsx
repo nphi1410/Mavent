@@ -14,43 +14,34 @@ const MeetingFilter = ({
   setEventId,
   joiningEvents,
 }) => {
-  const didInitRef = useRef(false);
-  const size = 10;
-  // Prevent initial effect run
+  const didInit = useRef(false);
+
   useEffect(() => {
-    didInitRef.current = true;
-  }, []);
-
-  // Trigger filter when searchTitle or page changes, but skip first render
-  useEffect(() => {
-    if (!didInitRef.current) return;
-
-    const filters = {
-      searchTitle: searchTitle || undefined,
-      eventId: eventId || undefined,
-      page: currentPage,
-      size,
-    };
-
-    onFilter(filters);
-  }, [searchTitle, currentPage, eventId]);
-
-  
+    if (didInit.current) {
+      onFilter({
+        page: currentPage,
+        searchTitle,
+        eventId,
+      });
+    } else {
+      didInit.current = true;
+    }
+  }, [currentPage, searchTitle, eventId]);
 
   const goToPage = (page) => {
-    if (page >= 0 && (totalPagesFromApi == null || page < totalPagesFromApi)) {
+    if (page >= 0 && page < (totalPagesFromApi ?? Infinity)) {
       setCurrentPage(page);
     }
   };
 
   return (
-    <div className="sticky top-16 z-10 bg-white border border-gray-300 p-4 shadow-sm rounded-md mb-4">
+    <div className="sticky top-16 z-10 bg-white border p-4 rounded-md shadow-sm mb-4">
       <div className="grid grid-cols-5 items-center gap-3">
         <Search
           searchTitle={searchTitle}
           setSearchTitle={(value) => {
             setSearchTitle(value);
-            setCurrentPage(0); // Reset to first page on new search
+            setCurrentPage(0);
           }}
         />
         <Pagination
@@ -58,12 +49,14 @@ const MeetingFilter = ({
           totalPages={totalPagesFromApi || 1}
           onPageChange={(page) => goToPage(page - 1)}
         />
-
         <SelectJoiningEvent
           list={joiningEvents}
           listName="Event"
           value={eventId}
-          onChange={(e) => setEventId(e.target.value)}
+          onChange={(e) => {
+            setEventId(e.target.value);
+            setCurrentPage(0);
+          }}
         />
       </div>
     </div>

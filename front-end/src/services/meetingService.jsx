@@ -25,6 +25,7 @@ export const getMeetingByAccountId = async (accountId, filters) => {
   const response = await Api.get(
     `${BASE_URL}/account/${accountId}?${params.toString()}`
   );
+  console.log("alo", response.data);
   
   return response.data;
 };
