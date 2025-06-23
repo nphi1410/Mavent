@@ -19,7 +19,7 @@ const EventDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [role, setRole] = useState(null);
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
 
   useEffect(() => {
@@ -38,12 +38,12 @@ const navigate = useNavigate();
       const fetchUserInfo = async () => {
         try {
           // Assuming you have a function to fetch user info in the event
-        const userEventInfo = await getUserInfoInEvent(id);
+          const userEventInfo = await getUserInfoInEvent(id);
           if (userEventInfo) {
             // Assuming userEventInfo contains the user data you need
-            if (userEventInfo.role){
-              
-    navigate(`/events/${id}/staff`);
+            if (userEventInfo.role) {
+
+              navigate(`/events/${id}/staff/${userEventInfo.role}` );
             }
             setRole(userEventInfo.role); // Set the role from user info
             console.log("User Info in Event:", userEventInfo);
@@ -61,37 +61,37 @@ const navigate = useNavigate();
 
       fetchData();
     }
-  }, [id]);
+  }, []);
 
   if (loading) return <p className="text-center mt-10">Loading...</p>;
   if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
 
   return (
     <div>
-        <EventBanner eventData={eventData}/>
+      <EventBanner eventData={eventData} />
 
-        <section className="flex flex-col lg:flex-row justify-between gap-8 px-4 sm:px-6 lg:px-12 py-8">
-          <div className="w-full lg:w-1/2">
-            <Description eventData={eventData} />
-          </div>
-          <div className="w-full lg:w-1/2 flex flex-col gap-6">
-            <EventTime eventData={eventData} />
-            <MapGuide eventData={eventData} />
-          </div>
-        </section>
-
-        
+      <section className="flex flex-col lg:flex-row justify-between gap-8 px-4 sm:px-6 lg:px-12 py-8">
+        <div className="w-full lg:w-1/2">
+          <Description eventData={eventData} />
+        </div>
+        <div className="w-full lg:w-1/2 flex flex-col gap-6">
+          <EventTime eventData={eventData} />
+          <MapGuide eventData={eventData} />
+        </div>
+      </section>
 
 
-        <section className="flex flex-col lg:flex-row justify-between gap-8 px-4 sm:px-6 lg:px-12 py-8">
-          <div className="w-full lg:w-1/2">
-            <OrganizerContact contact={eventData?.organizer} />
-          </div>
-          <div className="w-full lg:w-1/2">
-            <TagsList eventData={eventData} />
-          </div>
-        </section>
-        <RelevantEvent eventData={eventData} />
+
+
+      <section className="flex flex-col lg:flex-row justify-between gap-8 px-4 sm:px-6 lg:px-12 py-8">
+        <div className="w-full lg:w-1/2">
+          <OrganizerContact contact={eventData?.organizer} />
+        </div>
+        <div className="w-full lg:w-1/2">
+          <TagsList eventData={eventData} />
+        </div>
+      </section>
+      <RelevantEvent eventData={eventData} />
     </div>
   );
 };
