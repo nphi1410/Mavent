@@ -17,7 +17,7 @@ export default function EventDetailsByRoles() {
         const userEventInfo = await getUserInfoInEvent(id);
         if (userEventInfo) {
           // Assuming userEventInfo contains the user data you need
-          console.log("User Info in Event:", userEventInfo);
+          // console.log("User Info in Event:", userEventInfo);
           setAccountId(userEventInfo.accountId); // Set the account ID from user info
 
         } else {

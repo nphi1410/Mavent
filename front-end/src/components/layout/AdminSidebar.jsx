@@ -40,7 +40,13 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
       icon: <FontAwesomeIcon icon={faFileAlt} />,
       link: `/events/${eventId}/documents`,
       adminOnly: false // Visible to all roles
-    }
+    },
+    {name: 'applying requests',
+      displayName: 'Applying Requests',
+      icon: <FontAwesomeIcon icon={faFileAlt} />,
+      link: `/events/${eventId}/requests`,
+      adminOnly: false // Visible to all roles
+    },
   ];
   
   // Filter items based on user role

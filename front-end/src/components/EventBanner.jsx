@@ -38,7 +38,7 @@ const EventBanner = ({ eventData }) => {
 
     const registerDTO = {
       eventId: eventData.eventId,
-      username: sessionStorage.getItem("username"),
+      accountId: sessionStorage.getItem("accountId"),
       role: role,
       departmentId: null,
     };
@@ -48,8 +48,6 @@ const EventBanner = ({ eventData }) => {
       if(responseData.status === 200) {
         alert("Register successfully!");
       }
-      console.log("Response from register event:", responseData);
-      
       return;
     }
 
