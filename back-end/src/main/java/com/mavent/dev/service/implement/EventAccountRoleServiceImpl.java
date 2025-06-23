@@ -1,9 +1,13 @@
 package com.mavent.dev.service.implement;
 
+import com.mavent.dev.dto.department.DepartmentResponseDTO;
+import com.mavent.dev.dto.department.UserEventInfoDTO;
 import com.mavent.dev.dto.event.EventAccountRoleDTO;
-import com.mavent.dev.entity.Event;
+import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.EventAccountRole;
 import com.mavent.dev.repository.EventAccountRoleRepository;
+import com.mavent.dev.service.AccountService;
+import com.mavent.dev.service.DepartmentService;
 import com.mavent.dev.service.EventAccountRoleService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +23,10 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
 
     @Autowired
     private EventAccountRoleRepository eventAccountRoleRepository;
+    @Autowired
+    private DepartmentService departmentService;
+    @Autowired
+    private AccountService accountService;
 
     @Override
     public List<EventAccountRole> getMembersByEventId(Integer eventId) {
@@ -129,5 +137,24 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
                                                         java.util.Date endDate,
                                                         Pageable pageable) {
         return eventAccountRoleRepository.findByEventIdWithFilters(eventId, isActive, role, departmentId, searchTerm, startDate, endDate, pageable);
+    }
+
+    @Override
+    public UserEventInfoDTO getUserEventInfo(Integer eventId, Integer accountId) {
+        Optional<EventAccountRole> ear = eventAccountRoleRepository.findByEventIdAndAccountId(eventId, accountId);
+        if (ear.isPresent()) {
+            EventAccountRole eventAccountRole = ear.get();
+            System.out.println("EventAccountRoleServiceImplement.getUserEventInfo: " + eventAccountRole.getEventRole());
+            Account account = accountService.getAccountById(accountId);
+//            DepartmentResponseDTO department = departmentService.getDepartmentById(eventAccountRole.getDepartmentId());
+            return new UserEventInfoDTO(
+                    eventAccountRole.getEventId(),
+                    eventAccountRole.getDepartmentId(),
+//                    department.getName(),
+                    eventAccountRole.getAccountId(),
+                    account.getFullName(),
+                    eventAccountRole.getEventRole().toString()
+            );
+        } else return null;
     }
 }

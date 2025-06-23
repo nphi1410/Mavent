@@ -60,7 +60,6 @@ public class EventImplement implements EventService {
         return mapToDTO(savedEvent);
     }
 
-
     @Override
     public List<EventDTO> getAllEvents() {
         return eventRepository.findAll()

@@ -10,9 +10,8 @@ import lombok.Setter;
 public class CreateRequestDTO {
     private int accountId;
     private int eventId;
-    private int taskId;
+    private Integer taskId;
     private int departmentId;
     private int requestTypeId;
     private String content;
-    private String status;
 }

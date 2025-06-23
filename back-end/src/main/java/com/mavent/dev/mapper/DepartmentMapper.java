@@ -2,6 +2,7 @@ package com.mavent.dev.mapper;
 
 import com.mavent.dev.dto.department.DepartmentRequestDTO;
 import com.mavent.dev.dto.department.DepartmentResponseDTO;
+import com.mavent.dev.dto.department.UserEventInfoDTO;
 import com.mavent.dev.entity.Department;
 
 public class DepartmentMapper {
@@ -38,4 +39,18 @@ public class DepartmentMapper {
         .updatedAt(department.getUpdatedAt())
         .build();
     }
+
+//    public static UserEventInfoDTO toUserEventDepartmentDTO(Department department, Integer accountId) {
+//        if (department == null) {
+//            return null;
+//        }
+//
+//        return UserEventInfoDTO.builder()
+//                .departmentId(department.getDepartmentId())
+//                .eventId(department.getEventId())
+////                .departmentName(department.getName())
+//                .username()
+//                .accountId(accountId)
+//                .build();
+//    }
 }

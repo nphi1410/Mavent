@@ -12,6 +12,7 @@ import com.mavent.dev.mapper.AccountMapper;
 import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.repository.EventAccountRoleRepository;
 import com.mavent.dev.service.AccountService;
+import com.mavent.dev.service.DepartmentService;
 import com.mavent.dev.service.EventService;
 import com.mavent.dev.service.JwtBlacklistService;
 import com.mavent.dev.util.JwtUtil;
@@ -65,6 +66,8 @@ public class AccountController {
 
     @Autowired
     private CloudService cloudService;
+    @Autowired
+    private DepartmentService departmentService;
 
     @GetMapping("/accounts")
     public ResponseEntity<List<AccountDTO>> getAllAccounts() {
@@ -789,6 +792,8 @@ public class AccountController {
                     .body("Error retrieving user role: " + e.getMessage());
         }
     }
+
+
 
     @PutMapping("/user/tasks/{taskId}/attendees")
     public ResponseEntity<?> updateTaskAttendees(

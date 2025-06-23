@@ -2,6 +2,7 @@ package com.mavent.dev.repository;
 
 import com.mavent.dev.dto.EventCountDTO;
 import com.mavent.dev.dto.event.EventAccountRoleDTO;
+import com.mavent.dev.entity.Department;
 import com.mavent.dev.entity.EventAccountRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -227,5 +228,6 @@ public interface EventAccountRoleRepository extends JpaRepository<EventAccountRo
             @Param("accountId") Integer accountId,
             @Param("eventRole") String eventRole
     );
+
 
 }

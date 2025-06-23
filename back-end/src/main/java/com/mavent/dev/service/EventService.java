@@ -29,4 +29,5 @@ public interface EventService {
 
     EventDTO createEvent(EventDTO eventDTO);
 
+
 }

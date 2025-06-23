@@ -43,6 +43,7 @@ import SuperAdminViewEventDetails from "./pages/superadmin/SuperAdminViewEventDe
 import SuperAdminEditEvent from "./pages/superadmin/SuperAdminEditEvent";
 import SuperAdminViewUserDetails from "./pages/superadmin/SuperAdminViewUserDetails";
 import ViewEventFeedback from "./pages/ViewEventFeedback.jsx";
+import RequestHistory from "./pages/request/member/RequestHistory.jsx";
 
 // Higher Order Components for Route Protection
 const Protect = (Component) => <ProtectedRoute children={Component} />;
@@ -71,6 +72,7 @@ function App() {
           {/* Event Member Protected Routes */}
           <Route path="events/:id/departments" element={EventMember(<DepartmentManagementPage />)} />
           <Route path="events/:id/members" element={EventMember(<Members />)} />
+          <Route path="event/:id/account/:accountId/request" element={(<RequestHistory />)} />
 
           {/* Create Event-Protected Routes */}
           <Route path="create-event">

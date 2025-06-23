@@ -1,5 +1,6 @@
 package com.mavent.dev.service;
 
+import com.mavent.dev.dto.department.UserEventInfoDTO;
 import com.mavent.dev.dto.event.EventAccountRoleDTO;
 import com.mavent.dev.entity.EventAccountRole;
 import org.springframework.data.domain.Page;
@@ -53,4 +54,6 @@ public interface EventAccountRoleService {
                                                  java.util.Date startDate,
                                                  java.util.Date endDate,
                                                  Pageable pageable);
+
+    UserEventInfoDTO getUserEventInfo(Integer eventId, Integer accountId);
 }
