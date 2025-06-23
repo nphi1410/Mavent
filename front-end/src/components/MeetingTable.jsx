@@ -10,7 +10,7 @@ const MeetingTable = ({
   meetings,
   fetchMeetings,
   handleForm,
-  canModifyMeeting
+  canModifyMeeting,
 }) => {
   const [selectedMeeting, setSelectedMeeting] = useState(null);
 
@@ -59,7 +59,9 @@ const MeetingTable = ({
                 {vietnameseDate(meeting.meetingDatetime, true)}
               </td>
               <td className="px-4 py-3">{meeting.eventName}</td>
-              <td className="px-4 py-3">{meeting.departmentName}</td>
+              <td className="px-4 py-3">
+                {meeting.departmentId != null ? meeting.departmentName : "all"}
+              </td>
               <td className="px-4 py-3">{meeting.location}</td>
               <td className="px-4 py-3 text-center relative">
                 <Menu as="div" className="relative inline-block text-left">

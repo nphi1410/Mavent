@@ -105,7 +105,8 @@ public class MeetingImplement implements MeetingService {
 
     @Override
     public Page<MeetingDTO> getMeetingByAccountId(Integer accountId, String searchTitle, Integer eventId, Pageable pageable) {
-        return meetingRepository.findByAccountIdAndTitle(accountId, searchTitle, eventId, pageable);
+        Page<MeetingDTO> result = meetingRepository.findByAccountIdAndTitle(accountId, searchTitle, eventId, pageable);
+        return result;
     }
 
     @Override

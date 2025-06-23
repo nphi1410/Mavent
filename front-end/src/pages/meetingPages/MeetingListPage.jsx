@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { use, useCallback, useEffect, useMemo, useState } from "react";
 import { getMeetingByAccountId } from "../../services/meetingService";
 import { useNavigate } from "react-router-dom";
 import MeetingDetailsBoard from "../../components/MeetingDetailsBoard";
@@ -56,6 +56,9 @@ const MeetingListPage = () => {
   }, [accountId]);
 
   useEffect(() => {
+    console.log("MeetingListPage - Meetings updated:", meetings);
+  },[meetings])
+  useEffect(() => {
     if (eventId && joiningEvents.length > 0) {
       const event = joiningEvents.find(
         (e) => e.eventId.toString() === eventId.toString()
@@ -63,10 +66,6 @@ const MeetingListPage = () => {
       setSelectedEvent(event || null);
     }
   }, [eventId, joiningEvents]);
-
-  useEffect(() => {
-    console.log(selectedEvent);
-  }, [selectedEvent]);
 
   // Only used to update state from filter input
   const handleFilter = ({ page, searchTitle }) => {

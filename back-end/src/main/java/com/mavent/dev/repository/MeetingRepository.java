@@ -41,7 +41,7 @@ public interface MeetingRepository extends JpaRepository<Meeting, Integer> {
             FROM meeting_attendees ma
             JOIN meetings m ON ma.meeting_id = m.meeting_id
             JOIN events e ON e.event_id = m.event_id
-            JOIN departments d ON d.department_id = m.department_id
+            LEFT JOIN departments d ON d.department_id = m.department_id
             JOIN accounts a ON a.account_id = m.organizer_account_id
             WHERE ma.account_id = :accountId
               AND (:searchTitle IS NULL OR LOWER(m.title) LIKE LOWER(CONCAT('%', :searchTitle, '%')))
