@@ -32,7 +32,7 @@ const UserDashboardPage = () => {
       const data = await getAttendingEvent(accountId, pageable);
       if (data) {
         setEventData(data.content);
-        setTotalPagesFromApi(data.totalPages);
+        setTotalPagesFromApi(data.page.totalPages);
       }
     } catch (err) {
       console.error("Failed to fetch attending events", err);
