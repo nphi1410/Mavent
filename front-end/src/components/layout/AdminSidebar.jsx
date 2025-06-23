@@ -1,30 +1,50 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faUsers, 
   faTimes, 
-  faSitemap
+  faSitemap,
+  faFileAlt
 } from '@fortawesome/free-solid-svg-icons';
+import { useUserPermissions } from '../../hooks/useUserPermissions';
 
 // Sidebar component for admin dashboard
-const Sidebar = ({ activeItem, isOpen, onToggle }) => {  // Lấy event ID từ URL hiện tại
+const Sidebar = ({ activeItem, isOpen, onToggle }) => {
   const pathname = window.location.pathname;
   const eventIdMatch = pathname.match(/\/events\/(\d+)/);
   const eventId = eventIdMatch ? eventIdMatch[1] : '9'; // Mặc định là 9 nếu không tìm thấy
   
-  // Main section items
-  const mainItems = [    {
+  // Get user's role for the current event
+  const { userRole, loading } = useUserPermissions(eventId);
+  const isAdmin = userRole === 'ADMIN' || (userRole && userRole.includes('ADMIN'));
+  
+  // Define all menu items
+  const allMenuItems = [
+    {
       name: 'members',
       displayName: 'Members',
       icon: <FontAwesomeIcon icon={faUsers} />,
       link: `/events/${eventId}/members`,
-    },    {
+      adminOnly: true // Only visible to admins
+    },
+    {
       name: 'departments',
       displayName: 'Departments',
       icon: <FontAwesomeIcon icon={faSitemap} />,
       link: `/events/${eventId}/departments`,
+      adminOnly: true // Only visible to admins
+    },
+    {
+      name: 'documents',
+      displayName: 'Documents',
+      icon: <FontAwesomeIcon icon={faFileAlt} />,
+      link: `/events/${eventId}/documents`,
+      adminOnly: false // Visible to all roles
     }
   ];
+  
+  // Filter items based on user role
+  const mainItems = allMenuItems.filter(item => !item.adminOnly || isAdmin);
   // Không hiển thị phần Settings
   const settingsItems = [];
   return (

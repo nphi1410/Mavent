@@ -89,7 +89,7 @@ const DepartmentDetailModal = ({ isOpen, onClose, department, onEdit }) => {
   if (!isOpen || !department) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center z-9999">
       {/* Overlay */}
       <div className="absolute inset-0 bg-black opacity-50" onClick={onClose}></div>
       

@@ -4,7 +4,7 @@ import NavBar from "./../components/NavBar";
 import Content from "../components/Content";
 import Video from "../components/visual/Video";
 import Gallery from "../components/visual/Gallery";
-import { getImages } from "../services/documentService";
+import { getImages } from "../services/documentService.js";
 
 const HomePage = () => {
   return (

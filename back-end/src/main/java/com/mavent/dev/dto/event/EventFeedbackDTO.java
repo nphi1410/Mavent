@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class EventFeedbackDTO {
+    private Integer eventId;
     private Integer accountId;
     private Integer rating;
     private String comment;

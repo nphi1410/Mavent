@@ -52,19 +52,26 @@ export const getEventById = async (id) => {
   }
 };
 
-// ✅ Tạo sự kiện
-export const createEvent = async (eventData) => {
+// ✅ Tạo sự kiện (gửi multipart/form-data)
+export const createEvent = async (eventData, bannerFile, posterFile) => {
   try {
-    const response = await Api.post("/events/create-event", eventData);
+    const formData = new FormData();
+    formData.append("event", JSON.stringify(eventData)); // Dữ liệu JSON
+    formData.append("banner", bannerFile);               // File banner
+    formData.append("poster", posterFile);               // File poster
+
+    const response = await Api.post("/events/create-event", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
 
     const createdEvent = response.data;
-
-    // Nếu EventDTO có id
     const eventId = createdEvent?.eventId;
 
     return {
       success: true,
-      eventId: eventId, // Để navigate khi tạo xong
+      eventId: eventId,
       data: createdEvent,
     };
   } catch (error) {
@@ -76,6 +83,7 @@ export const createEvent = async (eventData) => {
     return { success: false, message: errorMessage };
   }
 };
+
 
 // Cập nhật sự kiện
 export const updateEvent = async (id, eventData) => {
@@ -124,5 +132,53 @@ export const getAttendingEvent = async (accountId, pageable) => {
     console.error("Error fetching attending events:", error);
     return [];
   }
+};
+
+export const getJoiningEvent = async (accountId) => {
+  try {
+    const response = await Api.get(`/events/joining/${accountId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching attending events:", error);
+    return [];
+  }
+};
+
+export const getAttendingSummary = async (accountId, eventRole) => {
+  try {
+    const response = await Api.get(`/events/attending/summary/${accountId}`, {
+      params: { eventRole },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching location:", error);
+    return [];
+  }
+};
+
+export const getSummary = async (status) => {
+  try {
+    const response = await Api.get(`/events/summary`, {
+      params: { status },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching location:", error);
+    return [];
+  }
+};
+
+export const countAttendanceByAccountId = async (accountId, eventRole, countCurrentMonth) => {
+  const response = await Api.get("/events/count", {
+    params: { accountId, eventRole, countCurrentMonth },
+  });
+  return response.data;
+};
+
+export const getEventRolesByAccount = async (accountId, page = 0, size = 1, sort = "createdAt,desc") => {
+  const response = await Api.get("/events/account", {
+    params: { accountId, page, size, sort },
+  });
+  return response.data;
 };
 

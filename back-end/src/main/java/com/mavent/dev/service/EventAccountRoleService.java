@@ -1,10 +1,12 @@
 package com.mavent.dev.service;
 
 import com.mavent.dev.dto.department.UserEventInfoDTO;
+import com.mavent.dev.dto.EventCountDTO;
 import com.mavent.dev.dto.event.EventAccountRoleDTO;
 import com.mavent.dev.entity.EventAccountRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -16,7 +18,9 @@ public interface EventAccountRoleService {
 
     List<EventAccountRole> getMembersByAccountId(Integer accountId);
 
-    Page<EventAccountRoleDTO> getMembersByAccountIdWithPagination(Integer accountId, Pageable pageable);
+    Page<EventAccountRoleDTO> getMembersByAccountIdWithPagination(Integer accountId, String searchTitle, String role, Pageable pageable);
+
+    List<EventAccountRoleDTO> getByAccountIdOnRole(Integer accountId);
 
     // Tìm kiếm và lọc members
     Page<EventAccountRole> searchMembersInEvent(Integer eventId, String searchTerm, Pageable pageable);
@@ -48,12 +52,12 @@ public interface EventAccountRoleService {
 
     // Lấy member với filters
     Page<EventAccountRole> getMembersWithFilters(Integer eventId, Boolean isActive,
-                                                 EventAccountRole.EventRole role,
-                                                 Integer departmentId,
-                                                 String searchTerm,
-                                                 java.util.Date startDate,
-                                                 java.util.Date endDate,
-                                                 Pageable pageable);
+
+    List<EventCountDTO> getMonthlyStatistic(Integer accountId, String eventRole);
+
+    Integer countAttendanceByAccountId(Integer accountId, EventAccountRole.EventRole eventRole, boolean countCurrentMonth);
+
+    Page<EventAccountRole> getByAccountIdAndPage(Integer accountId, Pageable pageable);
 
     UserEventInfoDTO getUserEventInfo(Integer eventId, Integer accountId);
 }

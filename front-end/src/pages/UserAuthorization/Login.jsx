@@ -50,7 +50,7 @@ function Login() {
           // console.log("User logged in");
           navigate("/profile");
         } else {
-          navigate("/home");
+          navigate("/");
         }
       }
     } catch (error) {

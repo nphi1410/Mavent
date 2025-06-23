@@ -31,13 +31,13 @@ public class DepartmentMapper {
         }
 
         return DepartmentResponseDTO.builder()
-        .departmentId(department.getDepartmentId())
-        .eventId(department.getEventId())
-        .name(department.getName())
-        .description(department.getDescription())
-        .createdAt(department.getCreatedAt())
-        .updatedAt(department.getUpdatedAt())
-        .build();
+                .departmentId(department.getDepartmentId())
+                .eventId(department.getEventId())
+                .name(department.getName())
+                .description(department.getDescription())
+                .createdAt(department.getCreatedAt())
+                .updatedAt(department.getUpdatedAt())
+                .build();
     }
 
 //    public static UserEventInfoDTO toUserEventDepartmentDTO(Department department, Integer accountId) {

@@ -206,3 +206,49 @@ export const updateTaskAttendees = async (taskId, attendees) => {
     throw error;
   }
 };
+
+export const updateTask = async (taskId, taskData) => {
+  try {
+    const response = await Api.put(`/user/tasks/${taskId}`, taskData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating task:", error);
+    handleAuthError(error);
+    throw error;
+  }
+};
+
+export const getEventDepartments = async (eventId) => {
+  try {
+    const response = await Api.get(`/events/${eventId}/departments`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching event departments:", error);
+    handleAuthError(error);
+    throw error;
+  }
+};
+
+export const getTaskFeedback = async (taskId) => {
+  try {
+    console.log("Fetching task feedback for taskId:", taskId);
+    
+    const response = await Api.get(`/user/tasks/${taskId}/feedback`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching task feedback:", error);
+    handleAuthError(error);
+    throw error;
+  }
+};
+
+export const createTaskFeedback = async (taskId, comment) => {
+  try {
+    const response = await Api.post(`/user/tasks/${taskId}/feedback`, { comment });
+    return response.data;
+  } catch (error) {
+    console.error("Error creating task feedback:", error);
+    handleAuthError(error);
+    throw error;
+  }
+};

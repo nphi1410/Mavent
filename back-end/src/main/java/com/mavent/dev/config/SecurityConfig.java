@@ -51,15 +51,18 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(Customizer.withDefaults())  // new lambda style to disable CSRF
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
+                .csrf(AbstractHttpConfigurer::disable)                .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/events/**",
                                 "/api/tags",
                                 "/api/document",
+                                "/api/documents/**",
+
                                 "/api/public/**",
                                 "/api/location/**",
-                                "/api/event/*/feedback"
+                                "/api/event/*/feedback",
+                                "/api/event/*/create-feedback",
+                                "/api/proposal"
                         ).permitAll()
                         .requestMatchers("/api/**").hasAnyRole("USER", "SUPER_ADMIN")
                         .requestMatchers("/api/dashboard").hasRole("SUPER_ADMIN")

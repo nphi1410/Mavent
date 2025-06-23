@@ -2,7 +2,7 @@
 
 import Api from "../config/Api";
 
-const BASE_URL = "/api/meetings";
+const BASE_URL = "/meetings";
 
 export const getAllMeetings = async () => {
   const response = await Api.get(BASE_URL);
@@ -11,6 +11,21 @@ export const getAllMeetings = async () => {
 
 export const getMeetingById = async (id) => {
   const response = await Api.get(`${BASE_URL}/${id}`);
+  return response.data;
+};
+
+export const getMeetingByAccountId = async (accountId, filters) => {
+  const params = new URLSearchParams();
+
+  if (filters?.searchTitle) params.append("searchTitle", filters.searchTitle);
+  if (filters?.eventId) params.append("eventId", filters.eventId);
+  if (filters?.page != null) params.append("page", filters.page);
+  if (filters?.size != null) params.append("size", filters.size);
+
+  const response = await Api.get(
+    `${BASE_URL}/account/${accountId}?${params.toString()}`
+  );
+  
   return response.data;
 };
 
