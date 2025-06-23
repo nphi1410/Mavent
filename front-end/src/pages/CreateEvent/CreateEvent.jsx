@@ -71,6 +71,12 @@ const CreateEvent = () => {
         } = formData;
 
         if (!name.trim()) return setError("Tên sự kiện không được để trống.");
+
+        const nameRegex = /^[a-zA-Z0-9\s.,()-]+$/u;
+        if (!nameRegex.test(name)) {
+            return setError("Tên sự kiện không được chứa ký tự đặc biệt.");
+        }
+
         if (!description.trim()) return setError("Mô tả không được để trống.");
         if (!locationId) return setError("Vui lòng chọn địa điểm.");
 
