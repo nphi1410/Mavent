@@ -50,6 +50,13 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
       icon: <FontAwesomeIcon icon={faFileAlt} />,
       link: `/events/${eventId}/documents`,
       requiredRole: 'MEMBER' // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
+    },
+    {
+      name: 'requests',
+      displayName: 'Requests',
+      icon: <FontAwesomeIcon icon={faFileAlt} />,
+      link: `/events/${eventId}/requests`,
+      requiredRole: 'ADMIN' // Only visible to department managers and admins
     }
   ];  // Filter items based on user role
   const mainItems = allMenuItems.filter(item => {
