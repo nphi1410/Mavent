@@ -2,7 +2,7 @@
 import { useState } from "react"
 import { ChevronLeft, Calendar, MessageSquare, MapPin, User } from "lucide-react"
 
-export default function EventDetails() {
+export default function EventDetailsByRoles() {
   const [activeDropdown, setActiveDropdown] = useState(null)
 
   const toggleDropdown = (dropdownName) => {
