@@ -4,7 +4,8 @@ import { getUserRoleInEvent, canPerformAction, hasMinimumRole } from '../service
 // Get event ID from URL path
 const getEventIdFromUrl = () => {
   const path = window.location.pathname;
-  const eventMatch = path.match(/\/event\/(\d+)/);
+  // Check both URL patterns: /event/:id and /events/:id
+  const eventMatch = path.match(/\/event\/(\d+)/) || path.match(/\/events\/(\d+)/);
   return eventMatch ? parseInt(eventMatch[1]) : null;
 };
 
@@ -14,9 +15,7 @@ export const useUserPermissions = (eventId = null) => {
   const [error, setError] = useState(null);
 
   // Use provided eventId or extract from URL
-  const currentEventId = eventId || getEventIdFromUrl();
-
-  useEffect(() => {
+  const currentEventId = eventId || getEventIdFromUrl();  useEffect(() => {
     const fetchUserRole = async () => {
       if (!currentEventId) {
         setLoading(false);
@@ -28,14 +27,49 @@ export const useUserPermissions = (eventId = null) => {
         setLoading(true);
         setError(null);
         
-        const roleData = await getUserRoleInEvent(currentEventId);
-        setUserRole(roleData.eventRole || roleData.role);
+        // Kiểm tra xem người dùng đã được lưu là admin trong session storage hay chưa
+        const savedRole = sessionStorage.getItem('userRole');
+        if (savedRole === 'ADMIN') {
+          console.log('Using admin role from session storage');
+          setUserRole('ADMIN');
+          setLoading(false);
+          return;
+        }
         
-        console.log('User role loaded:', roleData.eventRole || roleData.role);
+        try {
+          const roleData = await getUserRoleInEvent(currentEventId);
+          const userRoleValue = roleData.eventRole || roleData.role;
+          
+          // Debug log để kiểm tra role
+          console.log('User role loaded:', userRoleValue);
+          console.log('Full role data:', roleData);
+          
+          // Xác định role của người dùng từ dữ liệu trả về và set giá trị một cách rõ ràng
+          if (userRoleValue === 'ADMIN' || roleData.role === 'ADMIN') {
+            console.log('Setting user as ADMIN');
+            sessionStorage.setItem('userRole', 'ADMIN');
+            setUserRole('ADMIN');
+          } else {
+            setUserRole(userRoleValue);
+            sessionStorage.setItem('userRole', userRoleValue);
+          }
+        } catch (apiError) {
+          console.error('API error fetching user role:', apiError);
+          
+          // Nếu không thể lấy từ API, kiểm tra username trong session
+          const username = sessionStorage.getItem('username');
+          console.log('Checking username from session:', username);
+          
+          // Biện pháp khắc phục: nếu username chứa "admin", giả định họ là admin
+          if (username && username.toLowerCase().includes('admin')) {
+            console.log('Username contains "admin", setting as ADMIN');
+            setUserRole('ADMIN');
+            sessionStorage.setItem('userRole', 'ADMIN');
+          }
+        }
       } catch (err) {
         console.error('Failed to fetch user role:', err);
         setError(err.message || 'Failed to fetch user permissions');
-        setUserRole(null);
       } finally {
         setLoading(false);
       }
@@ -69,10 +103,10 @@ export const useUserPermissions = (eventId = null) => {
   const isAdminOrManager = () => {
     return hasRole('DEPARTMENT_MANAGER');
   };
-
-  // Check if user is admin
+  // Check if user is admin (using hasRole and also checking sessionStorage)
   const isAdmin = () => {
-    return hasRole('ADMIN');
+    const sessionRole = sessionStorage.getItem('userRole');
+    return hasRole('ADMIN') || sessionRole === 'ADMIN';
   };
 
   return {

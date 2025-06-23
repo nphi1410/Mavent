@@ -178,7 +178,6 @@ const memberService = {
       throw error;
     }
   },
-
   // Xóa member khỏi event
   removeMember: async (eventId, accountId) => {
     try {
@@ -188,23 +187,131 @@ const memberService = {
       console.error('Error removing member:', error);
       throw error;
     }
-  },
-
-  // Lấy danh sách departments của một event
+  },  
+    // Lấy danh sách departments của một event
   getDepartments: async (eventId, signal = undefined) => {
     try {
-      const response = await Api.get(`/departments?eventId=${eventId}`, { signal });
-      return response.data;
-    } catch (error) {
-      // Handle abort errors separately
-      if (error.name === 'AbortError' || error.code === 'ECONNABORTED' || 
-          (error.message && error.message.includes('canceled'))) {
-        // console.log('Departments request was cancelled');
-        throw { name: 'AbortError', message: 'Request aborted' };
+      console.log('Calling API to get departments for eventId:', eventId);
+      
+      // Kiểm tra eventId
+      if (!eventId) {
+        console.warn('No eventId provided for getDepartments');
+        return { 
+          success: false, 
+          data: [],
+          message: 'No event ID provided' 
+        };
       }
       
+      // Gọi API thực tế để lấy danh sách phòng ban của sự kiện
+      try {
+        // Thử gọi API với endpoint /departments trước
+        try {
+          const response = await Api.get(`/departments?eventId=${eventId}`, { 
+            signal,
+            timeout: 8000 // 8 giây timeout
+          });
+          
+          console.log('Departments API response from /departments:', response);
+          
+          // Xử lý phản hồi từ API
+          let departments = [];
+          
+          if (response && response.data) {
+            // Nếu API trả về mảng trực tiếp
+            if (Array.isArray(response.data)) {
+              departments = response.data;
+            } 
+            // Nếu API trả về đối tượng có thuộc tính data/content là mảng 
+            else if (Array.isArray(response.data.data)) {
+              departments = response.data.data;
+            } 
+            else if (Array.isArray(response.data.content)) {
+              departments = response.data.content;
+            }
+          }
+          
+          if (departments.length > 0) {
+            // Thêm mã phòng ban nếu không có
+            departments = departments.map(dept => {
+              if (!dept.deptNo) {
+                // Tạo deptNo từ departmentId nếu không có sẵn
+                return {
+                  ...dept,
+                  deptNo: `DEPT-${String(dept.departmentId).padStart(3, '0')}`
+                };
+              }
+              return dept;
+            });
+            
+            return {
+              success: true,
+              data: departments,
+              message: 'Departments fetched successfully'
+            };
+          }
+        } catch (err) {
+          console.log('Error fetching from /departments, trying alternative endpoint:', err);
+        }
+        
+        // Nếu endpoint đầu tiên thất bại, thử với endpoint thay thế
+        const alternativeResponse = await Api.get(`/events/${eventId}/departments`, { 
+          signal,
+          timeout: 8000
+        });
+        
+        console.log('Departments API response from alternative endpoint:', alternativeResponse);
+        
+        let departments = [];
+        
+        if (alternativeResponse && alternativeResponse.data) {
+          if (Array.isArray(alternativeResponse.data)) {
+            departments = alternativeResponse.data;
+          } else if (alternativeResponse.data.content && Array.isArray(alternativeResponse.data.content)) {
+            departments = alternativeResponse.data.content;
+          } else if (alternativeResponse.data.data && Array.isArray(alternativeResponse.data.data)) {
+            departments = alternativeResponse.data.data;
+          }
+        }
+        
+        // Thêm mã phòng ban nếu không có
+        departments = departments.map(dept => {
+          if (!dept.deptNo) {
+            return {
+              ...dept,
+              deptNo: `DEPT-${String(dept.departmentId).padStart(3, '0')}`
+            };
+          }
+          return dept;
+        });
+        
+        return {
+          success: true,
+          data: departments,
+          message: 'Departments fetched successfully from alternative endpoint'
+        };
+      } catch (apiError) {
+        console.error('API error in getDepartments:', apiError);
+        
+        // Kiểm tra nếu request bị hủy/timeout
+        if (apiError.name === 'AbortError' || apiError.code === 'ECONNABORTED' || 
+            (apiError.message && (apiError.message.includes('canceled') || apiError.message.includes('timeout')))) {
+          console.log('Departments request was cancelled or timed out');
+        }
+        
+        // Rethrow để xử lý ở cấp cao hơn
+        throw apiError;
+      }
+    } catch (error) {
       console.error('Error fetching departments:', error);
-      throw error;
+      
+      // Trả về đối tượng với dữ liệu rỗng để UI hiển thị trạng thái không có dữ liệu
+      return {
+        success: false,
+        data: [],
+        message: 'Failed to get departments from API',
+        error: error.message
+      };
     }
   },
   

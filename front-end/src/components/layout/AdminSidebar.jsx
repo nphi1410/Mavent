@@ -1,27 +1,56 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
-  faUsers,
-  faTimes
+  faUsers, 
+  faTimes, 
+  faSitemap,
+  faFileAlt
 } from '@fortawesome/free-solid-svg-icons';
+import { useUserPermissions } from '../../hooks/useUserPermissions';
 
 // Sidebar component for admin dashboard
 const Sidebar = ({ activeItem, isOpen, onToggle }) => {
-  // Main section items
-  const mainItems = [
+  const pathname = window.location.pathname;
+  const eventIdMatch = pathname.match(/\/events\/(\d+)/);
+  const eventId = eventIdMatch ? eventIdMatch[1] : '9'; // Mặc định là 9 nếu không tìm thấy
+  
+  // Get user's role for the current event
+  const { userRole, loading } = useUserPermissions(eventId);
+  const isAdmin = userRole === 'ADMIN' || (userRole && userRole.includes('ADMIN'));
+  
+  // Define all menu items
+  const allMenuItems = [
     {
-      name: 'Members',
+      name: 'members',
+      displayName: 'Members',
       icon: <FontAwesomeIcon icon={faUsers} />,
-      link: '/event/9/members',
+      link: `/events/${eventId}/members`,
+      adminOnly: true // Only visible to admins
+    },
+    {
+      name: 'departments',
+      displayName: 'Departments',
+      icon: <FontAwesomeIcon icon={faSitemap} />,
+      link: `/events/${eventId}/departments`,
+      adminOnly: true // Only visible to admins
+    },
+    {
+      name: 'documents',
+      displayName: 'Documents',
+      icon: <FontAwesomeIcon icon={faFileAlt} />,
+      link: `/events/${eventId}/documents`,
+      adminOnly: false // Visible to all roles
     }
   ];
+  
+  // Filter items based on user role
+  const mainItems = allMenuItems.filter(item => !item.adminOnly || isAdmin);
   // Không hiển thị phần Settings
   const settingsItems = [];
-
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:block w-64 bg-white shadow-md h-screen fixed left-0 top-0 pt-16 z-30">
+      <aside className={`hidden lg:block w-64 bg-white shadow-md h-screen fixed left-0 top-0 pt-16 z-30`}>
         <div className="px-4 py-6 h-full overflow-y-auto">
           <h2 className="mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Main</h2>
           <ul className="space-y-1">
@@ -36,7 +65,7 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
                   }`}
                 >
                   <span className="w-5 h-5 text-gray-500">{item.icon}</span>
-                  <span className="ml-3">{item.name}</span>
+                  <span className="ml-3">{item.displayName || item.name}</span>
                 </a>
               </li>
             ))}
@@ -58,7 +87,7 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
                       }`}
                     >
                       <span className="w-5 h-5 text-gray-500">{item.icon}</span>
-                      <span className="ml-3">{item.name}</span>
+                      <span className="ml-3">{item.displayName || item.name}</span>
                     </a>
                   </li>
                 ))}
@@ -66,26 +95,27 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
             </>
           )}
         </div>
-      </aside>
-
-      {/* Mobile Sidebar */}
+      </aside>      {/* Mobile Sidebar with improved visibility and accessibility */}
       <aside className={`
-        lg:hidden fixed left-0 top-0 w-64 h-full bg-white shadow-lg transform transition-transform duration-300 ease-in-out z-50
+        lg:hidden fixed left-0 top-0 w-72 h-full bg-white shadow-xl transform transition-all duration-300 ease-in-out z-50
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        {/* Mobile Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-800">Menu</h2>
+        {/* Mobile Header with improved styling */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-blue-50">
+          <div className="flex items-center">
+            <span className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 text-blue-700 mr-3">
+              <FontAwesomeIcon icon={faSitemap} className="h-4 w-4" />
+            </span>
+            <h2 className="text-lg font-semibold text-gray-800">Admin Menu</h2>
+          </div>
           <button
             onClick={onToggle}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500"
+            aria-label="Close menu"
           >
             <FontAwesomeIcon icon={faTimes} className="h-5 w-5" />
           </button>
-        </div>
-
-        {/* Mobile Menu Content */}
-        <div className="px-4 py-6 h-full overflow-y-auto">
+        </div>        {/* Mobile Menu Content with help text */}        <div className="px-4 py-6 h-full overflow-y-auto">
           <h3 className="mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Main</h3>
           <ul className="space-y-1">
             {mainItems.map((item) => (
@@ -100,7 +130,7 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
                   }`}
                 >
                   <span className="w-5 h-5 text-gray-500">{item.icon}</span>
-                  <span className="ml-3">{item.name}</span>
+                  <span className="ml-3">{item.displayName || item.name}</span>
                 </a>
               </li>
             ))}
@@ -123,7 +153,7 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
                       }`}
                     >
                       <span className="w-5 h-5 text-gray-500">{item.icon}</span>
-                      <span className="ml-3">{item.name}</span>
+                      <span className="ml-3">{item.displayName || item.name}</span>
                     </a>
                   </li>
                 ))}

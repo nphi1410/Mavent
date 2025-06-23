@@ -2,7 +2,6 @@ import { Transition, TransitionChild } from "@headlessui/react";
 import { Fragment, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
-import { logout } from "../../services/AuthService";
 import LogoutButton from "./LogoutButton";
 
 const SideBar = ({ isOpen, setIsOpen }) => {
@@ -11,11 +10,13 @@ const SideBar = ({ isOpen, setIsOpen }) => {
 
   const navList = [
     { name: "Home", icon: "fa-solid fa-house", path: "/" },
-    { name:"all events", icon: "fa-solid fa-calendar", path: "/events" },
+    { name:"All events", icon: "fa-solid fa-calendar", path: "/events" },
     { name: "Profile", icon: "fa-solid fa-user", path: "/profile" },
     { name: "Dashboard", icon: "fa-solid fa-chart-line", path: "/profile/dashboard" },
     { name: "Attended Events", icon: "fa-solid fa-calendar-check", path: "/profile/attended" },
-    { name: "tasks", icon: "fa-solid fa-list-check", path: "/profile/tasks" },
+    { name: "Tasks", icon: "fa-solid fa-list-check", path: "/profile/tasks" },
+    { name: "Create New Event", icon: "fa-solid fa-list-check", path: "/create-event" },
+    { name: "Meetings", icon: "fa-solid fa-comments", path: "/meetings" },
     { name: "Create New Event", icon: "fa-solid fa-list-check", path: "/create-event" }
   ];
 

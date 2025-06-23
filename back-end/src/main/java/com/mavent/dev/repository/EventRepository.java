@@ -1,5 +1,6 @@
 package com.mavent.dev.repository;
 
+import com.mavent.dev.dto.EventCountDTO;
 import com.mavent.dev.dto.FilterEventDTO;
 import com.mavent.dev.entity.Event;
 import org.springframework.data.domain.Page;
@@ -55,6 +56,19 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
             @Param("sortType") String sortType,
             Pageable pageable
     );
+
+    @Query(value = """
+                SELECT 
+                    DATE_FORMAT(created_at, '%Y-%m') AS yearMonth,
+                    COUNT(*) AS totalEvent
+                FROM events
+                WHERE created_at >= DATE_FORMAT(CURDATE() - INTERVAL 6 MONTH, '%Y-%m-01')
+                  AND created_at <  DATE_FORMAT(CURDATE() + INTERVAL 1 MONTH, '%Y-%m-01')
+                  AND (:status IS NULL OR status != :status)
+                GROUP BY yearMonth
+                ORDER BY yearMonth DESC
+            """, nativeQuery = true)
+    List<EventCountDTO> countByMonthWithoutStatus(@Param("status") String status);
 
 
 }

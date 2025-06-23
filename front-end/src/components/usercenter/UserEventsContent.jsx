@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 // Bỏ import axios nếu không dùng trực tiếp nữa
-// import axios from 'axios'; 
-import { getUserEvents } from '../../services/profileService'; // Sử dụng hàm service này
-import EventCard from './EventCard';
-import { useNavigate } from 'react-router-dom';
+// import axios from 'axios';
+import { getUserEvents } from "../../services/profileService"; // Sử dụng hàm service này
+import EventCard from "./EventCard";
+import { useNavigate } from "react-router-dom";
 
 const UserEventsContent = () => {
   const [events, setEvents] = useState([]);
@@ -13,9 +13,9 @@ const UserEventsContent = () => {
   const eventsPerPage = 3;
 
   const [filters, setFilters] = useState({
-    keyword: '',
-    status: '',
-    role: ''
+    keyword: "",
+    status: "",
+    role: "",
   });
   const [filteredEvents, setFilteredEvents] = useState([]);
   const navigate = useNavigate();
@@ -23,18 +23,20 @@ const UserEventsContent = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       setLoading(true); // Bắt đầu quá trình tải
-      setError(null);   // Xóa lỗi cũ
+      setError(null); // Xóa lỗi cũ
       try {
         // Sử dụng hàm service getUserEvents
-        const eventData = await getUserEvents(); 
+        const eventData = await getUserEvents();
         setEvents(eventData); // Service đã trả về response.data
       } catch (err) {
-        // hàm getUserEvents trong service đã gọi handleAuthError, 
+        // hàm getUserEvents trong service đã gọi handleAuthError,
         // handleAuthError sẽ throw error (ví dụ 'Authentication required') nếu có lỗi xác thực
         // hoặc tự động chuyển hướng nếu là 401.
         console.error("UserEventsContent: Failed to fetch events:", err);
         // Hiển thị thông báo lỗi mà service đã throw, hoặc một thông báo chung
-        setError(err.message || 'Could not load events. Please try again later.');
+        setError(
+          err.message || "Could not load events. Please try again later."
+        );
       } finally {
         setLoading(false); // Luôn đặt loading thành false sau khi hoàn tất
       }
@@ -52,32 +54,34 @@ const UserEventsContent = () => {
   const filterEvents = () => {
     let result = [...events];
     if (filters.role) {
-      result = result.filter(event => event.role === filters.role);
-    }
-    if (filters.keyword) {
-      result = result.filter(event => 
-        event.eventName.toLowerCase().includes(filters.keyword.toLowerCase())
-      );
-    }
-    if (filters.status) {
-      result = result.filter(event => event.status === filters.status);
-    }
+      result = result.filter((event) => event.role === filters.role);
+    }
+    if (filters.keyword) {
+      result = result.filter((event) =>
+        event.eventName.toLowerCase().includes(filters.keyword.toLowerCase())
+      );
+    }
+    if (filters.status) {
+      result = result.filter((event) => event.status === filters.status);
+    }
     setFilteredEvents(result);
   };
-  
+
   // ... (phần còn lại của component: tính toán phân trang, JSX, ...)
   // Tính toán phân trang dựa trên filteredEvents
   const totalPages = Math.ceil((filteredEvents?.length || 0) / eventsPerPage);
-  const paginatedEvents = filteredEvents?.slice(
-    (currentPage - 1) * eventsPerPage,
-    currentPage * eventsPerPage
-  ) || [];
+  const paginatedEvents =
+    filteredEvents?.slice(
+      (currentPage - 1) * eventsPerPage,
+      currentPage * eventsPerPage
+    ) || [];
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-full">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-    </div>
-  );
+  if (loading)
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
 
   // if (error) return (
   //   <div className="p-10 text-red-600 flex items-center justify-center">
@@ -98,7 +102,9 @@ const UserEventsContent = () => {
             <select
               className="w-48 px-4 py-2 border rounded-lg appearance-none"
               value={filters.status}
-              onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, status: e.target.value }))
+              }
             >
               <option value="">All Status</option>
               <option value="RECRUITING">Recruiting</option>
@@ -110,7 +116,13 @@ const UserEventsContent = () => {
               <option value="REVIEWING">Reviewing</option>
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2">
-              <svg className="h-4 w-4 fill-current text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+              <svg
+                className="h-4 w-4 fill-current text-gray-500"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+              >
+                <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+              </svg>
             </div>
           </div>
           {/* Role filter */}
@@ -118,7 +130,9 @@ const UserEventsContent = () => {
             <select
               className="w-48 px-4 py-2 border rounded-lg appearance-none"
               value={filters.role}
-              onChange={(e) => setFilters(prev => ({ ...prev, role: e.target.value }))}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, role: e.target.value }))
+              }
             >
               <option value="">All Roles</option>
               <option value="ADMIN">Admin</option>
@@ -127,21 +141,41 @@ const UserEventsContent = () => {
               <option value="PARTICIPANT">Participant</option>
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2">
-             <svg className="h-4 w-4 fill-current text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+              <svg
+                className="h-4 w-4 fill-current text-gray-500"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+              >
+                <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+              </svg>
             </div>
           </div>
         </div>
         {/* Right side search */}
         <div className="relative">
           <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            <svg
+              className="w-4 h-4 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
           </div>
           <input
             type="text"
             placeholder="Search by name..."
             className="w-64 pl-10 pr-4 py-2 border rounded-lg"
             value={filters.keyword}
-            onChange={(e) => setFilters(prev => ({ ...prev, keyword: e.target.value }))}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, keyword: e.target.value }))
+            }
           />
         </div>
       </div>
@@ -149,22 +183,29 @@ const UserEventsContent = () => {
       {/* Grid và Pagination */}
       {filteredEvents.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {paginatedEvents.map(event => (
+          {paginatedEvents.map((event) => (
             <EventCard key={event.eventId} event={event} />
-            ))}
+          ))}
         </div>
       ) : (
-        !loading && <div className="text-center py-10 text-gray-500">No events found.</div>
+        !loading && (
+          <div className="text-center py-10 text-gray-500">
+            No events found.
+          </div>
+        )
       )}
-      
 
       {totalPages > 1 && (
         <div className="mt-8 flex justify-center">
           <div className="py-4 px-6 flex justify-center items-center gap-4">
             <button
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className={`px-3 py-1 rounded ${ currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#00155c] text-white hover:bg-[#172c70]'}`}
+              className={`px-3 py-1 rounded ${
+                currentPage === 1
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-[#00155c] text-white hover:bg-[#172c70]"
+              }`}
             >
               Previous
             </button>
@@ -182,15 +223,25 @@ const UserEventsContent = () => {
                   ))}
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2">
-                  <svg className="h-4 w-4 fill-current text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+                  <svg
+                    className="h-4 w-4 fill-current text-gray-500"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                  </svg>
                 </div>
               </div>
               <span className="text-gray-600">of {totalPages}</span>
             </div>
             <button
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages || totalPages === 0}
-              className={`px-3 py-1 rounded ${ (currentPage === totalPages || totalPages === 0) ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#00155c] text-white hover:bg-[#172c70]'}`}
+              className={`px-3 py-1 rounded ${
+                currentPage === totalPages || totalPages === 0
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-[#00155c] text-white hover:bg-[#172c70]"
+              }`}
             >
               Next
             </button>

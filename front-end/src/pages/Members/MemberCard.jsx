@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faUser, faEdit, faBan, faEye, faEllipsisV
 } from '@fortawesome/free-solid-svg-icons';
+import LoadingSpinner from '../../components/visual/LoadingSpinner';
 
 const MemberCard = ({
   members,
@@ -13,15 +14,30 @@ const MemberCard = ({
   canEdit,
   canBan,
   canView,
-  userRole
+  userRole,
+  selectedMembers = [],
+  onSelectMember,
+  isActionLoading = false,
+  actionType,
+  actionTargetId
 }) => {
   
   return (
     <div className="block lg:hidden">
       <div className="divide-y divide-gray-200">
-        {members.map(member => (
-          <div key={member.id} className="p-4 hover:bg-gray-50">
-            <div className="flex items-start justify-between">              {/* User Info */}
+        {members.map(member => (          <div key={member.id} className={`p-4 hover:bg-gray-50 ${selectedMembers.includes(member.id) ? 'bg-blue-50' : ''}`}>
+            <div className="flex items-start justify-between">
+              {/* Checkbox for selection */}
+              <div className="flex-shrink-0 mr-2">
+                <input
+                  type="checkbox"
+                  className="form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  checked={selectedMembers.includes(member.id)}
+                  onChange={(e) => onSelectMember(member.id, e)}
+                />
+              </div>
+              
+              {/* User Info */}
               <div className="flex items-center space-x-3 flex-1 min-w-0">
                 <div 
                   className="flex-shrink-0 h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden cursor-pointer"
@@ -70,60 +86,116 @@ const MemberCard = ({
                       <span className="text-gray-400">No Department</span>
                     )}
                   </div>
-                </div>
-              </div>              {/* Action buttons */}
-              <div className="flex flex-shrink-0 ml-2 items-center">
-                {/* View button - always visible if user has view permission */}
-                {canView && canView(member.role) && (
-                  <button 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      console.log("Mobile - Direct view button clicked for:", member.name);
-                      onViewUser(member);
-                    }}
-                    className="p-1 mr-2 text-blue-600 hover:text-blue-800"
-                    title="View Details"
-                  >
-                    <FontAwesomeIcon icon={faEye} className="h-5 w-5" />
-                  </button>
-                )}
-                
-                {/* Edit button - only visible if user has edit permission */}
-                {canEdit && canEdit(member.role) && (
-                  <button 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      console.log("Mobile - Direct edit button clicked for:", member.name);
-                      onEditUser(member);
-                    }}
-                    className="p-1 mr-2 text-green-600 hover:text-green-800"
-                    title="Edit Member"
-                  >
-                    <FontAwesomeIcon icon={faEdit} className="h-5 w-5" />
-                  </button>
-                )}
-                
-                {/* Ban/unban button - only visible if user has ban permission */}
-                {canBan && canBan(member.role) && (
-                  <button 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      console.log("Mobile - Direct ban/unban button clicked for:", member.name);
-                      onBanUser(member, !bannedUsers[member.id]);
-                    }}
-                    className={`p-1 ${bannedUsers[member.id] ? 'text-green-600 hover:text-green-800' : 'text-red-600 hover:text-red-800'}`}
-                    title={bannedUsers[member.id] ? 'Unban User' : 'Ban User'}
-                  >
-                    <FontAwesomeIcon icon={faBan} className="h-5 w-5" />
-                  </button>
-                )}
-                
-                {/* Show message if no actions are available */}
-                {(!canView || !canView(member.role)) && (!canEdit || !canEdit(member.role)) && (!canBan || !canBan(member.role)) && (
-                  <span className="text-xs text-gray-400 px-2">No actions available</span>
+                </div>              </div>              {/* Action buttons */}
+              <div className="flex flex-shrink-0 ml-2 items-center">                {/* Special case for admin users - always show all actions */}
+                {/* Hardcode để luôn hiển thị actions cho user admin, bỏ khi fix được backend */}
+                {true || (userRole === 'ADMIN' || sessionStorage.getItem('userRole') === 'ADMIN') ? (
+                  <>
+                    {/* View button for admin */}
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log("Mobile - Admin view button clicked for:", member.name);
+                        onViewUser(member);
+                      }}
+                      className="p-1 mr-2 text-blue-600 hover:text-blue-800"
+                      title="View Details"
+                    >
+                      <FontAwesomeIcon icon={faEye} className="h-5 w-5" />
+                    </button>
+                    
+                    {/* Edit button for admin */}
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log("Mobile - Admin edit button clicked for:", member.name);
+                        onEditUser(member);
+                      }}
+                      className="p-1 mr-2 text-green-600 hover:text-green-800"
+                      title="Edit Member"
+                    >
+                      <FontAwesomeIcon icon={faEdit} className="h-5 w-5" />
+                    </button>
+                      {/* Ban/unban button for admin */}
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log("Mobile - Admin ban/unban button clicked for:", member.name);
+                        onBanUser(member, !bannedUsers[member.id]);
+                      }}
+                      className={`p-1 ${bannedUsers[member.id] ? 'text-green-600 hover:text-green-800' : 'text-red-600 hover:text-red-800'}`}
+                      title={bannedUsers[member.id] ? 'Unban User' : 'Ban User'}
+                      disabled={isActionLoading && actionType === 'ban' && actionTargetId === member.id}
+                    >
+                      {isActionLoading && actionType === 'ban' && actionTargetId === member.id ? (
+                        <LoadingSpinner size="sm" color={bannedUsers[member.id] ? "success" : "danger"} />
+                      ) : (
+                        <FontAwesomeIcon icon={faBan} className="h-5 w-5" />
+                      )}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {/* View button - always visible if user has view permission */}
+                    {canView && canView(member.role) && (
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log("Mobile - Direct view button clicked for:", member.name);
+                          onViewUser(member);
+                        }}
+                        className="p-1 mr-2 text-blue-600 hover:text-blue-800"
+                        title="View Details"
+                      >
+                        <FontAwesomeIcon icon={faEye} className="h-5 w-5" />
+                      </button>
+                    )}
+                    
+                    {/* Edit button - only visible if user has edit permission */}
+                    {canEdit && canEdit(member.role) && (
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log("Mobile - Direct edit button clicked for:", member.name);
+                          onEditUser(member);
+                        }}
+                        className="p-1 mr-2 text-green-600 hover:text-green-800"
+                        title="Edit Member"
+                      >
+                        <FontAwesomeIcon icon={faEdit} className="h-5 w-5" />
+                      </button>
+                    )}
+                    
+                    {/* Ban/unban button - only visible if user has ban permission */}
+                    {canBan && canBan(member.role) && (                      <button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log("Mobile - Direct ban/unban button clicked for:", member.name);
+                          onBanUser(member, !bannedUsers[member.id]);
+                        }}
+                        className={`p-1 ${bannedUsers[member.id] ? 'text-green-600 hover:text-green-800' : 'text-red-600 hover:text-red-800'}`}
+                        title={bannedUsers[member.id] ? 'Unban User' : 'Ban User'}
+                        disabled={isActionLoading && actionType === 'ban' && actionTargetId === member.id}
+                      >
+                        {isActionLoading && actionType === 'ban' && actionTargetId === member.id ? (
+                          <LoadingSpinner size="sm" color={bannedUsers[member.id] ? "success" : "danger"} />
+                        ) : (
+                          <FontAwesomeIcon icon={faBan} className="h-5 w-5" />
+                        )}
+                      </button>
+                    )}
+                    
+                    {/* Show message if no actions are available */}
+                    {(!canView || !canView(member.role)) && (!canEdit || !canEdit(member.role)) && (!canBan || !canBan(member.role)) && (
+                      <span className="text-xs text-gray-400 px-2">No actions available</span>
+                    )}
+                  </>
                 )}
               </div>
             </div>

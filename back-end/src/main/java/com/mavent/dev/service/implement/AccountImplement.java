@@ -1,23 +1,18 @@
 package com.mavent.dev.service.implement;
 
-import com.mavent.dev.entity.Event;
-import com.mavent.dev.entity.Department;
-import com.mavent.dev.dto.TaskCreateDTO;
+import com.mavent.dev.dto.task.TaskAttendeeDTO;
+import com.mavent.dev.dto.task.TaskFeedbackDTO;
+import com.mavent.dev.entity.*;
+import com.mavent.dev.dto.task.TaskCreateDTO;
 import com.mavent.dev.dto.superadmin.AccountDTO;
-import com.mavent.dev.entity.Task;
-import com.mavent.dev.entity.TaskAttendee;
-import com.mavent.dev.repository.TaskAttendeeRepository;
-import com.mavent.dev.repository.EventRepository;
-import com.mavent.dev.repository.DepartmentRepository;
+import com.mavent.dev.repository.*;
+import com.mavent.dev.util.JwtUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
-import com.mavent.dev.dto.TaskDTO;
+import com.mavent.dev.dto.task.TaskDTO;
 import com.mavent.dev.dto.UserEventDTO;
 import com.mavent.dev.dto.UserProfileDTO;
-import com.mavent.dev.entity.Account;
-import com.mavent.dev.repository.AccountRepository;
-import com.mavent.dev.repository.TaskRepository;
 import com.mavent.dev.service.AccountService;
 import com.mavent.dev.config.MailConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +26,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -52,9 +47,11 @@ public class AccountImplement implements AccountService, UserDetailsService {
 
 //    @Autowired
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
-    public AccountImplement(PasswordEncoder passwordEncoder) {
+    public AccountImplement(PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
@@ -143,10 +140,8 @@ public class AccountImplement implements AccountService, UserDetailsService {
     }
 
     @Override
-    public AccountDTO getAccountById(Integer id) {
-        Account account = accountRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("Account not found with ID: " + id));
-
-        return mapAccountToDTO(account);
+    public Account getAccountById(Integer id) {
+        return accountRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("Account not found with ID: " + id));
     }
 
     @Override
@@ -239,9 +234,15 @@ public class AccountImplement implements AccountService, UserDetailsService {
     public List<TaskDTO> getUserTasks(Integer accountId, String status, String priority, String keyword, String sortOrder, String eventName) {
         List<TaskDTO> tasks = taskRepository.findTasksWithEventAndDepartment(accountId);
 
-        // Filter by status
+        // Filter by status (multi)
         if (status != null && !status.isBlank()) {
-            tasks = tasks.stream().filter(t -> t.getStatus().equalsIgnoreCase(status)).toList();
+            List<String> statusList = Arrays.stream(status.split(","))
+                    .map(String::trim)
+                    .map(String::toUpperCase)
+                    .toList();
+            tasks = tasks.stream()
+                    .filter(t -> statusList.contains(t.getStatus().toUpperCase()))
+                    .toList();
         }
 
         // Filter by priority
@@ -252,13 +253,17 @@ public class AccountImplement implements AccountService, UserDetailsService {
         // Filter by event name
         if (eventName != null && !eventName.isBlank()) {
             String lowerEventName = eventName.toLowerCase();
-            tasks = tasks.stream().filter(t -> t.getEventName() != null && t.getEventName().toLowerCase().contains(lowerEventName)).toList();
+            tasks = tasks.stream()
+                    .filter(t -> t.getEventName() != null && t.getEventName().toLowerCase().contains(lowerEventName))
+                    .toList();
         }
 
         // Search by keyword (in title)
         if (keyword != null && !keyword.isBlank()) {
             String lowerKeyword = keyword.toLowerCase();
-            tasks = tasks.stream().filter(t -> t.getTitle().toLowerCase().contains(lowerKeyword)).toList();
+            tasks = tasks.stream()
+                    .filter(t -> t.getTitle().toLowerCase().contains(lowerKeyword))
+                    .toList();
         }
 
         // Sort by dueDate
@@ -271,6 +276,30 @@ public class AccountImplement implements AccountService, UserDetailsService {
         }
 
         return tasks;
+    }
+
+    @Override
+    public List<TaskAttendeeDTO> getTaskAttendees(Integer taskId) {
+        Task task = taskRepository.findById(taskId)
+            .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
+
+        List<TaskAttendee> attendees = taskAttendeeRepository.findByTaskId(taskId);
+
+        return attendees.stream().map(attendee -> {
+            TaskAttendeeDTO dto = new TaskAttendeeDTO();
+            dto.setTaskId(attendee.getTaskId());
+            dto.setAccountId(attendee.getAccountId());
+            dto.setStatus(attendee.getStatus().name());
+
+            Account account = accountRepository.findById(attendee.getAccountId()).orElse(null);
+            if (account != null) {
+                dto.setAccountName(account.getFullName());
+                dto.setEmail(account.getEmail());
+                dto.setAvatarUrl(account.getAvatarUrl());
+            }
+
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     @Override
@@ -320,18 +349,63 @@ public class AccountImplement implements AccountService, UserDetailsService {
 
         Task savedTask = taskRepository.save(task);
 
+        List<Integer> attendees = new ArrayList<>();
         if (taskCreateDTO.getTaskAttendees() != null && !taskCreateDTO.getTaskAttendees().isEmpty()) {
-            for (Integer attendeeId : taskCreateDTO.getTaskAttendees()) {
-                TaskAttendee taskAttendee = new TaskAttendee();
-                taskAttendee.setTaskId(savedTask.getTaskId());
-                taskAttendee.setAccountId(attendeeId);
-                taskAttendee.setStatus(TaskAttendee.Status.INVITED);
-                taskAttendeeRepository.save(taskAttendee);
-            }
+            attendees.addAll(taskCreateDTO.getTaskAttendees());
         }
 
+        Integer assignedUserId = taskCreateDTO.getAssignedToAccountId();
+        if (!attendees.contains(assignedUserId)) {
+            attendees.add(assignedUserId);
+        }
+
+        for (Integer attendeeId : attendees) {
+            TaskAttendee taskAttendee = new TaskAttendee();
+            taskAttendee.setTaskId(savedTask.getTaskId());
+            taskAttendee.setAccountId(attendeeId);
+            if (attendeeId.equals(assignedUserId)) {
+                taskAttendee.setStatus(TaskAttendee.Status.ACCEPTED);
+            } else {
+                taskAttendee.setStatus(TaskAttendee.Status.ACCEPTED);
+            }
+
+            taskAttendeeRepository.save(taskAttendee);
+        }
         return convertToTaskDTO(savedTask);
     }
+
+    @Override
+    public TaskDTO updateTask(Integer taskId, TaskCreateDTO updateDto) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
+
+        task.setTitle(updateDto.getTitle());
+        task.setDescription(updateDto.getDescription());
+        task.setPriority(Task.Priority.valueOf(updateDto.getPriority()));
+        task.setDueDate(updateDto.getDueDate());
+        task.setAssignedToAccountId(updateDto.getAssignedToAccountId());
+        task.setDepartmentId(updateDto.getDepartmentId());
+
+        task.setUpdatedAt(LocalDateTime.now());
+
+        Task saved = taskRepository.save(task);
+
+        TaskDTO dto = new TaskDTO();
+        dto.setTaskId(saved.getTaskId());
+        dto.setEventId(saved.getEventId());
+        dto.setDepartmentId(saved.getDepartmentId());
+        dto.setTitle(saved.getTitle());
+        dto.setDescription(saved.getDescription());
+        dto.setAssignedToAccountId(saved.getAssignedToAccountId());
+        dto.setAssignedByAccountId(saved.getAssignedByAccountId());
+        dto.setDueDate(saved.getDueDate());
+        dto.setStatus(saved.getStatus().name());
+        dto.setPriority(saved.getPriority().name());
+        dto.setCreatedAt(saved.getCreatedAt());
+        dto.setUpdatedAt(saved.getUpdatedAt());
+        return dto;
+    }
+
 
     private TaskDTO convertToTaskDTO(Task task) {
         TaskDTO dto = new TaskDTO();
@@ -363,21 +437,85 @@ public class AccountImplement implements AccountService, UserDetailsService {
     }
 
     public TaskDTO updateTaskStatus(Integer taskId, String newStatus) {
-        // Tìm task trong cơ sở dữ liệu
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new IllegalArgumentException("Task không tồn tại"));
 
-        // Cập nhật trạng thái
         task.setStatus(Task.Status.valueOf(newStatus));
 
-        // Cập nhật thời gian sửa đổi
         task.setUpdatedAt(LocalDateTime.now());
 
-        // Lưu vào cơ sở dữ liệu
         Task updatedTask = taskRepository.save(task);
 
-        // Chuyển đổi và trả về DTO
         return convertToTaskDTO(updatedTask);
+    }
+
+    @Autowired
+    private EventAccountRoleRepository eventAccountRoleRepository;
+
+    @Override
+    public boolean hasCreateTaskPermission(Integer eventId, Integer accountId) {
+        Optional<EventAccountRole> eventRoleOpt = eventAccountRoleRepository
+                .findByEventIdAndAccountId(eventId, accountId);
+
+        return eventRoleOpt.isPresent()
+                && Boolean.TRUE.equals(eventRoleOpt.get().getIsActive())
+                && switch (eventRoleOpt.get().getEventRole()) {
+            case ADMIN, DEPARTMENT_MANAGER -> true;
+            default -> false;
+        };
+    }
+
+    @Autowired
+    private TaskFeedbackRepository taskFeedbackRepository;
+
+    @Override
+    public TaskFeedbackDTO createTaskFeedback(Integer taskId, Integer feedbackById, String comment) {
+        Task task = taskRepository.findById(taskId)
+            .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
+
+        Integer creator = task.getAssignedByAccountId();
+        Integer assignee = task.getAssignedToAccountId();
+        if (!feedbackById.equals(creator) && !feedbackById.equals(assignee)) {
+            return null;
+        }
+
+        TaskFeedback fb = new TaskFeedback();
+        fb.setTaskId(taskId);
+        fb.setFeedbackByAccountId(feedbackById);
+        fb.setComment(comment);
+        fb.setCreatedAt(LocalDateTime.now());
+
+        TaskFeedback saved = taskFeedbackRepository.save(fb);
+
+        TaskFeedbackDTO dto = new TaskFeedbackDTO();
+        dto.setId(saved.getId());
+        dto.setTaskId(saved.getTaskId());
+        dto.setFeedbackByAccountId(saved.getFeedbackByAccountId());
+        dto.setComment(saved.getComment());
+        dto.setCreatedAt(saved.getCreatedAt());
+        return dto;
+    }
+
+    @Override
+    public List<TaskFeedbackDTO> getTaskFeedback(Integer taskId, Integer accountId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
+
+        Integer creator = task.getAssignedByAccountId();
+        Integer assignee = task.getAssignedToAccountId();
+        if (!accountId.equals(creator) && !accountId.equals(assignee)) {
+            return null;
+        }
+
+        return taskFeedbackRepository.findByTaskId(taskId).stream().map(fb -> {
+            TaskFeedbackDTO dto = new TaskFeedbackDTO();
+            dto.setId(fb.getId());
+            dto.setTaskId(fb.getTaskId());
+            dto.setFeedbackByAccountId(fb.getFeedbackByAccountId());
+            dto.setComment(fb.getComment());
+            dto.setCreatedAt(fb.getCreatedAt());
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     @Override
@@ -446,5 +584,57 @@ public class AccountImplement implements AccountService, UserDetailsService {
         return dto;
     }
 
+    @Override
+    @Transactional
+    public void updateTaskAttendees(Integer taskId, Integer assignedToAccountId, List<Integer> attendeeIds) {
+
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new IllegalArgumentException("Task không tồn tại"));
+        System.out.println("Updating attendees for task ID: " + taskId);
+
+        List<Integer> newAttendees = new ArrayList<>(attendeeIds);
+        if (!newAttendees.contains(assignedToAccountId)) {
+            newAttendees.add(assignedToAccountId);
+        }
+
+        List<TaskAttendee> currentAttendees = taskAttendeeRepository.findByTaskId(taskId);
+
+        for (TaskAttendee attendee : currentAttendees) {
+            if (!newAttendees.contains(attendee.getAccountId()) &&
+                !attendee.getAccountId().equals(assignedToAccountId)) {
+                taskAttendeeRepository.delete(attendee);
+            }
+        }
+
+        for (Integer attendeeId : newAttendees) {
+            boolean exists = currentAttendees.stream()
+                    .anyMatch(a -> a.getAccountId().equals(attendeeId));
+
+            if (!exists) {
+                TaskAttendee newAttendee = new TaskAttendee();
+                newAttendee.setTaskId(taskId);
+                newAttendee.setAccountId(attendeeId);
+                if (attendeeId.equals(assignedToAccountId)) {
+                    newAttendee.setStatus(TaskAttendee.Status.ACCEPTED);
+                } else {
+                    newAttendee.setStatus(TaskAttendee.Status.ACCEPTED);
+                }
+
+                taskAttendeeRepository.save(newAttendee);
+            }
+        }
+
+        task.setUpdatedAt(LocalDateTime.now());
+        taskRepository.save(task);
+    }
+
+    @Override
+    public Account getAccountByToken(String token) {
+        String username = jwtUtil.extractUsername(token);
+        if (username == null) {
+            return null;
+        }
+        return accountRepository.findByUsername(username);
+    }
 }
 

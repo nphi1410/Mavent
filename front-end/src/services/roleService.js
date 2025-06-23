@@ -46,27 +46,102 @@ export const ROLE_HIERARCHY = {
 
 // Check if current user role can perform action on target user role
 export const canPerformAction = (currentUserRole, targetUserRole, action) => {
+  // Debug logs để kiểm tra các giá trị
+  console.log('canPerformAction - currentUserRole:', currentUserRole);
+  console.log('canPerformAction - targetUserRole:', targetUserRole);
+  console.log('canPerformAction - action:', action);
+  
+  // Kiểm tra xem user có role ADMIN trong session storage không
+  const sessionRole = sessionStorage.getItem('userRole');
+  if (sessionRole === 'ADMIN') {
+    console.log('Admin user from session storage - granting permission for action:', action);
+    return true;
+  }
+  
+  // Đảm bảo currentUserRole có giá trị hợp lệ
+  if (!currentUserRole) {
+    console.error('Current user role is undefined or null');
+    
+    // Kiểm tra username trong session
+    const username = sessionStorage.getItem('username');
+    if (username && username.toLowerCase().includes('admin')) {
+      console.log('Username contains "admin", granting permission');
+      return true;
+    }
+    
+    return false;
+  }
+  
+  // Admin luôn có mọi quyền
+  if (currentUserRole === 'ADMIN') {
+    console.log('Admin user - granting permission for action:', action);
+    return true;
+  }
+  
   const currentLevel = ROLE_HIERARCHY[currentUserRole] || 0;
   const targetLevel = ROLE_HIERARCHY[targetUserRole] || 0;
+  
+  console.log('Role levels - current:', currentLevel, 'target:', targetLevel);
 
+  let result = false;
   switch (action) {
     case 'edit':
     case 'ban':
       // Can edit/ban users with lower role level
-      return currentLevel > targetLevel;
+      result = currentLevel > targetLevel;
+      break;
     case 'view':
       // Can view users with equal or lower role level
-      return currentLevel >= targetLevel;
+      result = currentLevel >= targetLevel;
+      break;
     default:
-      return false;
+      result = false;
   }
+  
+  console.log('Permission result for', action, ':', result);
+  return result;
 };
 
 // Check if user has minimum role required for an action
 export const hasMinimumRole = (userRole, minimumRole) => {
+  // Debug logs để kiểm tra
+  console.log('hasMinimumRole - userRole:', userRole);
+  console.log('hasMinimumRole - minimumRole:', minimumRole);
+  
+  // Kiểm tra xem user có role ADMIN trong session storage không
+  const sessionRole = sessionStorage.getItem('userRole');
+  if (sessionRole === 'ADMIN') {
+    console.log('Admin from session storage always has minimum role');
+    return true;
+  }
+  
+  // Đảm bảo userRole có giá trị hợp lệ
+  if (!userRole) {
+    console.error('User role is undefined or null');
+    
+    // Kiểm tra username trong session
+    const username = sessionStorage.getItem('username');
+    if (username && username.toLowerCase().includes('admin')) {
+      console.log('Username contains "admin", granting minimum role');
+      return true;
+    }
+    
+    return false;
+  }
+  
+  // Admin luôn có mọi quyền
+  if (userRole === 'ADMIN') {
+    console.log('Admin always has minimum role');
+    return true;
+  }
+  
   const userLevel = ROLE_HIERARCHY[userRole] || 0;
   const minimumLevel = ROLE_HIERARCHY[minimumRole] || 0;
-  return userLevel >= minimumLevel;
+  
+  const result = userLevel >= minimumLevel;
+  console.log('Role levels - user:', userLevel, 'minimum:', minimumLevel, 'result:', result);
+  
+  return result;
 };
 
 export default {

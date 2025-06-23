@@ -15,9 +15,9 @@ const ProfileContent = () => {
     setLoading(true); // Bắt đầu loading khi fetch profile
     setError(null);
     try {
-      console.log('ProfileContent: Fetching user profile...');
+      // console.log('ProfileContent: Fetching user profile...');
       const profileData = await getUserProfile(); // Service đã trả về response.data
-      console.log('ProfileContent: Received user profile:', profileData);
+      // console.log('ProfileContent: Received user profile:', profileData);
       setUserData(profileData);
     } catch (err) {
       console.error('ProfileContent: Error fetching profile:', err);

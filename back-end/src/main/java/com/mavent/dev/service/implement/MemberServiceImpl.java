@@ -83,10 +83,6 @@ public class MemberServiceImpl implements MemberService {
                 // Try to find department by name using department repository
                 log.info("Searching for department by name: {}", deptName);
 
-                // Since we don't have direct access to the department repository here,
-                // we'll have to rely on the EventAccountRoleRepository's query to handle name-based lookups
-
-                // Log the department ID that will be used in the query
                 log.info("Using null department ID and letting repository handle name-based lookup");
             }
         }

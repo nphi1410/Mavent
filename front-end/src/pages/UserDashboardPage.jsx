@@ -1,74 +1,86 @@
-import React from "react";
-import Table from "../components/arrangement/Table";
-import LineChart from "../components/chart/LineChart";
-import BarChart from "../components/chart/BarCHart";
+import React, { useEffect, useState, useCallback } from "react";
+import EventBarChart from "../components/chart/EventBarChart";
+import EventAccountRoleTable from "../components/EventAccountRoleTable";
+import { getAttendingEvent } from "../services/eventService";
+import AttendingSummaryBoard from "../components/AttendingSummaryBoard";
+import EventRoleFilter from "../components/filter/EventRoleFilter";
 
 const UserDashboardPage = () => {
-  const fakeTableData = [
-    {
-      eventId: "EVT001",
-      accountId: "ACC1001",
-      eventRole: "Speaker",
-      departmentId: "DPT01",
-      isActive: true,
-      assignedByAccountId: "ACC9001",
-      createdAt: "2025-06-01T10:12:45Z",
-      updatedAt: "2025-06-10T14:22:11Z",
-    },
-    {
-      eventId: "EVT002",
-      accountId: "ACC1002",
-      eventRole: "Attendee",
-      departmentId: "DPT02",
-      isActive: true,
-      assignedByAccountId: "ACC9002",
-      createdAt: "2025-06-02T09:45:30Z",
-      updatedAt: "2025-06-11T11:33:09Z",
-    },
-    {
-      eventId: "EVT003",
-      accountId: "ACC1003",
-      eventRole: "Volunteer",
-      departmentId: "DPT03",
-      isActive: false,
-      assignedByAccountId: "ACC9001",
-      createdAt: "2025-06-03T08:20:00Z",
-      updatedAt: "2025-06-09T10:00:00Z",
-    },
-    {
-      eventId: "EVT004",
-      accountId: "ACC1004",
-      eventRole: "Organizer",
-      departmentId: "DPT01",
-      isActive: true,
-      assignedByAccountId: "ACC9003",
-      createdAt: "2025-06-05T14:10:05Z",
-      updatedAt: "2025-06-12T13:14:30Z",
-    },
-    {
-      eventId: "EVT005",
-      accountId: "ACC1005",
-      eventRole: "Sponsor",
-      departmentId: "DPT02",
-      isActive: false,
-      assignedByAccountId: "ACC9002",
-      createdAt: "2025-06-06T16:55:12Z",
-      updatedAt: "2025-06-12T18:22:45Z",
-    },
-  ];
+  const [eventData, setEventData] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const accountId = sessionStorage.getItem("accountId");
+
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPagesFromApi, setTotalPagesFromApi] = useState(1);
+  const [searchTitle, setSearchTitle] = useState("");
+  const [selectedRole, setSelectedRole] = useState("");
+
+  // fetch event with filters
+  const fetchAttendingEvents = useCallback(async () => {
+    if (!accountId) return;
+    setLoading(true);
+
+    const pageable = {
+      page: currentPage,
+      size: 10,
+      searchTitle: searchTitle || undefined,
+      role: selectedRole || undefined,
+    };
+
+    try {
+      const data = await getAttendingEvent(accountId, pageable);
+      if (data) {
+        setEventData(data.content);
+        setTotalPagesFromApi(data.page.totalPages);
+      }
+    } catch (err) {
+      console.error("Failed to fetch attending events", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [accountId, currentPage, searchTitle, selectedRole]);
+
+  useEffect(() => {
+    fetchAttendingEvents();
+  }, [fetchAttendingEvents]);
 
   return (
     <div className="px-6 py-4">
-      <div className="chart-row flex gap-4 mb-6 h-[400px]">
-        <div className="w-1/3">
-          <LineChart />
+      <div className="chart-row flex flex-col lg:flex-row gap-4 mb-6 items-stretch justify-center">
+        <div className="w-full lg:w-2/5">
+          <EventBarChart accountId={accountId} />
         </div>
-        <div className="w-2/3">
-          <BarChart />
+        <div className="w-full lg:w-3/5">
+          <AttendingSummaryBoard accountId={accountId} />
         </div>
       </div>
-      {/*currently attending events */}
-      <Table data={fakeTableData} />
+
+      {/* Filter section */}
+      <div>
+        <EventRoleFilter
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          totalPagesFromApi={totalPagesFromApi}
+          searchTitle={searchTitle}
+          setSearchTitle={setSearchTitle}
+          selectedRole={selectedRole}
+          setSelectedRole={(role) => {
+            setSelectedRole(role);
+            setCurrentPage(0); // reset pagination on role change
+          }}
+          onFilter={fetchAttendingEvents}
+        />
+      </div>
+
+      {/* Event table */}
+      {loading ? (
+        <div className="text-center text-gray-400 italic mt-6">
+          Loading events...
+        </div>
+      ) : (
+        <EventAccountRoleTable eventData={eventData} />
+      )}
     </div>
   );
 };
