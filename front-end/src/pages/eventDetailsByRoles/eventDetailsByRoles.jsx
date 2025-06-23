@@ -1,9 +1,38 @@
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { ChevronLeft, Calendar, MessageSquare, MapPin, User } from "lucide-react"
+import { useNavigate, useParams } from "react-router-dom";
+import { getUserInfoInEvent } from "../../services/userEventService"; // Assuming you have this service to fetch user info in the event
 
 export default function EventDetailsByRoles() {
   const [activeDropdown, setActiveDropdown] = useState(null)
+  const navigate = useNavigate();
+  const [accountId, setAccountId] = useState(null);
+  const [error, setError] = useState(null);
+  const { id, role } = useParams(); // <-- Get ID from URL
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        // Assuming you have a function to fetch user info in the event
+        const userEventInfo = await getUserInfoInEvent(id);
+        if (userEventInfo) {
+          // Assuming userEventInfo contains the user data you need
+          console.log("User Info in Event:", userEventInfo);
+          setAccountId(userEventInfo.accountId); // Set the account ID from user info
+
+        } else {
+          console.warn("No user info found for this event.");
+        }
+
+
+      } catch (err) {
+        console.error("Failed to fetch user info:", err);
+        setError("Failed to fetch user information.");
+      }
+    }
+    fetchUserInfo();
+  }, [id, navigate]);
+
 
   const toggleDropdown = (dropdownName) => {
     setActiveDropdown(activeDropdown === dropdownName ? null : dropdownName)
@@ -53,43 +82,44 @@ export default function EventDetailsByRoles() {
           <div className="flex flex-wrap gap-4">
             <button
               onClick={() => toggleDropdown("eventInfo")}
-              className={`px-4 py-2 rounded-md font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                activeDropdown === "eventInfo"
+              className={`px-4 py-2 rounded-md font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${activeDropdown === "eventInfo"
                   ? "bg-blue-500 text-white hover:bg-blue-600 focus:ring-blue-500"
                   : "bg-white text-blue-500 border border-blue-500 hover:bg-blue-50 focus:ring-blue-500"
-              }`}
+                }`}
             >
               View Event Info
             </button>
-            <button
-              onClick={() => toggleDropdown("participants")}
-              className={`px-4 py-2 rounded-md font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                activeDropdown === "participants"
-                  ? "bg-gray-500 text-white hover:bg-gray-600 focus:ring-gray-500"
-                  : "bg-white text-gray-500 border border-gray-300 hover:bg-gray-50 focus:ring-gray-500"
-              }`}
-            >
-              View Participants →
-            </button>
-            <button
-              onClick={() => toggleDropdown("feedback")}
-              className={`px-4 py-2 rounded-md font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                activeDropdown === "feedback"
-                  ? "bg-gray-500 text-white hover:bg-gray-600 focus:ring-gray-500"
-                  : "bg-white text-gray-500 border border-gray-300 hover:bg-gray-50 focus:ring-gray-500"
-              }`}
-            >
-              View Feedback →
-            </button>
+            {role.toUpperCase() === "ADMIN" && (
+              <button
+                onClick={() => toggleDropdown("participants")}
+                className={`px-4 py-2 rounded-md font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${activeDropdown === "participants"
+                    ? "bg-gray-500 text-white hover:bg-gray-600 focus:ring-gray-500"
+                    : "bg-white text-gray-500 border border-gray-300 hover:bg-gray-50 focus:ring-gray-500"
+                  }`}
+              >
+                View Members →
+              </button>
+
+            )}
+            {role.toUpperCase() === "ADMIN" && (
+              <button
+                onClick={() => toggleDropdown("feedback")}
+                className={`px-4 py-2 rounded-md font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${activeDropdown === "feedback"
+                    ? "bg-gray-500 text-white hover:bg-gray-600 focus:ring-gray-500"
+                    : "bg-white text-gray-500 border border-gray-300 hover:bg-gray-50 focus:ring-gray-500"
+                  }`}
+              >
+                View Feedback →
+              </button>
+            )}
             <button
               onClick={() => toggleDropdown("reports")}
-              className={`px-4 py-2 rounded-md font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                activeDropdown === "reports"
+              className={`px-4 py-2 rounded-md font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${activeDropdown === "reports"
                   ? "bg-gray-500 text-white hover:bg-gray-600 focus:ring-gray-500"
                   : "bg-white text-gray-500 border border-gray-300 hover:bg-gray-50 focus:ring-gray-500"
-              }`}
+                }`}
             >
-              View Reports →
+              View Requests →
             </button>
           </div>
         </div>
@@ -216,20 +246,22 @@ export default function EventDetailsByRoles() {
           </div>
         )}
 
-        {activeDropdown === "participants" && (
+        {activeDropdown === "participants" && role.toUpperCase() === "ADMIN"(
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             <div className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Event Participants</h2>
-              <p className="text-gray-600">Participants list content would go here...</p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Event Members</h2>
+              {/* <p className="text-gray-600">Participants list content would go here...</p> */}
+              {navigate(`/events/${id}/members`)}
             </div>
           </div>
         )}
 
-        {activeDropdown === "feedback" && (
+        {activeDropdown === "feedback" && role.toUpperCase() === "ADMIN" && (
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             <div className="p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Event Feedback</h2>
-              <p className="text-gray-600">Feedback content would go here...</p>
+              {/* <p className="text-gray-600">Feedback content would go here...</p> */}
+              {navigate(`/event/${id}/feedback`)}
             </div>
           </div>
         )}
@@ -238,7 +270,8 @@ export default function EventDetailsByRoles() {
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             <div className="p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Event Reports</h2>
-              <p className="text-gray-600">Reports content would go here...</p>
+              {/* <p className="text-gray-600">Reports content would go here...</p> */}
+              { navigate(`/event/${id}/account/${accountId}/request`) }
             </div>
           </div>
         )}

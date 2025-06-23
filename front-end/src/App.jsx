@@ -72,7 +72,7 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="events" element={<AllEvents />} />
           <Route path="events/:id" element={<EventDetails />} />
-          <Route path="events/:id/staff" element={<EventDetailsByRoles />} />
+          <Route path="events/:id/staff/:role" element={<EventDetailsByRoles />} />
           <Route path="meetings" element={<MeetingListPage />} />
           <Route path="meetings/edit" element={<MeetingEditPage />} />
           <Route path="event/:eventId/feedback" element={<ViewEventFeedback />} />
