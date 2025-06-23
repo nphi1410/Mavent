@@ -4,7 +4,8 @@ import { getUserRoleInEvent, canPerformAction, hasMinimumRole } from '../service
 // Get event ID from URL path
 const getEventIdFromUrl = () => {
   const path = window.location.pathname;
-  const eventMatch = path.match(/\/event\/(\d+)/);
+  // Check both URL patterns: /event/:id and /events/:id
+  const eventMatch = path.match(/\/event\/(\d+)/) || path.match(/\/events\/(\d+)/);
   return eventMatch ? parseInt(eventMatch[1]) : null;
 };
 
@@ -102,10 +103,10 @@ export const useUserPermissions = (eventId = null) => {
   const isAdminOrManager = () => {
     return hasRole('DEPARTMENT_MANAGER');
   };
-
-  // Check if user is admin
+  // Check if user is admin (using hasRole and also checking sessionStorage)
   const isAdmin = () => {
-    return hasRole('ADMIN');
+    const sessionRole = sessionStorage.getItem('userRole');
+    return hasRole('ADMIN') || sessionRole === 'ADMIN';
   };
 
   return {
