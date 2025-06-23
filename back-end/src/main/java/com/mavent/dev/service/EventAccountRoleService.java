@@ -1,5 +1,6 @@
 package com.mavent.dev.service;
 
+import com.mavent.dev.dto.department.UserEventInfoDTO;
 import com.mavent.dev.dto.EventCountDTO;
 import com.mavent.dev.dto.event.EventAccountRoleDTO;
 import com.mavent.dev.entity.EventAccountRole;
@@ -63,4 +64,6 @@ public interface EventAccountRoleService {
     Integer countAttendanceByAccountId(Integer accountId, EventAccountRole.EventRole eventRole, boolean countCurrentMonth);
 
     Page<EventAccountRole> getByAccountIdAndPage(Integer accountId, Pageable pageable);
+
+    UserEventInfoDTO getUserEventInfo(Integer eventId, Integer accountId);
 }

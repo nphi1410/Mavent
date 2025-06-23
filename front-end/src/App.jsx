@@ -48,6 +48,7 @@ import SuperAdminLayout from "./layouts/SuperAdminLayout";
 import MeetingEditPage from "./pages/meetingPages/EditMeetingPage";
 import ViewEventFeedback from "./pages/ViewEventFeedback.jsx";
 import ParticipantFeedbackEvent from "./pages/ParticipantFeedbackEvent.jsx";
+import RequestHistory from "./pages/request/member/RequestHistory.jsx";
 
 // Higher Order Components for Route Protection
 const Protect = (Component) => <ProtectedRoute children={Component} />;
@@ -80,6 +81,7 @@ function App() {
           <Route path="events/:id/documents" element={EventMember(<DocumentsPage />)} />
 
           <Route path="/event/:eventId/feedback" element={<ViewEventFeedback />} />
+          <Route path="event/:id/account/:accountId/request" element={(<RequestHistory />)} />
 
           {/* Create Event-Protected Routes */}
           <Route path="create-event">
