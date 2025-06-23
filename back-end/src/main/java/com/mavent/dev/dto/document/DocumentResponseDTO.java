@@ -18,6 +18,7 @@ public class DocumentResponseDTO {
     private String departmentName;
     private Integer uploaderAccountId;
     private String uploaderName; // Optional: include uploader name for display
+    private String uploaderAvatar; // Avatar URL of the uploader
     private String title;
     private String filePath;
     private String fileUrl;

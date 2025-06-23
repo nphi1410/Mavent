@@ -28,10 +28,16 @@ public class DocumentMapper {    public static DocumentResponseDTO toResponseDTO
         } else {
             departmentName = null;
         }
-        
-        String uploaderName = uploader != null ?
+          String uploaderName = uploader != null ?
                 uploader.getFullName() :
                 "Unknown";
+                  String uploaderAvatar = uploader != null ?
+                uploader.getAvatarUrl() :
+                null;
+        
+        // Add debug logging for avatar URL
+        System.out.println("DocumentMapper - Uploader: " + uploaderName + 
+                         ", Avatar URL: " + uploaderAvatar);
 
         // Extract file name from path for potential future use
         String fileName = document.getFilePath() != null ?
@@ -44,6 +50,7 @@ public class DocumentMapper {    public static DocumentResponseDTO toResponseDTO
                 .departmentName(departmentName)
                 .uploaderAccountId(document.getUploaderAccountId())
                 .uploaderName(uploaderName)
+                .uploaderAvatar(uploaderAvatar)
                 .title(document.getTitle())
                 .filePath(document.getFilePath()).fileUrl(document.getFilePath()) // Use same URL for now, preview endpoint will generate SAS token when needed
                 .fileType(document.getFileType())
