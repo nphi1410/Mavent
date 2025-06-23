@@ -30,7 +30,7 @@ const isSuperAdmin = () => {
 // 2. Other admin pages (Members, Departments): Only accessible by ADMIN
 const EventMemberRoute = ({ children }) => {
   const location = useLocation();
-  const { id } = useParams(); // Get the event ID from URL
+  const { id: eventId } = useParams(); // Get the event ID from URL
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -52,8 +52,8 @@ const EventMemberRoute = ({ children }) => {
 
       try {
         // Check if user has member role or higher in this event
-        const role = await getUserRoleInEvent(id);
-        console.log('EventMemberRoute - User role for event:', id, 'is:', role);
+        const role = await getUserRoleInEvent(eventId);
+        console.log('EventMemberRoute - User role for event:', eventId, 'is:', role);
         
         // Handle different possible API response formats
         let userRole;
@@ -126,7 +126,7 @@ const EventMemberRoute = ({ children }) => {
     };
 
     checkUserRole();
-  }, [id]);
+  }, [eventId]);
 
   if (isLoading) {
     return <div className="flex justify-center items-center min-h-screen">Loading...</div>;

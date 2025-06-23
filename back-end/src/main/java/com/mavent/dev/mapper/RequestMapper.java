@@ -1,9 +1,18 @@
 package com.mavent.dev.mapper;
 
 import com.mavent.dev.dto.request.CreateRequestDTO;
+import com.mavent.dev.dto.request.RequestDTO;
 import com.mavent.dev.dto.request.UpdateRequestDTO;
 import com.mavent.dev.entity.*;
+import com.mavent.dev.service.AccountService;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import java.util.List;
+
+@Component
 public class RequestMapper {
 
     public static Request toEntity(CreateRequestDTO requestDTO) {
@@ -38,6 +47,44 @@ public class RequestMapper {
         requestDTO.setRequestTypeId(request.getRequestTypeId());
         requestDTO.setContent(request.getContent());
         return requestDTO;
+    }
+
+    public static RequestDTO fromRequestToRequestDTO(Request request, AccountService accountService) {
+        if (request == null) {
+            return null;
+        }
+        Account requestByAccount = accountService.getAccountById(request.getRequestByAccountId());
+        Account responseByAccount = null;
+        String responseByAccountUsername = null;
+        if (request.getResponseByAccountId() != null) {
+            responseByAccount = accountService.getAccountById(request.getResponseByAccountId());
+            responseByAccountUsername = responseByAccount.getUsername();
+        }
+        return new RequestDTO().builder()
+                .responseByAccountId(request.getResponseByAccountId())
+                .requestTypeId(request.getRequestTypeId())
+                .taskId(request.getTaskId())
+                .requestId(request.getRequestId())
+                .eventId(request.getEventId())
+                .departmentId(request.getDepartmentId())
+                .requestByAccountId(request.getRequestByAccountId())
+                .requestByUsername(requestByAccount.getUsername())
+                .requestContent(request.getContent())
+                .status(request.getStatus().name())
+                .responseContent(request.getResponseContent())
+                .responseByUsername(responseByAccountUsername)
+                .createdAt(request.getCreatedAt() != null ? request.getCreatedAt().toString() : null)
+                .updatedAt(request.getUpdatedAt() != null ? request.getUpdatedAt().toString() : null)
+                .build();
+    }
+
+    public static List<RequestDTO> toDTOList(List<Request> requests, AccountService accountService) {
+        if (requests == null || requests.isEmpty()) {
+            return List.of();
+        }
+        return requests.stream()
+                .map((Request request) -> fromRequestToRequestDTO(request, accountService))
+                .toList();
     }
 }
 

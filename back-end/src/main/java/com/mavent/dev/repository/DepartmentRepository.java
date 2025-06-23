@@ -79,4 +79,6 @@ public interface DepartmentRepository extends JpaRepository<Department, Integer>
 //     */
 //    @Query("SELECT COUNT(t) FROM Task t WHERE t.assignedDepartment.departmentId = :departmentId")
 //    long countTasksByDepartmentId(@Param("departmentId") Integer departmentId);
+
+
 }

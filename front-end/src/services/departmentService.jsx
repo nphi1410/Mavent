@@ -21,3 +21,5 @@ export const getDepartmentById = async (eventId, departmentId) => {
     return null;
   }
 };
+
+

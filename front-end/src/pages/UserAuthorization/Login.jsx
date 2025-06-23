@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import { login } from '../../services/AuthService';
 import axios from 'axios';
+import { getUserProfile } from '../../services/profileService';
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -40,16 +41,14 @@ function Login() {
         // Store token and basic info
         sessionStorage.setItem("token", token);
         sessionStorage.setItem("isLoggedIn", "true");
-        sessionStorage.setItem("username", decoded.sub);
-        console.log(decoded.sub);
 
         // Redirect based on role
         if (roles.includes("ROLE_SUPER_ADMIN")) {
-          console.log("Super Admin logged in");
+          // console.log("Super Admin logged in");
           navigate("/superadmin");
         } else if (roles.includes("ROLE_USER")) {
-          console.log("User logged in");
-          navigate("/");
+          // console.log("User logged in");
+          navigate("/profile");
         } else {
           navigate("/");
         }

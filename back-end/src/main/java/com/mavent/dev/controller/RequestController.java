@@ -2,12 +2,9 @@ package com.mavent.dev.controller;
 
 import com.mavent.dev.dto.request.CreateRequestDTO;
 import com.mavent.dev.dto.request.UpdateRequestDTO;
-import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.Request;
 import com.mavent.dev.service.AccountService;
 import com.mavent.dev.service.RequestService;
-import com.mavent.dev.mapper.RequestMapper;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,18 +17,28 @@ public class RequestController {
     @Autowired
     private RequestService requestService;
 
-    @Autowired
-    private AccountService accountService;
-
     @GetMapping()
-    public ResponseEntity<List<Request>> getAllRequests(
+    public ResponseEntity<?> getAllRequests(
             @PathVariable Integer eventId
     ) {
         return ResponseEntity.ok(requestService.getRequestsByEventId(eventId));
     }
 
+    @GetMapping("/department/{departmentId}")
+    public ResponseEntity<?> getRequestsByDepartment(
+            @PathVariable Integer eventId,
+            @PathVariable Integer departmentId
+    ) {
+        try {
+            return ResponseEntity.ok(requestService.getRequestByEventIdAndDepartmentId(eventId, departmentId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
     @GetMapping ("/account/{accountId}")
-    public ResponseEntity<List<Request>> getRequestsByAccount(
+    public ResponseEntity<?> getRequestsByAccount(
             @PathVariable Integer eventId,
             @PathVariable Integer accountId
     ) {
@@ -59,11 +66,12 @@ public class RequestController {
         return ResponseEntity.ok(requestService.addRequest(requestDTO));
     }
 
-    @PatchMapping("/update-status")
+    @PutMapping("/{requestId}")
     public ResponseEntity<?> updateRequest(
+            @PathVariable Integer requestId,
             @RequestBody UpdateRequestDTO updateRequestDTO
     ) {
-        return requestService.updateRequest(updateRequestDTO)
+        return requestService.updateRequest(updateRequestDTO, requestId)
                 ? ResponseEntity.ok("Request updated successfully")
                 : ResponseEntity.status(400).body("Failed to update request");
     }
