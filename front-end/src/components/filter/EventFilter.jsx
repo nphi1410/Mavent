@@ -1,89 +1,46 @@
-import React, { useEffect, useState, useRef } from "react";
-import SelectStatus from "./SelectStatus";
-import Sorting from "./Sorting";
-import SelectTags from "./SelectTags";
+import React, { useEffect, useRef, useState } from "react";
 import Search from "./Search";
 import Pagination from "./Pagination";
+import SelectJoiningEvent from "./SelectJoiningEvent";
 import { useSearchParams } from "react-router-dom";
-import { getTags } from "../../services/tagService";
 
-const EventFilter = ({
-  onFilter,
-  totalPagesFromApi,
-  currentPage,
-  setCurrentPage,
-}) => {
-  const [searchTitle, setSearchTitle] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [selectedTags, setSelectedTags] = useState([]);
-  const [sortOption, setSortOption] = useState("");
-  const [tags, setTags] = useState([]);
+const MeetingFilter = ({ onFilter, totalPagesFromApi }) => {
   const [searchParams] = useSearchParams();
+  const [searchTitle, setSearchTitle] = useState("");
+  const [eventId, setEventId] = useState("");
+  const [currentPage, setCurrentPage] = useState(0);
+
+  const didInitRef = useRef(false);
   const size = 10;
 
-  const didInitRef = useRef(false); // <-- 👈 track if first load has been done
-
-  // Fetch tags once
+  // First-load sync from URL
   useEffect(() => {
-    const fetchTags = async () => {
-      try {
-        const data = await getTags({ eventId: null });
-        setTags(data);
-      } catch (error) {
-        console.error("Error fetching tags:", error);
-      }
-    };
-    fetchTags();
-  }, []);
+    if (didInitRef.current) return;
 
-  // Load filters from URL on first load after tags are fetched
+    const titleParam = searchParams.get("searchTitle");
+    const pageParam = searchParams.get("page");
+    const eventIdParam = searchParams.get("eventId");
+
+    if (titleParam) setSearchTitle(titleParam);
+    if (pageParam) setCurrentPage(parseInt(pageParam));
+    if (eventIdParam) setEventId(eventIdParam);
+
+    didInitRef.current = true;
+  }, [searchParams]);
+
+  // Trigger filter when inputs change
   useEffect(() => {
-    if (tags.length === 0 || didInitRef.current) return;
-
-    const tagFromUrl = searchParams.get("tagId");
-    const type = searchParams.get("type");
-
-    const matchingTag = tags.find((t) => String(t.tagId) === String(tagFromUrl));
-    if (matchingTag) {
-      setSelectedTags([matchingTag]);
-    }
+    if (!didInitRef.current) return;
 
     const filters = {
-      type: type || undefined,
-      tagIds: matchingTag ? [matchingTag.tagId || matchingTag.id] : [],
-      isTrending: true,
-      page: currentPage ?? 0,
-      size,
-    };
-
-    onFilter(filters);
-    didInitRef.current = true; // mark as initialized
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tags]);
-
-  // Handle filter updates by user interaction
-  useEffect(() => {
-    if (!didInitRef.current) return; // skip first auto call
-
-    const tagIds = selectedTags.map((tag) => tag.tagId || tag);
-    const filters = {
-      name: searchTitle || undefined,
-      status: statusFilter || undefined,
-      tagIds,
-      sortType: sortOption || undefined,
+      searchTitle: searchTitle || undefined,
+      eventId: eventId || undefined,
       page: currentPage,
       size,
     };
 
     onFilter(filters);
-  }, [
-    searchTitle,
-    statusFilter,
-    selectedTags,
-    sortOption,
-    currentPage,
-    onFilter,
-  ]);
+  }, [searchTitle, eventId, currentPage]);
 
   const goToPage = (page) => {
     if (page >= 0 && (totalPagesFromApi == null || page < totalPagesFromApi)) {
@@ -93,39 +50,24 @@ const EventFilter = ({
 
   return (
     <div className="sticky top-16 z-10 bg-white border border-gray-300 p-4 shadow-sm rounded-md mb-4">
-      <div className="grid grid-cols-4 items-center gap-3">
+      <div className="grid grid-cols-5 items-center gap-3">
         <Search
           searchTitle={searchTitle}
           setSearchTitle={(value) => {
             setSearchTitle(value);
-            setCurrentPage(0);
+            setCurrentPage(0); // Reset page on new search
           }}
-        />
-        <SelectTags
-          tags={tags}
-          selectedTags={selectedTags}
-          onChange={(newTags) => {
-            setSelectedTags(newTags);
-            setCurrentPage(0);
-          }}
-        />
-        <Sorting
-          value={sortOption}
-          onChange={(e) => {
-            setSortOption(e.target.value);
-            setCurrentPage(0);
-          }}
-          className="col-span-2"
         />
         <Pagination
           currentPage={currentPage + 1}
-          totalPages={totalPagesFromApi || 0}
+          totalPages={totalPagesFromApi || 1}
           onPageChange={(page) => goToPage(page - 1)}
         />
-        <SelectStatus
-          value={statusFilter}
+        <SelectJoiningEvent
+          listName="Event"
+          value={eventId}
           onChange={(e) => {
-            setStatusFilter(e.target.value);
+            setEventId(e.target.value);
             setCurrentPage(0);
           }}
         />
@@ -134,4 +76,4 @@ const EventFilter = ({
   );
 };
 
-export default EventFilter;
+export default MeetingFilter;
