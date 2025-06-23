@@ -14,10 +14,9 @@ const SideBar = ({ isOpen, setIsOpen }) => {
     { name: "Profile", icon: "fa-solid fa-user", path: "/profile" },
     { name: "Dashboard", icon: "fa-solid fa-chart-line", path: "/profile/dashboard" },
     { name: "Attended Events", icon: "fa-solid fa-calendar-check", path: "/profile/attended" },
-    { name: "tasks", icon: "fa-solid fa-list-check", path: "/profile/tasks" },
-    { name: "Create New Event", icon: "fa-solid fa-list-check", path: "/create-event" },
+    { name: "Tasks", icon: "fa-solid fa-list-check", path: "/profile/tasks" },
     { name: "Meetings", icon: "fa-solid fa-comments", path: "/meetings" },
-    { name: "Create New Event", icon: "fa-solid fa-list-check", path: "/create-event" }
+    { name: "Create New Event", icon: "fa-solid fa-plus", path: "/create-event" }
   ];
 
   // Close sidebar on outside click

@@ -172,7 +172,7 @@ export default function RequestDetailsPopup({ isOpen, onClose, requestData, requ
                             {/* Description */}
                             <div>
                                 <div className="bg-white rounded-lg p-4 shadow-sm min-h-[200px]">
-                                    <p className="text-gray-800 leading-relaxed">{data.content}</p>
+                                    <p className="text-gray-800 leading-relaxed">{data.requestContent}</p>
                                 </div>
                             </div>
                         </div>
