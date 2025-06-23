@@ -48,7 +48,7 @@ function Login() {
           navigate("/superadmin");
         } else if (roles.includes("ROLE_USER")) {
           // console.log("User logged in");
-          navigate("/profile");
+          navigate("/");
         } else {
           navigate("/");
         }
