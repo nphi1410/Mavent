@@ -1,5 +1,6 @@
 package com.mavent.dev.service.implement;
 
+import com.mavent.dev.dto.EventCountDTO;
 import com.mavent.dev.dto.EventMemberDTO;
 import com.mavent.dev.dto.FilterEventDTO;
 import com.mavent.dev.dto.superadmin.EventDTO;
@@ -64,6 +65,11 @@ public class EventImplement implements EventService {
         Event savedEvent = eventRepository.save(event);
 
         return mapToDTO(savedEvent);
+    }
+
+    @Override
+    public List<EventCountDTO> getMonthlyStatistic(String status) {
+        return eventRepository.countByMonthWithoutStatus(status);
     }
 
 

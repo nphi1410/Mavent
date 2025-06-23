@@ -1,8 +1,12 @@
 package com.mavent.dev.controller;
 
+import com.mavent.dev.dto.MeetingDTO;
 import com.mavent.dev.entity.Meeting;
 import com.mavent.dev.service.MeetingService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,6 +51,17 @@ public class MeetingController {
     public ResponseEntity<List<Meeting>> getByOrganizer(@PathVariable("accountId") Integer accountId) {
         return ResponseEntity.ok(meetingService.getMeetingsByOrganizerAccountId(accountId));
     }
+
+    @GetMapping("/account/{accountId}")
+    public ResponseEntity<Page<MeetingDTO>> getByAccount(
+            @PathVariable("accountId") Integer accountId,
+            @RequestParam(required = false) String searchTitle,
+            @RequestParam(required = false) Integer eventId,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(meetingService.getMeetingByAccountId(accountId, searchTitle, eventId, pageable));
+    }
+
+
 
     @GetMapping("/department/{deptId}")
     public ResponseEntity<List<Meeting>> getByDepartment(@PathVariable("deptId") Integer deptId) {

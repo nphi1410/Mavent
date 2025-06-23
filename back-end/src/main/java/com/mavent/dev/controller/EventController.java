@@ -3,6 +3,7 @@ package com.mavent.dev.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.mavent.dev.dto.EventCountDTO;
 import com.mavent.dev.dto.EventRegisterDTO;
 import com.mavent.dev.dto.FilterEventDTO;
 import com.mavent.dev.dto.FilterRequestDTO;
@@ -105,24 +106,64 @@ public class EventController {
         eventAccountRole.setEventRole(eventRegisterDto.getRole());
         eventAccountRole.setAccountId(accountId);
         eventAccountRole.setCreatedAt(LocalDateTime.now());
-
-        if (eventRegisterDto.getRole().equals(EventAccountRole.EventRole.PARTICIPANT)) {
+//        if(eventRegisterDto.getRole().equals(EventAccountRole.EventRole.PARTICIPANT)){
             return ResponseEntity.ok(eventAccountRoleService.addMemberToEvent(eventAccountRole).toString());
-        }
+//        }
 
-        eventAccountRole.setDepartmentId(eventRegisterDto.getDepartmentId());
-        return ResponseEntity.ok(eventRegisterDto.toString());
+        // chua xu ly register as member
+//        eventAccountRole.setDepartmentId(eventRegisterDto.getDepartmentId());
+
+//        return ResponseEntity.ok(eventRegisterDto.toString());
     }
 
     // Lấy các sự kiện đang tham gia
     @GetMapping("/attending/{accountId}")
     public ResponseEntity<Page<EventAccountRoleDTO>> getAttendingEvent(
-            @PathVariable Integer accountId, Pageable pageable) {
-        Page<EventAccountRoleDTO> page = eventAccountRoleService.getMembersByAccountIdWithPagination(accountId, pageable);
-        return ResponseEntity.ok(page);
+            @PathVariable Integer accountId,
+            @RequestParam(required = false) String searchTitle,
+            @RequestParam(required = false) String role,
+            Pageable pageable) {
+
+        Page<EventAccountRoleDTO> eventAccountRolePage =
+                eventAccountRoleService.getMembersByAccountIdWithPagination(accountId, searchTitle, role, pageable);
+
+        return ResponseEntity.ok(eventAccountRolePage);
     }
 
-    // Lấy sự kiện theo ID
+    @GetMapping("/joining/{accountId}")
+    public ResponseEntity<List<EventAccountRoleDTO>> getEventListByAccountId(@PathVariable Integer accountId){
+        return ResponseEntity.ok(eventAccountRoleService.getByAccountIdOnRole(accountId));
+    }
+
+
+    @GetMapping("/attending/summary/{accountId}")
+    public ResponseEntity<List<EventCountDTO>> getAttendingMonthlySummary(@PathVariable Integer accountId, @RequestParam String eventRole) {
+        return ResponseEntity.ok(eventAccountRoleService.getMonthlyStatistic(accountId, eventRole));
+    }
+
+    @GetMapping("/summary")
+    public ResponseEntity<List<EventCountDTO>> getMonthlySummary(@RequestParam String status) {
+        return ResponseEntity.ok(eventService.getMonthlyStatistic(status));
+    }
+
+    @GetMapping("/count")
+    public ResponseEntity<Integer> countAttendanceByAccountId(@RequestParam Integer accountId,
+                                                              @RequestParam(required = false) EventAccountRole.EventRole eventRole,
+                                                              @RequestParam boolean countCurrentMonth) {
+        return ResponseEntity.ok(eventAccountRoleService.countAttendanceByAccountId(
+                accountId, eventRole, countCurrentMonth));
+    }
+
+    @GetMapping("/account")
+    public ResponseEntity<Page<EventAccountRole>> getByAccountId(
+            @RequestParam Integer accountId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(eventAccountRoleService.getByAccountIdAndPage(accountId, pageable));
+    }
+
+
+    //Get Event By ID
     @GetMapping("/{id}")
     public Event getEventById(@PathVariable("id") Integer eventId) {
         return eventService.getEventEntityById(eventId);

@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useState } from "react";
 import Tag from "./Tag";
 import { useNavigate } from "react-router-dom";
-import { separateDayMonthYear } from "../../utils/SeparateDayMonthYear";
+import { separateDayMonthYear } from "../../utils/DateConvert";
 import { getTags } from "../../services/tagService";
 
 const CardDetails = ({event}) => {

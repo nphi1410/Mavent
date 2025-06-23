@@ -12,7 +12,7 @@ import ChangePassword from "./pages/UserAuthorization/ChangePassword";
 import HomePage from "./pages/HomePage";
 import AllEvents from "./pages/AllEvents";
 import EventDetails from "./pages/EventDetails";
-import MeetingListPage from "./pages/MeetingListPage";
+import MeetingListPage from "./pages/meetingPages/MeetingListPage";
 
 // Department, Documents, and Members
 import DepartmentManagementPage from "./pages/Departments/DepartmentManagementPage";
@@ -44,6 +44,8 @@ import SuperAdminManageUsers from "./pages/superadmin/SuperAdminManageUsers";
 import SuperAdminViewEventDetails from "./pages/superadmin/SuperAdminViewEventDetails";
 import SuperAdminEditEvent from "./pages/superadmin/SuperAdminEditEvent";
 import SuperAdminViewUserDetails from "./pages/superadmin/SuperAdminViewUserDetails";
+import SuperAdminLayout from "./layouts/SuperAdminLayout";
+import MeetingEditPage from "./pages/meetingPages/EditMeetingPage";
 import ViewEventFeedback from "./pages/ViewEventFeedback.jsx";
 import ParticipantFeedbackEvent from "./pages/ParticipantFeedbackEvent.jsx";
 
@@ -69,6 +71,7 @@ function App() {
           <Route path="events" element={<AllEvents />} />
           <Route path="events/:id" element={<EventDetails />} />
           <Route path="meetings" element={<MeetingListPage />} />
+          <Route path="meetings/edit" element={<MeetingEditPage />} />
           <Route path="event/:eventId/feedback" element={<ViewEventFeedback />} />
 
           {/* Event Member Protected Routes */}

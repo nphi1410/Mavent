@@ -30,7 +30,7 @@ public class EventParticipantImplement implements EventParticipantService {
     }
 
     @Override
-    public Page<EventAccountRoleDTO> getEndedParticipantEvents(Integer accountId, Pageable pageable) {
+    public Page<EventAccountRole> getEndedParticipantEvents(Integer accountId, Pageable pageable) {
         // Lấy các event đã kết thúc mà user là participant
         return eventAccountRoleRepository.findByAccountId(accountId, pageable);
         // Hoặc dùng findEndedParticipantEventsByAccountId nếu bạn tạo riêng như gợi ý trên
