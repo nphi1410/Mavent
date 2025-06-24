@@ -82,8 +82,7 @@ function App() {
           <Route path="events/:id/departments" element={EventMember(<DepartmentManagementPage />)} />
           <Route path="events/:id/members" element={EventMember(<Members />)} />
           <Route path="events/:id/documents" element={EventMember(<DocumentsPage />)} />
-          <Route path="events/:id/requests" element={EventMember(<RequestsPage />)} />
-
+<Route path="events/:id/requests" element={EventMember(<RequestsPage />)} /> // Add this line
           <Route path="/event/:eventId/feedback" element={EventMember(<ViewEventFeedback />)} />
           <Route path="event/:id/account/:accountId/request" element={(<RequestHistory />)} />
 
