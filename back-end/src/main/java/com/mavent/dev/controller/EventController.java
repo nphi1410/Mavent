@@ -196,7 +196,7 @@ public class EventController {
         try {
             // Kiểm tra quyền truy cập sự kiện
             Account account = accountService.getAccount(jwt.extractUsername(request.getHeader("Authorization").substring(7)));
-            System.out.println("Account ID: " + account.getAccountId());
+//            System.out.println("Account ID: " + account.getAccountId());
 //            boolean hasAccess = eventService.checkEventAccess(eventId, account.getAccountId());
 //            if (!hasAccess) {
 //                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Bạn không có quyền truy cập sự kiện này");

@@ -34,7 +34,9 @@ const Layout = ({ children, activeItem }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);  const location = useLocation();  // Kiểm tra xem có phải đang ở trang quản lý (members, departments hoặc documents)
   const isManagementPage = 
     location.pathname.includes('/members') || 
-    (location.pathname.includes('/event') && location.pathname.includes('/members')) ||
+    (location.pathname.includes('/event') && 
+      (location.pathname.includes('/members') || location.pathname.includes('/staff'))
+    ) ||
     location.pathname.includes('/departments') ||
     location.pathname.includes('/documents') ||
     location.pathname.includes('/requests');
@@ -54,7 +56,8 @@ const Layout = ({ children, activeItem }) => {
   }
 
   // Nếu là trang quản lý, render với Sidebar
-  return (    <div className="flex min-h-screen bg-gray-50">      {/* Mobile Sidebar Overlay with blur effect */}
+  return (    
+    <div className="flex min-h-screen bg-gray-50">      {/* Mobile Sidebar Overlay with blur effect */}
       {isSidebarOpen && (
         <div 
           className="fixed inset-0 backdrop-blur-sm bg-black/30 z-40 lg:hidden animate-fadeIn"

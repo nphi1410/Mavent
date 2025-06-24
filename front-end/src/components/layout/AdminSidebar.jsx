@@ -1,19 +1,53 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faUsers, 
-  faTimes, 
+import {
+  faUsers,
+  faTimes,
   faSitemap,
   faFileAlt
 } from '@fortawesome/free-solid-svg-icons';
 import { useUserPermissions } from '../../hooks/useUserPermissions';
+import { getUserInfoInEvent } from "../../services/userEventService";
+
 
 // Sidebar component for admin dashboard
 const Sidebar = ({ activeItem, isOpen, onToggle }) => {
-  const pathname = window.location.pathname;
-  const eventIdMatch = pathname.match(/\/events\/(\d+)/);
-  const eventId = eventIdMatch ? eventIdMatch[1] : '9'; // Mặc định là 9 nếu không tìm thấy
+  // const pathname = window.location.pathname;
+  const { id } = useParams() || {};
+  // console.log('Event ID:', id);
+  const eventId = id;
+  const [role, setRole] = useState(''); // Default role
+
   // Get user's role for the current event
+
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const userEventInfo = await getUserInfoInEvent(id);
+        if (userEventInfo) {
+          // console.log("User Info in Event:", userEventInfo);
+          // console.log("User Info in Event:", userEventInfo.role);
+
+          if (userEventInfo.role === 'ADMIN') {
+            setIsAdmin(true); // Set admin status based on user info
+          }
+
+          setRole(userEventInfo.role); // Set role based on user info
+        } else {
+          console.warn("No user info found for this event.");
+        }
+
+
+      } catch (err) {
+        console.error("Failed to fetch user info:", err);
+        setError("Failed to fetch user information.");
+      }
+    }
+    fetchUserInfo();
+  }, []);
+  // Define all menu items
   const { userRole, loading, hasRole } = useUserPermissions(eventId);
   const isAdmin = userRole === 'ADMIN' || (userRole && userRole.includes('ADMIN'));
   const isManagerOrAdmin = hasRole('DEPARTMENT_MANAGER') || isAdmin;
@@ -31,52 +65,54 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
     // Define all menu items with their permission requirements
   const allMenuItems = [
     {
+      name: 'eventDetails',
+      displayName: 'Event Details',
+      icon: <FontAwesomeIcon icon={faSitemap} />,
+      link: `details`,
+      requiredRole: 'MEMBER' // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
+    },
+    {
       name: 'members',
       displayName: 'Members',
       icon: <FontAwesomeIcon icon={faUsers} />,
-      link: `/events/${eventId}/members`,
+      link: `members`,
       requiredRole: 'DEPARTMENT_MANAGER' // Only visible to department managers and admins
     },
     {
       name: 'departments',
       displayName: 'Departments',
       icon: <FontAwesomeIcon icon={faSitemap} />,
-      link: `/events/${eventId}/departments`,
+      link: `departments`,
       requiredRole: 'DEPARTMENT_MANAGER' // Only visible to department managers and admins
     },
     {
       name: 'documents',
       displayName: 'Documents',
       icon: <FontAwesomeIcon icon={faFileAlt} />,
-      link: `/events/${eventId}/documents`,
+      link: `documents`,
       requiredRole: 'MEMBER' // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
+    },
+    {
+      name: 'feedback',
+      displayName: 'Feedback',
+      icon: <FontAwesomeIcon icon={faFileAlt} />,
+      link: `feedback`,
+      requiredRole: 'ADMIN' // Visible to admin only (ADMIN)
     },
     {
       name: 'requests',
       displayName: 'Requests',
       icon: <FontAwesomeIcon icon={faFileAlt} />,
-      link: `/events/${eventId}/requests`,
-      requiredRole: 'ADMIN' // Only visible to department managers and admins
-    }
-  ];  // Filter items based on user role
-  const mainItems = allMenuItems.filter(item => {
-    // For items requiring DEPARTMENT_MANAGER role (Members and Departments management)
-    if (item.requiredRole === 'DEPARTMENT_MANAGER') {
-      // Only show to DEPARTMENT_MANAGER or ADMIN users
-      const visible = isManagerOrAdmin;
-      console.log(`Menu item "${item.name}" requires DEPARTMENT_MANAGER, user is ${userRole}, showing:`, visible);
-      return visible;
-    } 
-    // For items requiring MEMBER role (Documents)
-    else if (item.requiredRole === 'MEMBER') {
-      // These items are visible to all users with any valid role
-      // (which includes MEMBER, DEPARTMENT_MANAGER, and ADMIN)
-      console.log(`Menu item "${item.name}" visible to all roles (requires MEMBER role)`);
-      return true;
-    }
-    // Default case - if no specific rule, don't show
-    return false;
-  });// Không hiển thị phần Settings
+      link: `requests`,
+      requiredRole: 'MEMBER' // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
+    },
+
+
+  ];
+
+  // Filter items based on user role
+  const mainItems = allMenuItems.filter(item => !item.adminOnly || isAdmin);
+  // Không hiển thị phần Settings
   const settingsItems = [];
   
   // Debug: Log filtered menu items
@@ -92,11 +128,10 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
               <li key={item.name}>
                 <a
                   href={item.link}
-                  className={`flex items-center p-3 text-sm font-medium rounded-lg transition-colors duration-200 hover:bg-gray-100 ${
-                    activeItem === item.name.toLowerCase()
-                      ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-700'
-                      : 'text-gray-900'
-                  }`}
+                  className={`flex items-center p-3 text-sm font-medium rounded-lg transition-colors duration-200 hover:bg-gray-100 ${activeItem === item.name.toLowerCase()
+                    ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-700'
+                    : 'text-gray-900'
+                    }`}
                 >
                   <span className="w-5 h-5 text-gray-500">{item.icon}</span>
                   <span className="ml-3">{item.displayName || item.name}</span>
@@ -104,7 +139,8 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
               </li>
             ))}
           </ul>
-          
+
+
           {settingsItems.length > 0 && (
             <>
               <hr className="my-6 border-gray-200" />
@@ -114,11 +150,10 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
                   <li key={item.name}>
                     <a
                       href={item.link}
-                      className={`flex items-center p-3 text-sm font-medium rounded-lg transition-colors duration-200 hover:bg-gray-100 ${
-                        activeItem === item.name.toLowerCase()
-                          ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-700'
-                          : 'text-gray-900'
-                      }`}
+                      className={`flex items-center p-3 text-sm font-medium rounded-lg transition-colors duration-200 hover:bg-gray-100 ${activeItem === item.name.toLowerCase()
+                        ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-700'
+                        : 'text-gray-900'
+                        }`}
                     >
                       <span className="w-5 h-5 text-gray-500">{item.icon}</span>
                       <span className="ml-3">{item.displayName || item.name}</span>
@@ -157,11 +192,10 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
                 <a
                   href={item.link}
                   onClick={onToggle}
-                  className={`flex items-center p-3 text-sm font-medium rounded-lg transition-colors duration-200 hover:bg-gray-100 ${
-                    activeItem === item.name.toLowerCase()
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-900'
-                  }`}
+                  className={`flex items-center p-3 text-sm font-medium rounded-lg transition-colors duration-200 hover:bg-gray-100 ${activeItem === item.name.toLowerCase()
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-900'
+                    }`}
                 >
                   <span className="w-5 h-5 text-gray-500">{item.icon}</span>
                   <span className="ml-3">{item.displayName || item.name}</span>
@@ -169,7 +203,7 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
               </li>
             ))}
           </ul>
-          
+
           {settingsItems.length > 0 && (
             <>
               <hr className="my-6 border-gray-200" />
@@ -180,11 +214,10 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
                     <a
                       href={item.link}
                       onClick={onToggle}
-                      className={`flex items-center p-3 text-sm font-medium rounded-lg transition-colors duration-200 hover:bg-gray-100 ${
-                        activeItem === item.name.toLowerCase()
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'text-gray-900'
-                      }`}
+                      className={`flex items-center p-3 text-sm font-medium rounded-lg transition-colors duration-200 hover:bg-gray-100 ${activeItem === item.name.toLowerCase()
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'text-gray-900'
+                        }`}
                     >
                       <span className="w-5 h-5 text-gray-500">{item.icon}</span>
                       <span className="ml-3">{item.displayName || item.name}</span>

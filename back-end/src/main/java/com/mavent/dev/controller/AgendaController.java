@@ -17,4 +17,13 @@ public class AgendaController {
         AgendaDTO agendaItem = agendaService.createAgendaItem(eventId, dto);
         return ResponseEntity.ok(agendaItem);
     }
+
+    @GetMapping("/{eventId}/agenda")
+    public ResponseEntity<?> getAgendaItems(@PathVariable Integer eventId) {
+        try {
+            return ResponseEntity.ok(agendaService.getAgendaItemsByEventId(eventId));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error retrieving agenda items: " + e.getMessage());
+        }
+    }
 }

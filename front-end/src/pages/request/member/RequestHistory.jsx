@@ -1,4 +1,5 @@
 import { use, useEffect, useState } from "react"
+import Layout from '../../../components/layout/AdminLayout';
 import { useParams } from 'react-router-dom';
 import {
   getRequestsByEventIdAndAccountId,     // for member
@@ -8,7 +9,6 @@ import {
 } from "../../../services/requestService";
 import RequestForm from "../../../components/request/CreateRequest.jsx";
 import { getUserInfoInEvent } from "../../../services/userEventService.jsx";
-import { getAccountById } from "../../../services/accountService.jsx";
 import RequestDetailsPopup from "../../../components/request/MemberRequestDetails.jsx";
 
 export default function RequestHistory() {
@@ -23,43 +23,32 @@ export default function RequestHistory() {
   const [departmentId, setDepartmentId] = useState(null);
   const [filteredRequests, setFilteredRequests] = useState([]); // State for filtered requests
   const [role, setRole] = useState(""); // Default role is "member"
-  // const [accountInfoMap, setAccountInfoMap] = useState({});
   const [isPopupOpen, setIsPopupOpen] = useState(false)
+  const [accountId, setAccountId] = useState(""); // State for account ID
   const [viewRequest, setViewRequest] = useState(null); // State for the request to view details
 
 
-  const { id: eventId, accountId } = useParams();
+  const { id: eventId } = useParams();
   useEffect(() => {
     const fetchRequests = async () => {
       try {
         const userEventInfo = await getUserInfoInEvent(eventId);
         console.log("userEventInfo:", userEventInfo)
         // if (userEventInfo.role) {
-        setRole(userEventInfo.role); // Set role from user event info
+
+
         // console.log("User role:", role);
         // }
         setDepartmentId(userEventInfo?.departmentId || null); // Set department ID if available
 
         let rqs;
-        if (userEventInfo.role.toLowerCase().includes("member")) rqs = await getRequestsByEventIdAndAccountId(eventId, accountId); // await here
+        if (userEventInfo.role.toLowerCase().includes("member")) rqs = await getRequestsByEventIdAndAccountId(eventId, userEventInfo.accountId); // await here
         else if (userEventInfo.role.toUpperCase() === "ADMIN") {
           // console.log("Fetching all requests for admin role");
           rqs = await getRequestsByEventId(eventId); // await here
         }
         else if (userEventInfo.role.toLowerCase().includes("department_manager")) rqs = await getRequestsByEventIdAndDepartmentId(eventId, userEventInfo.departmentId); // await here
 
-        // const accountIds = [...new Set(requests.map(req => req.requestByAccountId))];
-
-        // Fetch account info for each unique id
-        // const accountMap = {};
-        // await Promise.all(
-        //   accountIds.map(async (id) => {
-        //     const acc = await getAccountById(id);
-        //     accountMap[id] = acc;
-        //   })
-        // );
-
-        // setAccountInfoMap(accountMap);
         const requestTypes = await getRequestTypes();
 
         setRequests(rqs); // data is already resolved
@@ -78,6 +67,7 @@ export default function RequestHistory() {
   }, [eventId, accountId]);
   useEffect(() => {
     const filterRequests = () => {
+      setLoading(true);
       let filtered = requests;
       console.log("Filtering requests with current filters:", {
         typeFilter,
@@ -120,6 +110,7 @@ export default function RequestHistory() {
       // const paginatedRequests = filteredRequests.slice(startIndex, startIndex + itemsPerPage);
 
       setFilteredRequests(filtered);
+      setLoading(false);
     };
 
     filterRequests();
@@ -129,16 +120,18 @@ export default function RequestHistory() {
   if (loading) return <p>Loading...</p>;
   if (!requests || requests.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div className="p-6">
-              <h1 className="text-2xl font-semibold text-gray-800 mb-4">No Requests Found</h1>
-              <p className="text-gray-600">There are no requests available for this event yet.</p>
+      <Layout activeItem="requests">
+        <div className="min-h-screen bg-gray-50 py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+              <div className="p-6">
+                <h1 className="text-2xl font-semibold text-gray-800 mb-4">No Requests Found</h1>
+                <p className="text-gray-600">There are no requests available for this event yet.</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </Layout>
     )
   }
   const getStatusBadge = (status) => {
@@ -181,141 +174,142 @@ export default function RequestHistory() {
 
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      {showCreateForm && (
-        <RequestForm
-          eventId={eventId}
-          accountId={accountId}
-          departmentId={departmentId}
-          onClose={handleCloseForm}
-        />
-      )}
-      {isPopupOpen && (
-        <RequestDetailsPopup
-          isOpen={isPopupOpen}
-          onClose={() => setIsPopupOpen(false)}
-          requestData={viewRequest}
-          requestType={requestTypes.find(type => type.requestTypeId === viewRequest.requestTypeId)?.name || "Unknown Type"}
-          answeredByAccountId={viewRequest.responseByAccountId}
-        />
-      )}
+    <Layout activeItem="requests">
+      <div className="min-h-screen bg-gray-50 py-8">
+        {showCreateForm && (
+          <RequestForm
+            eventId={eventId}
+            accountId={accountId}
+            departmentId={departmentId}
+            onClose={handleCloseForm}
+          />
+        )}
+        {isPopupOpen && (
+          <RequestDetailsPopup
+            isOpen={isPopupOpen}
+            onClose={() => setIsPopupOpen(false)}
+            requestData={viewRequest}
+            requestType={requestTypes.find(type => type.requestTypeId === viewRequest.requestTypeId)?.name || "Unknown Type"}
+            answeredByAccountId={viewRequest.responseByAccountId}
+          />
+        )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Page Title */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900">REQUEST HISTORY</h1>
-        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Page Title */}
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold text-gray-900">REQUEST HISTORY</h1>
+          </div>
 
-        {/* Main Card */}
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <div className="p-6">
-            {/* Filter Controls */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-6 items-start sm:items-end">
-              <div className="flex-1 min-w-0">
-                <select
-                  value={typeFilter}
-                  onChange={(e) => setTypeFilter(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                >
-                  <option value="">Select Type</option>
-                  {requestTypes?.map((type) => (
-                    <option key={type.requestTypeId} value={type.requestTypeId}>
-                      {type.name}
-                    </option>
-                  ))}
-                </select>
+          {/* Main Card */}
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="p-6">
+              {/* Filter Controls */}
+              <div className="flex flex-col sm:flex-row gap-4 mb-6 items-start sm:items-end">
+                <div className="flex-1 min-w-0">
+                  <select
+                    value={typeFilter}
+                    onChange={(e) => setTypeFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  >
+                    <option value="">Select Type</option>
+                    {requestTypes?.map((type) => (
+                      <option key={type.requestTypeId} value={type.requestTypeId}>
+                        {type.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  >
+                    <option value="">Select Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <input
+                    type="text"
+                    placeholder="Search by Title"
+                    value={searchTitle}
+                    onChange={(e) => setSearchTitle(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm placeholder-gray-400"
+                  />
+                </div>
+
+                <div className="flex-shrink-0">
+                  <button
+                    onClick={handleCreateRequest}
+                    className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                  >
+                    Create Request
+                  </button>
+                </div>
               </div>
 
-              <div className="flex-1 min-w-0">
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                >
-                  <option value="">Select Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="approved">Approved</option>
-                  <option value="rejected">Rejected</option>
-                </select>
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <input
-                  type="text"
-                  placeholder="Search by Title"
-                  value={searchTitle}
-                  onChange={(e) => setSearchTitle(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm placeholder-gray-400"
-                />
-              </div>
-
-              <div className="flex-shrink-0">
-                <button
-                  onClick={handleCreateRequest}
-                  className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                >
-                  Create Request
-                </button>
-              </div>
-            </div>
-
-            {/* Table */}
-            <div className="bg-rose-100 rounded-lg overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-rose-200">
-                  <thead>
-                    <tr>
-                      {!role.toLowerCase().includes("member") && (
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Requested By</th>
-                      )}
-                      {/* <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Request Title</th> */}
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Type</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Created Date</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Status</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Answered Date</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">View Detail</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-rose-200">
-                    {filteredRequests?.map((request) => (
-                      <tr key={request.requestId} className="hover:bg-rose-50 transition-colors duration-150">
-                        {/* <td className="px-6 py-4 text-sm text-gray-900">{
+              {/* Table */}
+              <div className="bg-rose-100 rounded-lg overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-rose-200">
+                    <thead>
+                      <tr>
+                        {!role.toLowerCase().includes("member") && (
+                          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Requested By</th>
+                        )}
+                        {/* <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Request Title</th> */}
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Type</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Created Date</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Status</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Answered Date</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">View Detail</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-rose-200">
+                      {filteredRequests?.map((request) => (
+                        <tr key={request.requestId} className="hover:bg-rose-50 transition-colors duration-150">
+                          {/* <td className="px-6 py-4 text-sm text-gray-900">{
                           request.requestByAccountId ? 
                             getAccountById(request.requestByAccountId)?.username : "Unknown User"
                         }</td> */}
-                        {!role.toLowerCase().includes("member") && (
+                          {!role.toLowerCase().includes("member") && (
+                            <td className="px-6 py-4 text-sm text-gray-900">
+                              {request.requestByUsername ? request.requestByUsername : "Unknown User"
+                              }
+                            </td>
+                          )}
+                          {/* <td className="px-6 py-4 text-sm text-gray-900">{request.title}</td> */}
                           <td className="px-6 py-4 text-sm text-gray-900">
-                            {request.requestByUsername ? request.requestByUsername : "Unknown User"
-                            }
+                            {requestTypes.find(type => type.requestTypeId === request.requestTypeId)?.name || "Unknown Type"}
                           </td>
-                        )}
-                        {/* <td className="px-6 py-4 text-sm text-gray-900">{request.title}</td> */}
-                        <td className="px-6 py-4 text-sm text-gray-900">
-                          {requestTypes.find(type => type.requestTypeId === request.requestTypeId)?.name || "Unknown Type"}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-900 whitespace-pre-line">{request.createdAt}</td>
-                        <td className="px-6 py-4">{getStatusBadge(request.status)}</td>
-                        <td className="px-6 py-4 text-sm text-gray-900 whitespace-pre-line">
-                          {request.status !== "PENDING" ? request.updatedAt : "Not Yet"}
-                        </td>
-                        <td className="px-6 py-4">
-                          <button
-                            onClick={() => handleViewDetail(request.requestId)}
-                            className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-4 rounded-full text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                          >
-                            View
-                          </button>
-                        </td>
-                      </tr>
+                          <td className="px-6 py-4 text-sm text-gray-900 whitespace-pre-line">{request.createdAt}</td>
+                          <td className="px-6 py-4">{getStatusBadge(request.status)}</td>
+                          <td className="px-6 py-4 text-sm text-gray-900 whitespace-pre-line">
+                            {request.status !== "PENDING" ? request.updatedAt : "Not Yet"}
+                          </td>
+                          <td className="px-6 py-4">
+                            <button
+                              onClick={() => handleViewDetail(request.requestId)}
+                              className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-4 rounded-full text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            >
+                              View
+                            </button>
+                          </td>
+                        </tr>
 
-                    ))}
-                  </tbody>
-                </table>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
 
-            {/* Pagination */}
-            {/* <div className="flex justify-center items-center space-x-2 mt-6">
+              {/* Pagination */}
+              {/* <div className="flex justify-center items-center space-x-2 mt-6">
               <button
                 onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
@@ -344,11 +338,11 @@ export default function RequestHistory() {
                 Next
               </button>
             </div> */}
+            </div>
           </div>
         </div>
+
       </div>
-
-    </div>
-
+    </Layout>
   )
 }

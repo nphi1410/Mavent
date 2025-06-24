@@ -6,7 +6,7 @@ import { updateRequest } from "../../services/requestService";
 export default function RequestDetailsPopup({ isOpen, onClose, requestData, requestType, answeredByAccountId }) {
     if (!isOpen) return null;
 
-    const [answeredByAccount, setAnsweredByAccount] = useState(null);
+    // const [answeredByAccount, setAnsweredByAccount] = useState(null);
     const [loading, setLoading] = useState(true);
     const [responseContent, setResponseContent] = useState("");
 
@@ -67,24 +67,24 @@ export default function RequestDetailsPopup({ isOpen, onClose, requestData, requ
     }
 
     useEffect(() => {
-        const fetchAnsweredBy = async () => {
-            if (answeredByAccountId) {
-                try {
-                    const response = await getAccountById(answeredByAccountId);
-                    console.log("response:", response)
-                    if (response) {
-                        setAnsweredByAccount(response);
-                        console.log("answeredByAccount:", response);
-                    } else {
-                        setAnsweredByAccount("not yet answered");
-                    }
+    //     const fetchAnsweredBy = async () => {
+    //         if (answeredByAccountId) {
+    //             try {
+    //                 const response = await getAccountById(answeredByAccountId);
+    //                 console.log("response:", response)
+    //                 if (response) {
+    //                     setAnsweredByAccount(response);
+    //                     console.log("answeredByAccount:", response);
+    //                 } else {
+    //                     setAnsweredByAccount("not yet answered");
+    //                 }
 
-                } catch (error) {
-                    console.error("Error fetching answered by account:", error);
-                }
-            }
-        }
-        fetchAnsweredBy();
+    //             } catch (error) {
+    //                 console.error("Error fetching answered by account:", error);
+    //             }
+    //         }
+    //     }
+    //     fetchAnsweredBy();
         setLoading(false);
     }, [answeredByAccountId]);
 
@@ -92,7 +92,7 @@ export default function RequestDetailsPopup({ isOpen, onClose, requestData, requ
 
     return (
         <div
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+            className="fixed inset-0 backdrop-blur-[0px] bg-gray-900/40 z-[9999] bg-opacity-50 flex items-center justify-center p-4"
             onClick={handleBackdropClick}
         >
             <div className="bg-gray-200 rounded-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto shadow-2xl">
@@ -181,35 +181,35 @@ export default function RequestDetailsPopup({ isOpen, onClose, requestData, requ
                         <div className="lg:col-span-1">
                             <div className="bg-white rounded-lg p-4 shadow-sm h-full">
                                 <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">FEEDBACK</h3>
-                                <textarea className="text-gray-700 leading-relaxed w-full"
+                                <textarea className="text-gray-700 leading-relaxed w-full h-7/10"
                                     onChange={(e) => setResponseContent(e.target.value)}
                                     placeholder={data.responseContent
                                         ? data.responseContent
                                         : "No feedback provided yet."}>
 
                                 </textarea>
-                            </div>
-                            <div className="mt-6">
                                 {data.status.toUpperCase() === "PENDING" && (
-                                    <div className="mt-6 flex justify-around">
+
+                                    <div className="mt-6 flex gap-4 justify-baseline bottom-0 left-0 right-0 ">
                                         <button
                                             onClick={handleApprove}
-                                            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+                                            className="flex-1 bg-green-600 text-white font-semibold text-lg py-3 rounded-2xl hover:bg-green-700 transition-colors duration-200"
                                         >
                                             Approve
                                         </button>
                                         <button
                                             onClick={handleReject}
-                                            className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+                                            className="flex-1 bg-red-600 text-white font-semibold text-lg py-3 rounded-2xl hover:bg-red-700 transition-colors duration-200"
                                         >
                                             Reject
                                         </button>
                                     </div>
-
                                 )}
+
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
