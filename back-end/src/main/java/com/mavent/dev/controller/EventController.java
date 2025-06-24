@@ -112,7 +112,7 @@ public class EventController {
     // Đăng ký sự kiện
     @PostMapping("/register")
     public ResponseEntity<String> registerEvent(@RequestBody EventRegisterDTO eventRegisterDto) {
-        Integer accountId = accountService.getAccount(eventRegisterDto.getUsername()).getAccountId();
+        Integer accountId = eventRegisterDto.getAccountId();
         EventAccountRole eventAccountRole = new EventAccountRole();
         eventAccountRole.setEventId(eventRegisterDto.getEventId());
         eventAccountRole.setEventRole(eventRegisterDto.getRole());
