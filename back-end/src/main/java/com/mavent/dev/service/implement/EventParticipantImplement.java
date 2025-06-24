@@ -1,6 +1,5 @@
 package com.mavent.dev.service.implement;
 
-import com.mavent.dev.dto.event.EventAccountRoleDTO;
 import com.mavent.dev.dto.event.EventFeedbackDTO;
 import com.mavent.dev.entity.Event;
 import com.mavent.dev.entity.EventAccountRole;
@@ -39,7 +38,6 @@ public class EventParticipantImplement implements EventParticipantService {
     @Override
     @Transactional
     public void createFeedback(EventFeedbackDTO dto) {
-        System.out.println("DTO nhận vào: " + dto);
 
         Integer eventId = dto.getEventId();
         Integer accountId = dto.getAccountId();
@@ -72,11 +70,7 @@ public class EventParticipantImplement implements EventParticipantService {
         feedback.setComment(dto.getComment());
         feedback.setSubmittedAt(LocalDateTime.now());
 
-        System.out.println("Đang lưu feedback: " + feedback);
-
         eventFeedbackRepository.save(feedback);
-
-        System.out.println("Lưu feedback thành công.");
     }
 
 }
