@@ -167,8 +167,19 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
       setLoading(true); // Show loading indicator
 
       // Make the API call to get preview URL
-      const previewData = await getDocumentPreviewUrl(documentId);
-      console.log('Preview data received:', previewData);
+      const previewData = await getDocumentPreviewUrl(documentId);      console.log('Preview data received:', previewData);
+      // Log more details for debugging Excel file type issues
+      console.log('File type detection check:', {
+        fileName: previewData?.fileName,
+        contentType: previewData?.contentType,
+        fileExtension: previewData?.fileName ? getFileExtension(previewData.fileName) : '',
+        contentTypeExtension: previewData?.contentType ? getFileExtension(previewData.contentType) : '',
+        isExcel: previewData?.fileName?.toLowerCase().endsWith('.xlsx') || 
+                previewData?.fileName?.toLowerCase().endsWith('.xls') ||
+                (previewData?.contentType && 
+                  (previewData.contentType.includes('spreadsheetml') || 
+                   previewData.contentType.includes('ms-excel')))
+      });
       
       if (!previewData) {
         console.error('No preview data received from API');
@@ -317,6 +328,13 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
     
     const lowerType = fileType.toLowerCase();
     
+    // Check for actual file extensions in the name first
+    if (lowerType.endsWith('.xlsx') || lowerType.endsWith('.xls') || 
+        lowerType.endsWith('.csv') || lowerType.endsWith('.ods') ||
+        lowerType.endsWith('.xlsm') || lowerType.endsWith('.xlsb')) {
+      return 'csv'; // Return spreadsheet code
+    }
+    
     // PDF documents
     if (
       lowerType.includes('pdf') || 
@@ -324,12 +342,31 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
     ) {
       return 'pdf';
     }
+      // Spreadsheet formats (xlsx, xls, csv, ods, etc.) - check Excel formats first!
+    if (
+      lowerType.includes('excel') || 
+      lowerType.includes('spreadsheet') || 
+      lowerType.includes('csv') ||
+      lowerType.includes('sheet') || 
+      lowerType.includes('xls') || 
+      lowerType.includes('ods') ||
+      lowerType.includes('numbers') ||
+      lowerType.includes('spreadsheetml') ||  // Important MIME type for Excel files
+      lowerType.endsWith('.xlsx') || 
+      lowerType.endsWith('.xls') || 
+      lowerType.endsWith('.csv') || 
+      lowerType.endsWith('.ods') ||
+      lowerType.endsWith('.tsv')
+    ) {
+      return 'csv';
+    }
     
     // Word documents (doc, docx, rtf, odt, etc.)
     if (
       lowerType.includes('word') || 
-      lowerType.includes('document') || 
-      lowerType.includes('doc') ||
+      lowerType.includes('wordprocessingml') ||  // Word specific MIME type
+      lowerType.includes('document') && !lowerType.includes('spreadsheetml') || // Avoid catching Excel files 
+      lowerType.includes('doc') && !lowerType.includes('spreadsheetml') ||  // Avoid catching Excel files
       lowerType.includes('rtf') || 
       lowerType.includes('odt') || 
       lowerType.includes('text/richtext') ||
@@ -341,24 +378,6 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
       lowerType.endsWith('.dotx')
     ) {
       return 'doc';
-    }
-    
-    // Spreadsheet formats (xlsx, xls, csv, ods, etc.)
-    if (
-      lowerType.includes('excel') || 
-      lowerType.includes('spreadsheet') || 
-      lowerType.includes('csv') ||
-      lowerType.includes('sheet') || 
-      lowerType.includes('xls') || 
-      lowerType.includes('ods') ||
-      lowerType.includes('numbers') ||
-      lowerType.endsWith('.xlsx') || 
-      lowerType.endsWith('.xls') || 
-      lowerType.endsWith('.csv') || 
-      lowerType.endsWith('.ods') ||
-      lowerType.endsWith('.tsv')
-    ) {
-      return 'csv';
     }
     
     // Image formats (jpg, jpeg, png, gif, svg, webp, etc.)
