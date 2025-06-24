@@ -124,7 +124,6 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
     }
     // For items requiring MEMBER role (Documents)
     else if (item.requiredRole === "MEMBER") {
-    else if (item.requiredRole === "MEMBER") {
       // These items are visible to all users with any valid role
       // (which includes MEMBER, DEPARTMENT_MANAGER, and ADMIN)
       console.log(
