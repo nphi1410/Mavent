@@ -26,7 +26,6 @@ export default function RequestHistory() {
   const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [accountId, setAccountId] = useState(""); // State for account ID
   const [viewRequest, setViewRequest] = useState(null); // State for the request to view details
-  // const [sortByDate, setSortByDate] = useState(false); // State for sorting by date
 
 
   const { id: eventId } = useParams();
@@ -104,14 +103,12 @@ export default function RequestHistory() {
         filtered = filtered.filter(request => request?.title?.toLowerCase().includes(searchTitle.toLowerCase()));
       }
 
-      if (sortByDate)
+        // // Paginate results
+        // const itemsPerPage = 5;
+        // const startIndex = (currentPage - 1) * itemsPerPage;
+        // const paginatedRequests = filteredRequests.slice(startIndex, startIndex + itemsPerPage);
 
-      // // Paginate results
-      // const itemsPerPage = 5;
-      // const startIndex = (currentPage - 1) * itemsPerPage;
-      // const paginatedRequests = filteredRequests.slice(startIndex, startIndex + itemsPerPage);
-
-      setFilteredRequests(filtered);
+        setFilteredRequests(filtered);
     };
 
     filterRequests();
@@ -243,17 +240,7 @@ export default function RequestHistory() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm placeholder-gray-400"
                   />
                 </div>
-
-                <div className="flex-1 min-w-0">
-                  <input
-                    type="text"
-                    placeholder="Search by Title"
-                    value={searchTitle}
-                    onChange={(e) => setSearchTitle(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm placeholder-gray-400"
-                  />
-                </div>
-
+                
                 {!role.toLowerCase().includes("admin") && (
                   <div className="flex-shrink-0">
                     <button
