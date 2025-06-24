@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUsers,
   faTimes,
@@ -9,12 +10,15 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useUserPermissions } from "../../hooks/useUserPermissions";
 
+
 // Sidebar component for admin dashboard
 const Sidebar = ({ activeItem, isOpen, onToggle }) => {
-  const pathname = window.location.pathname;
-  const eventIdMatch = pathname.match(/\/events\/(\d+)/);
-  const eventId = eventIdMatch ? eventIdMatch[1] : "9"; // Mặc định là 9 nếu không tìm thấy
-  // Get user's role for the current event
+  // const pathname = window.location.pathname;
+  const { id } = useParams() || {};
+  // console.log('Event ID:', id);
+  const eventId = id;
+
+  // Define all menu items
   const { userRole, loading, hasRole } = useUserPermissions(eventId);
   const isAdmin =
     userRole === "ADMIN" || (userRole && userRole.includes("ADMIN"));
@@ -39,44 +43,84 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
   // Define all menu items with their permission requirements
   const allMenuItems = [
     {
+      name: 'eventDetails',
+      displayName: 'Event Details',
+      icon: <FontAwesomeIcon icon={faSitemap} />,
+      link: `details`,
+      requiredRole: 'MEMBER' // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
+    },
+    {
+      name: 'eventDetails',
+      displayName: 'Event Details',
+      icon: <FontAwesomeIcon icon={faSitemap} />,
+      link: `details`,
+      requiredRole: 'MEMBER' // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
+    },
+    {
       name: "members",
       displayName: "Members",
       icon: <FontAwesomeIcon icon={faUsers} />,
-      link: `/events/${eventId}/members`,
+      link: `members`,
       requiredRole: "DEPARTMENT_MANAGER", // Only visible to department managers and admins
     },
     {
       name: "departments",
       displayName: "Departments",
       icon: <FontAwesomeIcon icon={faSitemap} />,
-      link: `/events/${eventId}/departments`,
-      requiredRole: "DEPARTMENT_MANAGER", // Only visible to department managers and admins
+      link: `departments`,
+      requiredRole: 'ADMIN' // Only visible to department managers and admins
     },
     {
       name: "documents",
       displayName: "Documents",
       icon: <FontAwesomeIcon icon={faFileAlt} />,
-      link: `/events/${eventId}/documents`,
-      requiredRole: "MEMBER", // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
+      link: `documents`,
+      requiredRole: 'MEMBER' // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
     },
     {
-      name: "requests",
-      displayName: "Requests",
-      icon: <FontAwesomeIcon icon={faInbox} />, // Or faClipboardList, faTicketAlt, etc.
-      link: `/events/${eventId}/requests`,
-      requiredRole: "MEMBER",
+      name: 'feedback',
+      displayName: 'Feedback',
+      icon: <FontAwesomeIcon icon={faFileAlt} />,
+      link: `feedback`,
+      requiredRole: 'ADMIN' // Visible to admin only (ADMIN)
     },
-  ]; // Filter items based on user role
+    {
+      name: 'requests',
+      displayName: 'Requests',
+      icon: <FontAwesomeIcon icon={faFileAlt} />,
+      link: `requests`,
+      requiredRole: 'MEMBER' // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
+    },
+
+
+  ];
+
+  // Filter items based on user role
   const mainItems = allMenuItems.filter((item) => {
+    // For items requiring ADMIN role (Members and Departments management)
+    if (item.requiredRole === "ADMIN") {
+      // Only show to DEPARTMENT_MANAGER or ADMIN users
+      const visible = isAdmin;
+      console.log(
+        `Menu item "${item.name}" requires ADMIN user is ${userRole}, showing:`,
+        visible
+      );
+      return visible;
+    }
     // For items requiring DEPARTMENT_MANAGER role (Members and Departments management)
+    if (item.requiredRole === "DEPARTMENT_MANAGER") {
     if (item.requiredRole === "DEPARTMENT_MANAGER") {
       // Only show to DEPARTMENT_MANAGER or ADMIN users
       const visible = isManagerOrAdmin;
       console.log(
+        
         `Menu item "${item.name}" requires DEPARTMENT_MANAGER, user is ${userRole}, showing:`,
+       
         visible
+      
       );
       return visible;
+    }
     }
     // For items requiring MEMBER role (Documents)
     else if (item.requiredRole === "MEMBER") {

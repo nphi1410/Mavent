@@ -18,13 +18,17 @@ const MapGuide = ({ eventData }) => {
   const [position, setPosition] = useState(null);
 
   useEffect(() => {
+    if (!eventData) {
+      return;
+    }
     const fetchPosition = async () => {
       try {
-        if (eventData.locationId === null) {
+        const locationId = eventData?.locationId;
+        if (locationId === null) {
           setPosition(null);
           return;
         }
-        const location = await getLocationById(eventData.locationId);
+        const location = await getLocationById(locationId);
         setPosition(location);
       } catch (err) {
         console.error("Failed to fetch location:", err);
@@ -32,7 +36,7 @@ const MapGuide = ({ eventData }) => {
     };
 
     fetchPosition();
-  }, []);
+  }, [eventData]);
 
   return (
     <section className="w-full max-w-2xl px-4 md:px-6 text-gray-900">

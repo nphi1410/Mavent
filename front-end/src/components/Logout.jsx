@@ -13,6 +13,8 @@ const logout = async () => {
             console.log('Logged out successfully');
             sessionStorage.removeItem('isLoggedIn');
             sessionStorage.removeItem('username');
+            sessionStorage.removeItem('userRole');
+            sessionStorage.removeItem('token');
 
             // navigate('/login');
             // Redirect to home page

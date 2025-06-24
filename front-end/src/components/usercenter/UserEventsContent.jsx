@@ -45,11 +45,11 @@ const UserEventsContent = () => {
     fetchEvents();
   }, [navigate]); // navigate thường ổn định, useEffect này sẽ chạy một lần khi component mount
 
-  // useEffect cho việc filter events (giữ nguyên logic filter của bạn)
+  // useEffect cho việc filter events 
   useEffect(() => {
     filterEvents();
     setCurrentPage(1); // Reset về trang 1 mỗi khi events hoặc filters thay đổi
-  }, [events, filters]); // Thêm events làm dependency
+  }, [events, filters, navigate]); // Thêm events làm dependency
 
   const filterEvents = () => {
     let result = [...events];

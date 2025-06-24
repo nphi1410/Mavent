@@ -23,7 +23,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/documents")
-public class DocumentController {    @Autowired
+public class DocumentController {
+
+    @Autowired
     private DocumentService documentService;
     
     @Autowired

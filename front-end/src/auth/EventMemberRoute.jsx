@@ -5,8 +5,8 @@ import { jwtDecode } from 'jwt-decode';
 
 // Utility function to check login status
 const isLoggedIn = () => {
-  const token = sessionStorage.getItem("token");
-  return !!token;
+  const isLoggedIn = sessionStorage.getItem("isLoggedIn");
+  return !!isLoggedIn;
 };
 
 // Check if user is a super admin
@@ -39,6 +39,7 @@ const EventMemberRoute = ({ children }) => {
       if (!isLoggedIn()) {
         setIsAuthorized(false);
         setIsLoading(false);
+
         return;
       }
 
@@ -132,7 +133,7 @@ const EventMemberRoute = ({ children }) => {
     return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
   }
 
-  if (!isLoggedIn() || !isAuthorized) {
+  if (!isAuthorized) {
     // Redirect to event details page with a message    // Customize message based on the route
     const isDocumentsRoute = location.pathname.includes('documents');
     const message = isDocumentsRoute
