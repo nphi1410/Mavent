@@ -26,6 +26,7 @@ export default function RequestHistory() {
   const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [accountId, setAccountId] = useState(""); // State for account ID
   const [viewRequest, setViewRequest] = useState(null); // State for the request to view details
+  // const [sortByDate, setSortByDate] = useState(false); // State for sorting by date
 
 
   const { id: eventId } = useParams();
@@ -40,6 +41,7 @@ export default function RequestHistory() {
         // console.log("User role:", role);
         // }
         setDepartmentId(userEventInfo?.departmentId || null); // Set department ID if available
+        setRole(userEventInfo.role || "participant"); // Set role, default to "member"
 
         let rqs;
         if (userEventInfo.role.toLowerCase().includes("member")) rqs = await getRequestsByEventIdAndAccountId(eventId, userEventInfo.accountId); // await here
@@ -67,7 +69,6 @@ export default function RequestHistory() {
   }, [eventId, accountId]);
   useEffect(() => {
     const filterRequests = () => {
-      setLoading(true);
       let filtered = requests;
       console.log("Filtering requests with current filters:", {
         typeFilter,
@@ -89,7 +90,6 @@ export default function RequestHistory() {
           }
         });
         filtered = filtered.filter(request => typeFilter.includes(request.requestTypeId));
-
       }
 
       // Filter by status
@@ -101,8 +101,10 @@ export default function RequestHistory() {
       // Filter by title
       if (searchTitle) {
         console.log("searchTitle:", searchTitle)
-        filtered = filtered.filter(request => request.title.toLowerCase().includes(searchTitle.toLowerCase()));
+        filtered = filtered.filter(request => request?.title?.toLowerCase().includes(searchTitle.toLowerCase()));
       }
+
+      if (sortByDate)
 
       // // Paginate results
       // const itemsPerPage = 5;
@@ -110,7 +112,6 @@ export default function RequestHistory() {
       // const paginatedRequests = filteredRequests.slice(startIndex, startIndex + itemsPerPage);
 
       setFilteredRequests(filtered);
-      setLoading(false);
     };
 
     filterRequests();
@@ -243,14 +244,26 @@ export default function RequestHistory() {
                   />
                 </div>
 
-                <div className="flex-shrink-0">
-                  <button
-                    onClick={handleCreateRequest}
-                    className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                  >
-                    Create Request
-                  </button>
+                <div className="flex-1 min-w-0">
+                  <input
+                    type="text"
+                    placeholder="Search by Title"
+                    value={searchTitle}
+                    onChange={(e) => setSearchTitle(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm placeholder-gray-400"
+                  />
                 </div>
+
+                {!role.toLowerCase().includes("admin") && (
+                  <div className="flex-shrink-0">
+                    <button
+                      onClick={handleCreateRequest}
+                      className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                    >
+                      Create Request
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Table */}
@@ -262,7 +275,7 @@ export default function RequestHistory() {
                         {!role.toLowerCase().includes("member") && (
                           <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Requested By</th>
                         )}
-                        {/* <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Request Title</th> */}
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Request Title</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Type</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Created Date</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Status</th>
@@ -283,14 +296,35 @@ export default function RequestHistory() {
                               }
                             </td>
                           )}
-                          {/* <td className="px-6 py-4 text-sm text-gray-900">{request.title}</td> */}
+                          <td className="px-6 py-4 text-sm text-gray-900">{request.title}</td>
                           <td className="px-6 py-4 text-sm text-gray-900">
                             {requestTypes.find(type => type.requestTypeId === request.requestTypeId)?.name || "Unknown Type"}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-900 whitespace-pre-line">{request.createdAt}</td>
+                          <td className="px-6 py-4 text-sm text-gray-900 whitespace-pre-line">
+                            {
+                              request.createdAt ?
+                                new Date(request.createdAt).toLocaleDateString("en-US", {
+                                  year: "numeric",
+                                  month: "2-digit",
+                                  day: "2-digit",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }) : "Not Yet"
+                            }
+                          </td>
                           <td className="px-6 py-4">{getStatusBadge(request.status)}</td>
                           <td className="px-6 py-4 text-sm text-gray-900 whitespace-pre-line">
-                            {request.status !== "PENDING" ? request.updatedAt : "Not Yet"}
+                            {
+                              request.status !== "PENDING" ?
+                                new Date(request.updatedAt).toLocaleDateString("en-US", {
+                                  year: "numeric",
+                                  month: "2-digit",
+                                  day: "2-digit",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })
+                                : "Not Yet"
+                            }
                           </td>
                           <td className="px-6 py-4">
                             <button
