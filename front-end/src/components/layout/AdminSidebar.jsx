@@ -17,36 +17,7 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
   const { id } = useParams() || {};
   // console.log('Event ID:', id);
   const eventId = id;
-  const [role, setRole] = useState(''); // Default role
 
-  // Get user's role for the current event
-
-
-  useEffect(() => {
-    const fetchUserInfo = async () => {
-      try {
-        const userEventInfo = await getUserInfoInEvent(id);
-        if (userEventInfo) {
-          // console.log("User Info in Event:", userEventInfo);
-          // console.log("User Info in Event:", userEventInfo.role);
-
-          if (userEventInfo.role === 'ADMIN') {
-            setIsAdmin(true); // Set admin status based on user info
-          }
-
-          setRole(userEventInfo.role); // Set role based on user info
-        } else {
-          console.warn("No user info found for this event.");
-        }
-
-
-      } catch (err) {
-        console.error("Failed to fetch user info:", err);
-        setError("Failed to fetch user information.");
-      }
-    }
-    fetchUserInfo();
-  }, []);
   // Define all menu items
   const { userRole, loading, hasRole } = useUserPermissions(eventId);
   const isAdmin = userRole === 'ADMIN' || (userRole && userRole.includes('ADMIN'));
@@ -83,7 +54,7 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
       displayName: 'Departments',
       icon: <FontAwesomeIcon icon={faSitemap} />,
       link: `departments`,
-      requiredRole: 'DEPARTMENT_MANAGER' // Only visible to department managers and admins
+      requiredRole: 'ADMIN' // Only visible to department managers and admins
     },
     {
       name: 'documents',
@@ -111,7 +82,39 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
   ];
 
   // Filter items based on user role
-  const mainItems = allMenuItems.filter(item => !item.adminOnly || isAdmin);
+  const mainItems = allMenuItems.filter((item) => {
+    // For items requiring ADMIN role (Members and Departments management)
+    if (item.requiredRole === "ADMIN") {
+      // Only show to DEPARTMENT_MANAGER or ADMIN users
+      const visible = isAdmin;
+      console.log(
+        `Menu item "${item.name}" requires ADMIN user is ${userRole}, showing:`,
+        visible
+      );
+      return visible;
+    }
+    // For items requiring DEPARTMENT_MANAGER role (Members and Departments management)
+    if (item.requiredRole === "DEPARTMENT_MANAGER") {
+      // Only show to DEPARTMENT_MANAGER or ADMIN users
+      const visible = isManagerOrAdmin;
+      console.log(
+        `Menu item "${item.name}" requires DEPARTMENT_MANAGER, user is ${userRole}, showing:`,
+        visible
+      );
+      return visible;
+    }
+    // For items requiring MEMBER role (Documents)
+    else if (item.requiredRole === "MEMBER") {
+      // These items are visible to all users with any valid role
+      // (which includes MEMBER, DEPARTMENT_MANAGER, and ADMIN)
+      console.log(
+        `Menu item "${item.name}" visible to all roles (requires MEMBER role)`
+      );
+      return true;
+    }
+    // Default case - if no specific rule, don't show
+    return false;
+  }); // Không hiển thị phần Settings
   // Không hiển thị phần Settings
   const settingsItems = [];
   

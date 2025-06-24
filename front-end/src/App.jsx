@@ -83,7 +83,7 @@ function App() {
             <Route index element={<EventDetailsByRoles />} />
             <Route path="details" element={(<EventDetailsByRoles />)} />
             <Route path="departments" element={EventMember(<DepartmentManagementPage />)} />
-            <Route path="members" element={EventMember(<Members />)} />
+            <Route path="members" element={(<Members />)} />
             <Route path="documents" element={(<DocumentsPage />)} />
             <Route path="feedback" element={EventMember(<ViewEventFeedback />)} />
             <Route path="requests" element={Protect((<RequestHistory />))} />
