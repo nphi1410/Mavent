@@ -102,7 +102,6 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
     }
     // For items requiring DEPARTMENT_MANAGER role (Members and Departments management)
     if (item.requiredRole === "DEPARTMENT_MANAGER") {
-    if (item.requiredRole === "DEPARTMENT_MANAGER") {
       // Only show to DEPARTMENT_MANAGER or ADMIN users
       const visible = isManagerOrAdmin;
       console.log(
@@ -113,7 +112,6 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
       
       );
       return visible;
-    }
     }
     // For items requiring MEMBER role (Documents)
     else if (item.requiredRole === "MEMBER") {
