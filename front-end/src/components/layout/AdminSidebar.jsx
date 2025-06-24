@@ -50,13 +50,6 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
       requiredRole: 'MEMBER' // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
     },
     {
-      name: 'eventDetails',
-      displayName: 'Event Details',
-      icon: <FontAwesomeIcon icon={faSitemap} />,
-      link: `details`,
-      requiredRole: 'MEMBER' // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
-    },
-    {
       name: "members",
       displayName: "Members",
       icon: <FontAwesomeIcon icon={faUsers} />,
