@@ -42,13 +42,7 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
   );
   // Define all menu items with their permission requirements
   const allMenuItems = [
-    {
-      name: 'eventDetails',
-      displayName: 'Event Details',
-      icon: <FontAwesomeIcon icon={faSitemap} />,
-      link: `details`,
-      requiredRole: 'MEMBER' // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
-    },
+ 
     {
       name: 'eventDetails',
       displayName: 'Event Details',
