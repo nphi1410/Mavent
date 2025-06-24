@@ -50,13 +50,6 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
       requiredRole: 'MEMBER' // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
     },
     {
-      name: 'eventDetails',
-      displayName: 'Event Details',
-      icon: <FontAwesomeIcon icon={faSitemap} />,
-      link: `details`,
-      requiredRole: 'MEMBER' // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
-    },
-    {
       name: "members",
       displayName: "Members",
       icon: <FontAwesomeIcon icon={faUsers} />,
@@ -109,7 +102,6 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
     }
     // For items requiring DEPARTMENT_MANAGER role (Members and Departments management)
     if (item.requiredRole === "DEPARTMENT_MANAGER") {
-    if (item.requiredRole === "DEPARTMENT_MANAGER") {
       // Only show to DEPARTMENT_MANAGER or ADMIN users
       const visible = isManagerOrAdmin;
       console.log(
@@ -120,7 +112,6 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
       
       );
       return visible;
-    }
     }
     // For items requiring MEMBER role (Documents)
     else if (item.requiredRole === "MEMBER") {

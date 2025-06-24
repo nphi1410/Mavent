@@ -54,7 +54,7 @@ export default function EventDetailsByRoles() {
           const items = await getAgendaItemsByEventId(id);
           console.log("Agenda Items:", items);
           setAgendaItems(items);
-        }  catch (err) {
+        } catch (err) {
           console.error("Failed to fetch agenda items:", err);
           setError("Failed to fetch agenda items.");
         }
@@ -117,7 +117,7 @@ export default function EventDetailsByRoles() {
 
                 <TagsList eventData={eventData} />
 
-                <div className="mb-6">
+                {/* <div className="mb-6">
                   <p className="text-gray-700 mb-2">32 people attended</p>
                   <div className="flex items-center">
                     {attendees.map((avatar, index) => (
@@ -130,6 +130,15 @@ export default function EventDetailsByRoles() {
                     ))}
                     <span className="text-gray-500 ml-2">+27</span>
                   </div>
+                </div> */}
+                <div className="mb-6">
+                  <h3 className="font-semibold text-gray-900 mb-2">Description:</h3>
+                  <p className="text-gray-700 leading-relaxed">
+                    {eventData?.description || "No description available."}
+                    {/* <button className="text-blue-500 hover:text-blue-600 ml-1 transition-colors duration-200">
+                  ...See more
+                </button> */}
+                  </p>
                 </div>
               </div>
 
@@ -138,21 +147,13 @@ export default function EventDetailsByRoles() {
 
 
             </div>
-            <div className="mb-6">
-              <h3 className="font-semibold text-gray-900 mb-2">Description:</h3>
-              <p className="text-gray-700 leading-relaxed">
-                {eventData?.description || "No description available."}
-                {/* <button className="text-blue-500 hover:text-blue-600 ml-1 transition-colors duration-200">
-                  ...See more
-                </button> */}
-              </p>
-            </div>
+
 
             {/* Agenda and Sponsors */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <AgendaList eventId={id} />
+            {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-8"> */}
+            <AgendaList eventId={id} />
 
-              <div>
+            {/* <div>
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-2xl font-bold text-gray-900">SPONSORS</h2>
                   <button className="text-blue-500 hover:text-blue-600 transition-colors duration-200">
@@ -172,19 +173,19 @@ export default function EventDetailsByRoles() {
                     </div>
                   ))}
                 </div>
-              </div>
-            </div>
+              </div> */}
+            {/* </div> */}
           </div>
-
+          {/* 
           {activeDropdown === "participants" && role.toUpperCase() === "ADMIN"(
             <div className="bg-white rounded-xl shadow-lg overflow-hidden">
               <div className="p-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">Participants</h2>
-                {/* <p className="text-gray-600">Participants list content would go here...</p> */}
-                {/* {navigate(`/event/${id}/members`)} */}
-              </div>
+                <p className="text-gray-600">Participants list content would go here...</p> */}
+          {/* {navigate(`/event/${id}/members`)} */}
+          {/* </div>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </Layout >

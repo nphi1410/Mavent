@@ -1,12 +1,12 @@
 package com.mavent.dev.dto.request;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
 @Data
-@Setter
+@Builder
 public class CreateRequestDTO {
     private int accountId;
     private int eventId;
@@ -14,4 +14,5 @@ public class CreateRequestDTO {
     private int departmentId;
     private int requestTypeId;
     private String content;
+    private String title;
 }

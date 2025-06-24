@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react"
 import { getRequestTypes, createRequest } from "../../services/requestService";
 
-export default function RequestForm({ eventId, accountId, departmentId, onClose}) {
+export default function RequestForm({ eventId, accountId, departmentId, onClose }) {
   const [requestTypes, setRequestTypes] = useState("")
   const [requestTypeId, setRequestTypeId] = useState("")
-  const [loading, setLoading] = useState(true);
   const [requestTitle, setRequestTitle] = useState("")
   const [requestDescription, setRequestDescription] = useState("")
   const [files, setFiles] = useState(null)
@@ -18,9 +17,7 @@ export default function RequestForm({ eventId, accountId, departmentId, onClose}
         console.log("requestTypes:", requestTypes)
       } catch (err) {
         console.error("Error fetching request types:", err);
-      } finally {
-        setLoading(false);
-      }
+      } 
     };
 
     fetchRequestTypes();
@@ -41,32 +38,38 @@ export default function RequestForm({ eventId, accountId, departmentId, onClose}
 
       await createRequest(eventId, payload); //  Service call
       alert("Request created successfully");
-      onClose(); 
+      onClose();
     } catch (err) {
       console.error("Error submitting request:", err);
       alert("Failed to submit request. Please try again.");
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose()
+    }
+  }
+
   if (!requestTypes || requestTypes.length === 0) {
     return <p>No request types available.</p>;
   }
 
   return (
 
-    <div className="fixed inset-0 backdrop-blur-[0px] bg-gray-900/40 z-[9999] flex items-center justify-center p-4">
+    <div className="fixed inset-0 backdrop-blur-[0px] bg-gray-900/40 z-[9999] flex items-center justify-center p-4"
+      onClick={handleBackdropClick}>
       <div className="w-full max-w-md bg-white rounded-lg shadow-lg overflow-hidden">
         {/* Card Header */}
         <div className="flex justify-between py-6 px-6 border-b border-gray-100">
           <h1 className="text-xl font-semibold text-gray-800">Request Form</h1>
-            <button
-              type="button"
-              onClick={onClose}
-              className="w-1/4 bg-gray-400 hover:bg-gray-500 text-white rounded-full transition-colors duration-200 focus:outline-none focus:ring-offset-2"
-            >
-              Cancel
-            </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-1/4 bg-gray-400 hover:bg-gray-500 text-white rounded-full transition-colors duration-200 focus:outline-none focus:ring-offset-2"
+          >
+            Cancel
+          </button>
         </div>
 
 
@@ -107,6 +110,7 @@ export default function RequestForm({ eventId, accountId, departmentId, onClose}
                 value={requestTitle}
                 onChange={(e) => setRequestTitle(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 text-gray-900"
+                required
               />
             </div>
 
@@ -118,6 +122,7 @@ export default function RequestForm({ eventId, accountId, departmentId, onClose}
                 onChange={(e) => setRequestDescription(e.target.value)}
                 rows={5}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 text-gray-900 resize-none"
+                required
               />
             </div>
 
