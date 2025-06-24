@@ -1,6 +1,13 @@
 import React from 'react';
 import defaultImage from './default.jpg';
-import { Link } from 'react-router-dom'; // ✅ Thêm Link để chuyển route
+import { Link } from 'react-router-dom'; // Thêm Link để chuyển route
+
+const nav = ( eventId, role) => {
+  switch (role) {
+    case '': return `/event/${eventId}`;
+    default: return `/event/${eventId}/staff/${role.toLowerCase()}/details`;
+  } 
+}
 
 const EventCard = ({ event }) => (
   <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
@@ -41,7 +48,7 @@ const EventCard = ({ event }) => (
           {event.status}
         </span>
         <button
-          onClick={() => window.location.href = `/events/${event.eventId}`}
+          onClick={() => window.location.href = nav(event.eventId, event.role)}
           className="text-blue-600 hover:text-blue-800 text-sm font-medium"
         >
           VIEW DETAIL

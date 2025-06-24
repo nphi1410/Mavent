@@ -36,7 +36,9 @@ const Layout = ({ children, activeItem }) => {
   const isManagementPage =
     location.pathname.includes("/members") ||
     (location.pathname.includes("/event") &&
-      location.pathname.includes("/members")) ||
+      
+      (location.pathname.includes("/members") || location.pathname.includes('/staff'))
+    ) ||
     location.pathname.includes("/departments") ||
     location.pathname.includes("/documents") ||
       location.pathname.includes("/requests"); // Add this line
