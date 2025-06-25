@@ -2,9 +2,7 @@ import { jwtDecode } from 'jwt-decode'; // ✅ Correct for named exports
 
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
-import { login } from '../../services/AuthService';
 import axios from 'axios';
-import { getUserProfile } from '../../services/profileService';
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -41,6 +39,7 @@ function Login() {
         // Store token and basic info
         sessionStorage.setItem("token", token);
         sessionStorage.setItem("isLoggedIn", "true");
+        sessionStorage.setItem("username", decoded.sub || username);
 
         // Redirect based on role
         if (roles.includes("ROLE_SUPER_ADMIN")) {

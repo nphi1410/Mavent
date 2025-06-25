@@ -2,6 +2,7 @@ package com.mavent.dev.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Table(name = "requests")
 public class Request {
 
@@ -43,6 +45,9 @@ public class Request {
 
     @Column(name = "response_by_account_id")
     private Integer responseByAccountId;
+
+    @Column(name = "title", nullable = false)
+    private String title;
 
     @Column(name = "response_content", columnDefinition = "TEXT")
     private String responseContent;

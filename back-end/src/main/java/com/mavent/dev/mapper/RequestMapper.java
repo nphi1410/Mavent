@@ -16,14 +16,16 @@ import java.util.List;
 public class RequestMapper {
 
     public static Request toEntity(CreateRequestDTO requestDTO) {
-        Request request = new Request();
-        request.setRequestByAccountId(requestDTO.getAccountId());
-        request.setEventId(requestDTO.getEventId());
-        request.setTaskId(requestDTO.getTaskId());
-        request.setDepartmentId(requestDTO.getDepartmentId());
-        request.setRequestTypeId(requestDTO.getRequestTypeId());
-        request.setContent(requestDTO.getContent());
-        return request;
+        new Request();
+        return Request.builder()
+                .requestByAccountId(requestDTO.getAccountId())
+                .eventId(requestDTO.getEventId())
+                .taskId(requestDTO.getTaskId())
+                .departmentId(requestDTO.getDepartmentId())
+                .requestTypeId(requestDTO.getRequestTypeId())
+                .content(requestDTO.getContent())
+                .title(requestDTO.getTitle())
+                .build();
     }
 
     public static Request toEntity(UpdateRequestDTO requestDTO) {
@@ -32,21 +34,13 @@ public class RequestMapper {
         request.setResponseByAccountId(requestDTO.getResponseByAccountId());
         request.setStatus(Request.Status.valueOf(requestDTO.getStatus()));
         request.setResponseContent(requestDTO.getResponseContent());
-        return request;
-    }
-
-    public static CreateRequestDTO fromEntity(Request request) {
-        if (request == null) {
-            return null;
-        }
-        CreateRequestDTO requestDTO = new CreateRequestDTO();
-        requestDTO.setAccountId(request.getRequestByAccountId());
-        requestDTO.setEventId(request.getEventId());
-        requestDTO.setTaskId(request.getTaskId());
-        requestDTO.setDepartmentId(request.getDepartmentId());
-        requestDTO.setRequestTypeId(request.getRequestTypeId());
-        requestDTO.setContent(request.getContent());
-        return requestDTO;
+        new Request();
+        return Request.builder()
+                .requestId(requestDTO.getRequestId())
+                .responseByAccountId(requestDTO.getResponseByAccountId())
+                .status(Request.Status.valueOf(requestDTO.getStatus()))
+                .responseContent(requestDTO.getResponseContent())
+                .build();
     }
 
     public static RequestDTO fromRequestToRequestDTO(Request request, AccountService accountService) {
@@ -60,7 +54,8 @@ public class RequestMapper {
             responseByAccount = accountService.getAccountById(request.getResponseByAccountId());
             responseByAccountUsername = responseByAccount.getUsername();
         }
-        return new RequestDTO().builder()
+        new RequestDTO();
+        return RequestDTO.builder()
                 .responseByAccountId(request.getResponseByAccountId())
                 .requestTypeId(request.getRequestTypeId())
                 .taskId(request.getTaskId())
@@ -69,6 +64,7 @@ public class RequestMapper {
                 .departmentId(request.getDepartmentId())
                 .requestByAccountId(request.getRequestByAccountId())
                 .requestByUsername(requestByAccount.getUsername())
+                .title(request.getTitle())
                 .requestContent(request.getContent())
                 .status(request.getStatus().name())
                 .responseContent(request.getResponseContent())

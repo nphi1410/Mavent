@@ -28,13 +28,13 @@ export const useUserPermissions = (eventId = null) => {
         setError(null);
         
         // Kiểm tra xem người dùng đã được lưu là admin trong session storage hay chưa
-        const savedRole = sessionStorage.getItem('userRole');
-        if (savedRole === 'ADMIN') {
-          console.log('Using admin role from session storage');
-          setUserRole('ADMIN');
-          setLoading(false);
-          return;
-        }
+        // const savedRole = sessionStorage.getItem('userRole');
+        // if (savedRole === 'ADMIN') {
+        //   console.log('Using admin role from session storage');
+        //   setUserRole('ADMIN');
+        //   setLoading(false);
+        //   return;
+        // }
         
         try {
           const roleData = await getUserRoleInEvent(currentEventId);
@@ -46,12 +46,12 @@ export const useUserPermissions = (eventId = null) => {
           
           // Xác định role của người dùng từ dữ liệu trả về và set giá trị một cách rõ ràng
           if (userRoleValue === 'ADMIN' || roleData.role === 'ADMIN') {
-            console.log('Setting user as ADMIN');
-            sessionStorage.setItem('userRole', 'ADMIN');
+            // console.log('Setting user as ADMIN');
+            // sessionStorage.setItem('userRole', 'ADMIN');
             setUserRole('ADMIN');
           } else {
             setUserRole(userRoleValue);
-            sessionStorage.setItem('userRole', userRoleValue);
+            // sessionStorage.setItem('userRole', userRoleValue);
           }
         } catch (apiError) {
           console.error('API error fetching user role:', apiError);
@@ -64,7 +64,7 @@ export const useUserPermissions = (eventId = null) => {
           if (username && username.toLowerCase().includes('admin')) {
             console.log('Username contains "admin", setting as ADMIN');
             setUserRole('ADMIN');
-            sessionStorage.setItem('userRole', 'ADMIN');
+            // sessionStorage.setItem('userRole', 'ADMIN');
           }
         }
       } catch (err) {
@@ -98,15 +98,16 @@ export const useUserPermissions = (eventId = null) => {
     if (!userRole) return false;
     return hasMinimumRole(userRole, minimumRole);
   };
-
   // Check if user is admin or department manager
   const isAdminOrManager = () => {
+    console.log('Checking if user is admin or manager, role:', userRole);
     return hasRole('DEPARTMENT_MANAGER');
   };
   // Check if user is admin (using hasRole and also checking sessionStorage)
   const isAdmin = () => {
-    const sessionRole = sessionStorage.getItem('userRole');
-    return hasRole('ADMIN') || sessionRole === 'ADMIN';
+    // const sessionRole = sessionStorage.getItem('userRole');
+    console.log('Checking if user is admin, role:', userRole);
+    return hasRole('ADMIN');
   };
 
   return {

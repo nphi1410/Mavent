@@ -2,10 +2,13 @@ package com.mavent.dev.service.implement;
 
 import com.mavent.dev.dto.event.AgendaDTO;
 import com.mavent.dev.entity.Agenda;
+import com.mavent.dev.mapper.AgendaMapper;
 import com.mavent.dev.repository.AgendaRepository;
 import com.mavent.dev.service.AgendaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -32,5 +35,10 @@ public class AgendaImplement implements AgendaService {
                 .agendaStartTime(dto.getAgendaStartTime())
                 .agendaEndTime(dto.getAgendaEndTime())
                 .build();
+    }
+
+    @Override
+    public List<AgendaDTO> getAgendaItemsByEventId(Integer eventId) {
+        return AgendaMapper.toAgendaDTOs(agendaRepository.findByEventId(eventId));
     }
 }
