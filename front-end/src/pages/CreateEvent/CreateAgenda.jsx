@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClock, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { createAgendaItem } from '../../services/agendaService'; // giả định bạn đã có service này
 
 const CreateAgenda = () => {
+    const navigate = useNavigate();
     const { eventId } = useParams();
     const [agendas, setAgendas] = useState([
         { title: '', description: '', startTime: '', endTime: '' },
@@ -42,7 +43,8 @@ const CreateAgenda = () => {
 
                 await createAgendaItem(eventId, dto);
             }
-            alert("Agenda created successfully!");
+            alert("Event created successfully!");
+            navigate(`/`);
         } catch (error) {
             console.error("Error:", error.response?.data || error.message);
             alert("Error creating agenda. Please try again.");
