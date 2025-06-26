@@ -9,7 +9,9 @@ const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    fetchUserProfile();
+    if (sessionStorage.getItem("isLoggedIn")) {
+      fetchUserProfile();
+    }
   }, []);
 
   const fetchUserProfile = async () => {

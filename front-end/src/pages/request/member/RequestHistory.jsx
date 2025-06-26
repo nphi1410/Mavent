@@ -40,7 +40,7 @@ export default function RequestHistory() {
         // console.log("User role:", role);
         // }
         setDepartmentId(userEventInfo?.departmentId || null); // Set department ID if available
-        setRole(userEventInfo.role || "participant"); // Set role, default to "member"
+        setRole(userEventInfo.role || "participant"); // Set role, default to "participant"
 
         let rqs;
         if (userEventInfo.role.toLowerCase().includes("member")) rqs = await getRequestsByEventIdAndAccountId(eventId, userEventInfo.accountId); // await here

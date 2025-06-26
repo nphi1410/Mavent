@@ -5,9 +5,6 @@ import com.mavent.dev.dto.request.RequestDTO;
 import com.mavent.dev.dto.request.UpdateRequestDTO;
 import com.mavent.dev.entity.*;
 import com.mavent.dev.service.AccountService;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -29,11 +26,6 @@ public class RequestMapper {
     }
 
     public static Request toEntity(UpdateRequestDTO requestDTO) {
-        Request request = new Request();
-        request.setRequestId(requestDTO.getRequestId());
-        request.setResponseByAccountId(requestDTO.getResponseByAccountId());
-        request.setStatus(Request.Status.valueOf(requestDTO.getStatus()));
-        request.setResponseContent(requestDTO.getResponseContent());
         new Request();
         return Request.builder()
                 .requestId(requestDTO.getRequestId())
