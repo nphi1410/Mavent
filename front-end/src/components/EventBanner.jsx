@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { registerEvent } from "../services/eventService";
 
 const EventBanner = ({ eventData }) => {
+  
   const [createAccount, setCreateAccount] = useState(null);
   const navigate = useNavigate();
   const PARTICIPANT_ROLE = "PARTICIPANT";
