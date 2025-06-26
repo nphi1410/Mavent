@@ -86,21 +86,7 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
       icon: <FontAwesomeIcon icon={faFileAlt} />,
       link: `documents`,
       requiredRole: 'MEMBER' // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
-    },
-    {
-      name: 'feedback',
-      displayName: 'Feedback',
-      icon: <FontAwesomeIcon icon={faComments} />,
-      link: `feedback`,
-      requiredRole: 'ADMIN' // Visible to admin only (ADMIN)
-    },
-    {
-      name: 'requests',
-      displayName: 'Requests',
-      icon: <FontAwesomeIcon icon={faFileAlt} />,
-      link: `requests`,
-      requiredRole: 'MEMBER' // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
-    },
+    }
 
 
   ];
