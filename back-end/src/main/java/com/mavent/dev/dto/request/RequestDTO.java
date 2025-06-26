@@ -18,6 +18,7 @@ public class RequestDTO {
     private Integer taskId;
     private Integer requestByAccountId;
     private String requestByUsername;
+    private String title;
     private String requestContent;
     private String status;
     private String responseContent;

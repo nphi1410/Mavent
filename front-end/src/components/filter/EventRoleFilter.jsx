@@ -29,12 +29,13 @@ const EventRoleFilter = ({
 
     const filters = {
       searchTitle: searchTitle || undefined,
+      role: selectedRole || undefined,
       page: currentPage,
       size,
     };
 
     onFilter(filters);
-  }, [searchTitle, currentPage]);
+  }, [searchTitle,selectedRole, currentPage]);
 
   const goToPage = (page) => {
     if (page >= 0 && (totalPagesFromApi == null || page < totalPagesFromApi)) {

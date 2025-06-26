@@ -165,7 +165,7 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
         Optional<EventAccountRole> ear = eventAccountRoleRepository.findByEventIdAndAccountId(eventId, accountId);
         if (ear.isPresent()) {
             EventAccountRole eventAccountRole = ear.get();
-            System.out.println("EventAccountRoleServiceImplement.getUserEventInfo: " + eventAccountRole.getEventRole());
+//            System.out.println("EventAccountRoleServiceImplement.getUserEventInfo: " + eventAccountRole.getEventRole());
             Account account = accountService.getAccountById(accountId);
 //            DepartmentResponseDTO department = departmentService.getDepartmentById(eventAccountRole.getDepartmentId());
             return new UserEventInfoDTO(

@@ -48,13 +48,9 @@ public class EventController {
     @Autowired
     private CloudService cloudService;
 
-    // ✅ Tạo sự kiện kèm ảnh banner và poster (fix multipart + JSON)
+    // Tạo sự kiện kèm ảnh banner và poster (fix multipart + JSON)
     @PostMapping(value = "/create-event", consumes = "multipart/form-data")
-    public ResponseEntity<?> createEvent(
-            @RequestParam("event") String eventJson,
-            @RequestPart("banner") MultipartFile banner,
-            @RequestPart("poster") MultipartFile poster
-    ) {
+    public ResponseEntity<?> createEvent(@RequestParam("event") String eventJson, @RequestPart("banner") MultipartFile banner, @RequestPart("poster") MultipartFile poster) {
         try {
             //Tạo ObjectMapper hỗ trợ LocalDateTime
             ObjectMapper mapper = new ObjectMapper();
@@ -82,12 +78,47 @@ public class EventController {
         }
     }
 
+    // Cập nhật sự kiện (hỗ trợ cập nhật / thay ảnh banner & poster)
+    @PutMapping(value = "/{id}", consumes = "multipart/form-data")
+    public ResponseEntity<?> updateEvent(@PathVariable("id") Integer eventId, @RequestParam("event") String eventJson,      // JSON của EventDTO
+                                         @RequestPart(value = "banner", required = false) MultipartFile banner, @RequestPart(value = "poster", required = false) MultipartFile poster) {
+
+        try {
+            // 1. Parse JSON -> EventDTO
+            ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+            EventDTO eventDTO = mapper.readValue(eventJson, EventDTO.class);
+
+        /* 2. Nếu có file mới => upload & gán URL
+              - Không gửi file => giữ nguyên URL cũ trong eventDTO
+        */
+            if (banner != null && !banner.isEmpty()) {
+                String bannerUrl = cloudService.uploadFile(banner, "event-banner");
+                eventDTO.setBannerUrl(bannerUrl);
+            }
+
+            if (poster != null && !poster.isEmpty()) {
+                String posterUrl = cloudService.uploadFile(poster, "event-poster");
+                eventDTO.setPosterUrl(posterUrl);
+            }
+
+            // 3. Gọi service cập nhật
+            EventDTO updated = eventService.updateEvent(eventId, eventDTO);
+            return ResponseEntity.ok(updated);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Cập nhật sự kiện thất bại: " + e.getMessage());
+        }
+    }
+
+
     // Lấy tất cả sự kiện
     @Autowired
     private DepartmentService departmentService;
 
     @Autowired
     private JwtUtil jwt;
+
     //Get All Event
     @GetMapping("")
     public List<EventDTO> getAllEvents() {
@@ -97,16 +128,7 @@ public class EventController {
     // Lọc sự kiện
     @PostMapping("/filter")
     public Page<FilterEventDTO> getFilterEvents(@RequestBody FilterRequestDTO request) {
-        return eventService.getFilterEvents(
-                request.getName(),
-                request.getStatus(),
-                request.getTagIds(),
-                request.getSortType(),
-                request.getPage(),
-                request.getSize(),
-                request.getType(),
-                request.isTrending()
-        );
+        return eventService.getFilterEvents(request.getName(), request.getStatus(), request.getTagIds(), request.getSortType(), request.getPage(), request.getSize(), request.getType(), request.isTrending());
     }
 
     // Đăng ký sự kiện
@@ -119,7 +141,7 @@ public class EventController {
         eventAccountRole.setAccountId(accountId);
         eventAccountRole.setCreatedAt(LocalDateTime.now());
 //        if(eventRegisterDto.getRole().equals(EventAccountRole.EventRole.PARTICIPANT)){
-            return ResponseEntity.ok(eventAccountRoleService.addMemberToEvent(eventAccountRole).toString());
+        return ResponseEntity.ok(eventAccountRoleService.addMemberToEvent(eventAccountRole).toString());
 //        }
 
         // chua xu ly register as member
@@ -130,20 +152,15 @@ public class EventController {
 
     // Lấy các sự kiện đang tham gia
     @GetMapping("/attending/{accountId}")
-    public ResponseEntity<Page<EventAccountRoleDTO>> getAttendingEvent(
-            @PathVariable Integer accountId,
-            @RequestParam(required = false) String searchTitle,
-            @RequestParam(required = false) String role,
-            Pageable pageable) {
+    public ResponseEntity<Page<EventAccountRoleDTO>> getAttendingEvent(@PathVariable Integer accountId, @RequestParam(required = false) String searchTitle, @RequestParam(required = false) String role, Pageable pageable) {
 
-        Page<EventAccountRoleDTO> eventAccountRolePage =
-                eventAccountRoleService.getMembersByAccountIdWithPagination(accountId, searchTitle, role, pageable);
+        Page<EventAccountRoleDTO> eventAccountRolePage = eventAccountRoleService.getMembersByAccountIdWithPagination(accountId, searchTitle, role, pageable);
 
         return ResponseEntity.ok(eventAccountRolePage);
     }
 
     @GetMapping("/joining/{accountId}")
-    public ResponseEntity<List<EventAccountRoleDTO>> getEventListByAccountId(@PathVariable Integer accountId){
+    public ResponseEntity<List<EventAccountRoleDTO>> getEventListByAccountId(@PathVariable Integer accountId) {
         return ResponseEntity.ok(eventAccountRoleService.getByAccountIdOnRole(accountId));
     }
 
@@ -159,18 +176,12 @@ public class EventController {
     }
 
     @GetMapping("/count")
-    public ResponseEntity<Integer> countAttendanceByAccountId(@RequestParam Integer accountId,
-                                                              @RequestParam(required = false) EventAccountRole.EventRole eventRole,
-                                                              @RequestParam boolean countCurrentMonth) {
-        return ResponseEntity.ok(eventAccountRoleService.countAttendanceByAccountId(
-                accountId, eventRole, countCurrentMonth));
+    public ResponseEntity<Integer> countAttendanceByAccountId(@RequestParam Integer accountId, @RequestParam(required = false) EventAccountRole.EventRole eventRole, @RequestParam boolean countCurrentMonth) {
+        return ResponseEntity.ok(eventAccountRoleService.countAttendanceByAccountId(accountId, eventRole, countCurrentMonth));
     }
 
     @GetMapping("/account")
-    public ResponseEntity<Page<EventAccountRole>> getByAccountId(
-            @RequestParam Integer accountId,
-            Pageable pageable
-    ) {
+    public ResponseEntity<Page<EventAccountRole>> getByAccountId(@RequestParam Integer accountId, Pageable pageable) {
         return ResponseEntity.ok(eventAccountRoleService.getByAccountIdAndPage(accountId, pageable));
     }
 
@@ -181,22 +192,12 @@ public class EventController {
         return eventService.getEventEntityById(eventId);
     }
 
-    // Cập nhật sự kiện
-    @PutMapping("/{id}")
-    public ResponseEntity<EventDTO> updateEvent(@PathVariable("id") Integer eventId,
-                                                @RequestBody EventDTO eventDTO) {
-        EventDTO updated = eventService.updateEvent(eventId, eventDTO);
-        return ResponseEntity.ok(updated);
-    }
-
     @GetMapping("/{eventId}/user")
-    public ResponseEntity<?> getUserInformationInEvent(
-            @PathVariable Integer eventId,
-            HttpServletRequest request) {
+    public ResponseEntity<?> getUserInformationInEvent(@PathVariable Integer eventId, HttpServletRequest request) {
         try {
             // Kiểm tra quyền truy cập sự kiện
             Account account = accountService.getAccount(jwt.extractUsername(request.getHeader("Authorization").substring(7)));
-            System.out.println("Account ID: " + account.getAccountId());
+//            System.out.println("Account ID: " + account.getAccountId());
 //            boolean hasAccess = eventService.checkEventAccess(eventId, account.getAccountId());
 //            if (!hasAccess) {
 //                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Bạn không có quyền truy cập sự kiện này");
@@ -213,8 +214,6 @@ public class EventController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi lấy thông tin phòng ban: " + e.getMessage());
         }
     }
-
-
 
 
 }

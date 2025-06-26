@@ -14,12 +14,30 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-public class DocumentMapper {
-    public static DocumentResponseDTO toResponseDTO(Document document, Department department, Account uploader) {
-        String departmentName = department != null ? department.getName() : null;
-        String uploaderName = uploader != null ?
+public class DocumentMapper {    public static DocumentResponseDTO toResponseDTO(Document document, Department department, Account uploader) {
+        // For department name, we have these cases:
+        // 1. If department exists, use the department name (this should now include user's event department)
+        // 2. If system role is SUPER_ADMIN, show "Admin"
+        // 3. Otherwise show null (will be displayed as "No Department")
+        String departmentName;
+        
+        if (department != null) {
+            departmentName = department.getName();
+        } else if (uploader != null && uploader.getSystemRole() == Account.SystemRole.SUPER_ADMIN) {
+            departmentName = "Admin";
+        } else {
+            departmentName = null;
+        }
+          String uploaderName = uploader != null ?
                 uploader.getFullName() :
                 "Unknown";
+                  String uploaderAvatar = uploader != null ?
+                uploader.getAvatarUrl() :
+                null;
+        
+        // Add debug logging for avatar URL
+        System.out.println("DocumentMapper - Uploader: " + uploaderName + 
+                         ", Avatar URL: " + uploaderAvatar);
 
         // Extract file name from path for potential future use
         String fileName = document.getFilePath() != null ?
@@ -32,6 +50,7 @@ public class DocumentMapper {
                 .departmentName(departmentName)
                 .uploaderAccountId(document.getUploaderAccountId())
                 .uploaderName(uploaderName)
+                .uploaderAvatar(uploaderAvatar)
                 .title(document.getTitle())
                 .filePath(document.getFilePath()).fileUrl(document.getFilePath()) // Use same URL for now, preview endpoint will generate SAS token when needed
                 .fileType(document.getFileType())

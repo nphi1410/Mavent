@@ -10,6 +10,7 @@ import com.mavent.dev.repository.RequestRepository;
 import com.mavent.dev.service.AccountService;
 import com.mavent.dev.service.RequestService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,18 +25,18 @@ public class RequestImplement implements RequestService {
 
     @Override
     public List<RequestDTO> getRequestByAccountAndEventId(Integer accountId, Integer eventId) {
-        return RequestMapper.toDTOList(requestRepository.findByRequestByAccountIdAndEventId(accountId, eventId), accountService);
+        return RequestMapper.toDTOList(requestRepository.findByRequestByAccountIdAndEventId(accountId, eventId, Sort.by(Sort.Direction.DESC, "createdAt").descending()), accountService);
     }
 
     @Override
     public List<RequestDTO> getRequestsByEventId(Integer eventId) {
         System.out.println("Fetching requests for event ID: " + eventId);
-        return RequestMapper.toDTOList(requestRepository.findByEventId(eventId), accountService);
+        return RequestMapper.toDTOList(requestRepository.findByEventId(eventId, Sort.by(Sort.Direction.DESC, "createdAt")), accountService);
     }
 
     @Override
     public List<RequestDTO> getRequestByEventIdAndDepartmentId(Integer eventId, Integer departmentId) {
-        return RequestMapper.toDTOList(requestRepository.findByEventIdAndDepartmentId(eventId, departmentId), accountService);
+        return RequestMapper.toDTOList(requestRepository.findByEventIdAndDepartmentId(eventId, departmentId, Sort.by(Sort.Direction.DESC, "createdAt")) , accountService);
     }
 
     @Override

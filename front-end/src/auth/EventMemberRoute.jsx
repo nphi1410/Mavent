@@ -5,8 +5,8 @@ import { jwtDecode } from 'jwt-decode';
 
 // Utility function to check login status
 const isLoggedIn = () => {
-  const token = sessionStorage.getItem("token");
-  return !!token;
+  const isLoggedIn = sessionStorage.getItem("isLoggedIn");
+  return !!isLoggedIn;
 };
 
 // Check if user is a super admin
@@ -25,7 +25,9 @@ const isSuperAdmin = () => {
   }
 };
 
-// This component was initially for members but now restricts access to event admins only
+// This component restricts access to:
+// 1. Documents page: Accessible by any role (ADMIN, DEPARTMENT_MANAGER, MEMBER)
+// 2. Other admin pages (Members, Departments): Only accessible by ADMIN
 const EventMemberRoute = ({ children }) => {
   const location = useLocation();
   const { id: eventId } = useParams(); // Get the event ID from URL
@@ -37,6 +39,7 @@ const EventMemberRoute = ({ children }) => {
       if (!isLoggedIn()) {
         setIsAuthorized(false);
         setIsLoading(false);
+
         return;
       }
 
@@ -130,10 +133,15 @@ const EventMemberRoute = ({ children }) => {
     return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
   }
 
-  if (!isLoggedIn() || !isAuthorized) {
-    // Redirect to event details page with a message
-    return <Navigate to={`/events/${eventId}`} state={{ 
-      unauthorizedMessage: "You need to be an admin of this event to access this page." 
+  if (!isAuthorized) {
+    // Redirect to event details page with a message    // Customize message based on the route
+    const isDocumentsRoute = location.pathname.includes('documents');
+    const message = isDocumentsRoute
+      ? "You need to be a member of this event to access the documents page."
+      : "You need to be an admin of this event to access this page.";
+    
+    return <Navigate to={`/events/${id}`} state={{ 
+      unauthorizedMessage: message
     }} replace />;
   }
 
