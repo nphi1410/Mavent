@@ -245,7 +245,7 @@ export default function RequestHistory() {
                   <div className="flex-shrink-0">
                     <button
                       onClick={handleCreateRequest}
-                      className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                      className="cursor-pointer bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                     >
                       Create Request
                     </button>
@@ -254,7 +254,7 @@ export default function RequestHistory() {
               </div>
 
               {/* Table */}
-              <div className="bg-rose-100 rounded-lg overflow-hidden">
+              <div className="bg-[#ffffff] rounded-lg overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-rose-200">
                     <thead>
@@ -272,7 +272,7 @@ export default function RequestHistory() {
                     </thead>
                     <tbody className="divide-y divide-rose-200">
                       {filteredRequests?.map((request) => (
-                        <tr key={request.requestId} className="hover:bg-rose-50 transition-colors duration-150">
+                        <tr key={request.requestId} className="hover:bg-gray-200 transition-colors duration-150">
                           {/* <td className="px-6 py-4 text-sm text-gray-900">{
                           request.requestByAccountId ? 
                             getAccountById(request.requestByAccountId)?.username : "Unknown User"
@@ -316,7 +316,7 @@ export default function RequestHistory() {
                           <td className="px-6 py-4">
                             <button
                               onClick={() => handleViewDetail(request.requestId)}
-                              className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-4 rounded-full text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                              className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-4 rounded-full text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                             >
                               View
                             </button>
