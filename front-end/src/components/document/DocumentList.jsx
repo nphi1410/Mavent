@@ -28,6 +28,7 @@ import {
   deleteDocument,
   updateDocument
 } from '../../services/documentService.jsx';
+import DocumentPreviewModal from './DocumentPreviewModal';
 
 const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter, sortBy, eventId, refreshTrigger }) => {
   // All states declared at the top - no conditional hooks
@@ -38,10 +39,12 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
   const [selectedDocuments, setSelectedDocuments] = useState([]);
   const [isSelectAll, setIsSelectAll] = useState(false);
   const [isBulkActionOpen, setIsBulkActionOpen] = useState(false);
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
-  const [processingBulkAction, setProcessingBulkAction] = useState(false);  const [previewDocument, setPreviewDocument] = useState(null);
-  const [detailDocument, setDetailDocument] = useState(null);  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);  const [processingBulkAction, setProcessingBulkAction] = useState(false);  
+  const [previewDocument, setPreviewDocument] = useState(null);
+  const [detailDocument, setDetailDocument] = useState(null);  
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [documentsPerPage, setDocumentsPerPage] = useState(6);
 
   // Show notification utility function - reusable for all notifications
@@ -157,28 +160,57 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
   const handleOpenDetail = (document) => {
     setDetailDocument(document);
     setIsDetailModalOpen(true);
-  };
-  
-  // Handle actual document preview
+  };  // Handle actual document preview
   const handlePreview = async (documentId) => {
     try {
-      const previewData = await getDocumentPreviewUrl(documentId);
-      setPreviewDocument(previewData);
+      console.log('Fetching preview for document ID:', documentId);
+      setLoading(true); // Show loading indicator
+
+      // Make the API call to get preview URL
+      const previewData = await getDocumentPreviewUrl(documentId);      console.log('Preview data received:', previewData);
+      // Log more details for debugging Excel file type issues
+      console.log('File type detection check:', {
+        fileName: previewData?.fileName,
+        contentType: previewData?.contentType,
+        fileExtension: previewData?.fileName ? getFileExtension(previewData.fileName) : '',
+        contentTypeExtension: previewData?.contentType ? getFileExtension(previewData.contentType) : '',
+        isExcel: previewData?.fileName?.toLowerCase().endsWith('.xlsx') || 
+                previewData?.fileName?.toLowerCase().endsWith('.xls') ||
+                (previewData?.contentType && 
+                  (previewData.contentType.includes('spreadsheetml') || 
+                   previewData.contentType.includes('ms-excel')))
+      });
       
-      // If the document is viewable in the browser, open it in a new tab
-      if (previewData.viewable) {
-        window.open(previewData.sasUrl, '_blank');
-      } else {
-        // Otherwise, trigger a download
-        const link = document.createElement('a');
-        link.href = previewData.sasUrl;
-        link.setAttribute('download', previewData.fileName || 'document');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+      if (!previewData) {
+        console.error('No preview data received from API');
+        showNotification('Không thể tải dữ liệu xem trước tài liệu', 'error');
+        return;
       }
+      
+      if (!previewData.sasUrl) {
+        console.error('Missing SAS URL in preview data');
+        showNotification('Link xem trước tài liệu không có sẵn', 'error');
+        return;
+      }
+      
+      // Test if the SAS URL is accessible
+      console.log('Testing SAS URL accessibility:', previewData.sasUrl);
+      
+      // Set the data and open the modal
+      setPreviewDocument(previewData);
+      setIsPreviewModalOpen(true);
+        // Log document details for debugging
+      console.log('Document preview details:', {
+        contentType: previewData.contentType,
+        fileName: previewData.fileName,
+        isViewable: previewData.isViewable || previewData.viewable // Handle both property names
+      });
+      
     } catch (error) {
       console.error('Error previewing document:', error);
+      showNotification('Lỗi khi xem trước tài liệu: ' + (error.message || 'Lỗi không xác định'), 'error');
+    } finally {
+      setLoading(false);
     }
   };
   
@@ -296,6 +328,13 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
     
     const lowerType = fileType.toLowerCase();
     
+    // Check for actual file extensions in the name first
+    if (lowerType.endsWith('.xlsx') || lowerType.endsWith('.xls') || 
+        lowerType.endsWith('.csv') || lowerType.endsWith('.ods') ||
+        lowerType.endsWith('.xlsm') || lowerType.endsWith('.xlsb')) {
+      return 'csv'; // Return spreadsheet code
+    }
+    
     // PDF documents
     if (
       lowerType.includes('pdf') || 
@@ -303,12 +342,31 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
     ) {
       return 'pdf';
     }
+      // Spreadsheet formats (xlsx, xls, csv, ods, etc.) - check Excel formats first!
+    if (
+      lowerType.includes('excel') || 
+      lowerType.includes('spreadsheet') || 
+      lowerType.includes('csv') ||
+      lowerType.includes('sheet') || 
+      lowerType.includes('xls') || 
+      lowerType.includes('ods') ||
+      lowerType.includes('numbers') ||
+      lowerType.includes('spreadsheetml') ||  // Important MIME type for Excel files
+      lowerType.endsWith('.xlsx') || 
+      lowerType.endsWith('.xls') || 
+      lowerType.endsWith('.csv') || 
+      lowerType.endsWith('.ods') ||
+      lowerType.endsWith('.tsv')
+    ) {
+      return 'csv';
+    }
     
     // Word documents (doc, docx, rtf, odt, etc.)
     if (
       lowerType.includes('word') || 
-      lowerType.includes('document') || 
-      lowerType.includes('doc') ||
+      lowerType.includes('wordprocessingml') ||  // Word specific MIME type
+      lowerType.includes('document') && !lowerType.includes('spreadsheetml') || // Avoid catching Excel files 
+      lowerType.includes('doc') && !lowerType.includes('spreadsheetml') ||  // Avoid catching Excel files
       lowerType.includes('rtf') || 
       lowerType.includes('odt') || 
       lowerType.includes('text/richtext') ||
@@ -320,24 +378,6 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
       lowerType.endsWith('.dotx')
     ) {
       return 'doc';
-    }
-    
-    // Spreadsheet formats (xlsx, xls, csv, ods, etc.)
-    if (
-      lowerType.includes('excel') || 
-      lowerType.includes('spreadsheet') || 
-      lowerType.includes('csv') ||
-      lowerType.includes('sheet') || 
-      lowerType.includes('xls') || 
-      lowerType.includes('ods') ||
-      lowerType.includes('numbers') ||
-      lowerType.endsWith('.xlsx') || 
-      lowerType.endsWith('.xls') || 
-      lowerType.endsWith('.csv') || 
-      lowerType.endsWith('.ods') ||
-      lowerType.endsWith('.tsv')
-    ) {
-      return 'csv';
     }
     
     // Image formats (jpg, jpeg, png, gif, svg, webp, etc.)
@@ -1084,13 +1124,19 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
                       <p className="text-xs text-gray-600 mt-1 truncate">{doc.description}</p>
                     )} */}
                   </div>
-                  {/* Action Buttons */}
-                <div className="flex space-x-2 ml-auto shrink-0 pl-2">                  <button 
+                  {/* Action Buttons */}                <div className="flex space-x-2 ml-auto shrink-0 pl-2">                    <button 
                     className="p-2 text-gray-600 hover:text-blue-600 transition-colors rounded-full hover:bg-blue-50" 
-                    title="View Document Details"
+                    title="Document Details"
                     onClick={() => handleOpenDetail(doc)}
                   >
                     <FontAwesomeIcon icon={faEye} />
+                  </button>
+                  <button 
+                    className="p-2 text-gray-600 hover:text-green-600 transition-colors rounded-full hover:bg-green-50" 
+                    title="Preview Document"
+                    onClick={() => handlePreview(doc.documentId)}
+                  >
+                    <FontAwesomeIcon icon={faFileAlt} />
                   </button>
                   <button 
                     className="p-2 text-gray-600 hover:text-blue-600 transition-colors rounded-full hover:bg-blue-50" 
@@ -1426,14 +1472,20 @@ const DocumentList = ({ searchTerm, departmentFilter, fileTypeFilter, dateFilter
                   type="button"
                   className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                   onClick={() => setDeleteConfirmation({ isOpen: false, documentId: null, documentTitle: '' })}
-                >
-                  Cancel
+                >                  Cancel
                 </button>
               </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* Document Preview Modal */}
+      <DocumentPreviewModal
+        isOpen={isPreviewModalOpen}
+        onClose={() => setIsPreviewModalOpen(false)}
+        previewData={previewDocument}
+      />
     </div>
   );
 };

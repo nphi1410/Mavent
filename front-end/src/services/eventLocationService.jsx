@@ -2,9 +2,7 @@ import Api from "../config/Api";
 
 export const getAllLocations = async () => {
     try {
-        const response = await Api.get("/location");
-        console.log(response.data);
-        
+        const response = await Api.get("/location");        
         return response.data;
     } catch (error) {
         console.error("Error fetching locations:", error);

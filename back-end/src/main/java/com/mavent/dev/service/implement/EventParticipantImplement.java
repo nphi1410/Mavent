@@ -1,6 +1,5 @@
 package com.mavent.dev.service.implement;
 
-import com.mavent.dev.dto.event.EventAccountRoleDTO;
 import com.mavent.dev.dto.event.EventFeedbackDTO;
 import com.mavent.dev.entity.Event;
 import com.mavent.dev.entity.EventAccountRole;
@@ -31,52 +30,49 @@ public class EventParticipantImplement implements EventParticipantService {
 
     @Override
     public Page<EventAccountRole> getEndedParticipantEvents(Integer accountId, Pageable pageable) {
-        // Lấy các event đã kết thúc mà user là participant
-        return eventAccountRoleRepository.findByAccountId(accountId, pageable);
-        // Hoặc dùng findEndedParticipantEventsByAccountId nếu bạn tạo riêng như gợi ý trên
+        // accountId: ID của người dùng cần truy vấn
+        // pageable:  thông tin phân trang (page size, page number, sort, ...)
+        // Gọi repository để lấy danh sách EventAccountRole của account, chỉ những event đã kết thúc
+        return eventAccountRoleRepository.findByAccountId(accountId, pageable); // repository trả về Page<EventAccountRole>
     }
 
     @Override
-    @Transactional
+    @Transactional // Bảo đảm toàn bộ thao tác bên trong được thực hiện trong một transaction
     public void createFeedback(EventFeedbackDTO dto) {
-        System.out.println("DTO nhận vào: " + dto);
 
-        Integer eventId = dto.getEventId();
-        Integer accountId = dto.getAccountId();
+        Integer eventId = dto.getEventId();   // Lấy eventId từ DTO truyền vào
+        Integer accountId = dto.getAccountId(); // Lấy accountId từ DTO truyền vào
 
-        if (eventId == null || accountId == null) {
-            throw new IllegalArgumentException("Event ID và Account ID không được null");
+        if (eventId == null || accountId == null) { // Kiểm tra đầu vào hợp lệ
+            throw new IllegalArgumentException("Event ID và Account ID không được null"); // Nếu null -> ném ngoại lệ
         }
 
         // 1. Kiểm tra user có role PARTICIPANT trong event không
-        EventAccountRole role = eventAccountRoleRepository.findByEventIdAndAccountId(eventId, accountId)
-                .orElseThrow(() -> new IllegalArgumentException("Bạn không có quyền feedback sự kiện này"));
+        EventAccountRole role = eventAccountRoleRepository
+                .findByEventIdAndAccountId(eventId, accountId) // Tìm bản ghi role theo eventId & accountId
+                .orElseThrow(() -> new IllegalArgumentException("Bạn không có quyền feedback sự kiện này")); // Không tìm thấy -> ném lỗi
 
-        if (role.getEventRole() != EventAccountRole.EventRole.PARTICIPANT) {
-            throw new IllegalStateException("Chỉ participant mới được feedback sự kiện này");
+        if (role.getEventRole() != EventAccountRole.EventRole.PARTICIPANT) { // Nếu role khác PARTICIPANT
+            throw new IllegalStateException("Chỉ participant mới được feedback sự kiện này"); // -> ném ngoại lệ phù hợp
         }
 
         // 2. Kiểm tra event đã kết thúc chưa
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new IllegalArgumentException("Sự kiện không tồn tại"));
+        Event event = eventRepository.findById(eventId) // Lấy thông tin event theo ID
+                .orElseThrow(() -> new IllegalArgumentException("Sự kiện không tồn tại")); // Không có -> ném ngoại lệ
 
-        if (!"ENDED".equals(event.getStatus().name())) {
-            throw new IllegalStateException("Chỉ feedback cho sự kiện đã kết thúc");
+        if (!"ENDED".equals(event.getStatus().name())) { // Nếu trạng thái event không phải ENDED
+            throw new IllegalStateException("Chỉ feedback cho sự kiện đã kết thúc"); // -> từ chối feedback
         }
 
-        // 3. Lưu feedback
-        EventFeedback feedback = new EventFeedback();
-        feedback.setEventId(eventId);
-        feedback.setAccountId(accountId);
-        feedback.setRating(dto.getRating());
-        feedback.setComment(dto.getComment());
-        feedback.setSubmittedAt(LocalDateTime.now());
+        // 3. Tạo và lưu đối tượng feedback
+        EventFeedback feedback = new EventFeedback(); // Khởi tạo entity EventFeedback mới
+        feedback.setEventId(eventId);                // Gán ID sự kiện
+        feedback.setAccountId(accountId);            // Gán ID người dùng
+        feedback.setRating(dto.getRating());         // Gán số sao đánh giá
+        feedback.setComment(dto.getComment());       // Gán nội dung bình luận
+        feedback.setSubmittedAt(LocalDateTime.now()); // Thời gian gửi feedback
 
-        System.out.println("Đang lưu feedback: " + feedback);
-
-        eventFeedbackRepository.save(feedback);
-
-        System.out.println("Lưu feedback thành công.");
+        eventFeedbackRepository.save(feedback); // Lưu feedback vào database thông qua repository
     }
 
 }

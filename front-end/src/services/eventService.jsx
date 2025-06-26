@@ -52,7 +52,7 @@ export const getEventById = async (id) => {
   }
 };
 
-// ✅ Tạo sự kiện (gửi multipart/form-data)
+// Tạo sự kiện (gửi multipart/form-data)
 export const createEvent = async (eventData, bannerFile, posterFile) => {
   try {
     const formData = new FormData();
@@ -84,17 +84,33 @@ export const createEvent = async (eventData, bannerFile, posterFile) => {
   }
 };
 
-
-// Cập nhật sự kiện
-export const updateEvent = async (id, eventData) => {
+// Cập nhật sự kiện (gửi multipart/form-data gồm JSON + ảnh)
+export const updateEvent = async (id, eventData, bannerFile, posterFile) => {
   try {
-    const response = await Api.put(`/events/${id}`, eventData);
+    const formData = new FormData();
+
+    // 1. Add JSON event object as string
+    formData.append("event", JSON.stringify(eventData));
+
+    // 2. Add optional banner & poster files
+    if (bannerFile) formData.append("banner", bannerFile);
+    if (posterFile) formData.append("poster", posterFile);
+
+    // 3. Gửi PUT request
+    const response = await Api.put(`/events/${id}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
     return response.data;
+
   } catch (error) {
     console.error(`Error updating event with ID ${id}:`, error);
     return null;
   }
 };
+
 
 // Lấy trending events
 export const getTrendingEvents = async (type) => {

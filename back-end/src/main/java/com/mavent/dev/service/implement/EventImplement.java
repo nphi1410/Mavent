@@ -69,6 +69,32 @@ public class EventImplement implements EventService {
     }
 
     @Override
+    public EventDTO updateEvent(Integer eventId, EventDTO eventDTO) {
+        Event event = getEventEntityById(eventId);
+
+        // cập nhật từng trường khi eventDTO không null
+        if (eventDTO.getName() != null) event.setName(eventDTO.getName());
+        if (eventDTO.getDescription() != null) event.setDescription(eventDTO.getDescription());
+        if (eventDTO.getStartDatetime() != null) event.setStartDatetime(eventDTO.getStartDatetime());
+        if (eventDTO.getEndDatetime() != null) event.setEndDatetime(eventDTO.getEndDatetime());
+        if (eventDTO.getLocation() != null) event.setLocation(eventDTO.getLocation());
+        if (eventDTO.getDdayInfo() != null) event.setDdayInfo(eventDTO.getDdayInfo());
+        if (eventDTO.getMaxMemberNumber() != null) event.setMaxMemberNumber(eventDTO.getMaxMemberNumber());
+        if (eventDTO.getMaxParticipantNumber() != null)
+            event.setMaxParticipantNumber(eventDTO.getMaxParticipantNumber());
+        if (eventDTO.getStatus() != null) event.setStatus(eventDTO.getStatus());
+        if (eventDTO.getBannerUrl() != null) event.setBannerUrl(eventDTO.getBannerUrl());
+        if (eventDTO.getPosterUrl() != null) event.setPosterUrl(eventDTO.getPosterUrl());
+        if (eventDTO.getCreatedBy() != null) event.setCreatedBy(eventDTO.getCreatedBy());
+        if (eventDTO.getIsDeleted() != null) event.setIsDeleted(eventDTO.getIsDeleted());
+
+        // Save entity
+        Event updatedEvent = eventRepository.save(event);
+
+        return mapToDTO(updatedEvent);
+    }
+
+    @Override
     public List<EventCountDTO> getMonthlyStatistic(String status) {
         return eventRepository.countByMonthWithoutStatus(status);
     }
@@ -86,30 +112,6 @@ public class EventImplement implements EventService {
     public EventDTO getEventById(Integer eventId) {
         Event event = getEventEntityById(eventId);
         return mapToDTO(event);
-    }
-
-    @Override
-    public EventDTO updateEvent(Integer eventId, EventDTO eventDTO) {
-        Event event = getEventEntityById(eventId);
-
-        // cập nhật từng trường khi eventDTO không null
-        if (eventDTO.getName() != null) event.setName(eventDTO.getName());
-        if (eventDTO.getDescription() != null) event.setDescription(eventDTO.getDescription());
-        if (eventDTO.getStartDatetime() != null) event.setStartDatetime(eventDTO.getStartDatetime());
-        if (eventDTO.getEndDatetime() != null) event.setEndDatetime(eventDTO.getEndDatetime());
-        if (eventDTO.getLocation() != null) event.setLocation(eventDTO.getLocation());
-        if (eventDTO.getDdayInfo() != null) event.setDdayInfo(eventDTO.getDdayInfo());
-        if (eventDTO.getMaxMemberNumber() != null) event.setMaxMemberNumber(eventDTO.getMaxMemberNumber());
-        if (eventDTO.getMaxParticipantNumber() != null)
-            event.setMaxParticipantNumber(eventDTO.getMaxParticipantNumber());
-        if (eventDTO.getStatus() != null) event.setStatus(eventDTO.getStatus());
-        if (eventDTO.getCreatedBy() != null) event.setCreatedBy(eventDTO.getCreatedBy());
-        if (eventDTO.getIsDeleted() != null) event.setIsDeleted(eventDTO.getIsDeleted());
-
-        // Save entity
-        Event updatedEvent = eventRepository.save(event);
-
-        return mapToDTO(updatedEvent);
     }
 
     @Override
