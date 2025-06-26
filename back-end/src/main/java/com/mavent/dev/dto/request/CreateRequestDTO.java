@@ -15,5 +15,4 @@ public class CreateRequestDTO {
     private int requestTypeId;
     private String title;
     private String content;
-    private String title;
 }
