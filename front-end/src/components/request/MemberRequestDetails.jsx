@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { getAccountById } from "../../services/accountService";
 import { updateRequest } from "../../services/requestService";
 
-export default function RequestDetailsPopup({ isOpen, onClose, requestData, requestType, answeredByAccountId }) {
+export default function RequestDetailsPopup({ isOpen, onClose, requestData, requestType, isMember }) {
     if (!isOpen) return null;
 
     const [answeredByAccount, setAnsweredByAccount] = useState(null);
@@ -184,14 +184,16 @@ export default function RequestDetailsPopup({ isOpen, onClose, requestData, requ
                                 <textarea className="text-gray-700 leading-relaxed w-full"
                                     onChange={(e) => setResponseContent(e.target.value)}
                                     placeholder={data.responseContent
-                                        ? data.responseContent
-                                        : "No feedback provided yet."}>
-
+                                        ? ""
+                                        : ""}
+                                    readOnly={isMember}
+                                    required={!isMember}
+                                >
+                                    {data?.responseContent ? data?.responseContent : "No feedback provided yet."}
                                 </textarea>
-                            </div>
-                            <div className="mt-6">
-                                {data.status.toUpperCase() === "PENDING" && (
-                                    <div className="mt-6 flex justify-around">
+                                {isMember && data.status.toUpperCase() === "PENDING" && (
+
+                                    <div className="mt-6 flex gap-4 justify-baseline bottom-0 left-0 right-0 ">
                                         <button
                                             onClick={handleApprove}
                                             className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"

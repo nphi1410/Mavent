@@ -4,9 +4,13 @@ import {
   faUsers, 
   faTimes, 
   faSitemap,
-  faFileAlt
-} from '@fortawesome/free-solid-svg-icons';
-import { useUserPermissions } from '../../hooks/useUserPermissions';
+  faFileAlt,
+  faInbox,
+  faHouse, 
+  faComments
+} from "@fortawesome/free-solid-svg-icons";
+import { useUserPermissions } from "../../hooks/useUserPermissions";
+
 
 // Sidebar component for admin dashboard
 const Sidebar = ({ activeItem, isOpen, onToggle }) => {
@@ -20,6 +24,14 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
   
   // Define all menu items
   const allMenuItems = [
+    {
+      name:"details",
+      displayName: "Details",
+      icon: <FontAwesomeIcon icon={faHouse} />,
+      link: `details`,
+      requiredRole: "PARTICIPANT", // Only visible to department managers and admins
+    },
+ 
     {
       name: 'members',
       displayName: 'Members',
@@ -38,14 +50,70 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
       name: 'documents',
       displayName: 'Documents',
       icon: <FontAwesomeIcon icon={faFileAlt} />,
-      link: `/events/${eventId}/documents`,
-      adminOnly: false // Visible to all roles
-    }
+      link: `documents`,
+      requiredRole: 'MEMBER' // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
+    },
+    {
+      name: 'feedback',
+      displayName: 'Feedback',
+      icon: <FontAwesomeIcon icon={faComments} />,
+      link: `feedback`,
+      requiredRole: 'ADMIN' // Visible to admin only (ADMIN)
+    },
+    {
+      name: 'requests',
+      displayName: 'Requests',
+      icon: <FontAwesomeIcon icon={faFileAlt} />,
+      link: `requests`,
+      requiredRole: 'MEMBER' // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
+    },
+
+
   ];
   
   // Filter items based on user role
-  const mainItems = allMenuItems.filter(item => !item.adminOnly || isAdmin);
-  // Không hiển thị phần Settings
+  const mainItems = allMenuItems.filter((item) => {
+    // For items requiring ADMIN role (Members and Departments management)
+    if (item.requiredRole === "ADMIN") {
+      // Only show to DEPARTMENT_MANAGER or ADMIN users
+      const visible = isAdmin;
+      console.log(
+        `Menu item "${item.name}" requires ADMIN user is ${userRole}, showing:`,
+        visible
+      );
+      return visible;
+    }
+    // For items requiring DEPARTMENT_MANAGER role (Members and Departments management)
+    if (item.requiredRole === "DEPARTMENT_MANAGER") {
+      // Only show to DEPARTMENT_MANAGER or ADMIN users
+      const visible = isManagerOrAdmin;
+      console.log(
+        
+        `Menu item "${item.name}" requires DEPARTMENT_MANAGER, user is ${userRole}, showing:`,
+       
+        visible
+      
+      );
+      return visible;
+    }
+    // For items requiring MEMBER role (Documents)
+    else if (item.requiredRole === "MEMBER") {
+      // These items are visible to all members 
+      // (which includes MEMBER, DEPARTMENT_MANAGER, and ADMIN)
+      const visible = isManagerOrAdmin || userRole === "MEMBER";
+      console.log(
+        
+        `Menu item "${item.name}" requires MEMBER, user is ${userRole}, showing:`,
+       
+        visible
+      
+      );  
+      return visible;
+    } 
+
+    // Default case - if no specific rule, don't show
+    return item.requiredRole === "PARTICIPANT";
+  }); // Không hiển thị phần Settings
   const settingsItems = [];
   return (
     <>

@@ -39,6 +39,7 @@ export default function RequestHistory() {
         // console.log("User role:", role);
         // }
         setDepartmentId(userEventInfo?.departmentId || null); // Set department ID if available
+        setRole(userEventInfo.role || "participant"); // Set role, default to "participant"
 
         let rqs;
         if (userEventInfo.role.toLowerCase().includes("member")) rqs = await getRequestsByEventIdAndAccountId(eventId, accountId); // await here
@@ -181,24 +182,24 @@ export default function RequestHistory() {
 
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      {showCreateForm && (
-        <RequestForm
-          eventId={eventId}
-          accountId={accountId}
-          departmentId={departmentId}
-          onClose={handleCloseForm}
-        />
-      )}
-      {isPopupOpen && (
-        <RequestDetailsPopup
-          isOpen={isPopupOpen}
-          onClose={() => setIsPopupOpen(false)}
-          requestData={viewRequest}
-          requestType={requestTypes.find(type => type.requestTypeId === viewRequest.requestTypeId)?.name || "Unknown Type"}
-          answeredByAccountId={viewRequest.responseByAccountId}
-        />
-      )}
+    <Layout activeItem="requests">
+      <div className="min-h-screen bg-gray-50 py-8">
+        {showCreateForm && (
+          <RequestForm
+            eventId={eventId}
+            accountId={accountId}
+            departmentId={departmentId}
+            onClose={handleCloseForm}
+          />
+        )}
+        {isPopupOpen && (
+          <RequestDetailsPopup
+            isOpen={isPopupOpen}
+            onClose={() => setIsPopupOpen(false)}
+            requestData={viewRequest}
+            requestType={requestTypes.find(type => type.requestTypeId === viewRequest.requestTypeId)?.name || "Unknown Type"}
+          />
+        )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Page Title */}
@@ -349,6 +350,7 @@ export default function RequestHistory() {
       </div>
 
     </div>
+    </Layout>
 
   )
 }
