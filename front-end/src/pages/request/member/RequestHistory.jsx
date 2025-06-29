@@ -25,7 +25,9 @@ export default function RequestHistory() {
   const [role, setRole] = useState(""); // Default role is "member"
   const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [accountId, setAccountId] = useState(""); // State for account ID
+  const [answeredByAccountId, setAnsweredByAccountId] = useState("");
   const [viewRequest, setViewRequest] = useState(null); // State for the request to view details
+  const [reload, setReload] = useState()
 
 
   const { id: eventId } = useParams();
@@ -34,16 +36,15 @@ export default function RequestHistory() {
       try {
         const userEventInfo = await getUserInfoInEvent(eventId);
         console.log("userEventInfo:", userEventInfo)
-        // if (userEventInfo.role) {
 
-
-        // console.log("User role:", role);
-        // }
         setDepartmentId(userEventInfo?.departmentId || null); // Set department ID if available
         setRole(userEventInfo.role || "participant"); // Set role, default to "participant"
 
         let rqs;
-        if (userEventInfo.role.toLowerCase().includes("member")) rqs = await getRequestsByEventIdAndAccountId(eventId, userEventInfo.accountId); // await here
+        if (userEventInfo.role.toLowerCase().includes("member")) {
+          rqs = await getRequestsByEventIdAndAccountId(eventId, userEventInfo.accountId); // await here
+
+        }
         else if (userEventInfo.role.toUpperCase() === "ADMIN") {
           // console.log("Fetching all requests for admin role");
           rqs = await getRequestsByEventId(eventId); // await here
@@ -55,6 +56,7 @@ export default function RequestHistory() {
         setRequests(rqs); // data is already resolved
         setFilteredRequests(rqs); // Initialize filtered requests with all requests
         setRequestTypes(requestTypes); // Set request types
+        setAnsweredByAccountId(userEventInfo.accountId);
 
         console.log("requests:", rqs)
       } catch (err) {
@@ -66,6 +68,7 @@ export default function RequestHistory() {
 
     fetchRequests();
   }, [eventId, accountId]);
+
   useEffect(() => {
     const filterRequests = () => {
       let filtered = requests;
@@ -103,12 +106,12 @@ export default function RequestHistory() {
         filtered = filtered.filter(request => request?.title?.toLowerCase().includes(searchTitle.toLowerCase()));
       }
 
-        // // Paginate results
-        // const itemsPerPage = 5;
-        // const startIndex = (currentPage - 1) * itemsPerPage;
-        // const paginatedRequests = filteredRequests.slice(startIndex, startIndex + itemsPerPage);
+      // // Paginate results
+      // const itemsPerPage = 5;
+      // const startIndex = (currentPage - 1) * itemsPerPage;
+      // const paginatedRequests = filteredRequests.slice(startIndex, startIndex + itemsPerPage);
 
-        setFilteredRequests(filtered);
+      setFilteredRequests(filtered);
     };
 
     filterRequests();
@@ -188,7 +191,9 @@ export default function RequestHistory() {
             onClose={() => setIsPopupOpen(false)}
             requestData={viewRequest}
             requestType={requestTypes.find(type => type.requestTypeId === viewRequest.requestTypeId)?.name || "Unknown Type"}
-            answeredByAccountId={viewRequest.responseByAccountId}
+            isMember={role.toLowerCase().includes("member")}
+            answeredByAccountId={viewRequest.responseByAccountId ? viewRequest.responseByAccountId : answeredByAccountId}
+
           />
         )}
 
@@ -240,7 +245,7 @@ export default function RequestHistory() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm placeholder-gray-400"
                   />
                 </div>
-                
+
                 {!role.toLowerCase().includes("admin") && (
                   <div className="flex-shrink-0">
                     <button

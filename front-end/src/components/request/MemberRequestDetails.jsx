@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { getAccountById } from "../../services/accountService";
 import { updateRequest } from "../../services/requestService";
 
-export default function RequestDetailsPopup({ isOpen, onClose, requestData, requestType, isMember }) {
+export default function RequestDetailsPopup({ isOpen, onClose, requestData, requestType, isMember, answeredByAccountId }) {
     if (!isOpen) return null;
 
     // const [answeredByAccount, setAnsweredByAccount] = useState(null);
@@ -89,6 +89,7 @@ export default function RequestDetailsPopup({ isOpen, onClose, requestData, requ
     // }, [answeredByAccountId]);
 
     // if (loading) return <div className="text-center p-4">Loading...</div>;
+    console.log("MemberRequestDetails isMember: " + isMember)
 
     return (
         <div
@@ -188,28 +189,39 @@ export default function RequestDetailsPopup({ isOpen, onClose, requestData, requ
                                 <h3 className="text-lg font-semibold mb-4 text-center">FEEDBACK</h3>
                                 <textarea className="text-gray-700 leading-relaxed w-full h-7/10"
                                     onChange={(e) => setResponseContent(e.target.value)}
-                                    placeholder={data.responseContent
-                                        ? ""
-                                        : ""}
+                                    placeholder={
+                                        data.responseContent
+                                                ? ""
+                                                : isMember 
+                                                        ? "" 
+                                                        : "Provide feedback here"
+
+                                    }
+                                    value={
+                                        data?.responseContent 
+                                            ? data?.responseContent 
+                                            : isMember
+                                                    ? "No feedback provided yet."
+                                                    : null
+                                    }
                                     readOnly={isMember}
                                     required={!isMember}
                                 >
-                                    {data?.responseContent ? data?.responseContent : "No feedback provided yet."}
                                 </textarea>
-                                {isMember && data.status.toUpperCase() === "PENDING" && (
+                                {!isMember && data.status.toUpperCase() === "PENDING" && (
 
                                     <div className="mt-6 flex gap-4 justify-baseline bottom-0 left-0 right-0 ">
                                         <button
                                             onClick={handleApprove}
                                             className="flex-1 bg-green-600 text-white font-semibold text-lg py-3 rounded-2xl hover:bg-green-700 transition-colors duration-200"
                                         >
-                                            Approve
+                                            APPROVE
                                         </button>
                                         <button
                                             onClick={handleReject}
                                             className="flex-1 bg-red-600 text-white font-semibold text-lg py-3 rounded-2xl hover:bg-red-700 transition-colors duration-200"
                                         >
-                                            Reject
+                                            REJECT
                                         </button>
                                     </div>
                                 )}
