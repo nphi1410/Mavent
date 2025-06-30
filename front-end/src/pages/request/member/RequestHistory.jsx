@@ -191,7 +191,7 @@ export default function RequestHistory() {
             onClose={() => setIsPopupOpen(false)}
             requestData={viewRequest}
             requestType={requestTypes.find(type => type.requestTypeId === viewRequest.requestTypeId)?.name || "Unknown Type"}
-            isMember={role.toLowerCase().includes("member")}
+            isMember={role.toLowerCase().includes("member") && !role.toLowerCase().includes("participant")}
             answeredByAccountId={viewRequest.responseByAccountId ? viewRequest.responseByAccountId : answeredByAccountId}
 
           />
