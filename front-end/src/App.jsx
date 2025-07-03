@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 // Layout
 import MainLayout from "./layouts/MainLayout";
+import Layout from './components/layout/AdminLayout';
 
 // Public
 import Login from "./pages/UserAuthorization/Login";
@@ -72,18 +73,22 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="events" element={<AllEvents />} />
           <Route path="events/:id" element={<EventDetails />} />
-          <Route path="events/:id/staff/:role" element={<EventDetailsByRoles />} />
           <Route path="meetings" element={<MeetingListPage />} />
           <Route path="meetings/edit" element={<MeetingEditPage />} />
           <Route path="event/:eventId/feedback" element={<ViewEventFeedback />} />
 
           {/* Event Member Protected Routes */}
-          <Route path="events/:id/departments" element={EventMember(<DepartmentManagementPage />)} />
-          <Route path="events/:id/members" element={EventMember(<Members />)} />
-          <Route path="events/:id/documents" element={EventMember(<DocumentsPage />)} />
-
-          <Route path="/event/:eventId/feedback" element={<ViewEventFeedback />} />
-          <Route path="event/:id/account/:accountId/request" element={(<RequestHistory />)} />
+          <Route path="event/:id/staff" element={<EventMemberRoute />}>
+            <Route path=":role" element={<Layout />}>
+              <Route index element={<EventDetailsByRoles />} />
+              <Route path="details" element={(<EventDetailsByRoles />)} />
+              <Route path="departments" element={<DepartmentManagementPage />} />
+              <Route path="members" element={(<Members />)} />
+              <Route path="documents" element={(<DocumentsPage />)} />
+              <Route path="feedback" element={<ViewEventFeedback />} />
+              <Route path="requests" element={(<RequestHistory />)} />
+            </Route>
+          </Route>
 
           {/* Create Event-Protected Routes */}
           <Route path="create-event">
@@ -119,8 +124,8 @@ function App() {
           <Route path="edit-event/:eventId" element={SuperAdmin(<SuperAdminEditEvent />)} />
           <Route path="user-detail/:id" element={SuperAdmin(<SuperAdminViewUserDetails />)} />
         </Route>
-      </Routes>
-    </Router>
+      </Routes >
+    </Router >
 
   );
 }

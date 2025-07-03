@@ -19,7 +19,7 @@ const EventFilter = ({
   const [sortOption, setSortOption] = useState("");
   const [tags, setTags] = useState([]);
   const [searchParams] = useSearchParams();
-  const size = 10;
+  const size = 12;
 
   const didInitRef = useRef(false); // <-- 👈 track if first load has been done
 

@@ -4,6 +4,7 @@ import { getEventFeedbackByEventId } from '../services/eventFeedbackService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStar, faChartColumn, faUser } from '@fortawesome/free-solid-svg-icons';
 import { Bar } from 'react-chartjs-2';
+import Layout from '../components/layout/AdminLayout';
 import 'chart.js/auto';
 
 function getChartData(data) {
@@ -50,7 +51,7 @@ function FeedbackCard({ feedback }) {
 }
 
 export default function ViewEventFeedback() {
-    const { eventId } = useParams();
+    const { id: eventId } = useParams();
     const [feedbackList, setFeedbackList] = useState([]);
     const [search, setSearch] = useState('');
     const [filterRating, setFilterRating] = useState(null);
@@ -87,6 +88,7 @@ export default function ViewEventFeedback() {
     const chartData = getChartData(filtered);
 
     return (
+
         <div className="p-6 bg-gray-50 min-h-screen">
             <div className="max-w-5xl mx-auto">
                 <h1 className="text-3xl font-bold mb-6 text-gray-800">Feedback for Event #{eventId}</h1>

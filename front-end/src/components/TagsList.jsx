@@ -5,9 +5,13 @@ import { getTags } from "../services/tagService";
 const TagsList = ({eventData}) => {
   const [tags, setTags] = useState([]);
   useEffect(() => {
+    if (!eventData) {
+      return;
+    }
       const fetchTags = async () => {
         try {
           const fetchedTags = await getTags({ eventId: eventData.eventId });
+          
           setTags(fetchedTags);
         } catch (error) {
           console.error("Error fetching tags:", error);
@@ -15,7 +19,7 @@ const TagsList = ({eventData}) => {
       };
   
       fetchTags();
-    }, [eventData.eventId]);
+    }, [eventData?.eventId]);
 
   return (
     <section className="w-full max-w-2xl px-4 md:px-6 py-8 text-gray-900">

@@ -1,58 +1,38 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faUsers, 
-  faTimes, 
+import {
+  faUsers,
+  faTimes,
   faSitemap,
-  faFileAlt
-} from '@fortawesome/free-solid-svg-icons';
-import { useUserPermissions } from '../../hooks/useUserPermissions';
+  faFileAlt,
+  faInbox,
+  faHouse, 
+  faComments
+} from "@fortawesome/free-solid-svg-icons";
+
 
 // Sidebar component for admin dashboard
-const Sidebar = ({ activeItem, isOpen, onToggle }) => {
-  const pathname = window.location.pathname;
-  const eventIdMatch = pathname.match(/\/events\/(\d+)/);
-  const eventId = eventIdMatch ? eventIdMatch[1] : '9'; // Mặc định là 9 nếu không tìm thấy
-  
-  // Get user's role for the current event
-  const { userRole, loading } = useUserPermissions(eventId);
-  const isAdmin = userRole === 'ADMIN' || (userRole && userRole.includes('ADMIN'));
-  
-  // Define all menu items
-  const allMenuItems = [
-    {
-      name: 'members',
-      displayName: 'Members',
-      icon: <FontAwesomeIcon icon={faUsers} />,
-      link: `/events/${eventId}/members`,
-      adminOnly: true // Only visible to admins
-    },
-    {
-      name: 'departments',
-      displayName: 'Departments',
-      icon: <FontAwesomeIcon icon={faSitemap} />,
-      link: `/events/${eventId}/departments`,
-      adminOnly: true // Only visible to admins
-    },
-    {
-      name: 'documents',
-      displayName: 'Documents',
-      icon: <FontAwesomeIcon icon={faFileAlt} />,
-      link: `/events/${eventId}/documents`,
-      adminOnly: false // Visible to all roles
-    }
-  ];
-  
-  // Filter items based on user role
-  const mainItems = allMenuItems.filter(item => !item.adminOnly || isAdmin);
-  // Không hiển thị phần Settings
-  const settingsItems = [];
+const Sidebar = ({ isOpen, onToggle, mainItems }) => {
+  const location = useLocation();
+  console.log("location: " + location.pathname);
+
+  const pathSegments = location.pathname.split('/').filter(Boolean);
+  // console.log("pathSegments: " + pathSegments);
+
+  const activeItem = pathSegments[pathSegments.length - 1] || '';
+  console.log("activeItem: " + activeItem);
+
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className={`hidden lg:block w-64 bg-white shadow-md h-screen fixed left-0 top-0 pt-16 z-30`}>
+      <aside
+        className={`hidden lg:block w-64 bg-white shadow-md h-screen fixed left-0 top-0 pt-16 z-30`}
+      >
         <div className="px-4 py-6 h-full overflow-y-auto">
-          <h2 className="mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Main</h2>
+          <h2 className="mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            Main
+          </h2>
           <ul className="space-y-1">
             {mainItems.map((item) => (
               <li key={item.name}>
@@ -60,8 +40,8 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
                   href={item.link}
                   className={`flex items-center p-3 text-sm font-medium rounded-lg transition-colors duration-200 hover:bg-gray-100 ${
                     activeItem === item.name.toLowerCase()
-                      ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-700'
-                      : 'text-gray-900'
+                      ? "bg-blue-100 text-blue-700 border-r-2 border-blue-700"
+                      : "text-gray-900"
                   }`}
                 >
                   <span className="w-5 h-5 text-gray-500">{item.icon}</span>
@@ -70,11 +50,13 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
               </li>
             ))}
           </ul>
-          
-          {settingsItems.length > 0 && (
+
+          {/* {settingsItems.length > 0 && (
             <>
               <hr className="my-6 border-gray-200" />
-              <h2 className="mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Settings</h2>
+              <h2 className="mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Settings
+              </h2>
               <ul className="space-y-1">
                 {settingsItems.map((item) => (
                   <li key={item.name}>
@@ -82,24 +64,29 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
                       href={item.link}
                       className={`flex items-center p-3 text-sm font-medium rounded-lg transition-colors duration-200 hover:bg-gray-100 ${
                         activeItem === item.name.toLowerCase()
-                          ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-700'
-                          : 'text-gray-900'
+                          ? "bg-blue-100 text-blue-700 border-r-2 border-blue-700"
+                          : "text-gray-900"
                       }`}
                     >
                       <span className="w-5 h-5 text-gray-500">{item.icon}</span>
-                      <span className="ml-3">{item.displayName || item.name}</span>
+                      <span className="ml-3">
+                        {item.displayName || item.name}
+                      </span>
                     </a>
                   </li>
                 ))}
               </ul>
             </>
-          )}
+          )} */}
         </div>
-      </aside>      {/* Mobile Sidebar with improved visibility and accessibility */}
-      <aside className={`
+      </aside>{" "}
+      {/* Mobile Sidebar with improved visibility and accessibility */}
+      <aside
+        className={`
         lg:hidden fixed left-0 top-0 w-72 h-full bg-white shadow-xl transform transition-all duration-300 ease-in-out z-50
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
+        ${isOpen ? "translate-x-0" : "-translate-x-full"}
+      `}
+      >
         {/* Mobile Header with improved styling */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-blue-50">
           <div className="flex items-center">
@@ -115,8 +102,12 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
           >
             <FontAwesomeIcon icon={faTimes} className="h-5 w-5" />
           </button>
-        </div>        {/* Mobile Menu Content with help text */}        <div className="px-4 py-6 h-full overflow-y-auto">
-          <h3 className="mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Main</h3>
+        </div>{" "}
+        {/* Mobile Menu Content with help text */}{" "}
+        <div className="px-4 py-6 h-full overflow-y-auto">
+          <h3 className="mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            Main
+          </h3>
           <ul className="space-y-1">
             {mainItems.map((item) => (
               <li key={item.name}>
@@ -125,8 +116,8 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
                   onClick={onToggle}
                   className={`flex items-center p-3 text-sm font-medium rounded-lg transition-colors duration-200 hover:bg-gray-100 ${
                     activeItem === item.name.toLowerCase()
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-900'
+                      ? "bg-blue-100 text-blue-700"
+                      : "text-gray-900"
                   }`}
                 >
                   <span className="w-5 h-5 text-gray-500">{item.icon}</span>
@@ -135,11 +126,13 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
               </li>
             ))}
           </ul>
-          
-          {settingsItems.length > 0 && (
+
+          {/* {settingsItems.length > 0 && (
             <>
               <hr className="my-6 border-gray-200" />
-              <h3 className="mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Settings</h3>
+              <h3 className="mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Settings
+              </h3>
               <ul className="space-y-1">
                 {settingsItems.map((item) => (
                   <li key={item.name}>
@@ -148,18 +141,20 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
                       onClick={onToggle}
                       className={`flex items-center p-3 text-sm font-medium rounded-lg transition-colors duration-200 hover:bg-gray-100 ${
                         activeItem === item.name.toLowerCase()
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'text-gray-900'
+                          ? "bg-blue-100 text-blue-700"
+                          : "text-gray-900"
                       }`}
                     >
                       <span className="w-5 h-5 text-gray-500">{item.icon}</span>
-                      <span className="ml-3">{item.displayName || item.name}</span>
+                      <span className="ml-3">
+                        {item.displayName || item.name}
+                      </span>
                     </a>
                   </li>
                 ))}
               </ul>
             </>
-          )}
+          )} */}
         </div>
       </aside>
     </>

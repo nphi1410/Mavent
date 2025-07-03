@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { registerEvent } from "../services/eventService";
 
 const EventBanner = ({ eventData }) => {
+  
   const [createAccount, setCreateAccount] = useState(null);
   const navigate = useNavigate();
   const PARTICIPANT_ROLE = "PARTICIPANT";
@@ -38,7 +39,7 @@ const EventBanner = ({ eventData }) => {
 
     const registerDTO = {
       eventId: eventData.eventId,
-      username: sessionStorage.getItem("username"),
+      accountId: sessionStorage.getItem("accountId"),
       role: role,
       departmentId: null,
     };
@@ -48,8 +49,6 @@ const EventBanner = ({ eventData }) => {
       if(responseData.status === 200) {
         alert("Register successfully!");
       }
-      console.log("Response from register event:", responseData);
-      
       return;
     }
 

@@ -1,4 +1,5 @@
 import axios from "axios";
+import Api from "../config/Api"; 
 
 const API_BASE_URL = "http://localhost:8080/api/events";
 
@@ -11,3 +12,14 @@ export const createAgendaItem = async (eventId, itemData) => {
         throw error;
     }
 };
+
+export const getAgendaItemsByEventId = async (eventId) => {
+    try {
+        const response = await Api.get(`/events/${eventId}/agenda`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching agenda items:", error.response?.data || error.message);
+        throw error;
+    }
+
+}

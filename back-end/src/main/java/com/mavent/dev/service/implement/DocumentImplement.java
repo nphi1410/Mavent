@@ -6,10 +6,12 @@ import com.mavent.dev.dto.document.DocumentResponseDTO;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.Department;
 import com.mavent.dev.entity.Document;
+import com.mavent.dev.entity.EventAccountRole;
 import com.mavent.dev.mapper.DocumentMapper;
 import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.repository.DepartmentRepository;
 import com.mavent.dev.repository.DocumentRepository;
+import com.mavent.dev.repository.EventAccountRoleRepository;
 import com.mavent.dev.service.DocumentService;
 import com.mavent.dev.service.globalservice.CloudService;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,7 @@ public class DocumentImplement implements DocumentService {
     private final AccountRepository accountRepository;
     private final DepartmentRepository departmentRepository;
     private final CloudService cloudService;
+    private final EventAccountRoleRepository eventAccountRoleRepository;
 
     @Value("${spring.cloud.azure.storage.blob.document-container:documents}")
     private String documentContainer;
@@ -110,9 +113,50 @@ public class DocumentImplement implements DocumentService {
                     Department department = document.getDepartmentId() != null ?
                             departmentRepository.findById(document.getDepartmentId()).orElse(null) : null;
                     Account uploader = accountRepository.findById(document.getUploaderAccountId()).orElse(null);
+                      // Check if the uploader is an admin of this event
+                    boolean isEventAdmin = false;
+                    Department uploaderDepartment = department; // Default to document department
+                      if (uploader != null && document.getEventId() != null) {
+                        isEventAdmin = eventAccountRoleRepository.hasRoleInEvent(
+                            document.getEventId(),
+                            uploader.getAccountId(), 
+                            EventAccountRole.EventRole.ADMIN);
+                            
+                        // Always check if uploader has a department in the event, regardless of document department
+                        Optional<EventAccountRole> eventRole = eventAccountRoleRepository.findByEventIdAndAccountId(
+                            document.getEventId(), uploader.getAccountId());
+                        
+                        // Add debug logging
+                        System.out.println("Document Detail: ID: " + documentId + " - Event role found: " + eventRole.isPresent());
+                            
+                        if (eventRole.isPresent() && eventRole.get().getDepartmentId() != null) {
+                            // Get the department info
+                            Integer deptId = eventRole.get().getDepartmentId();
+                            System.out.println("Document Detail: ID: " + documentId + " - User's department ID in event: " + deptId);
+                                
+                            Optional<Department> userDept = departmentRepository.findById(deptId);
+                            if (userDept.isPresent()) {
+                                uploaderDepartment = userDept.get();
+                                System.out.println("Document Detail: ID: " + documentId + " - Found department: " + uploaderDepartment.getName());
+                            }
+                        }
+                    }// Create response DTO with correct department info
+                    DocumentResponseDTO responseDTO = DocumentMapper.toResponseDTO(document, uploaderDepartment, uploader);
                     
-                    DocumentResponseDTO responseDTO = DocumentMapper.toResponseDTO(document, department, uploader);
-                      // Get file size if possible
+                    // If uploader is an event admin and has no department, set "Admin" as department name
+                    if (isEventAdmin && uploaderDepartment == null) {
+                        responseDTO.setDepartmentName("Admin");
+                    }
+                    
+                    // Add logging to debug department name
+                    System.out.println("Document ID: " + document.getDocumentId() + 
+                                     ", Uploader: " + (uploader != null ? uploader.getFullName() : "null") +
+                                     ", Department: " + (uploaderDepartment != null ? uploaderDepartment.getName() : "null") +
+                                     ", Department Name Set: " + responseDTO.getDepartmentName() + 
+                                     ", Event ID: " + document.getEventId() +
+                                     ", Account ID: " + (uploader != null ? uploader.getAccountId() : "null"));
+                    
+                    // Get file size if possible
                     if (document.getFilePath() != null) {
                         try {
                             String blobName = getBlobNameFromUrl(document.getFilePath());
@@ -234,12 +278,42 @@ public class DocumentImplement implements DocumentService {
         if (savedDocument.getUploaderAccountId() != null) {
             uploader = accountRepository.findById(savedDocument.getUploaderAccountId()).orElse(null);
         }
+          // Check if the uploader is an admin of this event and get their department
+        boolean isEventAdmin = false;
+        Department uploaderDepartment = department; // Default to document department
         
-        // Return mapped response DTO
-        return DocumentMapper.toResponseDTO(savedDocument, department, uploader);
-    }
-
-    private List<DocumentResponseDTO> mapDocumentsToResponseDTOs(List<Document> documents) {
+        if (uploader != null && savedDocument.getEventId() != null) {
+            isEventAdmin = eventAccountRoleRepository.hasRoleInEvent(
+                savedDocument.getEventId(),
+                uploader.getAccountId(), 
+                EventAccountRole.EventRole.ADMIN);
+                
+            // If not admin or department is null, check if user has a department in the event
+            if (department == null || !isEventAdmin) {
+                // Get user's role in the event to find their department
+                Optional<EventAccountRole> eventRole = eventAccountRoleRepository.findByEventIdAndAccountId(
+                    savedDocument.getEventId(), uploader.getAccountId());
+                    
+                if (eventRole.isPresent() && eventRole.get().getDepartmentId() != null) {
+                    // Get the department info
+                    Optional<Department> userDept = departmentRepository.findById(eventRole.get().getDepartmentId());
+                    if (userDept.isPresent()) {
+                        uploaderDepartment = userDept.get();
+                    }
+                }
+            }
+        }
+        
+        // Create response DTO
+        DocumentResponseDTO responseDTO = DocumentMapper.toResponseDTO(savedDocument, uploaderDepartment, uploader);
+        
+        // If uploader is an event admin and has no department, set "Admin" as department name
+        if (isEventAdmin && uploaderDepartment == null) {
+            responseDTO.setDepartmentName("Admin");
+        }
+        
+        return responseDTO;
+    }    private List<DocumentResponseDTO> mapDocumentsToResponseDTOs(List<Document> documents) {
         // Get unique department IDs and account IDs
         List<Integer> departmentIds = documents.stream()
                 .map(Document::getDepartmentId)
@@ -266,8 +340,77 @@ public class DocumentImplement implements DocumentService {
                     accountMap.put(acc.getAccountId(), acc));
         }
         
-        // Map to DTOs
-        List<DocumentResponseDTO> responseDTOs = DocumentMapper.toResponseDTOList(documents, departmentMap, accountMap);
+        // Create a map to cache event admin status for each account and event
+        Map<String, Boolean> eventAdminStatusCache = new HashMap<>();
+        
+        // Map to DTOs with customized department names for admins
+        List<DocumentResponseDTO> responseDTOs = new ArrayList<>();
+        
+        for (Document document : documents) {
+            Department department = document.getDepartmentId() != null ? 
+                departmentMap.get(document.getDepartmentId()) : null;
+                
+            Account uploader = document.getUploaderAccountId() != null ?
+                accountMap.get(document.getUploaderAccountId()) : null;
+              // Get uploader's role and department in the event 
+            boolean isEventAdmin = false;
+            Department uploaderDepartment = department; // Default to document department
+            
+            if (uploader != null && document.getEventId() != null) {
+                // Check admin status
+                String adminCacheKey = document.getEventId() + "-admin-" + uploader.getAccountId();
+                if (eventAdminStatusCache.containsKey(adminCacheKey)) {
+                    isEventAdmin = eventAdminStatusCache.get(adminCacheKey);
+                } else {
+                    isEventAdmin = eventAccountRoleRepository.hasRoleInEvent(
+                        document.getEventId(),
+                        uploader.getAccountId(),
+                        EventAccountRole.EventRole.ADMIN);
+                    eventAdminStatusCache.put(adminCacheKey, isEventAdmin);
+                }
+                
+                // If not admin or department is null, check if user has a department in the event
+                if (department == null || !isEventAdmin) {
+                    // Get user's role in the event to find their department
+                    Optional<EventAccountRole> eventRole = eventAccountRoleRepository.findByEventIdAndAccountId(
+                        document.getEventId(), uploader.getAccountId());
+                    
+                    if (eventRole.isPresent() && eventRole.get().getDepartmentId() != null) {
+                        // Get the department info
+                        Integer deptId = eventRole.get().getDepartmentId();
+                        Department userDept = departmentMap.get(deptId);
+                        
+                        // If not in map already, fetch it and add to map
+                        if (userDept == null) {
+                            Optional<Department> fetchedDept = departmentRepository.findById(deptId);
+                            if (fetchedDept.isPresent()) {
+                                userDept = fetchedDept.get();
+                                departmentMap.put(deptId, userDept);
+                            }
+                        }
+                        
+                        if (userDept != null) {
+                            uploaderDepartment = userDept;
+                        }
+                    }
+                }
+            }
+              // Create the DTO with the correct department info
+            DocumentResponseDTO dto = DocumentMapper.toResponseDTO(document, uploaderDepartment, uploader);
+            
+            // If uploader is an admin and still no department found, set to "Admin"
+            if (isEventAdmin && uploaderDepartment == null) {
+                dto.setDepartmentName("Admin");
+            }
+            
+            // Add logging to debug department name
+            System.out.println("List: Document ID: " + document.getDocumentId() + 
+                             ", Uploader: " + (uploader != null ? uploader.getFullName() : "null") +
+                             ", Department: " + (uploaderDepartment != null ? uploaderDepartment.getName() : "null") +
+                             ", Department Name Set: " + dto.getDepartmentName());
+            
+            responseDTOs.add(dto);
+        }
         
         // Populate file sizes when possible
         for (int i = 0; i < documents.size(); i++) {
