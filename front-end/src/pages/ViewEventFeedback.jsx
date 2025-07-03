@@ -89,77 +89,75 @@ export default function ViewEventFeedback() {
 
     return (
 
-        <Layout activeItem="feedback">
-            <div className="p-6 bg-gray-50 min-h-screen">
-                <div className="max-w-5xl mx-auto">
-                    <h1 className="text-3xl font-bold mb-6 text-gray-800">Feedback for Event #{eventId}</h1>
+        <div className="p-6 bg-gray-50 min-h-screen">
+            <div className="max-w-5xl mx-auto">
+                <h1 className="text-3xl font-bold mb-6 text-gray-800">Feedback for Event #{eventId}</h1>
 
-                    <div className="bg-white p-6 rounded-lg shadow mb-6">
-                        <div className="flex items-center mb-4">
-                            <FontAwesomeIcon icon={faChartColumn} className="text-gray-800 text-xl" />
-                            <h2 className="text-xl font-semibold text-gray-800 pl-1.5">Feedback Summary</h2>
-                        </div>
-
-                        <div className="flex justify-center gap-16">
-                            <div>
-                                <p className="text-sm text-gray-500">Average Rating</p>
-                                <p className="text-2xl font-bold flex items-center gap-2 text-yellow-500">
-                                    <FontAwesomeIcon icon={faStar} />
-                                    {(filtered.reduce((a, b) => a + b.rating, 0) / (filtered.length || 1)).toFixed(1)}
-                                </p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-500">Total Reviews</p>
-                                <p className="text-2xl font-bold flex items-center gap-2">
-                                    <FontAwesomeIcon icon={faUser} className='text-blue-500' />
-                                    {filtered.length}
-                                </p>
-                            </div>
-                        </div>
-                        <Bar data={chartData} options={chartOptions} />
+                <div className="bg-white p-6 rounded-lg shadow mb-6">
+                    <div className="flex items-center mb-4">
+                        <FontAwesomeIcon icon={faChartColumn} className="text-gray-800 text-xl" />
+                        <h2 className="text-xl font-semibold text-gray-800 pl-1.5">Feedback Summary</h2>
                     </div>
 
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
-                        <input
-                            type="text"
-                            placeholder="Search by comment..."
-                            className="w-full md:w-1/2 p-2 border border-gray-300 rounded-lg"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                        <div className="flex gap-2 flex-wrap">
-                            {[1, 2, 3, 4, 5].map(star => (
-                                <button
-                                    key={star}
-                                    className={`cursor-pointer px-3 py-1 rounded border ${filterRating === star ? 'bg-yellow-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-200'}`}
-                                    onClick={() => {
-                                        setFilterRating(filterRating === star ? null : star);
-                                        setPage(1);
-                                    }}
-                                >
-                                    {star}★
-                                </button>
-                            ))}
+                    <div className="flex justify-center gap-16">
+                        <div>
+                            <p className="text-sm text-gray-500">Average Rating</p>
+                            <p className="text-2xl font-bold flex items-center gap-2 text-yellow-500">
+                                <FontAwesomeIcon icon={faStar} />
+                                {(filtered.reduce((a, b) => a + b.rating, 0) / (filtered.length || 1)).toFixed(1)}
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-gray-500">Total Reviews</p>
+                            <p className="text-2xl font-bold flex items-center gap-2">
+                                <FontAwesomeIcon icon={faUser} className='text-blue-500' />
+                                {filtered.length}
+                            </p>
                         </div>
                     </div>
+                    <Bar data={chartData} options={chartOptions} />
+                </div>
 
-                    {paginated.map((f, index) => (
-                        <FeedbackCard key={index} feedback={f} />
-                    ))}
-
-                    <div className="flex justify-center items-center mt-6 gap-2">
-                        {Array.from({ length: totalPages }, (_, i) => (
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
+                    <input
+                        type="text"
+                        placeholder="Search by comment..."
+                        className="w-full md:w-1/2 p-2 border border-gray-300 rounded-lg"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+                    <div className="flex gap-2 flex-wrap">
+                        {[1, 2, 3, 4, 5].map(star => (
                             <button
-                                key={i}
-                                className={`px-3 py-1 rounded ${page === i + 1 ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border'} hover:bg-blue-100`}
-                                onClick={() => setPage(i + 1)}
+                                key={star}
+                                className={`cursor-pointer px-3 py-1 rounded border ${filterRating === star ? 'bg-yellow-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-200'}`}
+                                onClick={() => {
+                                    setFilterRating(filterRating === star ? null : star);
+                                    setPage(1);
+                                }}
                             >
-                                {i + 1}
+                                {star}★
                             </button>
                         ))}
                     </div>
                 </div>
+
+                {paginated.map((f, index) => (
+                    <FeedbackCard key={index} feedback={f} />
+                ))}
+
+                <div className="flex justify-center items-center mt-6 gap-2">
+                    {Array.from({ length: totalPages }, (_, i) => (
+                        <button
+                            key={i}
+                            className={`px-3 py-1 rounded ${page === i + 1 ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border'} hover:bg-blue-100`}
+                            onClick={() => setPage(i + 1)}
+                        >
+                            {i + 1}
+                        </button>
+                    ))}
+                </div>
             </div>
-        </Layout>
+        </div>
     );
 }

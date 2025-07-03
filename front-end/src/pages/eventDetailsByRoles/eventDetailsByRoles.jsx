@@ -70,7 +70,7 @@ export default function EventDetailsByRoles() {
   }
 
   return (
-    <Layout activeItem="eventDetails">
+    <div>
 
       <div className="min-h-screen bg-gray-50">
 
@@ -188,6 +188,6 @@ export default function EventDetailsByRoles() {
           )} */}
         </div>
       </div>
-    </Layout >
+    </div>
   )
 }

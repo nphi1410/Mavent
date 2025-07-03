@@ -67,7 +67,7 @@ export default function RequestHistory() {
     };
 
     fetchRequests();
-  }, [eventId, accountId]);
+  }, []);
 
   useEffect(() => {
     const filterRequests = () => {
@@ -175,7 +175,6 @@ export default function RequestHistory() {
 
 
   return (
-    <Layout activeItem="requests">
       <div className="min-h-screen bg-gray-50 py-8">
         {showCreateForm && (
           <RequestForm
@@ -369,6 +368,5 @@ export default function RequestHistory() {
         </div>
 
       </div>
-    </Layout>
   )
 }

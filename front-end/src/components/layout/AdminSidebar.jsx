@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUsers,
@@ -10,139 +10,19 @@ import {
   faHouse, 
   faComments
 } from "@fortawesome/free-solid-svg-icons";
-import { useUserPermissions } from "../../hooks/useUserPermissions";
 
 
 // Sidebar component for admin dashboard
-const Sidebar = ({ activeItem, isOpen, onToggle }) => {
-  // const pathname = window.location.pathname;
-  const { id } = useParams() || {};
-  // console.log('Event ID:', id);
-  const eventId = id;
+const Sidebar = ({ isOpen, onToggle, mainItems }) => {
+  const location = useLocation();
+  console.log("location: " + location.pathname);
 
-  // Define all menu items
-  const { userRole, loading, hasRole } = useUserPermissions(eventId);
-  const isAdmin =
-    userRole === "ADMIN" || (userRole && userRole.includes("ADMIN"));
-  const isManagerOrAdmin = hasRole("DEPARTMENT_MANAGER") || isAdmin;
+  const pathSegments = location.pathname.split('/').filter(Boolean);
+  // console.log("pathSegments: " + pathSegments);
 
-  // Additional debug for role checks
-  console.log(
-    'AdminSidebar - hasRole("DEPARTMENT_MANAGER"):',
-    hasRole("DEPARTMENT_MANAGER")
-  );
-  console.log('AdminSidebar - hasRole("MEMBER"):', hasRole("MEMBER"));
+  const activeItem = pathSegments[pathSegments.length - 1] || '';
+  console.log("activeItem: " + activeItem);
 
-  console.log("AdminSidebar - Current user role:", userRole);
-  console.log("AdminSidebar - isAdmin:", isAdmin);
-  console.log("AdminSidebar - isManagerOrAdmin:", isManagerOrAdmin);
-  // If still loading role, use a safe default to prevent UI flicker
-  const effectiveRole = loading ? null : userRole;
-  console.log(
-    "AdminSidebar - Effective role used for rendering:",
-    effectiveRole
-  );
-  // Define all menu items with their permission requirements
-  const allMenuItems = [
-    {
-      name:"details",
-      displayName: "Details",
-      icon: <FontAwesomeIcon icon={faHouse} />,
-      link: `details`,
-      requiredRole: "PARTICIPANT", // Only visible to department managers and admins
-    },
- 
-    {
-      name: "members",
-      displayName: "Members",
-      icon: <FontAwesomeIcon icon={faUsers} />,
-      link: `members`,
-      requiredRole: "DEPARTMENT_MANAGER", // Only visible to department managers and admins
-    },
-    {
-      name: "departments",
-      displayName: "Departments",
-      icon: <FontAwesomeIcon icon={faSitemap} />,
-      link: `departments`,
-      requiredRole: 'ADMIN' // Only visible to department managers and admins
-    },
-    {
-      name: "documents",
-      displayName: "Documents",
-      icon: <FontAwesomeIcon icon={faFileAlt} />,
-      link: `documents`,
-      requiredRole: 'MEMBER' // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
-    },
-    {
-      name: 'feedback',
-      displayName: 'Feedback',
-      icon: <FontAwesomeIcon icon={faComments} />,
-      link: `feedback`,
-      requiredRole: 'ADMIN' // Visible to admin only (ADMIN)
-    },
-    {
-      name: 'requests',
-      displayName: 'Requests',
-      icon: <FontAwesomeIcon icon={faInbox} />,
-      link: `requests`,
-      requiredRole: 'MEMBER' // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
-    }
-
-
-  ];
-
-  // Filter items based on user role
-  const mainItems = allMenuItems.filter((item) => {
-    // For items requiring ADMIN role (Members and Departments management)
-    if (item.requiredRole === "ADMIN") {
-      // Only show to DEPARTMENT_MANAGER or ADMIN users
-      const visible = isAdmin;
-      console.log(
-        `Menu item "${item.name}" requires ADMIN user is ${userRole}, showing:`,
-        visible
-      );
-      return visible;
-    }
-    // For items requiring DEPARTMENT_MANAGER role (Members and Departments management)
-    if (item.requiredRole === "DEPARTMENT_MANAGER") {
-      // Only show to DEPARTMENT_MANAGER or ADMIN users
-      const visible = isManagerOrAdmin;
-      console.log(
-        
-        `Menu item "${item.name}" requires DEPARTMENT_MANAGER, user is ${userRole}, showing:`,
-       
-        visible
-      
-      );
-      return visible;
-    }
-    // For items requiring MEMBER role (Documents)
-    else if (item.requiredRole === "MEMBER") {
-      // These items are visible to all members 
-      // (which includes MEMBER, DEPARTMENT_MANAGER, and ADMIN)
-      const visible = isManagerOrAdmin || userRole === "MEMBER";
-      console.log(
-        
-        `Menu item "${item.name}" requires MEMBER, user is ${userRole}, showing:`,
-       
-        visible
-      
-      );  
-      return visible;
-    } 
-
-    // Default case - if no specific rule, don't show
-    return item.requiredRole === "PARTICIPANT";
-  }); // Không hiển thị phần Settings
-  const settingsItems = [];
-
-  // Debug: Log filtered menu items
-  console.log(
-    "Filtered menu items for user role",
-    userRole,
-    ":",
-    mainItems.map((item) => item.name)
-  );
   return (
     <>
       {/* Desktop Sidebar */}
@@ -171,7 +51,7 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
             ))}
           </ul>
 
-          {settingsItems.length > 0 && (
+          {/* {settingsItems.length > 0 && (
             <>
               <hr className="my-6 border-gray-200" />
               <h2 className="mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -197,7 +77,7 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
                 ))}
               </ul>
             </>
-          )}
+          )} */}
         </div>
       </aside>{" "}
       {/* Mobile Sidebar with improved visibility and accessibility */}
@@ -247,7 +127,7 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
             ))}
           </ul>
 
-          {settingsItems.length > 0 && (
+          {/* {settingsItems.length > 0 && (
             <>
               <hr className="my-6 border-gray-200" />
               <h3 className="mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -274,7 +154,7 @@ const Sidebar = ({ activeItem, isOpen, onToggle }) => {
                 ))}
               </ul>
             </>
-          )}
+          )} */}
         </div>
       </aside>
     </>
