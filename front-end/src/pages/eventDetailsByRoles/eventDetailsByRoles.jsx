@@ -12,24 +12,8 @@ export default function EventDetailsByRoles() {
   const [activeDropdown, setActiveDropdown] = useState("eventInfo");
   const { id, role } = useParams(); // <-- Get ID from URL
 
-  const attendees = [
-    "/placeholder.svg?height=40&width=40",
-    "/placeholder.svg?height=40&width=40",
-    "/placeholder.svg?height=40&width=40",
-    "/placeholder.svg?height=40&width=40",
-    "/placeholder.svg?height=40&width=40",
-  ]
-
-
-  const sponsors = [
-    { name: "Diamond Sponsor", company: "NPC Company" },
-    { name: "Diamond Sponsor", company: "NPC Company" },
-    { name: "Diamond Sponsor", company: "NPC Company" },
-  ]
   const [eventData, setEventData] = useState(null);
-  const [agendaItems, setAgendaItems] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
 
@@ -48,20 +32,7 @@ export default function EventDetailsByRoles() {
         }
       };
 
-      const fetchAgendaItems = async () => {
-        // Simulating fetching agenda items
-        try {
-          const items = await getAgendaItemsByEventId(id);
-          console.log("Agenda Items:", items);
-          setAgendaItems(items);
-        } catch (err) {
-          console.error("Failed to fetch agenda items:", err);
-          setError("Failed to fetch agenda items.");
-        }
-      }
-
       fetchData();
-      fetchAgendaItems();
       setLoading(false);
     }
   }, []);
