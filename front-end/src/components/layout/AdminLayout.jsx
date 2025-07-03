@@ -133,7 +133,7 @@ const Layout = () => {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-  console.log(userRole)
+    
   // Nếu không phải trang quản lý, chỉ render children
   if (!isManagementPage && userRole.includes("PARTICIPANT")) {
     return (

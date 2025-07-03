@@ -47,7 +47,7 @@ const EventMemberRoute = () => {
 
       // Super admins can access any event page
       if (isSuperAdmin()) {
-        console.log('EventMemberRoute - User is a super admin, granting access');
+        // console.log('EventMemberRoute - User is a super admin, granting access');
         setIsAuthorized(true);
         setIsLoading(false);
         return;
@@ -56,7 +56,7 @@ const EventMemberRoute = () => {
       try {
         // Check if user has member role or higher in this event
         const role = await getUserRoleInEvent(eventId);
-        console.log('EventMemberRoute - User role for event:', eventId, 'is:', role);
+        // console.log('EventMemberRoute - User role for event:', eventId, 'is:', role);
 
         // Handle different possible API response formats
         let userRole;
@@ -64,28 +64,28 @@ const EventMemberRoute = () => {
 
         // If role is null or undefined, default to empty string
         if (role === null || role === undefined) {
-          console.log('EventMemberRoute - Role is null or undefined');
+          // console.log('EventMemberRoute - Role is null or undefined');
           isAuth = false;
           userRole = '';
         }
         // If role is a string, use it directly
         else if (typeof role === 'string') {
           userRole = role.toUpperCase(); // Normalize to uppercase to match ROLE_HIERARCHY keys
-          console.log('EventMemberRoute - Role is a string:', userRole);
+          // console.log('EventMemberRoute - Role is a string:', userRole);
         }
         // If role is an object with a role property
         else if (typeof role === 'object' && role.role) {
           userRole = role.role.toUpperCase(); // Normalize to uppercase
-          console.log('EventMemberRoute - Extracted role from object:', userRole);
+          // console.log('EventMemberRoute - Extracted role from object:', userRole);
         }
         // If role is an object with a roleName property
         else if (typeof role === 'object' && role.roleName) {
           userRole = role.roleName.toUpperCase(); // Normalize to uppercase
-          console.log('EventMemberRoute - Extracted roleName from object:', userRole);
+          // console.log('EventMemberRoute - Extracted roleName from object:', userRole);
         }
         // For any other unexpected format, default to empty
         else {
-          console.log('EventMemberRoute - Unexpected role format:', typeof role);
+          // console.log('EventMemberRoute - Unexpected role format:', typeof role);
           userRole = '';
         }
 
@@ -120,8 +120,8 @@ const EventMemberRoute = () => {
         //   }
         // }
 
-        console.log('EventMemberRoute - User role:', userRole);
-        console.log('EventMemberRoute - Is user authorized?', isAuth);
+        // console.log('EventMemberRoute - User role:', userRole);
+        // console.log('EventMemberRoute - Is user authorized?', isAuth);
 
         setIsAuthorized(isAuth);
       } catch (error) {
