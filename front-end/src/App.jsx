@@ -51,7 +51,6 @@ import MeetingEditPage from "./pages/meetingPages/EditMeetingPage";
 import ViewEventFeedback from "./pages/ViewEventFeedback.jsx";
 import ParticipantFeedbackEvent from "./pages/ParticipantFeedbackEvent.jsx";
 import RequestHistory from "./pages/request/member/RequestHistory.jsx";
-import RequestsPage from "./pages/RequestsPage.jsx";
 
 // Higher Order Components for Route Protection
 const Protect = (Component) => <ProtectedRoute children={Component} />;
@@ -79,14 +78,16 @@ function App() {
           <Route path="event/:eventId/feedback" element={<ViewEventFeedback />} />
 
           {/* Event Member Protected Routes */}
-          <Route path="event/:id/staff/:role" >
-            <Route index element={<EventDetailsByRoles />} />
-            <Route path="details" element={(<EventDetailsByRoles />)} />
-            <Route path="departments" element={EventMember(<DepartmentManagementPage />)} />
-            <Route path="members" element={(<Members />)} />
-            <Route path="documents" element={(<DocumentsPage />)} />
-            <Route path="feedback" element={EventMember(<ViewEventFeedback />)} />
-            <Route path="requests" element={Protect((<RequestHistory />))} />
+          <Route path="event/:id/staff" element={<EventMemberRoute />}>
+            <Route path=":role" element={<Layout />}>
+              <Route index element={<EventDetailsByRoles />} />
+              <Route path="details" element={(<EventDetailsByRoles />)} />
+              <Route path="departments" element={<DepartmentManagementPage />} />
+              <Route path="members" element={(<Members />)} />
+              <Route path="documents" element={(<DocumentsPage />)} />
+              <Route path="feedback" element={<ViewEventFeedback />} />
+              <Route path="requests" element={(<RequestHistory />)} />
+            </Route>
           </Route>
 
           {/* Create Event-Protected Routes */}

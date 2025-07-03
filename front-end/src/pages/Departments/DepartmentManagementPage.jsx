@@ -11,42 +11,40 @@ const Notification = ({ type, message, onClose }) => {
   useEffect(() => {
     // Use longer timeout for error notifications
     const timeout = type === 'error' ? 8000 : 5000;
-    
+
     const timer = setTimeout(() => {
       onClose();
     }, timeout);
-    
+
     return () => clearTimeout(timer);
   }, [onClose, type]);
-  
+
   return (
-    <div 
-      className={`fixed top-24 right-5 z-[1000] p-4 rounded-md shadow-xl flex items-center max-w-md ${
-        type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 
-        type === 'warning' ? 'bg-yellow-50 text-yellow-700 border border-yellow-200' :
-        'bg-red-50 text-red-700 border border-red-200'
-      }`} 
-      style={{ 
-        animation: 'fadeIn 0.3s ease-in-out', 
+    <div
+      className={`fixed top-24 right-5 z-[1000] p-4 rounded-md shadow-xl flex items-center max-w-md ${type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' :
+          type === 'warning' ? 'bg-yellow-50 text-yellow-700 border border-yellow-200' :
+            'bg-red-50 text-red-700 border border-red-200'
+        }`}
+      style={{
+        animation: 'fadeIn 0.3s ease-in-out',
         maxWidth: '90vw',
         opacity: 0,
         transform: 'translateY(-10px)',
         animationFillMode: 'forwards'
       }}
     >
-      <span className={`mr-3 ${
-        type === 'success' ? 'text-green-600' : 
-        type === 'warning' ? 'text-yellow-600' : 
-        'text-red-600'
-      }`}>
-        <FontAwesomeIcon 
-          icon={type === 'success' ? faCheckCircle : faExclamationCircle} 
-          size={type === 'error' ? 'lg' : 'sm'} 
+      <span className={`mr-3 ${type === 'success' ? 'text-green-600' :
+          type === 'warning' ? 'text-yellow-600' :
+            'text-red-600'
+        }`}>
+        <FontAwesomeIcon
+          icon={type === 'success' ? faCheckCircle : faExclamationCircle}
+          size={type === 'error' ? 'lg' : 'sm'}
           className={type === 'error' ? 'animate-pulse' : ''}
         />
       </span>
       <p className={`text-sm ${type === 'error' ? 'font-medium' : ''}`}>{message}</p>
-      <button 
+      <button
         onClick={onClose}
         className="ml-4 text-gray-400 hover:text-gray-600 flex-shrink-0"
         aria-label="Close notification"
@@ -62,11 +60,11 @@ const DepartmentDetailModal = ({ isOpen, onClose, department, onEdit }) => {
   const { id: eventId } = useParams();
   const [memberCount, setMemberCount] = useState(null);
   const [loadingCount, setLoadingCount] = useState(false);
-  
+
   useEffect(() => {
     const fetchMemberCount = async () => {
       if (!isOpen || !department || !department.departmentId) return;
-      
+
       try {
         setLoadingCount(true);
         const count = await departmentService.getMemberCount(eventId, department.departmentId);
@@ -74,25 +72,25 @@ const DepartmentDetailModal = ({ isOpen, onClose, department, onEdit }) => {
       } catch (error) {
         console.error('Error fetching department member count:', error);
         // Fallback to any count we might have from the department object
-        setMemberCount(department.loadedMemberCount || 
-                        department.memberCount || 
-                        department.members?.length || 
-                        0);
+        setMemberCount(department.loadedMemberCount ||
+          department.memberCount ||
+          department.members?.length ||
+          0);
       } finally {
         setLoadingCount(false);
       }
     };
-    
+
     fetchMemberCount();
   }, [department, eventId, isOpen]);
-  
+
   if (!isOpen || !department) return null;
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-9999">
       {/* Overlay */}
       <div className="absolute inset-0 bg-black opacity-50" onClick={onClose}></div>
-      
+
       {/* Modal */}
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md z-10 p-6">
         <div className="flex justify-between items-center mb-6">
@@ -103,7 +101,7 @@ const DepartmentDetailModal = ({ isOpen, onClose, department, onEdit }) => {
             <FontAwesomeIcon icon={faTimes} size="lg" />
           </button>
         </div>
-        
+
         <div className="space-y-4">
           <div className="border-b pb-3">
             <p className="text-sm text-gray-500">Mã phòng ban</p>
@@ -120,12 +118,12 @@ const DepartmentDetailModal = ({ isOpen, onClose, department, onEdit }) => {
               )}
             </div>
           </div>
-          
+
           <div className="border-b pb-3">
             <p className="text-sm text-gray-500">Tên phòng ban</p>
             <p className="font-medium text-gray-800">{department.name}</p>
           </div>
-          
+
           <div className="border-b pb-3">
             <p className="text-sm text-gray-500">Số lượng thành viên</p>
             <div className="mt-1">
@@ -138,14 +136,14 @@ const DepartmentDetailModal = ({ isOpen, onClose, department, onEdit }) => {
               )}
             </div>
           </div>
-          
+
           <div className="border-b pb-3">
             <p className="text-sm text-gray-500">Mô tả</p>
             <div className="max-h-48 overflow-y-auto">
               <p className="font-medium text-gray-800 break-words whitespace-pre-wrap">{department.description || 'Không có mô tả'}</p>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-gray-500">Ngày tạo</p>
@@ -161,9 +159,9 @@ const DepartmentDetailModal = ({ isOpen, onClose, department, onEdit }) => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex justify-between mt-6">
-          <button 
+          <button
             onClick={() => {
               onEdit(department.departmentId);
               onClose();
@@ -173,7 +171,7 @@ const DepartmentDetailModal = ({ isOpen, onClose, department, onEdit }) => {
             <FontAwesomeIcon icon={faEdit} className="mr-2" />
             Chỉnh sửa
           </button>
-          <button 
+          <button
             onClick={onClose}
             className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md"
           >
@@ -188,23 +186,23 @@ const DepartmentDetailModal = ({ isOpen, onClose, department, onEdit }) => {
 // Confirmation Dialog Component for bulk actions
 const ConfirmationDialog = ({ isOpen, onClose, onConfirm, title, message, confirmButtonText }) => {
   if (!isOpen) return null;
-  
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Overlay */}
       <div className="absolute inset-0 bg-black opacity-50" onClick={onClose}></div>
-      
+
       {/* Dialog */}
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md z-10 p-6" style={{ animation: 'fadeIn 0.3s ease-in-out' }}>
         <div className="mb-5">
           <div className="flex items-center justify-center bg-red-100 text-red-600 w-12 h-12 rounded-full mx-auto mb-4">
             <FontAwesomeIcon icon={faTrash} size="lg" />
           </div>
-          
+
           <h3 className="text-xl font-medium text-gray-900 text-center">{title}</h3>
           <p className="text-sm text-gray-600 mt-3 text-center">{message}</p>
         </div>
-        
+
         <div className="flex justify-center gap-4 mt-6">
           <button
             onClick={onClose}
@@ -243,7 +241,7 @@ const DepartmentManagementPage = () => {
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [processingBulkDelete, setProcessingBulkDelete] = useState(false);
   const lastSelectedRef = useRef(null);
-  
+
   // Add keyframe animations for bulk actions
   useEffect(() => {
     const styleEl = document.createElement('style');
@@ -264,12 +262,12 @@ const DepartmentManagementPage = () => {
       }
     `;
     document.head.appendChild(styleEl);
-    
+
     return () => {
       document.head.removeChild(styleEl);
     };
   }, []);
-  
+
   // Mock data cho departments dựa trên mockup
   const mockDepartments = [
     { id: 1, deptNo: 'MKT-001', name: 'Marketing Department' },
@@ -288,9 +286,9 @@ const DepartmentManagementPage = () => {
         setLoading(true);
         const data = await departmentService.getDepartmentsByEventId(eventId);
         console.log('Fetched departments:', data);
-        
+
         let departmentsArray = [];
-        
+
         // Process the returned data
         if (Array.isArray(data)) {
           departmentsArray = data;
@@ -304,11 +302,11 @@ const DepartmentManagementPage = () => {
           console.warn('Unexpected data format:', data);
           setTotalPages(1);
         }
-        
+
         // Store the departments in state without member counts
         setDepartments(departmentsArray);
         setError(null);
-        
+
         // Once departments are loaded, fetch member counts for each
         if (departmentsArray.length > 0) {
           fetchMemberCounts(departmentsArray);
@@ -331,17 +329,17 @@ const DepartmentManagementPage = () => {
 
     fetchDepartments();
   }, [eventId]);
-  
+
   // Fetch member counts for all departments
   const fetchMemberCounts = async (departmentsList) => {
     // Create a copy of departments to update with member counts
     const updatedDepartments = [...departmentsList];
-    
+
     // Process departments in batches to avoid too many concurrent requests
     const batchSize = 5;
     for (let i = 0; i < updatedDepartments.length; i += batchSize) {
       const batch = updatedDepartments.slice(i, i + batchSize);
-      
+
       // Process the batch in parallel
       const batchPromises = batch.map(async (dept) => {
         try {
@@ -359,15 +357,15 @@ const DepartmentManagementPage = () => {
           };
         }
       });
-      
+
       // Wait for all promises in this batch to resolve
       const batchResults = await Promise.all(batchPromises);
-      
+
       // Update the departments with their member counts
       batchResults.forEach((updatedDept, index) => {
         updatedDepartments[i + index] = updatedDept;
       });
-      
+
       // Update state after each batch
       setDepartments([...updatedDepartments]);
     }
@@ -375,13 +373,13 @@ const DepartmentManagementPage = () => {
 
   // Filter departments based on search term
   const filteredDepartments = departments.filter(department => {
-    const matchesSearch = 
-      (department.name && department.name.toLowerCase().includes(searchTerm.toLowerCase())) || 
+    const matchesSearch =
+      (department.name && department.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (department.deptNo && department.deptNo.toLowerCase().includes(searchTerm.toLowerCase()));
-    
+
     return matchesSearch;
   });
-  
+
   // Update total pages whenever filtered departments change
   useEffect(() => {
     setTotalPages(Math.ceil(filteredDepartments.length / ITEMS_PER_PAGE));
@@ -389,13 +387,13 @@ const DepartmentManagementPage = () => {
 
   // Calculate paginated departments based on current page
   const ITEMS_PER_PAGE = 10; // Set to 10 items per page
-  
+
   const computePaginatedDepartments = () => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
     return filteredDepartments.slice(startIndex, endIndex);
   };
-  
+
   // Get the current page's departments
   const paginatedDepartments = computePaginatedDepartments();
 
@@ -420,10 +418,10 @@ const DepartmentManagementPage = () => {
       });
       return;
     }
-    
+
     // Find the department in the existing data
     const deptDetail = departments.find(dept => dept.departmentId === departmentId);
-    
+
     if (!deptDetail) {
       setNotification({
         type: 'error',
@@ -431,9 +429,9 @@ const DepartmentManagementPage = () => {
       });
       return;
     }
-    
+
     console.log('Department detail from local data:', deptDetail);
-    
+
     // Set the department detail to state and open the modal
     setDepartmentDetail(deptDetail);
     setIsDetailModalOpen(true);
@@ -448,7 +446,7 @@ const DepartmentManagementPage = () => {
       });
       return;
     }
-    
+
     const department = departments.find(d => d.departmentId === departmentId);
     if (!department) {
       setNotification({
@@ -457,7 +455,7 @@ const DepartmentManagementPage = () => {
       });
       return;
     }
-    
+
     setSelectedDepartment(department);
     setIsModalOpen(true);
   };
@@ -471,23 +469,23 @@ const DepartmentManagementPage = () => {
       });
       return;
     }
-    
+
     // Find the department to get its name for better user feedback
     const departmentToDelete = departments.find(d => d.departmentId === departmentId);
     const deptName = departmentToDelete ? departmentToDelete.name : `ID: ${departmentId}`;
-    
+
     try {
       const numericEventId = parseInt(eventId, 10);
       const numericDepartmentId = parseInt(departmentId, 10);
-      
+
       // Clear any existing notifications first
       setNotification(null);
       setLoading(true);
-      
+
       // First check: Get the latest member count
       console.log(`Checking member count for department ${departmentId}`);
       const memberCount = await departmentService.getMemberCount(numericEventId, numericDepartmentId);
-      
+
       if (memberCount > 0) {
         setLoading(false);
         setNotification({
@@ -496,11 +494,11 @@ const DepartmentManagementPage = () => {
         });
         return;
       }
-      
+
       // Second check: Check for tasks (if available)
       console.log(`Checking tasks for department ${departmentId}`);
       const tasksCheck = await departmentService.checkDepartmentHasTasks(numericEventId, numericDepartmentId);
-      
+
       if (tasksCheck.hasTasks) {
         setLoading(false);
         setNotification({
@@ -509,34 +507,34 @@ const DepartmentManagementPage = () => {
         });
         return;
       }
-      
+
       setLoading(false);
-      
+
       // If there are no known constraints, confirm deletion
       if (window.confirm(`Bạn có chắc chắn muốn xóa phòng ban "${deptName}"?`)) {
         try {
           setLoading(true);
           console.log(`Attempting to delete department ${departmentId} from event ${eventId}`);
-          
+
           // Try to delete using our enhanced service method
           await departmentService.deleteDepartment(numericEventId, numericDepartmentId);
-          
+
           // If we get here, deletion was successful
           console.log(`Successfully deleted department ${departmentId}`);
-          
+
           // Update local state after successful deletion
           setDepartments(departments.filter(dept => dept.departmentId !== numericDepartmentId));
-          
+
           setNotification({
             type: 'success',
             message: `Xóa phòng ban "${deptName}" thành công`
           });
         } catch (err) {
           console.error(`Error deleting department with ID ${departmentId}:`, err);
-          
+
           // Get a more detailed error message
           let errorMessage = 'Không thể xóa phòng ban. ';
-          
+
           if (err.message) {
             if (err.message.includes('constraint') || err.message.includes('ràng buộc')) {
               errorMessage = `Không thể xóa phòng ban "${deptName}" vì phòng ban này có dữ liệu liên quan (có thể là thành viên, nhiệm vụ hoặc dữ liệu khác). Vui lòng kiểm tra và xóa các dữ liệu liên quan trước.`;
@@ -550,10 +548,10 @@ const DepartmentManagementPage = () => {
           } else {
             errorMessage
           }
-          
-          setNotification({ 
-            type: 'error', 
-            message: errorMessage 
+
+          setNotification({
+            type: 'error',
+            message: errorMessage
           });
         } finally {
           setLoading(false);
@@ -573,7 +571,7 @@ const DepartmentManagementPage = () => {
     setSelectedDepartment(null);
     setIsModalOpen(true);
   };
-  
+
   const handleSubmitDepartment = async (formData) => {
     try {
       setLoading(true);
@@ -582,26 +580,26 @@ const DepartmentManagementPage = () => {
         if (!selectedDepartment.departmentId || selectedDepartment.departmentId === 'undefined') {
           throw new Error('Mã phòng ban không hợp lệ');
         }
-        
+
         // Ensure the deptNo is preserved from the original department
         // This handles the case where the deptNo field is disabled in edit mode
         const updatedFormData = {
           ...formData,
           deptNo: selectedDepartment.deptNo || formData.deptNo
         };
-        
+
         // Update existing department
         const updatedDepartment = await departmentService.updateDepartment(
-          eventId, 
-          parseInt(selectedDepartment.departmentId, 10), 
+          eventId,
+          parseInt(selectedDepartment.departmentId, 10),
           updatedFormData
         );
-        
+
         // Update the local state with the updated department data
         setDepartments(departments.map(dept =>
           dept.departmentId === selectedDepartment.departmentId ? updatedDepartment : dept
         ));
-        
+
         // Show success notification
         setNotification({ type: 'success', message: 'Cập nhật phòng ban thành công' });
       } else {
@@ -612,22 +610,22 @@ const DepartmentManagementPage = () => {
           name: formData.name,
           description: formData.description
         };
-        
+
         console.log("Submitting department with data:", newDeptData);
-        
+
         // Add new department
         const newDepartment = await departmentService.addDepartment(eventId, newDeptData);
-        
+
         // Add the new department to the local state
         setDepartments([...departments, newDepartment]);
-        
+
         // Show success notification
         setNotification({ type: 'success', message: 'Thêm phòng ban mới thành công' });
       }
     } catch (err) {
       console.error('Error submitting department:', err);
-      const errorMessage = selectedDepartment ? 
-        'Không thể cập nhật phòng ban. Vui lòng thử lại sau.' : 
+      const errorMessage = selectedDepartment ?
+        'Không thể cập nhật phòng ban. Vui lòng thử lại sau.' :
         'Không thể thêm phòng ban mới. Vui lòng thử lại sau.';
       setError(errorMessage);
       setNotification({ type: 'error', message: errorMessage });
@@ -643,45 +641,45 @@ const DepartmentManagementPage = () => {
       // Simple toggle if not using shift
       if (!event.shiftKey || !lastSelectedRef.current) {
         lastSelectedRef.current = departmentId;
-        
+
         if (prev.includes(departmentId)) {
           return prev.filter(id => id !== departmentId);
         } else {
           return [...prev, departmentId];
         }
       }
-      
+
       // Handle shift+click to select a range
       const currentPage = paginatedDepartments.map(dept => dept.departmentId);
       const lastSelectedIndex = currentPage.indexOf(lastSelectedRef.current);
       const currentIndex = currentPage.indexOf(departmentId);
-      
+
       if (lastSelectedIndex === -1 || currentIndex === -1) {
         // If we can't find the indices, just toggle this item
         lastSelectedRef.current = departmentId;
-        
+
         if (prev.includes(departmentId)) {
           return prev.filter(id => id !== departmentId);
         } else {
           return [...prev, departmentId];
         }
       }
-      
+
       // Determine the range to select
       const start = Math.min(lastSelectedIndex, currentIndex);
       const end = Math.max(lastSelectedIndex, currentIndex);
       const rangeToSelect = currentPage.slice(start, end + 1);
-      
+
       // Update the last selected ref
       lastSelectedRef.current = departmentId;
-      
+
       // Add all in the range to selected
       const newSelected = [...new Set([...prev, ...rangeToSelect])];
-      
+
       return newSelected;
     });
   };
-  
+
   // Handle select/deselect all departments on current page
   const handleSelectAllDepartments = (e) => {
     if (e.target.checked) {
@@ -691,36 +689,36 @@ const DepartmentManagementPage = () => {
       const currentPageIds = paginatedDepartments.map(dept => dept.departmentId);
       setSelectedDepartments(selectedDepartments.filter(id => !currentPageIds.includes(id)));
     }
-    
+
     // Reset last selected when selecting/deselecting all
     lastSelectedRef.current = null;
   };
-  
+
   // Check if all departments on current page are selected
-  const areAllCurrentPageDepartmentsSelected = paginatedDepartments.length > 0 && 
+  const areAllCurrentPageDepartmentsSelected = paginatedDepartments.length > 0 &&
     paginatedDepartments.every(dept => selectedDepartments.includes(dept.departmentId));
-  
+
   // Handle bulk delete action
   const handleBulkDelete = async () => {
     setIsConfirmDialogOpen(false);
-    
+
     if (selectedDepartments.length === 0) return;
-    
+
     setLoading(true);
     setProcessingBulkDelete(true);
-    
+
     // Show initial processing notification
     setNotification({
       type: 'warning',
       message: `Đang xử lý yêu cầu xóa ${selectedDepartments.length} phòng ban...`
     });
-    
+
     // Keep track of successful and failed deletions
     let successCount = 0;
     let errorCount = 0;
     let errorMessages = [];
     let departmentsWithConstraints = [];
-    
+
     // Get names for all selected departments for better UX
     const deptNamesMap = {};
     selectedDepartments.forEach(deptId => {
@@ -729,11 +727,11 @@ const DepartmentManagementPage = () => {
         deptNamesMap[deptId] = dept.name;
       }
     });
-    
+
     // Process departments in batches to avoid overwhelming the server
     const batchSize = 5;
     const totalBatches = Math.ceil(selectedDepartments.length / batchSize);
-    
+
     for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
       // Update progress in notification if multiple batches
       if (totalBatches > 1 && batchIndex > 0) {
@@ -742,16 +740,16 @@ const DepartmentManagementPage = () => {
           message: `Đang xử lý... (${batchIndex}/${totalBatches} lô) - Đã xóa: ${successCount}, Lỗi: ${errorCount}`
         });
       }
-      
+
       const start = batchIndex * batchSize;
       const batch = selectedDepartments.slice(start, start + batchSize);
-      
+
       // Process the batch in parallel
       const batchPromises = batch.map(async (departmentId) => {
         try {
           // First check if department has any members
           const memberCount = await departmentService.getMemberCount(eventId, departmentId);
-          
+
           if (memberCount > 0) {
             const deptName = deptNamesMap[departmentId] || `ID: ${departmentId}`;
             departmentsWithConstraints.push({ name: deptName, reason: `có ${memberCount} thành viên` });
@@ -761,7 +759,7 @@ const DepartmentManagementPage = () => {
               error: `Phòng ban "${deptName}" có ${memberCount} thành viên và không thể xóa.`
             };
           }
-          
+
           // Check for tasks
           const tasksCheck = await departmentService.checkDepartmentHasTasks(eventId, departmentId);
           if (tasksCheck.hasTasks) {
@@ -773,13 +771,13 @@ const DepartmentManagementPage = () => {
               error: `Phòng ban "${deptName}" có ${tasksCheck.taskCount} nhiệm vụ và không thể xóa.`
             };
           }
-          
+
           // Try to delete the department
           await departmentService.deleteDepartment(eventId, departmentId);
           return { success: true, departmentId };
         } catch (error) {
           const deptName = deptNamesMap[departmentId] || `ID: ${departmentId}`;
-          
+
           let errorMsg = `Không thể xóa "${deptName}"`;
           if (error.message) {
             if (error.message.includes('constraint') || error.message.includes('ràng buộc')) {
@@ -789,7 +787,7 @@ const DepartmentManagementPage = () => {
               errorMsg += `: ${error.message}`;
             }
           }
-          
+
           return {
             success: false,
             departmentId,
@@ -797,9 +795,9 @@ const DepartmentManagementPage = () => {
           };
         }
       });
-      
+
       const results = await Promise.all(batchPromises);
-      
+
       // Count successes and failures
       results.forEach(result => {
         if (result.success) {
@@ -809,25 +807,25 @@ const DepartmentManagementPage = () => {
           errorMessages.push(result.error);
         }
       });
-      
+
       // Update the departments list by removing successfully deleted departments
       const successfullyDeletedIds = results
         .filter(result => result.success)
         .map(result => result.departmentId);
-        
-      setDepartments(prev => 
+
+      setDepartments(prev =>
         prev.filter(dept => !successfullyDeletedIds.includes(dept.departmentId))
       );
-      
+
       // Update the selected departments list
-      setSelectedDepartments(prev => 
+      setSelectedDepartments(prev =>
         prev.filter(id => !successfullyDeletedIds.includes(id))
       );
     }
-    
+
     setLoading(false);
     setProcessingBulkDelete(false);
-    
+
     // Show detailed result notification
     if (successCount > 0 && errorCount === 0) {
       setNotification({
@@ -837,7 +835,7 @@ const DepartmentManagementPage = () => {
     } else if (successCount > 0 && errorCount > 0) {
       // Create a more detailed message for mixed results
       let message = `Đã xóa ${successCount} phòng ban, nhưng ${errorCount} phòng ban không thể xóa.`;
-      
+
       if (departmentsWithConstraints.length > 0) {
         if (departmentsWithConstraints.length <= 2) {
           // Show specific details for a few departments
@@ -850,7 +848,7 @@ const DepartmentManagementPage = () => {
           message += ` Hầu hết lỗi do phòng ban ${mainReason}.`;
         }
       }
-      
+
       setNotification({
         type: 'warning',
         message: message
@@ -859,7 +857,7 @@ const DepartmentManagementPage = () => {
     } else if (errorCount > 0) {
       // Detailed error message
       let message = `Không thể xóa phòng ban nào.`;
-      
+
       if (departmentsWithConstraints.length > 0) {
         if (departmentsWithConstraints.length <= 2) {
           message += " " + departmentsWithConstraints
@@ -872,7 +870,7 @@ const DepartmentManagementPage = () => {
       } else if (errorMessages.length === 1) {
         message += ` ${errorMessages[0]}`;
       }
-      
+
       setNotification({
         type: 'error',
         message: message
@@ -885,11 +883,11 @@ const DepartmentManagementPage = () => {
   if (error) return <div className="text-red-500 text-center p-4">{error}</div>;
 
   return (
-    <Layout activeItem="departments">
+    <div>
       <div className="p-6 bg-white rounded-lg shadow-md">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold text-gray-800">Manage Departments</h1>
-      
+
         </div>
         <hr className="mb-6" />
 
@@ -908,7 +906,7 @@ const DepartmentManagementPage = () => {
             </div>
           </div>
           <div className="flex gap-2">
-            <button 
+            <button
               onClick={handleAddDepartment}
               className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md flex items-center justify-center transition duration-200"
             >
@@ -919,12 +917,11 @@ const DepartmentManagementPage = () => {
         </div>
 
         {/* Bulk Actions */}
-        <div 
-          className={`mb-4 p-3 border rounded-md shadow-sm flex items-center justify-between transition-all duration-300 ${
-            selectedDepartments.length > 0 
-              ? 'opacity-100 bg-blue-50 border-blue-200 transform translate-y-0' 
+        <div
+          className={`mb-4 p-3 border rounded-md shadow-sm flex items-center justify-between transition-all duration-300 ${selectedDepartments.length > 0
+              ? 'opacity-100 bg-blue-50 border-blue-200 transform translate-y-0'
               : 'opacity-0 bg-gray-50 border-gray-200 transform -translate-y-4 pointer-events-none absolute'
-          }`}
+            }`}
           style={{
             height: selectedDepartments.length > 0 ? 'auto' : '0',
             overflow: 'hidden',
@@ -949,7 +946,7 @@ const DepartmentManagementPage = () => {
             <button
               onClick={() => setIsConfirmDialogOpen(true)}
               className="px-3 py-1.5 text-white bg-red-600 rounded hover:bg-red-700 flex items-center transition-colors"
-              style={{ 
+              style={{
                 animation: selectedDepartments.length >= 5 ? 'pulse 2s infinite' : 'none',
               }}
             >
@@ -958,7 +955,7 @@ const DepartmentManagementPage = () => {
             </button>
           </div>
         </div>
-        
+
         {/* Department Table */}
         <div className="overflow-x-auto rounded-lg shadow">
           <table className="w-full border-collapse bg-white">
@@ -972,7 +969,7 @@ const DepartmentManagementPage = () => {
                       checked={areAllCurrentPageDepartmentsSelected}
                       ref={(el) => {
                         if (el) {
-                          const hasSelected = paginatedDepartments.some(dept => 
+                          const hasSelected = paginatedDepartments.some(dept =>
                             selectedDepartments.includes(dept.departmentId)
                           );
                           el.indeterminate = hasSelected && !areAllCurrentPageDepartmentsSelected;
@@ -993,13 +990,12 @@ const DepartmentManagementPage = () => {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {paginatedDepartments.map((department) => (
-                <tr 
-                  key={department.departmentId} 
-                  className={`hover:bg-gray-50 transition-all duration-200 ${
-                    selectedDepartments.includes(department.departmentId) 
-                      ? 'bg-blue-50 shadow-sm' 
+                <tr
+                  key={department.departmentId}
+                  className={`hover:bg-gray-50 transition-all duration-200 ${selectedDepartments.includes(department.departmentId)
+                      ? 'bg-blue-50 shadow-sm'
                       : ''
-                  }`}
+                    }`}
                   style={{
                     animation: selectedDepartments.includes(department.departmentId) ? 'highlight 1s ease-out' : 'none'
                   }}
@@ -1008,9 +1004,8 @@ const DepartmentManagementPage = () => {
                     <div className="relative">
                       <input
                         type="checkbox"
-                        className={`form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 hover:ring-2 hover:ring-blue-300 transition-all ${
-                          selectedDepartments.includes(department.departmentId) ? 'scale-110' : ''
-                        }`}
+                        className={`form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 hover:ring-2 hover:ring-blue-300 transition-all ${selectedDepartments.includes(department.departmentId) ? 'scale-110' : ''
+                          }`}
                         checked={selectedDepartments.includes(department.departmentId)}
                         onChange={(e) => handleSelectDepartment(department.departmentId, e)}
                         title="Select department (use Shift+click to select a range)"
@@ -1037,26 +1032,26 @@ const DepartmentManagementPage = () => {
                     {department.loadedMemberCount !== undefined ? (
                       <span className="font-medium">{department.loadedMemberCount}</span>
                     ) : (
-                      <span className="text-gray-400">Đang tải...</span>  
+                      <span className="text-gray-400">Đang tải...</span>
                     )}
                   </td>
                   <td className="px-3 py-4">
                     <div className="flex justify-center space-x-1">
-                      <button 
+                      <button
                         onClick={() => handleViewDepartment(department.departmentId)}
                         className="p-1.5 rounded text-gray-600 hover:bg-gray-100"
                         title="View"
                       >
                         <FontAwesomeIcon icon={faEye} />
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleEditDepartment(department.departmentId)}
                         className="p-1.5 rounded text-gray-600 hover:bg-gray-100"
                         title="Edit"
                       >
                         <FontAwesomeIcon icon={faEdit} />
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleDeleteDepartment(department.departmentId)}
                         className="p-1.5 rounded text-gray-600 hover:bg-gray-100 hover:text-red-500"
                         title="Delete"
@@ -1077,8 +1072,8 @@ const DepartmentManagementPage = () => {
             Showing {filteredDepartments.length > 0 ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredDepartments.length)} of {filteredDepartments.length} departments
           </div>
           <div className="flex justify-center items-center space-x-1">
-            <button 
-              onClick={() => handlePageChange(currentPage - 1)} 
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
               className="p-2 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -1086,23 +1081,22 @@ const DepartmentManagementPage = () => {
                 <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
             </button>
-            
+
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <button
                 key={page}
                 onClick={() => handlePageChange(page)}
-                className={`px-4 py-2 text-sm rounded-md ${
-                  currentPage === page
+                className={`px-4 py-2 text-sm rounded-md ${currentPage === page
                     ? 'bg-blue-600 text-white'
                     : 'text-gray-700 hover:bg-gray-50 border border-gray-300'
-                }`}
+                  }`}
               >
                 {page}
               </button>
             ))}
-            
-            <button 
-              onClick={() => handlePageChange(currentPage + 1)} 
+
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
               className="p-2 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -1112,9 +1106,9 @@ const DepartmentManagementPage = () => {
             </button>
           </div>
         </div>
-        
+
         {/* Department Form Modal */}
-        <DepartmentFormModal 
+        <DepartmentFormModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           department={selectedDepartment}
@@ -1122,7 +1116,7 @@ const DepartmentManagementPage = () => {
         />
 
         {/* Department Detail Modal */}
-        <DepartmentDetailModal 
+        <DepartmentDetailModal
           isOpen={isDetailModalOpen}
           onClose={() => setIsDetailModalOpen(false)}
           department={selectedDepartment}
@@ -1140,17 +1134,17 @@ const DepartmentManagementPage = () => {
 
         {/* Notification */}
         {notification && (
-          <Notification 
+          <Notification
             type={notification.type}
             message={notification.message}
             onClose={() => setNotification(null)}
           />
         )}
       </div>
-      
+
       {/* Bulk Action Floating Button (Mobile) */}
       {selectedDepartments.length > 0 && (
-        <div 
+        <div
           className="fixed bottom-5 right-5 z-40 md:hidden"
           style={{ animation: 'fadeIn 0.3s ease-out' }}
         >
@@ -1170,7 +1164,7 @@ const DepartmentManagementPage = () => {
           </div>
         </div>
       )}
-      
+
       {/* Form Modal for Add/Edit */}
       <DepartmentFormModal
         isOpen={isModalOpen}
@@ -1178,7 +1172,7 @@ const DepartmentManagementPage = () => {
         department={selectedDepartment}
         onSubmit={handleSubmitDepartment}
       />
-      
+
       {/* Detail Modal for View */}
       <DepartmentDetailModal
         isOpen={isDetailModalOpen}
@@ -1186,7 +1180,7 @@ const DepartmentManagementPage = () => {
         department={departmentDetail}
         onEdit={handleEditDepartment}
       />
-      
+
       {/* Notification - this one rendered at the component level for better positioning */}
       {notification && (
         <Notification
@@ -1195,7 +1189,7 @@ const DepartmentManagementPage = () => {
           onClose={() => setNotification(null)}
         />
       )}
-    </Layout>
+    </div>
   );
 };
 
