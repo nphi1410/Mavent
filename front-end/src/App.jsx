@@ -78,14 +78,16 @@ function App() {
           <Route path="event/:eventId/feedback" element={<ViewEventFeedback />} />
 
           {/* Event Member Protected Routes */}
-          <Route path="event/:id/staff/:role" element={<Layout />}>
-            <Route index element={<EventDetailsByRoles />} />
-            <Route path="details" element={(<EventDetailsByRoles />)} />
-            <Route path="departments" element={<DepartmentManagementPage />} />
-            <Route path="members" element={(<Members />)} />
-            <Route path="documents" element={(<DocumentsPage />)} />
-            <Route path="feedback" element={<ViewEventFeedback />} />
-            <Route path="requests" element={(<RequestHistory />)} />
+          <Route path="event/:id/staff" element={<EventMemberRoute />}>
+            <Route path=":role" element={<Layout />}>
+              <Route index element={<EventDetailsByRoles />} />
+              <Route path="details" element={(<EventDetailsByRoles />)} />
+              <Route path="departments" element={<DepartmentManagementPage />} />
+              <Route path="members" element={(<Members />)} />
+              <Route path="documents" element={(<DocumentsPage />)} />
+              <Route path="feedback" element={<ViewEventFeedback />} />
+              <Route path="requests" element={(<RequestHistory />)} />
+            </Route>
           </Route>
 
           {/* Create Event-Protected Routes */}
