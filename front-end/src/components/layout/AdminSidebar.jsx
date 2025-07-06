@@ -15,13 +15,11 @@ import {
 // Sidebar component for admin dashboard
 const Sidebar = ({ isOpen, onToggle, mainItems }) => {
   const location = useLocation();
-  console.log("location: " + location.pathname);
 
   const pathSegments = location.pathname.split('/').filter(Boolean);
   // console.log("pathSegments: " + pathSegments);
 
   const activeItem = pathSegments[pathSegments.length - 1] || '';
-  console.log("activeItem: " + activeItem);
 
   return (
     <>

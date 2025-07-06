@@ -44,7 +44,7 @@ const EventDetails = () => {
             // Assuming userEventInfo contains the user data you need
             if (userEventInfo.role) {
               navigate(
-                `/event/${id}/staff/${userEventInfo.role.toLowerCase()}`
+                `/event/${id}/staff/details`
               );
             }
             setRole(userEventInfo.role); // Set the role from user info

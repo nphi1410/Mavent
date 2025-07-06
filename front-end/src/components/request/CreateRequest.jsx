@@ -1,27 +1,27 @@
 import { useEffect, useState } from "react"
 import { getRequestTypes, createRequest } from "../../services/requestService";
 
-export default function RequestForm({ eventId, accountId, departmentId, onClose }) {
-  const [requestTypes, setRequestTypes] = useState("")
-  const [requestTypeId, setRequestTypeId] = useState("")
+export default function RequestForm({ eventId, accountId, departmentId, onClose, requestTypes }) {
+  // const [requestTypes, setRequestTypes] = useState("")
+  const [selectedRequestTypeId, setSelectedRequestTypeId] = useState("")
   const [requestTitle, setRequestTitle] = useState("")
   const [requestDescription, setRequestDescription] = useState("")
   const [files, setFiles] = useState(null)
 
-  useEffect((e) => {
-    const fetchRequestTypes = async () => {
-      try {
-        const requestTypes = await getRequestTypes();
-        setRequestTypes(requestTypes); // Set request types
+  // useEffect((e) => {
+  //   const fetchRequestTypes = async () => {
+  //     try {
+  //       const requestTypes = await getRequestTypes();
+  //       setRequestTypes(requestTypes); // Set request types
 
-        console.log("requestTypes:", requestTypes)
-      } catch (err) {
-        console.error("Error fetching request types:", err);
-      } 
-    };
+  //       console.log("requestTypes:", requestTypes)
+  //     } catch (err) {
+  //       console.error("Error fetching request types:", err);
+  //     } 
+  //   };
 
-    fetchRequestTypes();
-  }, []);
+  //   fetchRequestTypes();
+  // }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,7 +32,7 @@ export default function RequestForm({ eventId, accountId, departmentId, onClose 
         eventId,
         taskId: null,
         departmentId,
-        requestTypeId,
+        requestTypeId: selectedRequestTypeId,
         content: requestDescription,
       };
 
@@ -80,8 +80,8 @@ export default function RequestForm({ eventId, accountId, departmentId, onClose 
             <div className="space-y-2">
               <div className="relative">
                 <select
-                  value={requestTypeId}
-                  onChange={(e) => setRequestTypeId(e.target.value)}
+                  value={selectedRequestTypeId}
+                  onChange={(e) => setSelectedRequestTypeId(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 appearance-none cursor-pointer"
                 >
                   <option value="" disabled>
