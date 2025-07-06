@@ -89,7 +89,7 @@ export default function RequestDetailsPopup({ isOpen, onClose, requestData, requ
     // }, [answeredByAccountId]);
 
     // if (loading) return <div className="text-center p-4">Loading...</div>;
-    console.log("MemberRequestDetails isMember: " + isMember)
+    // console.log("MemberRequestDetails isMember: " + isMember)
 
     return (
         <div

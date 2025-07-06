@@ -8,12 +8,11 @@ import {
   getRequestTypes,
 } from "../../../services/requestService";
 import RequestForm from "../../../components/request/CreateRequest.jsx";
-import { getUserInfoInEvent } from "../../../services/userEventService.jsx";
 import RequestDetailsPopup from "../../../components/request/MemberRequestDetails.jsx";
 import { useEventRole } from "../../../context/EventRoleContext.jsx";
 
 export default function RequestHistory() {
-  const { userRole: role, departmentId } = useEventRole();
+  const { user } = useEventRole();
   const [typeFilter, setTypeFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [searchTitle, setSearchTitle] = useState("");
@@ -36,24 +35,24 @@ export default function RequestHistory() {
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-
         let rqs;
         switch (role.toUpperCase()) {
           case "MEMBER":
-            rqs = await getRequestsByEventIdAndAccountId(eventId, userEventInfo.accountId); // await here
+            rqs = await getRequestsByEventIdAndAccountId(eventId, user.accountId); // await here
             break;
           case "ADMIN":
             rqs = await getRequestsByEventId(eventId); // await here
             break;
           case "DEPARTMENT_MANAGER":
-            rqs = await getRequestsByEventIdAndDepartmentId(eventId, userEventInfo.departmentId); // await here
+            rqs = await getRequestsByEventIdAndDepartmentId(eventId, user.departmentId); // await here
             break;
+          default:
+            return;
         }
 
         setRequests(rqs); // data is already resolved
         setFilteredRequests(rqs); // Initialize filtered requests with all requests
-        setRequestTypes(requestTypes); // Set request types
-        setAnsweredByAccountId(userEventInfo.accountId);
+        setAnsweredByAccountId(user.accountId);
 
         console.log("requests:", rqs)
       } catch (err) {
@@ -63,29 +62,41 @@ export default function RequestHistory() {
       }
     };
 
+    const fetchRequestTypes = async () => {
+      try {
+        const response = await getRequestTypes();
+        if (response.status === 200) {
+          setRequestTypes(response.data);
+        }
+      } catch (err) {
+        console.log('RequestHistory.useEffect - error fetching requestTypes: ', err);
+      }
+    }
+
+    fetchRequestTypes();
     fetchRequests();
   }, []);
 
   useEffect(() => {
     const filterRequests = () => {
       let filtered = requests;
-      // console.log("Filtering requests with current filters:", {
-      //   typeFilter,
-      //   statusFilter,
-      //   searchTitle,
-      // });
+      console.log("Filtering requests with current filters:", {
+        typeFilter,
+        statusFilter,
+        searchTitle,
+      });
       // If no filters are applied, return all requests
       if (!typeFilter && !statusFilter && !searchTitle) {
-        // console.log("No filters applied, returning all requests");
+        console.log("No filters applied, returning all requests");
         setFilteredRequests(requests);
         return;
       }
       // Filter by type
       if (typeFilter) {
-        // console.log("typeFilter:", typeFilter)
+        console.log("typeFilter:", typeFilter)
         filtered.map(request => {
           if (typeFilter.includes(request.requestTypeId)) {
-            // console.log("Matched request:", request);
+            console.log("Matched request:", request);
           }
         });
         filtered = filtered.filter(request => typeFilter.includes(request.requestTypeId));
@@ -99,7 +110,7 @@ export default function RequestHistory() {
 
       // Filter by title
       if (searchTitle) {
-        // console.log("searchTitle:", searchTitle)
+        console.log("searchTitle:", searchTitle)
         filtered = filtered.filter(request => request?.title?.toLowerCase().includes(searchTitle.toLowerCase()));
       }
 
@@ -179,6 +190,7 @@ export default function RequestHistory() {
           accountId={accountId}
           departmentId={departmentId}
           onClose={handleCloseForm}
+          requestTypes={requestTypes}
         />
       )}
       {isPopupOpen && (

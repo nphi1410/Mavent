@@ -1,6 +1,6 @@
 
 const Agenda = ({ agenda, index }) => {
-    console.log("Agenda Item:", agenda);
+    // console.log("Agenda Item:", agenda);
     return (
         <tr key={index} className="text-left hover:bg-gray-100 transition-colors duration-200">
             <td className="py-3 text-gray-700">

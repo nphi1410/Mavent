@@ -13,7 +13,7 @@ import {
   faHouse,
   faComments
 } from "@fortawesome/free-solid-svg-icons";
-import { useEventRole } from "../../context/EventRoleContext";
+import { EventRoleProvider, useEventRole } from "../../context/EventRoleContext";
 
 // Add CSS for animations
 const fadeInKeyframes = `
@@ -42,9 +42,29 @@ const addKeyframesToDocument = () => {
 addKeyframesToDocument();
 
 const Layout = () => {
-  const { userRole } = useEventRole();
+  const { user } = useEventRole();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      // console.log("✅ User is loaded:", user);
+      setLoading(false);
+    }
+  }, [user]);
+
+  // While loading, show a spinner or nothing
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-gray-500">Loading user info...</div>
+      </div>
+    );
+  }
+
+  // console.log('AdminLayout: ', user)
+  const userRole = user.role;
 
   // Kiểm tra xem có phải đang ở trang quản lý (members, departments hoặc documents)
   // const isManagementPage =
@@ -133,7 +153,7 @@ const Layout = () => {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-    
+
   // Nếu không phải trang quản lý, chỉ render children
   if (!isManagementPage && userRole.includes("PARTICIPANT")) {
     return (
@@ -146,48 +166,51 @@ const Layout = () => {
   }
 
   // Nếu là trang quản lý, render với Sidebar
+  
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {" "}
-      {/* Mobile Sidebar Overlay with blur effect */}
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 backdrop-blur-sm bg-black/30 z-40 lg:hidden animate-fadeIn"
-          onClick={() => setIsSidebarOpen(false)}
-          style={{ animation: "fadeIn 0.2s ease-in-out" }}
-          aria-label="Close sidebar overlay"
-        />
-      )}
-      {/* Sidebar with Sticky Help Button on Mobile */}
-      <div className="relative">
-        <Sidebar
-          // activeItem={activeItem}
-          mainItems={mainItems}
-          isOpen={isSidebarOpen}
-          onToggle={toggleSidebar}
-        />
-
-        {/* Floating help button for very small screens */}
-        {!isSidebarOpen && (
-          <button
-            onClick={toggleSidebar}
-            className="lg:hidden fixed bottom-4 left-4 z-40 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            style={{
-              animation: isSidebarOpen ? undefined : "pulse 2s infinite",
-            }}
-            aria-label="Open sidebar menu"
-          >
-            <FontAwesomeIcon icon={faBars} className="h-5 w-5" />
-          </button>
+    // <EventRoleProvider>
+      <div className="flex min-h-screen bg-gray-50">
+        {" "}
+        {/* Mobile Sidebar Overlay with blur effect */}
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0 backdrop-blur-sm bg-black/30 z-40 lg:hidden animate-fadeIn"
+            onClick={() => setIsSidebarOpen(false)}
+            style={{ animation: "fadeIn 0.2s ease-in-out" }}
+            aria-label="Close sidebar overlay"
+          />
         )}
+        {/* Sidebar with Sticky Help Button on Mobile */}
+        <div className="relative">
+          <Sidebar
+            // activeItem={activeItem}
+            mainItems={mainItems}
+            isOpen={isSidebarOpen}
+            onToggle={toggleSidebar}
+          />
+
+          {/* Floating help button for very small screens */}
+          {!isSidebarOpen && (
+            <button
+              onClick={toggleSidebar}
+              className="lg:hidden fixed bottom-4 left-4 z-40 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              style={{
+                animation: isSidebarOpen ? undefined : "pulse 2s infinite",
+              }}
+              aria-label="Open sidebar menu"
+            >
+              <FontAwesomeIcon icon={faBars} className="h-5 w-5" />
+            </button>
+          )}
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1 lg:ml-64 min-w-0 transition-all duration-300">
+          <main className="p-3 sm:p-4 lg:p-6">
+            <Outlet />
+          </main>
+        </div>
       </div>
-      {/* Main Content */}
-      <div className="flex-1 lg:ml-64 min-w-0 transition-all duration-300">
-        <main className="p-3 sm:p-4 lg:p-6">
-          <Outlet />
-        </main>
-      </div>
-    </div>
   );
 };
 

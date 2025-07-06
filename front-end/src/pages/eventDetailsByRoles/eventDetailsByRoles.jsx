@@ -9,7 +9,7 @@ import MapGuide from "../../components/MapGuide";
 import Layout from '../../components/layout/AdminLayout';
 
 export default function EventDetailsByRoles() {
-  const [activeDropdown, setActiveDropdown] = useState("eventInfo");
+  // const [activeDropdown, setActiveDropdown] = useState("eventInfo");
   const { id, role } = useParams(); // <-- Get ID from URL
 
   const [eventData, setEventData] = useState(null);
@@ -23,7 +23,7 @@ export default function EventDetailsByRoles() {
       const fetchData = async () => {
         try {
           const data = await getEventById(id);
-          console.log("Event Data:", data);
+          // console.log("Event Data:", data);
 
           setEventData(data);
         } catch (err) {

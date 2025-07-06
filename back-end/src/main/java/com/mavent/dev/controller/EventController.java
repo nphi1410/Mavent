@@ -203,15 +203,11 @@ public class EventController {
 //                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Bạn không có quyền truy cập sự kiện này");
 //            }
 
-            // Lấy thông tin phòng ban của người dùng trong sự kiện
-            UserEventInfoDTO department = eventAccountRoleService.getUserEventInfo(eventId, account.getAccountId());
-            if (department == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy phòng ban cho người dùng trong sự kiện này");
-            }
+            UserEventInfoDTO info = eventAccountRoleService.getUserEventInfo(eventId, account.getAccountId());
 
-            return ResponseEntity.ok(department);
+            return ResponseEntity.ok(info);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi lấy thông tin phòng ban: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error fetching User Role In Event: " + e.getMessage());
         }
     }
 

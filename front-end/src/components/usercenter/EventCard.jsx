@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'; // Thêm Link để chuyển route
 const nav = ( eventId, role) => {
   switch (role) {
     case '': return `/event/${eventId}`;
-    default: return `/event/${eventId}/staff/${role.toLowerCase()}/details`;
+    default: return `/event/${eventId}/staff/details`;
   } 
 }
 
