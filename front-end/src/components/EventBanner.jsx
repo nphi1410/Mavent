@@ -2,11 +2,10 @@ import { faCalendar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useState } from "react";
 import { getAccountById } from "../services/accountService";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { registerEvent } from "../services/eventService";
 
 const EventBanner = ({ eventData }) => {
-  
   const [createAccount, setCreateAccount] = useState(null);
   const navigate = useNavigate();
   const PARTICIPANT_ROLE = "PARTICIPANT";
@@ -46,22 +45,21 @@ const EventBanner = ({ eventData }) => {
 
     if (role === PARTICIPANT_ROLE) {
       const responseData = await registerEvent(registerDTO);
-      if(responseData.status === 200) {
+      if (responseData.status === 200) {
         alert("Register successfully!");
       }
-      return;
     }
 
     if (role === MEMBER_ROLE) {
-      console.log("Registering for role:", role);
       // console.log("Choose department");
       const responseData = await registerEvent(registerDTO);
-      if(responseData.status === 200) {
+      if (responseData.status === 200) {
         alert("Register successfully!");
       }
       console.log("Response from register event:", responseData);
     }
     console.log("Registering for role:", role);
+    window.location.reload();
   };
 
   return (
