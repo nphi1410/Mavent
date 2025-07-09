@@ -91,7 +91,7 @@ function App() {
                 <Route path="documents" element={(<DocumentsPage />)} />
                 <Route path="feedback" element={<ViewEventFeedback />} />
                 <Route path="requests" element={(<RequestHistory />)} />
-                {/* <Route path="create-feedback" element={<ParticipantFeedbackEvent />} /> */}
+                <Route path="create-feedback" element={<ParticipantFeedbackEvent />} />
               </Route>
             </Route>
           </Route>
@@ -104,11 +104,8 @@ function App() {
             <Route path=":eventId/create-agenda" element={<CreateAgenda />} />
           </Route>
 
-          {/* Participant Create Event Feedback Routes */}
-          <Route path="events/:eventId/create-feedback" element={<ParticipantFeedbackEvent />} />
-
           {/* User Profile Routes */}
-          <Route path="profile">
+          <Route path="profile" element={<ProtectedRoute />}>
             <Route index element={<ProfilePage />} />
             <Route path="attended" element={<UserEventsPage />} />
             <Route path="dashboard" element={<UserDashboardPage />} />

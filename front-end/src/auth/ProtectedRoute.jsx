@@ -34,8 +34,6 @@ const ProtectedRoute = ({ isRequiredToHaveRole }) => {
       }
     }
 
-
-
     setLoading(false);
   }, [eventId]);
 

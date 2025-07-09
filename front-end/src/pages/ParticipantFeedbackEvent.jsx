@@ -14,7 +14,7 @@ import { createEventFeedback } from '../services/eventFeedbackService';
 import { getEventById } from '../services/eventService'; // Hàm lấy chi tiết event
 
 const ParticipantFeedbackEvent = ({ accountId = 1 }) => {
-    const { eventId } = useParams();
+    const { id: eventId } = useParams();
     const [event, setEvent] = useState(null);
 
     const [rating, setRating] = useState(0);
