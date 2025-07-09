@@ -32,61 +32,54 @@ export default function RequestHistory() {
   const [reload, setReload] = useState();
 
   const { id: eventId } = useParams();
- useEffect(() => {
-  const fetchAll = async () => {
-    try {
-      // Step 1: Get user role
-      const roleResponse = await getUserInfoInEvent(eventId);
-      if (!roleResponse) return;
-      setRole(roleResponse.role);
+  useEffect(() => {
+    const fetchAll = async () => {
+      try {
+        // Step 1: Get user role
+        const roleResponse = await getUserInfoInEvent(eventId);
+        if (!roleResponse) return;
+        setRole(roleResponse.role);
 
-      // Step 2: Get request types (run in parallel)
-      const requestTypesPromise = getRequestTypes();
+        // Step 3: Fetch requests based on role
+        let rqs;
+        const upperRole = roleResponse.role.toUpperCase();
 
-      // Step 3: Fetch requests based on role
-      let rqs;
-      const upperRole = roleResponse.role.toUpperCase();
+        switch (upperRole) {
+          case "MEMBER":
+            rqs = await getRequestsByEventIdAndAccountId(
+              eventId,
+              user.accountId
+            );
+            break;
+          case "ADMIN":
+            rqs = await getRequestsByEventId(eventId);
+            break;
+          case "DEPARTMENT_MANAGER":
+            rqs = await getRequestsByEventIdAndDepartmentId(
+              eventId,
+              user.departmentId
+            );
+            break;
+          default:
+            return;
+        }
 
-      switch (upperRole) {
-        case "MEMBER":
-          rqs = await getRequestsByEventIdAndAccountId(
-            eventId,
-            user.accountId
-          );
-          break;
-        case "ADMIN":
-          rqs = await getRequestsByEventId(eventId);
-          break;
-        case "DEPARTMENT_MANAGER":
-          rqs = await getRequestsByEventIdAndDepartmentId(
-            eventId,
-            user.departmentId
-          );
-          break;
-        default:
-          return;
+        setRequests(rqs);
+        setFilteredRequests(rqs);
+        setAnsweredByAccountId(user.accountId);
+
+        // Step 4: Await and set request types
+        const requestTypesRes = await getRequestTypes();
+        setRequestTypes(requestTypesRes);
+      } catch (err) {
+        console.error("Error during fetchAll:", err);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      setRequests(rqs);
-      setFilteredRequests(rqs);
-      setAnsweredByAccountId(user.accountId);
-
-      // Step 4: Await and set request types
-      const requestTypesRes = await requestTypesPromise;
-      if (requestTypesRes.status === 200) {
-        setRequestTypes(requestTypesRes.data);
-      }
-
-    } catch (err) {
-      console.error("Error during fetchAll:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchAll();
-}, [eventId, user.accountId, user.departmentId]);
-
+    fetchAll();
+  }, [eventId, user.accountId, user.departmentId]);
 
   useEffect(() => {
     const filterRequests = () => {
@@ -343,10 +336,7 @@ export default function RequestHistory() {
                           {request.title}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-900">
-                          {requestTypes.find(
-                            (type) =>
-                              type.requestTypeId === request.requestTypeId
-                          )?.name || "Unknown Type"}
+                          {request.requestType || "Unknown Type"}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-900 whitespace-pre-line">
                           {request.createdAt
