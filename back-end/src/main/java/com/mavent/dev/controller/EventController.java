@@ -48,6 +48,12 @@ public class EventController {
     @Autowired
     private CloudService cloudService;
 
+    @Autowired
+    private DepartmentService departmentService;
+
+    @Autowired
+    private JwtUtil jwt;
+
     // Tạo sự kiện kèm ảnh banner và poster (fix multipart + JSON)
     @PostMapping(value = "/create-event", consumes = "multipart/form-data")
     public ResponseEntity<?> createEvent(@RequestParam("event") String eventJson, @RequestPart("banner") MultipartFile banner, @RequestPart("poster") MultipartFile poster) {
@@ -111,14 +117,6 @@ public class EventController {
         }
     }
 
-
-    // Lấy tất cả sự kiện
-    @Autowired
-    private DepartmentService departmentService;
-
-    @Autowired
-    private JwtUtil jwt;
-
     //Get All Event
     @GetMapping("")
     public List<EventDTO> getAllEvents() {
@@ -139,6 +137,10 @@ public class EventController {
         eventAccountRole.setEventId(eventRegisterDto.getEventId());
         eventAccountRole.setEventRole(eventRegisterDto.getRole());
         eventAccountRole.setAccountId(accountId);
+        eventAccountRole.setDepartmentId(eventRegisterDto.getDepartmentId());
+        if (eventRegisterDto.getRole().equals(EventAccountRole.EventRole.MEMBER)){
+            eventAccountRole.setIsActive(false);
+        }
         eventAccountRole.setCreatedAt(LocalDateTime.now());
 //        if(eventRegisterDto.getRole().equals(EventAccountRole.EventRole.PARTICIPANT)){
         return ResponseEntity.ok(eventAccountRoleService.addMemberToEvent(eventAccountRole).toString());

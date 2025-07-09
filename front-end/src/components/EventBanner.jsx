@@ -2,12 +2,15 @@ import { faCalendar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useState } from "react";
 import { getAccountById } from "../services/accountService";
-import { useLocation, useNavigate } from "react-router-dom";
 import { registerEvent } from "../services/eventService";
+import { useNavigate } from "react-router-dom";
+import DepartmentChooseForm from "./department/DepartmentChooseForm";
 
 const EventBanner = ({ eventData }) => {
   const [createAccount, setCreateAccount] = useState(null);
+  const [showDepartmentForm, setShowDepartmentForm] = useState(false);
   const navigate = useNavigate();
+
   const PARTICIPANT_ROLE = "PARTICIPANT";
   const MEMBER_ROLE = "MEMBER";
   const RECRUITING_STATUS = "RECRUITING";
@@ -28,38 +31,44 @@ const EventBanner = ({ eventData }) => {
   }, [eventData?.createBy]);
 
   const handleRegister = async (role) => {
-    //check user has logged in
-    //if not logged in show message you have to login first, then redirect to login page
     if (!sessionStorage.getItem("isLoggedIn")) {
       alert("You have to login first");
       navigate("/login");
       return;
     }
 
-    const registerDTO = {
-      eventId: eventData.eventId,
-      accountId: sessionStorage.getItem("accountId"),
-      role: role,
-      departmentId: null,
-    };
-
     if (role === PARTICIPANT_ROLE) {
+      const registerDTO = {
+        eventId: eventData.eventId,
+        accountId: sessionStorage.getItem("accountId"),
+        role: PARTICIPANT_ROLE,
+        departmentId: null,
+      };
       const responseData = await registerEvent(registerDTO);
       if (responseData.status === 200) {
         alert("Register successfully!");
+        window.location.reload();
       }
     }
 
     if (role === MEMBER_ROLE) {
-      // console.log("Choose department");
-      const responseData = await registerEvent(registerDTO);
-      if (responseData.status === 200) {
-        alert("Register successfully!");
-      }
-      console.log("Response from register event:", responseData);
+      setShowDepartmentForm(true);
     }
-    console.log("Registering for role:", role);
-    window.location.reload();
+  };
+
+  const handleDepartmentSelect = async (department) => {
+    const registerDTO = {
+      eventId: eventData.eventId,
+      accountId: sessionStorage.getItem("accountId"),
+      role: MEMBER_ROLE,
+      departmentId: department.departmentId,
+    };
+
+    const responseData = await registerEvent(registerDTO);
+    if (responseData.status === 200) {
+      alert("Register successfully!");
+      window.location.reload();
+    }
   };
 
   return (
@@ -85,7 +94,7 @@ const EventBanner = ({ eventData }) => {
           </p>
         </div>
 
-        {/* Form Card */}
+        {/* Register Form */}
         <div className="bg-white shadow-lg rounded-lg p-4 sm:p-6 max-w-sm w-full text-gray-800">
           <h3 className="text-lg sm:text-xl font-semibold mb-2">Date & Time</h3>
           <p className="text-sm mb-4 flex items-center gap-2">
@@ -108,6 +117,15 @@ const EventBanner = ({ eventData }) => {
               </button>
             )}
           </div>
+
+          {/* Department Choose Form */}
+          {showDepartmentForm && (
+            <DepartmentChooseForm
+              eventId={eventData.eventId}
+              onDepartmentSelect={handleDepartmentSelect}
+              onClose={() => setShowDepartmentForm(false)}
+            />
+          )}
         </div>
       </div>
     </div>
