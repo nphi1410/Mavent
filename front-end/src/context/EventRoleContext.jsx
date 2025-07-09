@@ -6,6 +6,7 @@ export const EventRoleContext = createContext();
 
 export const EventRoleProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
     const { id: eventId } = useParams();
     const navigate = useNavigate();
 
@@ -13,6 +14,7 @@ export const EventRoleProvider = ({ children }) => {
 
     useEffect(() => {
         // console.log("Running useEffect with eventId:", eventId);
+        setLoading(true);
         if (!eventId) {
             console.log("No eventId found.");
             return;
@@ -20,8 +22,9 @@ export const EventRoleProvider = ({ children }) => {
         const fetchUserInfoInEvent = async () => {
             try {
                 const response = await getUserInfoInEvent(eventId);
-                // console.log("Fetched user:", response);
+                console.log("Fetched user:", response);
                 if (response) {
+                    console.log("context: response data: ", response)
                     setUser(response);
                 } else {
                     // console.log("No user found, redirecting.");
@@ -33,10 +36,15 @@ export const EventRoleProvider = ({ children }) => {
         };
 
         fetchUserInfoInEvent();
+        setLoading(false);
     }, [eventId]);
 
     return (
-        <EventRoleContext.Provider value={{ user }}>
+        <EventRoleContext.Provider value={{ user, roleLoading: loading }}>
+            {
+
+                console.log("context: ", user)
+            }
             {children}
         </EventRoleContext.Provider>
     );
