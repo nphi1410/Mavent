@@ -17,10 +17,10 @@ const EventDetails = () => {
   const [eventData, setEventData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [role, setRole] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
+    setError("");
     if (id) {
       const fetchData = async () => {
         setLoading(true);
@@ -38,17 +38,11 @@ const EventDetails = () => {
         setLoading(true);
         try {
           if (sessionStorage.getItem("isLoggedIn") !== "true") return;
-          // Assuming you have a function to fetch user info in the event
           const userEventInfo = await getUserInfoInEvent(id);
-          if (userEventInfo) {
-            // Assuming userEventInfo contains the user data you need
-            if (userEventInfo.role) {
-              navigate(
-                `/event/${id}/staff/details`
-              );
-            }
-            setRole(userEventInfo.role); // Set the role from user info
-            console.log("User Info in Event:", userEventInfo);
+          if (userEventInfo && userEventInfo?.role) {
+            navigate(
+              `/event/${id}/staff/details`
+            );
           } else {
             console.warn("No user info found for this event.");
           }
@@ -65,7 +59,7 @@ const EventDetails = () => {
     }
   }, [id]);
 
-  if (loading) return <p className="text-center mt-10">Loading...</p>;
+  if (loading) return <p className="text-center mt-10">Loading Event Details...</p>;
   if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
 
   return (

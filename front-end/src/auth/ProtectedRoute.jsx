@@ -9,12 +9,11 @@ const isLoggedIn = () => {
   return !!token;
 };
 
-const ProtectedRoute = ({ roleRequired }) => {
+const ProtectedRoute = ({ isRequiredToHaveRole }) => {
   const location = useLocation();
   const { id: eventId } = useParams();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [loading, setLoading] = useState(true);
-  const { user } = useEventRole();
 
   const navigate = useNavigate();
 
@@ -26,11 +25,16 @@ const ProtectedRoute = ({ roleRequired }) => {
       setLoading(false); // stop loading, let fallback handle it
       return;
     }
-
-    if (user?.role) {
-      // switch()
-      setIsAuthorized(true);
+    if (isRequiredToHaveRole) {
+      const { user, roleLoading } = useEventRole();
+      setLoading(roleLoading);
+      if (user?.role) {
+        // switch()
+        setIsAuthorized(true);
+      }
     }
+
+
 
     setLoading(false);
   }, [eventId]);
@@ -44,7 +48,7 @@ const ProtectedRoute = ({ roleRequired }) => {
     return <div>Loading...</div>;
   }
 
-  if (roleRequired && isAuthorized) {
+  if (isRequiredToHaveRole && isAuthorized) {
     return (
       <Outlet />
     );
