@@ -59,7 +59,7 @@ const EventCard = ({ event }) => (
       {event.role === 'PARTICIPANT' && event.status === 'ENDED' && (
         <div className="mt-2 text-right">
           <Link
-            to={`/events/${event.eventId}/create-feedback`}
+            to={`/event/${event.eventId}/staff/create-feedback`}
             className="text-purple-600 hover:underline text-sm"
           >
             Đánh giá sự kiện
