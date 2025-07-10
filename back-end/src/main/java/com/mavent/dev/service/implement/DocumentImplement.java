@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Paths;
+
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -42,7 +42,9 @@ public class DocumentImplement implements DocumentService {
     @Override
     public List<Document> getFiveImage() {
         return documentRepository.findTop5ByOrderByCreatedAtDesc();
-    }    @Override
+    }
+
+    @Override
     @Transactional
     public DocumentResponseDTO uploadDocument(MultipartFile file, DocumentRequestDTO request, Integer uploaderAccountId) throws IOException {
         // Validate file
@@ -69,21 +71,21 @@ public class DocumentImplement implements DocumentService {
         if (request.getDepartmentId() != null) {
             department = departmentRepository.findById(request.getDepartmentId()).orElse(null);
         }
-          // Create response DTO
+        // Create response DTO
         DocumentResponseDTO responseDTO = DocumentMapper.toResponseDTO(document, department, uploader);
-        
+
         // Set the file size if possible
         try {
             String blobName = getBlobNameFromUrl(filePath);
             long fileSize;
-            
+
             if (blobName != null) {
                 fileSize = cloudService.getFileSize(blobName, documentContainer);
             } else {
                 // If blob name can't be extracted, use the original file size
                 fileSize = file.getSize();
             }
-            
+
             responseDTO.setFileSize(fileSize);
             responseDTO.setFileSizeFormatted(formatFileSize(fileSize));
         } catch (Exception e) {
@@ -92,7 +94,7 @@ public class DocumentImplement implements DocumentService {
             responseDTO.setFileSize(fileSize);
             responseDTO.setFileSizeFormatted(formatFileSize(fileSize));
         }
-        
+
         return responseDTO;
     }
 
@@ -106,34 +108,36 @@ public class DocumentImplement implements DocumentService {
     public List<DocumentResponseDTO> getDocumentsByDepartment(Integer eventId, Integer departmentId) {
         List<Document> documents = documentRepository.findByEventIdAndDepartmentId(eventId, departmentId);
         return mapDocumentsToResponseDTOs(documents);
-    }    @Override
+    }
+
+    @Override
     public Optional<DocumentResponseDTO> getDocumentById(Integer documentId) {
         return documentRepository.findById(documentId)
                 .map(document -> {
                     Department department = document.getDepartmentId() != null ?
                             departmentRepository.findById(document.getDepartmentId()).orElse(null) : null;
                     Account uploader = accountRepository.findById(document.getUploaderAccountId()).orElse(null);
-                      // Check if the uploader is an admin of this event
+                    // Check if the uploader is an admin of this event
                     boolean isEventAdmin = false;
                     Department uploaderDepartment = department; // Default to document department
-                      if (uploader != null && document.getEventId() != null) {
+                    if (uploader != null && document.getEventId() != null) {
                         isEventAdmin = eventAccountRoleRepository.hasRoleInEvent(
-                            document.getEventId(),
-                            uploader.getAccountId(), 
-                            EventAccountRole.EventRole.ADMIN);
-                            
+                                document.getEventId(),
+                                uploader.getAccountId(),
+                                EventAccountRole.EventRole.ADMIN);
+
                         // Always check if uploader has a department in the event, regardless of document department
                         Optional<EventAccountRole> eventRole = eventAccountRoleRepository.findByEventIdAndAccountId(
-                            document.getEventId(), uploader.getAccountId());
-                        
+                                document.getEventId(), uploader.getAccountId());
+
                         // Add debug logging
                         System.out.println("Document Detail: ID: " + documentId + " - Event role found: " + eventRole.isPresent());
-                            
+
                         if (eventRole.isPresent() && eventRole.get().getDepartmentId() != null) {
                             // Get the department info
                             Integer deptId = eventRole.get().getDepartmentId();
                             System.out.println("Document Detail: ID: " + documentId + " - User's department ID in event: " + deptId);
-                                
+
                             Optional<Department> userDept = departmentRepository.findById(deptId);
                             if (userDept.isPresent()) {
                                 uploaderDepartment = userDept.get();
@@ -142,20 +146,20 @@ public class DocumentImplement implements DocumentService {
                         }
                     }// Create response DTO with correct department info
                     DocumentResponseDTO responseDTO = DocumentMapper.toResponseDTO(document, uploaderDepartment, uploader);
-                    
+
                     // If uploader is an event admin and has no department, set "Admin" as department name
                     if (isEventAdmin && uploaderDepartment == null) {
                         responseDTO.setDepartmentName("Admin");
                     }
-                    
+
                     // Add logging to debug department name
-                    System.out.println("Document ID: " + document.getDocumentId() + 
-                                     ", Uploader: " + (uploader != null ? uploader.getFullName() : "null") +
-                                     ", Department: " + (uploaderDepartment != null ? uploaderDepartment.getName() : "null") +
-                                     ", Department Name Set: " + responseDTO.getDepartmentName() + 
-                                     ", Event ID: " + document.getEventId() +
-                                     ", Account ID: " + (uploader != null ? uploader.getAccountId() : "null"));
-                    
+                    System.out.println("Document ID: " + document.getDocumentId() +
+                            ", Uploader: " + (uploader != null ? uploader.getFullName() : "null") +
+                            ", Department: " + (uploaderDepartment != null ? uploaderDepartment.getName() : "null") +
+                            ", Department Name Set: " + responseDTO.getDepartmentName() +
+                            ", Event ID: " + document.getEventId() +
+                            ", Account ID: " + (uploader != null ? uploader.getAccountId() : "null"));
+
                     // Get file size if possible
                     if (document.getFilePath() != null) {
                         try {
@@ -170,26 +174,28 @@ public class DocumentImplement implements DocumentService {
                             responseDTO.setFileSizeFormatted("Unknown");
                         }
                     }
-                    
+
                     return responseDTO;
                 });
-    }    @Override
+    }
+
+    @Override
     public DocumentPreviewUrlDTO generatePreviewUrl(Integer documentId) {
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new IllegalArgumentException("Document không tồn tại: " + documentId));
-        
+
         // Extract blob name from filePath
         String blobName = getBlobNameFromUrl(document.getFilePath());
         if (blobName == null) {
             throw new IllegalStateException("Không thể trích xuất blob name từ file path: " + document.getFilePath());
         }
-        
+
         // Generate SAS URL with 30-minute expiration
         String sasUrl = cloudService.generateSasUrl(blobName, documentContainer, 30);
-        
+
         // Determine if this is a viewable document type
         boolean isViewable = isViewableContentType(document.getFileType());
-        
+
         return DocumentPreviewUrlDTO.builder()
                 .sasUrl(sasUrl)
                 .contentType(document.getFileType())
@@ -197,35 +203,37 @@ public class DocumentImplement implements DocumentService {
                 .isViewable(isViewable)
                 .build();
     }
-    
+
     // Helper method to determine if content type is viewable in browser
     private boolean isViewableContentType(String contentType) {
         if (contentType == null) return false;
-        
-        return contentType.startsWith("image/") || 
-               contentType.equals("application/pdf") ||
-               contentType.equals("text/plain") ||
-               contentType.equals("text/html") ||
-               contentType.equals("text/css") ||
-               contentType.equals("text/javascript");
-    }    @Override
+
+        return contentType.startsWith("image/") ||
+                contentType.equals("application/pdf") ||
+                contentType.equals("text/plain") ||
+                contentType.equals("text/html") ||
+                contentType.equals("text/css") ||
+                contentType.equals("text/javascript");
+    }
+
+    @Override
     public boolean deleteDocument(Integer documentId) {
         return documentRepository.findById(documentId)
                 .map(document -> {
                     try {
                         // Extract blob name from filePath using our helper method
                         String blobName = getBlobNameFromUrl(document.getFilePath());
-                        
+
                         if (blobName == null) {
                             // Log the error and delete from database only
                             System.out.println("Could not extract blob name from URL: " + document.getFilePath());
                             documentRepository.delete(document);
                             return true;
                         }
-                        
+
                         // Delete from storage
                         boolean deleted = cloudService.deleteFile(blobName, documentContainer);
-                        
+
                         // Delete from database regardless of storage deletion success
                         // This ensures we don't keep references to files we can't access
                         documentRepository.delete(document);
@@ -248,6 +256,7 @@ public class DocumentImplement implements DocumentService {
             String contentDisposition) throws IOException {
         return cloudService.uploadFileWithContentDisposition(file, containerName, contentDisposition);
     }    // Helper method to fetch related entities and map documents to DTOs    @Override
+
     public DocumentResponseDTO updateDocument(Integer documentId, DocumentRequestDTO request) {
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new IllegalArgumentException("Document not found: " + documentId));
@@ -256,44 +265,44 @@ public class DocumentImplement implements DocumentService {
         if (request.getTitle() != null && !request.getTitle().isEmpty()) {
             document.setTitle(request.getTitle());
         }
-        
+
         // Update description if provided
         if (request.getDescription() != null) {
             document.setDescription(request.getDescription());
         }
-        
+
         // Update updatedAt timestamp
         document.setUpdatedAt(LocalDateTime.now());
-        
+
         // Save updated document
         Document savedDocument = documentRepository.save(document);
-        
+
         // Get related entities for response
         Department department = null;
         if (savedDocument.getDepartmentId() != null) {
             department = departmentRepository.findById(savedDocument.getDepartmentId()).orElse(null);
         }
-        
+
         Account uploader = null;
         if (savedDocument.getUploaderAccountId() != null) {
             uploader = accountRepository.findById(savedDocument.getUploaderAccountId()).orElse(null);
         }
-          // Check if the uploader is an admin of this event and get their department
+        // Check if the uploader is an admin of this event and get their department
         boolean isEventAdmin = false;
         Department uploaderDepartment = department; // Default to document department
-        
+
         if (uploader != null && savedDocument.getEventId() != null) {
             isEventAdmin = eventAccountRoleRepository.hasRoleInEvent(
-                savedDocument.getEventId(),
-                uploader.getAccountId(), 
-                EventAccountRole.EventRole.ADMIN);
-                
+                    savedDocument.getEventId(),
+                    uploader.getAccountId(),
+                    EventAccountRole.EventRole.ADMIN);
+
             // If not admin or department is null, check if user has a department in the event
             if (department == null || !isEventAdmin) {
                 // Get user's role in the event to find their department
                 Optional<EventAccountRole> eventRole = eventAccountRoleRepository.findByEventIdAndAccountId(
-                    savedDocument.getEventId(), uploader.getAccountId());
-                    
+                        savedDocument.getEventId(), uploader.getAccountId());
+
                 if (eventRole.isPresent() && eventRole.get().getDepartmentId() != null) {
                     // Get the department info
                     Optional<Department> userDept = departmentRepository.findById(eventRole.get().getDepartmentId());
@@ -303,17 +312,19 @@ public class DocumentImplement implements DocumentService {
                 }
             }
         }
-        
+
         // Create response DTO
         DocumentResponseDTO responseDTO = DocumentMapper.toResponseDTO(savedDocument, uploaderDepartment, uploader);
-        
+
         // If uploader is an event admin and has no department, set "Admin" as department name
         if (isEventAdmin && uploaderDepartment == null) {
             responseDTO.setDepartmentName("Admin");
         }
-        
+
         return responseDTO;
-    }    private List<DocumentResponseDTO> mapDocumentsToResponseDTOs(List<Document> documents) {
+    }
+
+    private List<DocumentResponseDTO> mapDocumentsToResponseDTOs(List<Document> documents) {
         // Get unique department IDs and account IDs
         List<Integer> departmentIds = documents.stream()
                 .map(Document::getDepartmentId)
@@ -339,23 +350,23 @@ public class DocumentImplement implements DocumentService {
             accountRepository.findAllById(accountIds).forEach(acc ->
                     accountMap.put(acc.getAccountId(), acc));
         }
-        
+
         // Create a map to cache event admin status for each account and event
         Map<String, Boolean> eventAdminStatusCache = new HashMap<>();
-        
+
         // Map to DTOs with customized department names for admins
         List<DocumentResponseDTO> responseDTOs = new ArrayList<>();
-        
+
         for (Document document : documents) {
-            Department department = document.getDepartmentId() != null ? 
-                departmentMap.get(document.getDepartmentId()) : null;
-                
+            Department department = document.getDepartmentId() != null ?
+                    departmentMap.get(document.getDepartmentId()) : null;
+
             Account uploader = document.getUploaderAccountId() != null ?
-                accountMap.get(document.getUploaderAccountId()) : null;
-              // Get uploader's role and department in the event 
+                    accountMap.get(document.getUploaderAccountId()) : null;
+            // Get uploader's role and department in the event
             boolean isEventAdmin = false;
             Department uploaderDepartment = department; // Default to document department
-            
+
             if (uploader != null && document.getEventId() != null) {
                 // Check admin status
                 String adminCacheKey = document.getEventId() + "-admin-" + uploader.getAccountId();
@@ -363,23 +374,23 @@ public class DocumentImplement implements DocumentService {
                     isEventAdmin = eventAdminStatusCache.get(adminCacheKey);
                 } else {
                     isEventAdmin = eventAccountRoleRepository.hasRoleInEvent(
-                        document.getEventId(),
-                        uploader.getAccountId(),
-                        EventAccountRole.EventRole.ADMIN);
+                            document.getEventId(),
+                            uploader.getAccountId(),
+                            EventAccountRole.EventRole.ADMIN);
                     eventAdminStatusCache.put(adminCacheKey, isEventAdmin);
                 }
-                
+
                 // If not admin or department is null, check if user has a department in the event
                 if (department == null || !isEventAdmin) {
                     // Get user's role in the event to find their department
                     Optional<EventAccountRole> eventRole = eventAccountRoleRepository.findByEventIdAndAccountId(
-                        document.getEventId(), uploader.getAccountId());
-                    
+                            document.getEventId(), uploader.getAccountId());
+
                     if (eventRole.isPresent() && eventRole.get().getDepartmentId() != null) {
                         // Get the department info
                         Integer deptId = eventRole.get().getDepartmentId();
                         Department userDept = departmentMap.get(deptId);
-                        
+
                         // If not in map already, fetch it and add to map
                         if (userDept == null) {
                             Optional<Department> fetchedDept = departmentRepository.findById(deptId);
@@ -388,34 +399,35 @@ public class DocumentImplement implements DocumentService {
                                 departmentMap.put(deptId, userDept);
                             }
                         }
-                        
+
                         if (userDept != null) {
                             uploaderDepartment = userDept;
                         }
                     }
                 }
             }
-              // Create the DTO with the correct department info
+            // Create the DTO with the correct department info
             DocumentResponseDTO dto = DocumentMapper.toResponseDTO(document, uploaderDepartment, uploader);
-            
+
             // If uploader is an admin and still no department found, set to "Admin"
             if (isEventAdmin && uploaderDepartment == null) {
                 dto.setDepartmentName("Admin");
             }
-            
+
             // Add logging to debug department name
-            System.out.println("List: Document ID: " + document.getDocumentId() + 
-                             ", Uploader: " + (uploader != null ? uploader.getFullName() : "null") +
-                             ", Department: " + (uploaderDepartment != null ? uploaderDepartment.getName() : "null") +
-                             ", Department Name Set: " + dto.getDepartmentName());
-            
+            System.out.println("List: Document ID: " + document.getDocumentId() +
+                    ", Uploader: " + (uploader != null ? uploader.getFullName() : "null") +
+                    ", Department: " + (uploaderDepartment != null ? uploaderDepartment.getName() : "null") +
+                    ", Department Name Set: " + dto.getDepartmentName());
+
             responseDTOs.add(dto);
         }
-        
+
         // Populate file sizes when possible
         for (int i = 0; i < documents.size(); i++) {
             Document document = documents.get(i);
-            if (document.getFilePath() != null && i < responseDTOs.size()) {                try {
+            if (document.getFilePath() != null && i < responseDTOs.size()) {
+                try {
                     String blobName = getBlobNameFromUrl(document.getFilePath());
                     if (blobName != null) {
                         long fileSize = cloudService.getFileSize(blobName, documentContainer);
@@ -428,21 +440,22 @@ public class DocumentImplement implements DocumentService {
                 }
             }
         }
-        
+
         return responseDTOs;
     }
-      // Helper method to extract blob name from URL
+
+    // Helper method to extract blob name from URL
     private String getBlobNameFromUrl(String url) {
         try {
             if (url == null) return null;
-            
+
             // Extract blob name from URL
             // URL format: https://storageaccount.blob.core.windows.net/containername/blobname
             int lastSlashIndex = url.lastIndexOf('/');
             if (lastSlashIndex != -1) {
                 return url.substring(lastSlashIndex + 1);
             }
-            
+
             // If no slash found, return the entire URL as a fallback
             // This is not ideal but better than returning null
             return url;
@@ -465,7 +478,7 @@ public class DocumentImplement implements DocumentService {
             return null;
         }
     }
-    
+
     // Helper method to format file size into human-readable format
     private String formatFileSize(long sizeInBytes) {
         if (sizeInBytes < 1024) {

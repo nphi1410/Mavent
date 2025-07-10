@@ -278,7 +278,7 @@ const DocumentPreviewModal = ({isOpen, onClose, previewData}) => {
             contentType === 'application/vnd.ms-excel.sheet.macroEnabled.12' ||
             contentType === 'application/vnd.ms-excel.sheet.binary.macroEnabled.12' ||
             // Check filename if available
-            (previewData?.fileName && 
+            (previewData?.fileName && qa
              (previewData.fileName.endsWith('.xlsx') || 
               previewData.fileName.endsWith('.xls') || 
               previewData.fileName.endsWith('.csv')))
