@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'; // Thêm Link để chuyển route
 const nav = ( eventId, role) => {
   switch (role) {
     case '': return `/event/${eventId}`;
-    default: return `/event/${eventId}/staff/${role.toLowerCase()}/details`;
+    default: return `/event/${eventId}/staff/details`;
   } 
 }
 
@@ -59,7 +59,7 @@ const EventCard = ({ event }) => (
       {event.role === 'PARTICIPANT' && event.status === 'ENDED' && (
         <div className="mt-2 text-right">
           <Link
-            to={`/events/${event.eventId}/create-feedback`}
+            to={`/event/${event.eventId}/staff/create-feedback`}
             className="text-purple-600 hover:underline text-sm"
           >
             Đánh giá sự kiện

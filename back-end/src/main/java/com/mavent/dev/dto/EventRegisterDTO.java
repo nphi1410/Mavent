@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class EventRegisterDTO {
     private Integer eventId;
-    private String username;
+    private Integer accountId;
     private EventRole role;
     private Integer departmentId;
 }

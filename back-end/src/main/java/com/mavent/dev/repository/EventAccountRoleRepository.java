@@ -2,7 +2,6 @@ package com.mavent.dev.repository;
 
 import com.mavent.dev.dto.EventCountDTO;
 import com.mavent.dev.dto.event.EventAccountRoleDTO;
-import com.mavent.dev.entity.Department;
 import com.mavent.dev.entity.EventAccountRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -73,6 +72,13 @@ public interface EventAccountRoleRepository extends JpaRepository<EventAccountRo
                     JOIN events e ON ear.event_id = e.event_id
                     WHERE ear.account_id = :accountId
                       AND e.end_datetime <= NOW()
+                      AND e.is_deleted = false
+                      AND (
+                        :eventName IS NULL OR LOWER(e.name) LIKE LOWER(CONCAT('%', :eventName, '%'))
+                      )
+                      AND (
+                        :role IS NULL OR ear.event_role = :role
+                      )
                     """,
             countQuery = """
                     SELECT COUNT(*)

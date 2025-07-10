@@ -41,8 +41,8 @@ export const useUserPermissions = (eventId = null) => {
           const userRoleValue = roleData.eventRole || roleData.role;
           
           // Debug log để kiểm tra role
-          console.log('User role loaded:', userRoleValue);
-          console.log('Full role data:', roleData);
+          // console.log('User role loaded:', userRoleValue);
+          // console.log('Full role data:', roleData);
           
           // Xác định role của người dùng từ dữ liệu trả về và set giá trị một cách rõ ràng
           if (userRoleValue === 'ADMIN' || roleData.role === 'ADMIN') {
@@ -54,15 +54,15 @@ export const useUserPermissions = (eventId = null) => {
             // sessionStorage.setItem('userRole', userRoleValue);
           }
         } catch (apiError) {
-          console.error('API error fetching user role:', apiError);
+          // console.error('API error fetching user role:', apiError);
           
           // Nếu không thể lấy từ API, kiểm tra username trong session
           const username = sessionStorage.getItem('username');
-          console.log('Checking username from session:', username);
+          // console.log('Checking username from session:', username);
           
           // Biện pháp khắc phục: nếu username chứa "admin", giả định họ là admin
           if (username && username.toLowerCase().includes('admin')) {
-            console.log('Username contains "admin", setting as ADMIN');
+            // console.log('Username contains "admin", setting as ADMIN');
             setUserRole('ADMIN');
             // sessionStorage.setItem('userRole', 'ADMIN');
           }
@@ -100,13 +100,13 @@ export const useUserPermissions = (eventId = null) => {
   };
   // Check if user is admin or department manager
   const isAdminOrManager = () => {
-    console.log('Checking if user is admin or manager, role:', userRole);
+    // console.log('Checking if user is admin or manager, role:', userRole);
     return hasRole('DEPARTMENT_MANAGER');
   };
   // Check if user is admin (using hasRole and also checking sessionStorage)
   const isAdmin = () => {
     // const sessionRole = sessionStorage.getItem('userRole');
-    console.log('Checking if user is admin, role:', userRole);
+    // console.log('Checking if user is admin, role:', userRole);
     return hasRole('ADMIN');
   };
 

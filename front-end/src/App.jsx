@@ -51,12 +51,13 @@ import MeetingEditPage from "./pages/meetingPages/EditMeetingPage";
 import ViewEventFeedback from "./pages/ViewEventFeedback.jsx";
 import ParticipantFeedbackEvent from "./pages/ParticipantFeedbackEvent.jsx";
 import RequestHistory from "./pages/request/member/RequestHistory.jsx";
-import RequestsPage from "./pages/RequestsPage.jsx";
+// import { EventRoleContext, EventRoleProvider } from "./context/EventRoleContext.jsx";
+import EventWrapper from "./wrapper/EventWrapper.jsx";
 
 // Higher Order Components for Route Protection
-const Protect = (Component) => <ProtectedRoute children={Component} />;
-const SuperAdmin = (Component) => <SuperAdminRoute children={Component} />;
-const EventMember = (Component) => <EventMemberRoute children={Component} />;
+// const Protect = (Component) => <ProtectedRoute children={Component} />;
+// const SuperAdmin = (Component) => <SuperAdminRoute children={Component} />;
+// const EventMember = (Component) => <EventMemberRoute children={Component} />;
 
 function App() {
   return (
@@ -74,54 +75,57 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="events" element={<AllEvents />} />
           <Route path="events/:id" element={<EventDetails />} />
+
           <Route path="meetings" element={<MeetingListPage />} />
           <Route path="meetings/edit" element={<MeetingEditPage />} />
-          <Route path="event/:eventId/feedback" element={<ViewEventFeedback />} />
+          {/* <Route path="event/:eventId/feedback" element={<ViewEventFeedback />} /> */}
 
-          {/* Event Member Protected Routes */}
-          <Route path="event/:id/staff/:role" >
-            <Route index element={<EventDetailsByRoles />} />
-            <Route path="details" element={(<EventDetailsByRoles />)} />
-            <Route path="departments" element={EventMember(<DepartmentManagementPage />)} />
-            <Route path="members" element={(<Members />)} />
-            <Route path="documents" element={(<DocumentsPage />)} />
-            <Route path="feedback" element={EventMember(<ViewEventFeedback />)} />
-            <Route path="requests" element={Protect((<RequestHistory />))} />
+          {/* Routes that requires user to have ROLE in event */}
+          <Route path="event/:id" element={<EventWrapper />}>
+            <Route path="staff" element={<Layout />}>
+              <Route element={<ProtectedRoute isRequiredToHaveEventRole={true} />}>
+                <Route index element={<EventDetailsByRoles />} />
+                <Route path="details" element={(<EventDetailsByRoles />)} />
+                <Route path="departments" element={<DepartmentManagementPage />} />
+                <Route path="members" element={(<Members />)} />
+                <Route path="documents" element={(<DocumentsPage />)} />
+                <Route path="feedback" element={<ViewEventFeedback />} />
+                <Route path="requests" element={(<RequestHistory />)} />
+                <Route path="create-feedback" element={<ParticipantFeedbackEvent />} />
+              </Route>
+            </Route>
           </Route>
 
           {/* Create Event-Protected Routes */}
-          <Route path="create-event">
-            <Route index element={Protect(<CreateEvent />)} />
-            <Route path=":eventId/create-proposal" element={Protect(<CreateProposal />)} />
-            <Route path=":eventId/create-timeline" element={Protect(<CreateTimeline />)} />
-            <Route path=":eventId/create-agenda" element={Protect(<CreateAgenda />)} />
+          <Route path="create-event" element={<ProtectedRoute />}>
+            <Route index element={<CreateEvent />} />
+            <Route path=":eventId/create-proposal" element={<CreateProposal />} />
+            <Route path=":eventId/create-timeline" element={<CreateTimeline />} />
+            <Route path=":eventId/create-agenda" element={<CreateAgenda />} />
           </Route>
 
-          {/* Participant Create Event Feedback Routes */}
-          <Route path="events/:eventId/create-feedback" element={Protect(<ParticipantFeedbackEvent />)} />
-
           {/* User Profile Routes */}
-          <Route path="profile">
-            <Route index element={Protect(<ProfilePage />)} />
-            <Route path="attended" element={Protect(<UserEventsPage />)} />
-            <Route path="dashboard" element={Protect(<UserDashboardPage />)} />
+          <Route path="profile" element={<ProtectedRoute />}>
+            <Route index element={<ProfilePage />} />
+            <Route path="attended" element={<UserEventsPage />} />
+            <Route path="dashboard" element={<UserDashboardPage />} />
             <Route path="tasks">
-              <Route index element={Protect(<UserTasksPage />)} />
-              <Route path=":taskId" element={Protect(<TaskDetails />)} />
-              <Route path="history" element={Protect(<TaskHistory />)} />
+              <Route index element={<UserTasksPage />} />
+              <Route path=":taskId" element={<TaskDetails />} />
+              <Route path="history" element={<TaskHistory />} />
             </Route>
           </Route>
         </Route>
 
         {/* Super Admin Routes */}
-        <Route path="superadmin">
-          <Route index element={SuperAdmin(<SuperAdminDashboard />)} />
-          <Route path="events" element={SuperAdmin(<SuperAdminManageEvents />)} />
-          <Route path="events/pending" element={SuperAdmin(<SuperAdminPendingEvents />)} />
-          <Route path="users" element={SuperAdmin(<SuperAdminManageUsers />)} />
-          <Route path="event-detail/:eventId" element={SuperAdmin(<SuperAdminViewEventDetails />)} />
-          <Route path="edit-event/:eventId" element={SuperAdmin(<SuperAdminEditEvent />)} />
-          <Route path="user-detail/:id" element={SuperAdmin(<SuperAdminViewUserDetails />)} />
+        <Route path="superadmin" element={<SuperAdminRoute />}>
+          <Route index element={<SuperAdminDashboard />} />
+          <Route path="events" element={<SuperAdminManageEvents />} />
+          <Route path="events/pending" element={<SuperAdminPendingEvents />} />
+          <Route path="users" element={<SuperAdminManageUsers />} />
+          <Route path="event-detail/:eventId" element={<SuperAdminViewEventDetails />} />
+          <Route path="edit-event/:eventId" element={<SuperAdminEditEvent />} />
+          <Route path="user-detail/:id" element={<SuperAdminViewUserDetails />} />
         </Route>
       </Routes >
     </Router >

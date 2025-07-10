@@ -13,6 +13,6 @@ public class CreateRequestDTO {
     private Integer taskId;
     private int departmentId;
     private int requestTypeId;
-    private String content;
     private String title;
+    private String content;
 }

@@ -5,9 +5,6 @@ import com.mavent.dev.dto.request.RequestDTO;
 import com.mavent.dev.dto.request.UpdateRequestDTO;
 import com.mavent.dev.entity.*;
 import com.mavent.dev.service.AccountService;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -29,11 +26,6 @@ public class RequestMapper {
     }
 
     public static Request toEntity(UpdateRequestDTO requestDTO) {
-        Request request = new Request();
-        request.setRequestId(requestDTO.getRequestId());
-        request.setResponseByAccountId(requestDTO.getResponseByAccountId());
-        request.setStatus(Request.Status.valueOf(requestDTO.getStatus()));
-        request.setResponseContent(requestDTO.getResponseContent());
         new Request();
         return Request.builder()
                 .requestId(requestDTO.getRequestId())
@@ -43,44 +35,44 @@ public class RequestMapper {
                 .build();
     }
 
-    public static RequestDTO fromRequestToRequestDTO(Request request, AccountService accountService) {
-        if (request == null) {
-            return null;
-        }
-        Account requestByAccount = accountService.getAccountById(request.getRequestByAccountId());
-        Account responseByAccount = null;
-        String responseByAccountUsername = null;
-        if (request.getResponseByAccountId() != null) {
-            responseByAccount = accountService.getAccountById(request.getResponseByAccountId());
-            responseByAccountUsername = responseByAccount.getUsername();
-        }
-        new RequestDTO();
-        return RequestDTO.builder()
-                .responseByAccountId(request.getResponseByAccountId())
-                .requestTypeId(request.getRequestTypeId())
-                .taskId(request.getTaskId())
-                .requestId(request.getRequestId())
-                .eventId(request.getEventId())
-                .departmentId(request.getDepartmentId())
-                .requestByAccountId(request.getRequestByAccountId())
-                .requestByUsername(requestByAccount.getUsername())
-                .title(request.getTitle())
-                .requestContent(request.getContent())
-                .status(request.getStatus().name())
-                .responseContent(request.getResponseContent())
-                .responseByUsername(responseByAccountUsername)
-                .createdAt(request.getCreatedAt() != null ? request.getCreatedAt().toString() : null)
-                .updatedAt(request.getUpdatedAt() != null ? request.getUpdatedAt().toString() : null)
-                .build();
-    }
+//    public static RequestDTO fromRequestToRequestDTO(Request request, AccountService accountService) {
+//        if (request == null) {
+//            return null;
+//        }
+//        Account requestByAccount = accountService.getAccountById(request.getRequestByAccountId());
+//        Account responseByAccount = null;
+//        String responseByAccountUsername = null;
+//        if (request.getResponseByAccountId() != null) {
+//            responseByAccount = accountService.getAccountById(request.getResponseByAccountId());
+//            responseByAccountUsername = responseByAccount.getUsername();
+//        }
+//        new RequestDTO();
+//        return RequestDTO.builder()
+//                .responseByAccountId(request.getResponseByAccountId())
+//                .requestTypeId(request.getRequestTypeId())
+//                .taskId(request.getTaskId())
+//                .requestId(request.getRequestId())
+//                .eventId(request.getEventId())
+//                .departmentId(request.getDepartmentId())
+//                .requestByAccountId(request.getRequestByAccountId())
+//                .requestByUsername(requestByAccount.getUsername())
+//                .title(request.getTitle())
+//                .requestContent(request.getContent())
+//                .status(request.getStatus().name())
+//                .responseContent(request.getResponseContent())
+//                .responseByUsername(responseByAccountUsername)
+//                .createdAt(request.getCreatedAt() != null ? request.getCreatedAt().toString() : null)
+//                .updatedAt(request.getUpdatedAt() != null ? request.getUpdatedAt().toString() : null)
+//                .build();
+//    }
 
-    public static List<RequestDTO> toDTOList(List<Request> requests, AccountService accountService) {
-        if (requests == null || requests.isEmpty()) {
-            return List.of();
-        }
-        return requests.stream()
-                .map((Request request) -> fromRequestToRequestDTO(request, accountService))
-                .toList();
-    }
+//    public static List<RequestDTO> toDTOList(List<Request> requests, AccountService accountService) {
+//        if (requests == null || requests.isEmpty()) {
+//            return List.of();
+//        }
+//        return requests.stream()
+//                .map((Request request) -> fromRequestToRequestDTO(request, accountService))
+//                .toList();
+//    }
 }
 

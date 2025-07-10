@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Navigate, useLocation, useParams } from "react-router-dom";
-import { getUserRoleInEvent, ROLE_HIERARCHY } from "../services/roleService";
+import { Navigate, Outlet, useLocation, useParams } from "react-router-dom";
+import { getUserRoleInEvent } from "../services/roleService";
 import { jwtDecode } from 'jwt-decode';
+import { EventRoleContext } from "../context/EventRoleContext";
 
 // Utility function to check login status
 const isLoggedIn = () => {
@@ -28,11 +29,12 @@ const isSuperAdmin = () => {
 // This component restricts access to:
 // 1. Documents page: Accessible by any role (ADMIN, DEPARTMENT_MANAGER, MEMBER)
 // 2. Other admin pages (Members, Departments): Only accessible by ADMIN
-const EventMemberRoute = ({ children }) => {
+const EventMemberRoute = () => {
   const location = useLocation();
   const { id: eventId } = useParams(); // Get the event ID from URL
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [userEventRole, setUserEventRole] = useState("");
 
   useEffect(() => {
     const checkUserRole = async () => {
@@ -45,7 +47,7 @@ const EventMemberRoute = ({ children }) => {
 
       // Super admins can access any event page
       if (isSuperAdmin()) {
-        console.log('EventMemberRoute - User is a super admin, granting access');
+        // console.log('EventMemberRoute - User is a super admin, granting access');
         setIsAuthorized(true);
         setIsLoading(false);
         return;
@@ -54,69 +56,73 @@ const EventMemberRoute = ({ children }) => {
       try {
         // Check if user has member role or higher in this event
         const role = await getUserRoleInEvent(eventId);
-        console.log('EventMemberRoute - User role for event:', eventId, 'is:', role);
-        
+        // console.log('EventMemberRoute - User role for event:', eventId, 'is:', role);
+
         // Handle different possible API response formats
         let userRole;
-        
+        let isAuth = true;
+
         // If role is null or undefined, default to empty string
         if (role === null || role === undefined) {
-          console.log('EventMemberRoute - Role is null or undefined');
+          // console.log('EventMemberRoute - Role is null or undefined');
+          isAuth = false;
           userRole = '';
         }
         // If role is a string, use it directly
         else if (typeof role === 'string') {
           userRole = role.toUpperCase(); // Normalize to uppercase to match ROLE_HIERARCHY keys
-          console.log('EventMemberRoute - Role is a string:', userRole);
+          // console.log('EventMemberRoute - Role is a string:', userRole);
         }
         // If role is an object with a role property
         else if (typeof role === 'object' && role.role) {
           userRole = role.role.toUpperCase(); // Normalize to uppercase
-          console.log('EventMemberRoute - Extracted role from object:', userRole);
+          // console.log('EventMemberRoute - Extracted role from object:', userRole);
         }
         // If role is an object with a roleName property
         else if (typeof role === 'object' && role.roleName) {
           userRole = role.roleName.toUpperCase(); // Normalize to uppercase
-          console.log('EventMemberRoute - Extracted roleName from object:', userRole);
+          // console.log('EventMemberRoute - Extracted roleName from object:', userRole);
         }
         // For any other unexpected format, default to empty
         else {
-          console.log('EventMemberRoute - Unexpected role format:', typeof role);
+          // console.log('EventMemberRoute - Unexpected role format:', typeof role);
           userRole = '';
         }
-          // Check if this is the documents route
-        const isDocumentsRoute = location.pathname.includes('documents');
-        console.log('EventMemberRoute - Is documents route:', isDocumentsRoute);
-        
-        let isAuth = false;
-        
-        if (isDocumentsRoute) {
-          // For document routes, allow access to any role in the event
-          if (userRole && userRole.length > 0) {
-            console.log('EventMemberRoute - User has a role for documents access:', userRole);
-            isAuth = true;
-          } else {
-            console.log('EventMemberRoute - User does not have any role for documents access');
-          }
-        } else {
-          // For other routes, only allow ADMIN role
-          // Check if user has specifically the ADMIN role
-          if (userRole === "ADMIN") {
-            console.log('EventMemberRoute - User has exact ADMIN role');
-            isAuth = true;
-          }
-          // Also check for variations of ADMIN in case the API returns it differently
-          else if (userRole.includes("ADMIN") && !userRole.includes("DEPARTMENT")) {
-            console.log('EventMemberRoute - User has role containing ADMIN:', userRole);
-            isAuth = true;
-          } else {
-            console.log('EventMemberRoute - User role is not ADMIN, access denied');
-          }
-        }
-        
-        console.log('EventMemberRoute - User role:', userRole);
-        console.log('EventMemberRoute - Is user authorized?', isAuth);
-        
+
+        setUserEventRole(userRole);
+        // Check if this is the documents route
+        // const isDocumentsRoute = location.pathname.includes('documents');
+        // console.log('EventMemberRoute - Is documents route:', isDocumentsRoute);
+
+        // let isAuth = false;
+
+        // if (isDocumentsRoute) {
+        //   // For document routes, allow access to any role in the event
+        //   if (userRole && userRole.length > 0) {
+        //     console.log('EventMemberRoute - User has a role for documents access:', userRole);
+        //     isAuth = true;
+        //   } else {
+        //     console.log('EventMemberRoute - User does not have any role for documents access');
+        //   }
+        // } else {
+        //   // For other routes, only allow ADMIN role
+        //   // Check if user has specifically the ADMIN role
+        //   if (userRole === "ADMIN") {
+        //     console.log('EventMemberRoute - User has exact ADMIN role');
+        //     isAuth = true;
+        //   }
+        //   // Also check for variations of ADMIN in case the API returns it differently
+        //   else if (userRole.includes("ADMIN") && !userRole.includes("DEPARTMENT")) {
+        //     console.log('EventMemberRoute - User has role containing ADMIN:', userRole);
+        //     isAuth = true;
+        //   } else {
+        //     console.log('EventMemberRoute - User role is not ADMIN, access denied');
+        //   }
+        // }
+
+        // console.log('EventMemberRoute - User role:', userRole);
+        // console.log('EventMemberRoute - Is user authorized?', isAuth);
+
         setIsAuthorized(isAuth);
       } catch (error) {
         console.error("Failed to check user role:", error);
@@ -139,13 +145,17 @@ const EventMemberRoute = ({ children }) => {
     const message = isDocumentsRoute
       ? "You need to be a member of this event to access the documents page."
       : "You need to be an admin of this event to access this page.";
-    
-    return <Navigate to={`/events/${id}`} state={{ 
+
+    return <Navigate to={`/events/${eventId}`} state={{
       unauthorizedMessage: message
     }} replace />;
   }
 
-  return children;
+  return (
+    <EventRoleContext.Provider value={{ userRole: userEventRole }}>
+      <Outlet />
+    </EventRoleContext.Provider>
+  );
 };
 
 export default EventMemberRoute;

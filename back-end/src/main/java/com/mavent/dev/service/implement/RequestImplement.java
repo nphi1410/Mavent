@@ -5,7 +5,6 @@ import com.mavent.dev.dto.request.RequestDTO;
 import com.mavent.dev.dto.request.UpdateRequestDTO;
 import com.mavent.dev.entity.Request;
 import com.mavent.dev.mapper.RequestMapper;
-import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.repository.RequestRepository;
 import com.mavent.dev.service.AccountService;
 import com.mavent.dev.service.RequestService;
@@ -25,19 +24,40 @@ public class RequestImplement implements RequestService {
 
     @Override
     public List<RequestDTO> getRequestByAccountAndEventId(Integer accountId, Integer eventId) {
-        return RequestMapper.toDTOList(requestRepository.findByRequestByAccountIdAndEventId(accountId, eventId, Sort.by(Sort.Direction.DESC, "createdAt").descending()), accountService);
+        return requestRepository.getRequests(
+                null,
+                eventId,
+                accountId,
+                null,
+                null,
+                null,
+                Sort.by(Sort.Direction.DESC, "created_at"));
     }
 
     @Override
     public List<RequestDTO> getRequestsByEventId(Integer eventId) {
-        System.out.println("Fetching requests for event ID: " + eventId);
-        return RequestMapper.toDTOList(requestRepository.findByEventId(eventId, Sort.by(Sort.Direction.DESC, "createdAt")), accountService);
+        return requestRepository.getRequests(
+                null,
+                eventId,
+                null,
+                null,
+                null,
+                null,
+                Sort.by(Sort.Direction.DESC, "created_at"));
     }
 
     @Override
     public List<RequestDTO> getRequestByEventIdAndDepartmentId(Integer eventId, Integer departmentId) {
-        return RequestMapper.toDTOList(requestRepository.findByEventIdAndDepartmentId(eventId, departmentId, Sort.by(Sort.Direction.DESC, "createdAt")) , accountService);
+        return requestRepository.getRequests(
+                null,
+                eventId,
+                null,
+                null,
+                departmentId,
+                null,
+                Sort.by(Sort.Direction.DESC, "created_at"));
     }
+
 
     @Override
     public Request getRequestByRequestId(Integer requestId) {

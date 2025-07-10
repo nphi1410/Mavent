@@ -23,7 +23,7 @@ const AgendaList = ({ eventId }) => {
         if (eventId) {
             fetchAgendaItems();
         }
-    }, [eventId]);
+    }, []);
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p className="text-red-500">{error}</p>;
@@ -42,12 +42,17 @@ const AgendaList = ({ eventId }) => {
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                        {agendaItems.map((agenda, index) => (
-                            <Agenda key={index} agenda={agenda} />
-                        ))}
+                        {
+                            agendaItems?.length !== 0
+                            ? agendaItems.map((agenda, index) => (
+                                <Agenda key={index} agenda={agenda} />
+                            ))
+                            : <div className="text-amber-500">There are no agenda created yet</div>
+                        }
                     </tbody>
                 </table>
             </div>
+            {error && <div className="text-red-600">{error}</div>}
         </div>
     );
 }

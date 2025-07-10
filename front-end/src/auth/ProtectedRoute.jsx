@@ -1,5 +1,7 @@
-import React from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { EventRoleContext, useEventRole } from "../context/EventRoleContext";
+import { useNavigate, Navigate, Outlet, useLocation, useParams } from "react-router-dom";
+import { getUserInfoInEvent } from "../services/userEventService";
 
 // Utility function to check login status
 const isLoggedIn = () => {
@@ -7,15 +9,50 @@ const isLoggedIn = () => {
   return !!token;
 };
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ isRequiredToHaveRole }) => {
   const location = useLocation();
+  const { id: eventId } = useParams();
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // console.log('useEffect in PR');
+    // console.log('user role in PR' ,user?.role)
+
+    if (!isLoggedIn()) {
+      setLoading(false); // stop loading, let fallback handle it
+      return;
+    }
+    if (isRequiredToHaveRole) {
+      const { user, roleLoading } = useEventRole();
+      setLoading(roleLoading);
+      if (user?.role) {
+        // switch()
+        setIsAuthorized(true);
+      }
+    }
+
+    setLoading(false);
+  }, [eventId]);
 
   if (!isLoggedIn()) {
-    // Redirect to login and preserve current location
+    console.log("User not logged in, redirecting");
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  return children;
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isRequiredToHaveRole && isAuthorized) {
+    return (
+      <Outlet />
+    );
+  }
+
+  return <Outlet />;
 };
 
 export default ProtectedRoute;
