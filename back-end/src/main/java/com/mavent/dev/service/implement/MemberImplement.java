@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class MemberServiceImpl implements MemberService {
+public class MemberImplement implements MemberService {
 
     private final EventAccountRoleRepository eventAccountRoleRepository;
     private final MemberMapper memberMapper;
@@ -43,7 +43,7 @@ public class MemberServiceImpl implements MemberService {
         // Process filters
         Boolean isActive = null;
         if (filterRequest.getStatus() != null && !filterRequest.getStatus().isEmpty()) {
-            isActive = "active".equalsIgnoreCase(filterRequest.getStatus());
+            isActive = "active".equalsIgnoreCase(filterRequest.getStatus()) || "pending".equalsIgnoreCase(filterRequest.getStatus());
             log.info("Filtering by status: {}, isActive: {}", filterRequest.getStatus(), isActive);
         } else if (filterRequest.getIsActive() != null) {
             // Fallback to isActive if status is not provided
@@ -142,6 +142,7 @@ public class MemberServiceImpl implements MemberService {
                 searchTerm,
                 startDateObj,
                 endDateObj,
+                filterRequest.getStatus(),
                 pageable);
 
         // Convert to DTOs
@@ -186,6 +187,10 @@ public class MemberServiceImpl implements MemberService {
         // Update role if provided
         if (request.getEventRole() != null) {
             memberRole.setEventRole(EventAccountRole.EventRole.valueOf(request.getEventRole()));
+        }
+
+        if (request.getAssignedByAccountId() != null) {
+            memberRole.setAssignedByAccountId(request.getAssignedByAccountId());
         }
 
         // Update department if provided

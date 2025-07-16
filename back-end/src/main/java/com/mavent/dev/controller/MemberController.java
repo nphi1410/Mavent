@@ -100,6 +100,7 @@ public class MemberController {
                 }
             }
 
+            Boolean isActiveFromStatus = status != null ? ("active".equalsIgnoreCase(status.trim()) || "pending".equalsIgnoreCase(status.trim())) : null;
             MemberFilterRequestDTO filterRequest = MemberFilterRequestDTO.builder()
                     .eventId(eventId)
                     .searchTerm(search)
@@ -107,7 +108,7 @@ public class MemberController {
                     .departmentId(departmentId)  // Set department ID if parsed successfully
                     .departmentName(department) // Also keep department name for fallback
                     .status(status) // Send raw status string
-                    .isActive(status != null ? "active".equalsIgnoreCase(status.trim()) : null) // Also set isActive for backward compatibility
+                    .isActive(isActiveFromStatus) // Also set isActive for backward compatibility
                     .startDate(startDate)  // Add start date
                     .endDate(endDate)      // Add end date
                     .page(page)
@@ -120,7 +121,7 @@ public class MemberController {
 
             log.debug("Status parameter: {}, converted to isActive: {}",
                     status,
-                    status != null ? "active".equalsIgnoreCase(status.trim()) : null);
+                    isActiveFromStatus);
 
             log.info("Filter request created: {}", filterRequest);
 

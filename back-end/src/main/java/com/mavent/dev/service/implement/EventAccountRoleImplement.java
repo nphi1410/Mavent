@@ -1,6 +1,5 @@
 package com.mavent.dev.service.implement;
 
-import com.mavent.dev.dto.department.DepartmentResponseDTO;
 import com.mavent.dev.dto.department.UserEventInfoDTO;
 import com.mavent.dev.dto.EventCountDTO;
 import com.mavent.dev.dto.event.EventAccountRoleDTO;
@@ -20,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class EventAccountRoleServiceImpl implements EventAccountRoleService {
+public class EventAccountRoleImplement implements EventAccountRoleService {
 
     @Autowired
     private EventAccountRoleRepository eventAccountRoleRepository;
@@ -142,7 +141,7 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
                                                         java.util.Date startDate,
                                                         java.util.Date endDate,
                                                         Pageable pageable) {
-        return eventAccountRoleRepository.findByEventIdWithFilters(eventId, isActive, role, departmentId, searchTerm, startDate, endDate, pageable);
+        return eventAccountRoleRepository.findByEventIdWithFilters(eventId, isActive, role, departmentId, searchTerm, startDate, endDate,null, pageable);
     }
 
     @Override
