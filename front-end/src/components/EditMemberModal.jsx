@@ -23,6 +23,7 @@ const EditMemberModal = ({
   React.useEffect(() => {
     if (isOpen && user) {
       // console.log(`Edit Modal should be visible now for user: ${user.name}`);
+      console.log(user);
     }
   }, [isOpen, user]);
 
@@ -255,7 +256,7 @@ const EditMemberModal = ({
             onClick={onSave}
           >
             <FontAwesomeIcon icon={faSave} className="mr-2" />
-            Save Changes
+            {!user.assignedByAccountId ? "Approve application" : "Save changes"}
           </button>
           <button
             className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors duration-200 flex items-center justify-center"

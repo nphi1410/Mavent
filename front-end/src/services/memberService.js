@@ -46,10 +46,10 @@ const memberService = {
       // Map status to backend format - ensure consistent casing
       if (params.status) {
         // Normalize status to either 'active' or 'inactive' (lowercase)
-        const normalizedStatus =
-          params.status.toLowerCase().trim() === "active"
-            ? "active"
-            : "inactive";
+        const normalizedStatus = params.status;
+        // .toLowerCase().trim() === "active"
+        //   ? "active"
+        //   : "inactive";
         queryParams.append("status", normalizedStatus);
         // console.log('Adding status parameter:', normalizedStatus);
       }
@@ -129,12 +129,12 @@ const memberService = {
       if (process.env.NODE_ENV === "development") {
         // console.log(`Status conversion: status=${memberData.status}, isActive=${memberData.isActive} → final isActive=${isActive}`);
       }
-
       const updateRequest = {
         eventId: memberData.eventId,
         accountId: memberData.accountId,
         eventRole: memberData.role || memberData.eventRole,
         departmentId: memberData.departmentId,
+        assignedByAccountId: memberData.assignedByAccountId,
         // Always include isActive field to ensure it's sent to backend (forcing boolean type)
         isActive: isActive,
         reason: memberData.reason || "Updated by admin",
@@ -142,7 +142,7 @@ const memberService = {
 
       // console.log('Final update request with isActive:', updateRequest);
 
-      // console.log('Sending update request:', updateRequest);
+      // console.log("Sending update request:", updateRequest);
       const response = await Api.put("/members", updateRequest);
       // console.log('Update response:', response.data);
       return response.data;

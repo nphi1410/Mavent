@@ -50,11 +50,11 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
       setError(null);
 
       // Normalize filters before sending to API
-      const normalizedStatus = statusFilter
-        ? statusFilter.toLowerCase().trim() === "active"
-          ? "active"
-          : "inactive"
-        : undefined;
+      const normalizedStatus = statusFilter;
+      // ? statusFilter.toLowerCase().trim() === "active"
+      //   ? "active"
+      //   : "inactive"
+      // : undefined;
 
       const normalizedRole = roleFilter
         ? roleFilter.trim().toUpperCase()

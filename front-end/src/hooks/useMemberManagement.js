@@ -1,15 +1,15 @@
-import { useCallback, useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
-import useMemberData from './useMemberData';
-import useMemberFilters from './useMemberFilters';
-import useMemberModals from './useMemberModals';
-import useMemberActions from './useMemberActions';
-import memberService from '../services/memberService';
+import { useCallback, useState, useEffect, useRef } from "react";
+import { useParams } from "react-router-dom";
+import useMemberData from "./useMemberData";
+import useMemberFilters from "./useMemberFilters";
+import useMemberModals from "./useMemberModals";
+import useMemberActions from "./useMemberActions";
+import memberService from "../services/memberService";
 
 /**
  * Main member management hook that composes all smaller hooks together.
  * This hook provides a unified interface for the Members component.
- * 
+ *
  * @returns {Object} All necessary methods and state for member management
  */
 const useMemberManagement = () => {
@@ -17,54 +17,55 @@ const useMemberManagement = () => {
   const { id } = useParams();
   // Event ID state
   const [eventId, setEventId] = useState(id ? parseInt(id) : null);
-  
+
   // Loading states for various actions
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [actionType, setActionType] = useState(null); // 'ban', 'bulkBan', 'edit', etc.
   const [actionTargetId, setActionTargetId] = useState(null);
-  
+
   // Update eventId when URL param changes
   useEffect(() => {
     if (id) {
       setEventId(parseInt(id));
     }
   }, [id]);
-  
+
   // ------------------------
   // 1. Initialize Hooks
   // ------------------------
-  
+
   // Track API call frequency to prevent spam
   const fetchCallbackCountRef = useRef(0);
   const lastFetchTimeRef = useRef(Date.now());
   const minFetchIntervalMs = 300; // Minimum time between API calls (300ms)
-  
+
   // Reset the counter periodically to allow new fetches after some time
   useEffect(() => {
     const resetIntervalId = setInterval(() => {
       fetchCallbackCountRef.current = 0;
     }, 3000); // Reset counter every 3 seconds
-    
+
     return () => clearInterval(resetIntervalId);
   }, []);
-  
+
   // Filter states - with optimized callback to prevent excessive API calls
   const filterHook = useMemberFilters(() => {
     const now = Date.now();
     const timeSinceLastFetch = now - lastFetchTimeRef.current;
-    
+
     // Only call fetchMembers if:
     // 1. It's been defined
     // 2. Not called too many times in succession
     // 3. Enough time has passed since last call
-    if (typeof fetchMembers === 'function' && 
-        fetchCallbackCountRef.current < 5 &&
-        timeSinceLastFetch > minFetchIntervalMs) {
-      
+    if (
+      typeof fetchMembers === "function" &&
+      fetchCallbackCountRef.current < 5 &&
+      timeSinceLastFetch > minFetchIntervalMs
+    ) {
       fetchCallbackCountRef.current += 1;
       lastFetchTimeRef.current = now;
-      
-      if (process.env.NODE_ENV === 'development') {
+
+      if (process.env.NODE_ENV === "development") {
         // console.log(`Triggering fetch #${fetchCallbackCountRef.current}, interval: ${timeSinceLastFetch}ms`);        // console.log('Current filter values:', {
         //   searchTerm: filterHook?.filterValues?.searchTerm,
         //   statusFilter: filterHook?.filterValues?.statusFilter,
@@ -72,15 +73,15 @@ const useMemberManagement = () => {
         //   departmentFilter: filterHook?.filterValues?.departmentFilter
         // });
       }
-      
+
       fetchMembers();
     } else {
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === "development") {
         // console.log(`Filter change debounced - too many requests or too soon`);
       }
     }
   });
-  
+
   const {
     searchTerm,
     debouncedSearchTerm,
@@ -97,23 +98,27 @@ const useMemberManagement = () => {
     applyFilters,
     paginate,
     handlePageChange,
-    handlePageSizeChange
+    handlePageSizeChange,
   } = filterHook;
 
   // Current page is 0-based for API but 1-based for UI
   const apiPage = currentPage - 1 >= 0 ? currentPage - 1 : 0;
 
   // Data fetching and management
-  const memberDataHook = useMemberData(eventId, {
-    searchTerm: debouncedSearchTerm, // Use debounced search term for API calls
-    statusFilter,
-    roleFilter,
-    departmentFilter
-  }, {
-    page: apiPage,
-    size: pageSize
-  });
-    const {
+  const memberDataHook = useMemberData(
+    eventId,
+    {
+      searchTerm: debouncedSearchTerm, // Use debounced search term for API calls
+      statusFilter,
+      roleFilter,
+      departmentFilter,
+    },
+    {
+      page: apiPage,
+      size: pageSize,
+    }
+  );
+  const {
     members,
     departments,
     loading,
@@ -123,7 +128,7 @@ const useMemberManagement = () => {
     totalElements,
     fetchMembers,
     fetchDepartments,
-    clearError
+    clearError,
   } = memberDataHook;
 
   // Modal and UI states
@@ -142,23 +147,18 @@ const useMemberManagement = () => {
     closeUserDetailModal,
     openEditModal,
     closeEditModal,
-    handleEditInputChange
+    handleEditInputChange,
   } = modalHook;
 
   // Member actions (update, ban, delete)
   const actionHook = useMemberActions(eventId);
-  const {
-    updateMember,
-    banMember,
-    unbanMember,
-    deleteMember,
-    bulkBanMembers
-  } = actionHook;
+  const { updateMember, banMember, unbanMember, deleteMember, bulkBanMembers } =
+    actionHook;
 
   // ------------------------
   // 2. Derived Values
   // ------------------------
-  
+
   const currentMembers = members;
   const filteredMembers = members;
   const bannedUsers = members.reduce((acc, member) => {
@@ -170,7 +170,7 @@ const useMemberManagement = () => {
   // ------------------------
   // 3. Integration Methods
   // ------------------------
-  
+
   // Simplified and fixed version of handleViewUser
   const handleViewUser = (user) => {
     // console.log('handleViewUser called with user:', user);
@@ -178,42 +178,54 @@ const useMemberManagement = () => {
     try {
       // Close any open menus when viewing user details
       toggleMenu(null);
-      
+
       // Create a clean copy of the user object to avoid reference issues
-      const userCopy = {...user};
-      
+      const userCopy = { ...user };
+
       // Make sure we have an accountId
       if (!userCopy.accountId && userCopy.id) {
         // console.log('Using id as accountId since accountId is missing');
         userCopy.accountId = userCopy.id;
       }
-      
+
       // Create a clean user object for the modal, even if we're missing data
       const modalUser = {
         ...userCopy,
-        id: userCopy.accountId || userCopy.id || Math.random().toString(36).substr(2, 9),
-        name: userCopy.name || userCopy.fullName || 'Unknown User',
-        role: userCopy.role || userCopy.eventRole || 'N/A',
-        status: userCopy.status || (userCopy.isActive ? 'Active' : 'Inactive') || 'N/A',
-        department: userCopy.department || userCopy.departmentName || 'N/A',
-        isBanned: userCopy.isBanned !== undefined ? userCopy.isBanned : !userCopy.isActive,
-        email: userCopy.email || 'N/A',
+        id:
+          userCopy.accountId ||
+          userCopy.id ||
+          Math.random().toString(36).substr(2, 9),
+        name: userCopy.name || userCopy.fullName || "Unknown User",
+        role: userCopy.role || userCopy.eventRole || "N/A",
+        status:
+          userCopy.status ||
+          (userCopy.isActive ? "Active" : "Inactive") ||
+          "N/A",
+        department: userCopy.department || userCopy.departmentName || "N/A",
+        isBanned:
+          userCopy.isBanned !== undefined
+            ? userCopy.isBanned
+            : !userCopy.isActive,
+        email: userCopy.email || "N/A",
       };
-      
+
       // console.log('Opening modal with cleaned user data:', modalUser);
-      
+
       // Force modal to open immediately with what we have
       openUserDetailModal(modalUser);
-      
+
       // If we have an accountId, fetch additional details from API
       if (userCopy.accountId) {
         // console.log('Fetching additional details from API...');
-        
+
         // Use a separate async function for the API call
         const fetchDetails = async () => {
           try {
-            const response = await memberService.getMemberDetails(eventId, userCopy.accountId);
-            
+            const response = await memberService.getMemberDetails(
+              eventId,
+              userCopy.accountId
+            );
+
             if (response.success && response.data) {
               // Transform API data to match front-end expectations
               const transformedUser = {
@@ -221,31 +233,34 @@ const useMemberManagement = () => {
                 id: response.data.accountId,
                 name: response.data.fullName,
                 role: response.data.eventRole,
-                status: response.data.isActive ? 'Active' : 'Inactive',
-                department: response.data.departmentName || 'N/A',
+                status: response.data.isActive ? "Active" : "Inactive",
+                department: response.data.departmentName || "N/A",
                 isBanned: !response.data.isActive,
                 // Format date of birth if available
-                dateOfBirth: response.data.dateOfBirth ? 
-                  new Date(response.data.dateOfBirth).toLocaleDateString('vi-VN') : null,
+                dateOfBirth: response.data.dateOfBirth
+                  ? new Date(response.data.dateOfBirth).toLocaleDateString(
+                      "vi-VN"
+                    )
+                  : null,
                 // Make sure we have access to all properties
                 studentId: response.data.studentId || null,
                 gender: response.data.gender || null,
-                avatarUrl: response.data.avatarUrl || null
+                avatarUrl: response.data.avatarUrl || null,
               };
-              
+
               // console.log('API returned user details:', transformedUser);
               openUserDetailModal(transformedUser);
             }
           } catch (err) {
-            console.error('Error fetching user details from API:', err);
+            console.error("Error fetching user details from API:", err);
           }
         };
-        
+
         // Execute the async function
         fetchDetails();
       }
     } catch (err) {
-      console.error('Error in handleViewUser:', err);
+      console.error("Error in handleViewUser:", err);
     }
   };
 
@@ -253,23 +268,33 @@ const useMemberManagement = () => {
     // console.log('handleEditUser called with user:', user);
     // Close any open menus when editing
     toggleMenu(null);
-    
+
     // Create a clean copy of the user object to avoid reference issues
-    const userCopy = {...user};
-    
+    const userCopy = { ...user };
+
     // Chuẩn bị dữ liệu user cho edit modal
     const editableUser = {
       ...userCopy,
       id: userCopy.accountId || userCopy.id,
       name: userCopy.fullName || userCopy.name,
       role: userCopy.eventRole || userCopy.role,
-      status: userCopy.isActive !== undefined ? (userCopy.isActive ? 'Active' : 'Inactive') : userCopy.status,
-      department: userCopy.departmentName || userCopy.department || 'N/A',
-      isBanned: userCopy.isBanned !== undefined ? userCopy.isBanned : !userCopy.isActive
+      status:
+        userCopy.isActive !== undefined
+          ? userCopy.isActive
+            ? "Active"
+            : "Inactive"
+          : userCopy.status,
+      department: userCopy.departmentName || userCopy.department || "N/A",
+      isBanned:
+        userCopy.isBanned !== undefined
+          ? userCopy.isBanned
+          : !userCopy.isActive,
+      assignedByAccountId: userCopy.assignedByAccountId || null,
+      assignedByName: userCopy.assignedByName || null,
     };
-    
+
     // console.log('Opening edit modal with user:', editableUser);
-    
+
     // Open edit modal directly for improved responsiveness
     openEditModal(editableUser);
   };
@@ -277,32 +302,35 @@ const useMemberManagement = () => {
     try {
       // Set loading state
       setIsActionLoading(true);
-      setActionType('edit');
+      setActionType("edit");
       setActionTargetId(editedUser?.id);
-      
-      // console.log('Saving edited user data:', JSON.stringify(editedUser));
-      
+
+      // console.log("Saving edited user data:", JSON.stringify(editedUser));
+
       // Ensure the isActive field is correctly set based on status
       if (editedUser.isActive === undefined && editedUser.status) {
-        const isActive = editedUser.status === 'Active';
+        const isActive = editedUser.status === "Active";
         // console.log(`Setting missing isActive to ${isActive} based on status ${editedUser.status}`);
         editedUser.isActive = isActive;
       }
-      
+
+      editedUser.assignedByAccountId = sessionStorage.getItem("accountId");
+      editedUser.assignedByName = sessionStorage.getItem("fullName");
+
       const result = await updateMember(editedUser, departments);
-      
+
       if (result.success) {
         // console.log('Member updated successfully:', result.data);
-        
+
         // Force a full refresh of the members list to ensure UI updates
         // console.log('Forcing complete refresh of member list');
         await fetchMembers();
         closeEditModal();
       } else {
-        console.error('Failed to update member');
+        console.error("Failed to update member");
       }
     } catch (err) {
-      console.error('Error updating member:', err);
+      console.error("Error updating member:", err);
     } finally {
       setIsActionLoading(false);
       setActionType(null);
@@ -313,13 +341,13 @@ const useMemberManagement = () => {
     try {
       // Set loading state
       setIsActionLoading(true);
-      setActionType('ban');
+      setActionType("ban");
       setActionTargetId(member?.id);
-      
+
       // console.log(`Ban User called for ${member.name} with shouldBeBanned=${shouldBeBanned}`);
       // Close any open menus when banning/unbanning
       toggleMenu(null);
-      
+
       let success;
       // If shouldBeBanned is true, we want to ban the user
       // If shouldBeBanned is false, we want to unban the user
@@ -330,7 +358,7 @@ const useMemberManagement = () => {
         // console.log('Calling unbanMember for', member.name);
         success = await unbanMember(member);
       }
-      
+
       // Refresh member list on success
       if (success) {
         // console.log('Ban operation successful, refreshing members list');
@@ -339,7 +367,7 @@ const useMemberManagement = () => {
         // console.log('Ban operation failed, not refreshing members list');
       }
     } catch (err) {
-      console.error('Error banning/unbanning member:', err);
+      console.error("Error banning/unbanning member:", err);
     } finally {
       setIsActionLoading(false);
       setActionType(null);
@@ -348,13 +376,13 @@ const useMemberManagement = () => {
   };
 
   const handleDeleteMember = async (member) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa thành viên này?')) {
+    if (window.confirm("Bạn có chắc chắn muốn xóa thành viên này?")) {
       try {
         await deleteMember(member);
         // Refresh member list on success
         await fetchMembers();
       } catch (err) {
-        console.error('Error deleting member:', err);
+        console.error("Error deleting member:", err);
       }
     }
   };
@@ -362,29 +390,31 @@ const useMemberManagement = () => {
   const handleBulkBanUsers = async (memberIds) => {
     try {
       if (!memberIds || !Array.isArray(memberIds) || memberIds.length === 0) {
-        console.error('Invalid memberIds for bulk ban:', memberIds);
+        console.error("Invalid memberIds for bulk ban:", memberIds);
         return false;
       }
-      
+
       // Set loading state
       setIsActionLoading(true);
-      setActionType('bulkBan');
-      
+      setActionType("bulkBan");
+
       console.log(`Attempting to bulk ban ${memberIds.length} members`);
-      
+
       // Find the member objects by their IDs
-      const membersToban = currentMembers.filter(member => memberIds.includes(member.id));
-      
+      const membersToban = currentMembers.filter((member) =>
+        memberIds.includes(member.id)
+      );
+
       if (membersToban.length === 0) {
-        console.error('No matching members found to ban');
+        console.error("No matching members found to ban");
         setIsActionLoading(false);
         setActionType(null);
         return false;
       }
-      
+
       // Execute bulk ban operation
       const result = await bulkBanMembers(membersToban);
-      
+
       if (result.success) {
         // Refresh the members list
         await fetchMembers();
@@ -392,13 +422,13 @@ const useMemberManagement = () => {
         setActionType(null);
         return true;
       } else {
-        console.error('Bulk ban operation failed:', result.message);
+        console.error("Bulk ban operation failed:", result.message);
         setIsActionLoading(false);
         setActionType(null);
         return false;
       }
     } catch (err) {
-      console.error('Error performing bulk ban operation:', err);
+      console.error("Error performing bulk ban operation:", err);
       setIsActionLoading(false);
       setActionType(null);
       return false;
@@ -410,15 +440,15 @@ const useMemberManagement = () => {
     if (currentPage !== 0) {
       handlePageChange(1);
     }
-    
+
     switch (filterType) {
-      case 'role':
+      case "role":
         handleRoleFilter(value);
         break;
-      case 'department':
+      case "department":
         handleDepartmentFilter(value);
         break;
-      case 'status':
+      case "status":
         handleStatusFilter(value);
         break;
       default:
@@ -437,14 +467,14 @@ const useMemberManagement = () => {
   // ------------------------
   // 4. Method Aliases
   // ------------------------
-  
+
   // Alias functions để tương thích với Members.jsx
   const handleViewDetails = handleViewUser;
   const handleEditMember = handleEditUser;
   const handleUpdateMember = handleSaveUser;
   const handleBanMember = handleBanUser;
   const handleCancelEdit = closeEditModal;
-  
+
   // Create aliases for modal functions to match expected names in Members.jsx
   const closeUserDetail = closeUserDetailModal;
   const closeDetailModal = closeUserDetailModal;
@@ -453,15 +483,15 @@ const useMemberManagement = () => {
   // ------------------------
   // 5. Effect Hooks
   // ------------------------
-  
+
   // Sử dụng ref để theo dõi việc fetch dữ liệu ban đầu
   const initialFetchRef = useRef(true);
-    // Thêm function để refresh department data
+  // Thêm function để refresh department data
   const refreshDepartments = useCallback(() => {
-    console.log('Manually refreshing departments data...');
+    console.log("Manually refreshing departments data...");
     fetchDepartments();
   }, [fetchDepartments]);
-  
+
   // Initial data fetch - chỉ gọi một lần khi component mount
   useEffect(() => {
     if (initialFetchRef.current) {
@@ -477,46 +507,47 @@ const useMemberManagement = () => {
     // Data - tương thích với Members.jsx
     currentMembers,
     filteredMembers,
-    bannedUsers,    members,
+    bannedUsers,
+    members,
     departments,
     loading,
     departmentsLoading,
     error,
     totalPages,
     totalElements,
-    
+
     // Action loading states
     isActionLoading,
     actionType,
     actionTargetId,
-    
+
     // Search and filter state - tương thích với Members.jsx
     searchTerm,
     statusFilter,
     roleFilter,
     departmentFilter,
-    
+
     // Pagination state - tương thích với Members.jsx
     currentPage,
     totalPages,
     itemsPerPage,
     pageSize,
-    
+
     // UI state - tương thích với Members.jsx
     activeMenu,
     selectedUser,
     showUserDetail,
     editedUser,
     showEditModal,
-    
+
     // Modal states - giữ lại cho tương thích
     selectedMember,
     isDetailModalOpen,
     isEditModalOpen,
-    
+
     // Event
     eventId,
-    
+
     // Handlers - tương thích với Members.jsx
     handleSearch,
     handleStatusFilter,
@@ -533,7 +564,7 @@ const useMemberManagement = () => {
     handleEditInputChange,
     handleSaveUser,
     handleCancelEdit,
-    
+
     // Additional handlers - giữ lại cho tương thích
     handleFilterChange,
     handlePageChange,
@@ -546,10 +577,11 @@ const useMemberManagement = () => {
     handleBulkBanUsers,
     closeDetailModal,
     closeEditModal,
-    clearError,    changeEvent,
+    clearError,
+    changeEvent,
     fetchMembers,
     fetchDepartments,
-    refreshDepartments
+    refreshDepartments,
   };
 };
 
