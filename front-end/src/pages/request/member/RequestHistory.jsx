@@ -39,6 +39,7 @@ export default function RequestHistory() {
         const roleResponse = await getUserInfoInEvent(eventId);
         if (!roleResponse) return;
         setRole(roleResponse.role);
+        // console.log("event id: ", eventId)
 
         // Step 3: Fetch requests based on role
         let rqs;
@@ -63,6 +64,7 @@ export default function RequestHistory() {
           default:
             return;
         }
+        // console.log("request: ", rqs)
 
         setRequests(rqs);
         setFilteredRequests(rqs);
@@ -84,23 +86,23 @@ export default function RequestHistory() {
   useEffect(() => {
     const filterRequests = () => {
       let filtered = requests;
-      console.log("Filtering requests with current filters:", {
-        typeFilter,
-        statusFilter,
-        searchTitle,
-      });
+      // console.log("Filtering requests with current filters:", {
+      //   typeFilter,
+      //   statusFilter,
+      //   searchTitle,
+      // });
       // If no filters are applied, return all requests
       if (!typeFilter && !statusFilter && !searchTitle) {
-        console.log("No filters applied, returning all requests");
+        // console.log("No filters applied, returning all requests");
         setFilteredRequests(requests);
         return;
       }
       // Filter by type
       if (typeFilter) {
-        console.log("typeFilter:", typeFilter);
+        // console.log("typeFilter:", typeFilter);
         filtered.map((request) => {
           if (typeFilter.includes(request.requestTypeId)) {
-            console.log("Matched request:", request);
+            // console.log("Matched request:", request);
           }
         });
         filtered = filtered.filter((request) =>
@@ -118,7 +120,7 @@ export default function RequestHistory() {
 
       // Filter by title
       if (searchTitle) {
-        console.log("searchTitle:", searchTitle);
+        // console.log("searchTitle:", searchTitle);
         filtered = filtered.filter((request) =>
           request?.title?.toLowerCase().includes(searchTitle.toLowerCase())
         );
@@ -135,27 +137,6 @@ export default function RequestHistory() {
     filterRequests();
   }, [typeFilter, statusFilter, searchTitle]);
 
-  if (loading) return <p>Loading...</p>;
-  if (!requests || requests.length === 0) {
-    return (
-      <Layout activeItem="requests">
-        <div className="min-h-screen bg-gray-50 py-8">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-              <div className="p-6">
-                <h1 className="text-2xl font-semibold text-gray-800 mb-4">
-                  No Requests Found
-                </h1>
-                <p className="text-gray-600">
-                  There are no requests available for this event yet.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
   const getStatusBadge = (status) => {
     const statusStyles = {
       PENDING: "bg-yellow-500 text-white",
@@ -193,6 +174,27 @@ export default function RequestHistory() {
     setIsPopupOpen(true);
   };
 
+  if (loading) return <p>Loading...</p>;
+  console.log("request: ", requests)
+  if (!requests || requests.length === 0) {
+    return (
+        <div className="min-h-screen bg-gray-50 py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+              <div className="p-6">
+                <h1 className="text-2xl font-semibold text-gray-800 mb-4">
+                  No Requests Found
+                </h1>
+                <p className="text-gray-600">
+                  There are no requests created for this event yet.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+    );
+  }
+  
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       {showCreateForm && (
@@ -341,15 +343,15 @@ export default function RequestHistory() {
                         <td className="px-6 py-4 text-sm text-gray-900 whitespace-pre-line">
                           {request.createdAt
                             ? new Date(request.createdAt).toLocaleDateString(
-                                "en-US",
-                                {
-                                  year: "numeric",
-                                  month: "2-digit",
-                                  day: "2-digit",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                }
-                              )
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )
                             : "Not Yet"}
                         </td>
                         <td className="px-6 py-4">
@@ -358,15 +360,15 @@ export default function RequestHistory() {
                         <td className="px-6 py-4 text-sm text-gray-900 whitespace-pre-line">
                           {request.status !== "PENDING"
                             ? new Date(request.updatedAt).toLocaleDateString(
-                                "en-US",
-                                {
-                                  year: "numeric",
-                                  month: "2-digit",
-                                  day: "2-digit",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                }
-                              )
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )
                             : "Not Yet"}
                         </td>
                         <td className="px-6 py-4">
