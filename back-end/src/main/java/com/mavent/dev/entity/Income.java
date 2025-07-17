@@ -15,7 +15,7 @@ public class Income {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer incomeId;
     private Integer eventId;
-    private BigInteger amount;
+    private Long amount;
     private String title;
     private String description;
     private enum sourceType{

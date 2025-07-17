@@ -1,11 +1,7 @@
 package com.mavent.dev.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
 
 import java.sql.Timestamp;
 
@@ -25,8 +21,8 @@ public class Sponsor {
     private String contactEmail;
     private String contactPhone;
     private String notes;
-    private String createdByAccountId;
-    private String isDeleted;
+    private Integer createdByAccountId;
+    private Boolean isDeleted;
     private Timestamp createdAt;
     private Timestamp updatedAt;
 }

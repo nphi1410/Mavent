@@ -1,11 +1,7 @@
 package com.mavent.dev.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
 
 import java.math.BigInteger;
 import java.sql.Date;
@@ -21,7 +17,7 @@ public class EventSponsorship {
     private Integer eventId;
     private Integer sponsorId;
     private Integer packageId;
-    private BigInteger amount;
+    private Long amount;
     private enum status{
         INTERESTED,NEGOTIATING,CONFIRMED,PAID,FULFILLED
     }

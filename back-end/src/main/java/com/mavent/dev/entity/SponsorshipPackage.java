@@ -3,6 +3,7 @@ package com.mavent.dev.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 @Entity
@@ -14,7 +15,7 @@ public class SponsorshipPackage {
     private Integer packageId;
     private Integer eventId;
     private String name;
-    private Double amount;
+    private BigDecimal amount;
     private String description;
     private String benefits;
     private Integer maxSponsors;
