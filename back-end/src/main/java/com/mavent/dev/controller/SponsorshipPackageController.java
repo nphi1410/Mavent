@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/sponsorship-package")
+@RequestMapping("/api/sponsorship/package")
 public class SponsorshipPackageController {
     @Autowired
     private SponsorshipPackageService service;

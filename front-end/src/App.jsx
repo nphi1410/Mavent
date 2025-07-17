@@ -53,6 +53,9 @@ import ParticipantFeedbackEvent from "./pages/ParticipantFeedbackEvent.jsx";
 import RequestHistory from "./pages/request/member/RequestHistory.jsx";
 // import { EventRoleContext, EventRoleProvider } from "./context/EventRoleContext.jsx";
 import EventWrapper from "./wrapper/EventWrapper.jsx";
+import EventSponsorsPage from "./pages/EventSponsorsPage.jsx";
+import SponsorshipPackagesPage from "./pages/SponsorshipPackagesPage.jsx";
+import SponsorshipPage from "./pages/SponsorshipPage.jsx";
 
 // Higher Order Components for Route Protection
 // const Protect = (Component) => <ProtectedRoute children={Component} />;
@@ -99,6 +102,12 @@ function App() {
                 <Route path="documents" element={<DocumentsPage />} />
                 <Route path="feedback" element={<ViewEventFeedback />} />
                 <Route path="requests" element={<RequestHistory />} />
+                <Route path="sponsors" element={<EventSponsorsPage />} />
+                <Route
+                  path="sponsorship-packages"
+                  element={<SponsorshipPackagesPage />}
+                />
+                <Route path="sponsorship" element={<SponsorshipPage />} />
                 <Route
                   path="create-feedback"
                   element={<ParticipantFeedbackEvent />}

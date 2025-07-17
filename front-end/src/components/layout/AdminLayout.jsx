@@ -2,18 +2,24 @@ import React, { useState, useEffect } from "react";
 import { Outlet, useParams, useLocation } from "react-router-dom";
 import Sidebar from "./AdminSidebar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCrown,
+  faHandHoldingDollar,
+  faHandshake,
+} from "@fortawesome/free-solid-svg-icons";
 import {
   faBars,
   faUsers,
-  faTimes,
   faSitemap,
   faFileAlt,
   faInbox,
   faHouse,
-  faComments
+  faComments,
 } from "@fortawesome/free-solid-svg-icons";
-import { EventRoleProvider, useEventRole } from "../../context/EventRoleContext";
+import {
+  EventRoleProvider,
+  useEventRole,
+} from "../../context/EventRoleContext";
 
 // Add CSS for animations
 const fadeInKeyframes = `
@@ -81,7 +87,7 @@ const Layout = () => {
     "departments",
     "documents",
     "requests",
-    "feedback"
+    "feedback",
   ].some((segment) => location.pathname.includes(segment));
 
   const allMenuItems = [
@@ -105,38 +111,63 @@ const Layout = () => {
       displayName: "Departments",
       icon: <FontAwesomeIcon icon={faSitemap} />,
       link: `departments`,
-      requiredRole: 'ADMIN' // Only visible to department managers and admins
+      requiredRole: "ADMIN", // Only visible to department managers and admins
     },
     {
       name: "documents",
       displayName: "Documents",
       icon: <FontAwesomeIcon icon={faFileAlt} />,
       link: `documents`,
-      requiredRole: 'MEMBER' // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
+      requiredRole: "MEMBER", // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
     },
     {
-      name: 'feedback',
-      displayName: 'Feedback',
+      name: "feedback",
+      displayName: "Feedback",
       icon: <FontAwesomeIcon icon={faComments} />,
       link: `feedback`,
-      requiredRole: 'ADMIN' // Visible to admin only (ADMIN)
+      requiredRole: "ADMIN", // Visible to admin only (ADMIN)
     },
     {
-      name: 'requests',
-      displayName: 'Requests',
+      name: "requests",
+      displayName: "Requests",
       icon: <FontAwesomeIcon icon={faInbox} />,
       link: `requests`,
-      requiredRole: 'MEMBER' // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
-    }
-
-
+      requiredRole: "MEMBER", // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
+    },
+    {
+      name: "sponsorship packages",
+      displayName: "Sponsorship Packages",
+      icon: <FontAwesomeIcon icon={faCrown} />,
+      link: `sponsorship-packages`,
+      requiredRole: "MEMBER",
+    },
+    {
+      name: "sponsors",
+      displayName: "Sponsors",
+      icon: <FontAwesomeIcon icon={faHandshake} />,
+      link: `sponsors`,
+      requiredRole: "MEMBER",
+    },
+    {
+      name: "sponsorship",
+      displayName: "Sponsorship",
+      icon: <FontAwesomeIcon icon={faHandHoldingDollar} />,
+      link: `sponsorship`,
+      requiredRole: "MEMBER",
+    },
   ];
 
   // Filter items based on user role
   const mainItems = allMenuItems.filter((item) => {
     if (item.requiredRole === "ADMIN") return userRole.includes("ADMIN");
-    if (item.requiredRole === "DEPARTMENT_MANAGER") return ["ADMIN", "DEPARTMENT_MANAGER"].some(role => userRole.includes(role));
-    if (item.requiredRole === "MEMBER") return ["ADMIN", "DEPARTMENT_MANAGER", "MEMBER"].some(role => userRole.includes(role));
+    if (item.requiredRole === "DEPARTMENT_MANAGER")
+      return ["ADMIN", "DEPARTMENT_MANAGER"].some((role) =>
+        userRole.includes(role)
+      );
+    if (item.requiredRole === "MEMBER")
+      return ["ADMIN", "DEPARTMENT_MANAGER", "MEMBER"].some((role) =>
+        userRole.includes(role)
+      );
     return item.requiredRole === "PARTICIPANT";
   });
 
@@ -166,51 +197,50 @@ const Layout = () => {
   }
 
   // Nếu là trang quản lý, render với Sidebar
-  
+
   return (
     // <EventRoleProvider>
-      <div className="flex min-h-screen bg-gray-50">
-        {" "}
-        {/* Mobile Sidebar Overlay with blur effect */}
-        {isSidebarOpen && (
-          <div
-            className="fixed inset-0 backdrop-blur-sm bg-black/30 z-40 lg:hidden animate-fadeIn"
-            onClick={() => setIsSidebarOpen(false)}
-            style={{ animation: "fadeIn 0.2s ease-in-out" }}
-            aria-label="Close sidebar overlay"
-          />
+    <div className="flex min-h-screen bg-gray-50">
+      {" "}
+      {/* Mobile Sidebar Overlay with blur effect */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 backdrop-blur-sm bg-black/30 z-40 lg:hidden animate-fadeIn"
+          onClick={() => setIsSidebarOpen(false)}
+          style={{ animation: "fadeIn 0.2s ease-in-out" }}
+          aria-label="Close sidebar overlay"
+        />
+      )}
+      {/* Sidebar with Sticky Help Button on Mobile */}
+      <div className="relative">
+        <Sidebar
+          // activeItem={activeItem}
+          mainItems={mainItems}
+          isOpen={isSidebarOpen}
+          onToggle={toggleSidebar}
+        />
+
+        {/* Floating help button for very small screens */}
+        {!isSidebarOpen && (
+          <button
+            onClick={toggleSidebar}
+            className="lg:hidden fixed bottom-4 left-4 z-40 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            style={{
+              animation: isSidebarOpen ? undefined : "pulse 2s infinite",
+            }}
+            aria-label="Open sidebar menu"
+          >
+            <FontAwesomeIcon icon={faBars} className="h-5 w-5" />
+          </button>
         )}
-        {/* Sidebar with Sticky Help Button on Mobile */}
-        <div className="relative">
-          <Sidebar
-            // activeItem={activeItem}
-            mainItems={mainItems}
-            isOpen={isSidebarOpen}
-            onToggle={toggleSidebar}
-          />
-
-          {/* Floating help button for very small screens */}
-          {!isSidebarOpen && (
-            <button
-              onClick={toggleSidebar}
-              className="lg:hidden fixed bottom-4 left-4 z-40 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              style={{
-                animation: isSidebarOpen ? undefined : "pulse 2s infinite",
-              }}
-              aria-label="Open sidebar menu"
-            >
-              <FontAwesomeIcon icon={faBars} className="h-5 w-5" />
-            </button>
-          )}
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 lg:ml-64 min-w-0 transition-all duration-300">
-          <main className="p-3 sm:p-4 lg:p-6">
-            <Outlet />
-          </main>
-        </div>
       </div>
+      {/* Main Content */}
+      <div className="flex-1 lg:ml-64 min-w-0 transition-all duration-300">
+        <main className="p-3 sm:p-4 lg:p-6">
+          <Outlet />
+        </main>
+      </div>
+    </div>
   );
 };
 
