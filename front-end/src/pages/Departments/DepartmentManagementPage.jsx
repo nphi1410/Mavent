@@ -671,6 +671,7 @@ const DepartmentManagementPage = () => {
     setIsModalOpen(true);
   };
 
+  const handleAssignSponsorPermission = () => {};
   const handleSubmitDepartment = async (formData) => {
     try {
       setLoading(true);
@@ -1063,6 +1064,7 @@ const DepartmentManagementPage = () => {
               <FontAwesomeIcon icon={faSearch} />
             </div>
           </div>
+
           <div className="flex gap-2">
             <button
               onClick={handleAddDepartment}
@@ -1102,6 +1104,12 @@ const DepartmentManagementPage = () => {
               className="px-3 py-1.5 text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
             >
               Clear selection
+            </button>
+            <button
+              onClick={() => handleAssignSponsorPermission(selectedDepartments)}
+              className="px-3 py-1.5 text-white bg-blue-600 rounded hover:bg-blue-700 flex items-center transition-colors"
+            >
+              Assign Sponsor permission
             </button>
             <button
               onClick={() => setIsConfirmDialogOpen(true)}

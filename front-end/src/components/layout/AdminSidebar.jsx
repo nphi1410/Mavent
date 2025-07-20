@@ -1,25 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import React, { useState, useEffect } from "react";
+import { useLocation, useParams } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faUsers,
   faTimes,
   faSitemap,
   faFileAlt,
   faInbox,
-  faHouse, 
-  faComments
+  faHouse,
+  faComments,
 } from "@fortawesome/free-solid-svg-icons";
-
 
 // Sidebar component for admin dashboard
 const Sidebar = ({ isOpen, onToggle, mainItems }) => {
   const location = useLocation();
 
-  const pathSegments = location.pathname.split('/').filter(Boolean);
+  const pathSegments = location.pathname.split("/").filter(Boolean);
   // console.log("pathSegments: " + pathSegments);
+  const { id } = useParams();
 
-  const activeItem = pathSegments[pathSegments.length - 1] || '';
+  const activeItem = pathSegments[pathSegments.length - 1] || "";
+  const manageUrl = `/event/${id}/staff/`;
 
   return (
     <>
@@ -35,7 +36,7 @@ const Sidebar = ({ isOpen, onToggle, mainItems }) => {
             {mainItems.map((item) => (
               <li key={item.name}>
                 <a
-                  href={item.link}
+                  href={manageUrl + item.link}
                   className={`flex items-center p-3 text-sm font-medium rounded-lg transition-colors duration-200 hover:bg-gray-100 ${
                     activeItem === item.name.toLowerCase()
                       ? "bg-blue-100 text-blue-700 border-r-2 border-blue-700"

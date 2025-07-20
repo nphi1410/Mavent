@@ -142,13 +142,6 @@ const Layout = () => {
       requiredRole: "MEMBER",
     },
     {
-      name: "sponsors",
-      displayName: "Sponsors",
-      icon: <FontAwesomeIcon icon={faHandshake} />,
-      link: `sponsors`,
-      requiredRole: "MEMBER",
-    },
-    {
       name: "sponsorship",
       displayName: "Sponsorship",
       icon: <FontAwesomeIcon icon={faHandHoldingDollar} />,
