@@ -92,12 +92,9 @@ public class SecurityConfig {
 //    }
 
     @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http, PasswordEncoder encoder) throws Exception {
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
-        builder
-                .userDetailsService(username -> accountService.loadUserByUsername(username))
-                .passwordEncoder(encoder);
-
+        builder.authenticationProvider(customAuthenticationProvider);
         return builder.build(); // ✅ Only call build() on AuthenticationManagerBuilder
     }
 

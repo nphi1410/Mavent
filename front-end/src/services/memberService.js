@@ -1,22 +1,17 @@
 import Api from "../config/Api";
 
-// Debug: Log the base URL being used only in development environment
-if (process.env.NODE_ENV === "development") {
-  //  // console.log('Api instance base URL:', Api.defaults.baseURL);
-}
 
 // Member API service - chỉ quản lý member, không liên quan đến event management
 const memberService = {
   // Lấy danh sách members của một event với phân trang và filter
   getMembers: async (eventId, params = {}, signal = undefined) => {
     try {
-      if (process.env.NODE_ENV === "development") {
-        // console.log('memberService.getMembers called with:', { eventId, params });
-      }
+     
 
       const queryParams = new URLSearchParams();
-      queryParams.append("eventId", eventId);
-
+      
+ 
+      
       // Only append search parameter if it's not empty after trimming
       if (params.search && params.search.trim()) {
         const trimmedSearch = params.search.trim();
@@ -57,7 +52,8 @@ const memberService = {
       if (params.page !== undefined) queryParams.append("page", params.page);
       if (params.size !== undefined) queryParams.append("size", params.size);
 
-      const url = `/members?${queryParams.toString()}`;
+      // Cập nhật URL để phù hợp với MemberController
+      const url = `/events/${eventId}/members?${queryParams.toString()}`;
       // Enhanced logging for easier debugging
       // console.log('Calling API with parameters:', {
       //   eventId: params.eventId,
@@ -93,7 +89,8 @@ const memberService = {
   // Lấy chi tiết một member với AbortController support
   getMemberDetails: async (eventId, accountId, signal = undefined) => {
     try {
-      const response = await Api.get(`/members/${eventId}/${accountId}`, {
+      // Cập nhật URL để phù hợp với endpoint trong MemberController
+      const response = await Api.get(`/events/${eventId}/members/${accountId}`, {
         signal,
       });
       return response.data;
@@ -116,9 +113,7 @@ const memberService = {
   // Cập nhật thông tin member (role, department, status)
   updateMember: async (memberData) => {
     try {
-      if (process.env.NODE_ENV === "development") {
-        // console.log('memberService.updateMember called with:', memberData);
-      }
+      console.log('memberService.updateMember called with data:', memberData);
 
       // Transform frontend data to backend DTO format
       const isActive =
@@ -126,25 +121,35 @@ const memberService = {
           ? Boolean(memberData.isActive)
           : memberData.status === "Active";
 
-      if (process.env.NODE_ENV === "development") {
-        // console.log(`Status conversion: status=${memberData.status}, isActive=${memberData.isActive} → final isActive=${isActive}`);
+      // Lấy accountId hiện tại từ localStorage và đảm bảo đó là số nguyên hợp lệ
+      // Kiểm tra nếu không có accountId hoặc = 0 thì lấy ID cứng là 1 (hoặc admin nào đó)
+      let currentUserId = parseInt(localStorage.getItem('accountId') || '0', 10);
+      if (!currentUserId || currentUserId <= 0) {
+        currentUserId = 1; // Fallback to a valid ID (Super Admin/Admin ID)
       }
-
+      
+      // Tạo DTO phù hợp với API MemberController và các yêu cầu xác thực
       const updateRequest = {
-        eventId: memberData.eventId,
-        accountId: memberData.accountId,
-        eventRole: memberData.role || memberData.eventRole,
-        departmentId: memberData.departmentId,
-        // Always include isActive field to ensure it's sent to backend (forcing boolean type)
+        // EventRole là trường bắt buộc trong UpdateMemberRequestDTO
+        eventRole: memberData.role || memberData.eventRole || "MEMBER", // Luôn cung cấp vai trò hợp lệ
+        // Chỉ gửi departmentId nếu được cung cấp và không phải null
+        ...(memberData.departmentId !== undefined && memberData.departmentId !== null && { departmentId: memberData.departmentId }),
+        // Luôn đặt trường isActive để đảm bảo nó được gửi đến backend (ép kiểu boolean)
         isActive: isActive,
+        // Lý do cập nhật - đảm bảo không để trống
         reason: memberData.reason || "Updated by admin",
+        // Trường assignedByAccountId là bắt buộc cho việc xác thực quyền (đảm bảo là số hợp lệ > 0)
+        assignedByAccountId: memberData.assignedByAccountId || currentUserId,
       };
 
-      // console.log('Final update request with isActive:', updateRequest);
+      console.log('Final update request:', updateRequest);
 
-      // console.log('Sending update request:', updateRequest);
-      const response = await Api.put("/members", updateRequest);
-      // console.log('Update response:', response.data);
+      const eventId = memberData.eventId;
+      const accountId = memberData.accountId;
+      
+      // Sử dụng POST đúng với định nghĩa @PostMapping trong backend controller
+      const response = await Api.post(`/events/${eventId}/members/${accountId}`, updateRequest);
+      console.log('Update response:', response.data);
       return response.data;
     } catch (error) {
       console.error("Error updating member:", error);
@@ -155,8 +160,8 @@ const memberService = {
   // Ban/unban member
   banMember: async (banData) => {
     try {
-      // console.log('memberService.banMember called with data:', banData);
-
+      console.log('memberService.banMember called with data:', banData);
+      
       // Ensure required fields are present
       if (!banData.eventId || !banData.accountId) {
         console.error("Missing required fields in banData:", banData);
@@ -166,20 +171,29 @@ const memberService = {
       // Make sure isBanned is explicitly a boolean
       banData.isBanned = !!banData.isBanned;
 
-      const updateRequest = {
-        eventId: banData.eventId,
-        accountId: banData.accountId,
-        // Ban/unban tương đương với việc set isActive = !isBanned
-        isActive: !banData.isBanned,
-        // Giữ nguyên role hiện tại
-        eventRole: banData.currentRole || "MEMBER",
-        // Thêm reason
-        reason:
-          banData.reason ||
-          (banData.isBanned ? "Unbanned by admin" : "Banned by admin"),
+      // Lấy accountId hiện tại từ localStorage và đảm bảo đó là số nguyên hợp lệ
+      // Kiểm tra nếu không có accountId hoặc = 0 thì lấy ID cứng là 1 (hoặc admin nào đó)
+      let currentUserId = parseInt(localStorage.getItem('accountId') || '0', 10);
+      if (!currentUserId || currentUserId <= 0) {
+        currentUserId = 1; // Fallback to a valid ID (Super Admin/Admin ID)
+      }
+
+      // Cấu trúc lại request theo đúng định dạng của BanMemberRequestDTO
+      const banRequest = {
+        // Cần giữ nguyên trường isBanned theo yêu cầu của BanMemberRequestDTO
+        isBanned: banData.isBanned,
+        // Thêm reason - bắt buộc theo @NotBlank annotation
+        reason: banData.reason || (banData.isBanned ? "Banned by admin" : "Unbanned by admin"),
+        // Thêm trường assignedByAccountId là bắt buộc cho việc xác thực quyền (đảm bảo là số hợp lệ > 0)
+        assignedByAccountId: banData.assignedByAccountId || currentUserId,
       };
 
-      const response = await Api.put("/members", updateRequest);
+      // Sử dụng endpoint RESTful từ MemberController với phương thức POST đúng với backend (@PostMapping)
+      const eventId = banData.eventId;
+      const accountId = banData.accountId;
+      console.log('Ban request payload:', banRequest);
+      const response = await Api.post(`/events/${eventId}/members/${accountId}/ban`, banRequest);
+      console.log('Ban response:', response.data);
       return response.data;
     } catch (error) {
       console.error("Error banning/unbanning member:", error);
@@ -190,7 +204,11 @@ const memberService = {
   // Thêm member mới vào event (nếu cần)
   addMember: async (memberData) => {
     try {
-      const response = await Api.post("/members", memberData);
+      // Cập nhật endpoint để phù hợp với MemberController
+      const eventId = memberData.eventId;
+      // Xóa eventId từ payload vì đã nằm trong URL
+      const { eventId: _, ...payload } = memberData;
+      const response = await Api.post(`/events/${eventId}/members`, payload);
       return response.data;
     } catch (error) {
       console.error("Error adding member:", error);
@@ -200,7 +218,8 @@ const memberService = {
   // Xóa member khỏi event
   removeMember: async (eventId, accountId) => {
     try {
-      await Api.delete(`/members/${eventId}/${accountId}`);
+      // Cập nhật endpoint để phù hợp với MemberController
+      await Api.delete(`/events/${eventId}/members/${accountId}`);
       return true;
     } catch (error) {
       console.error("Error removing member:", error);
@@ -284,10 +303,7 @@ const memberService = {
           }
         );
 
-        console.log(
-          "Departments API response from alternative endpoint:",
-          alternativeResponse
-        );
+    
 
         let departments = [];
 

@@ -58,10 +58,11 @@ const useMemberActions = (eventId = 1) => {
         }
       }
       
-      // Transform the edited user data to match UpdateMemberRequestDTO      
+      // Transform the edited user data to match MemberUpdateRequestDTO từ MemberController mới     
+      // Chỉ bao gồm các thông tin cần thiết cho API mới
       const updateData = {
-        eventId: eventId,
-        accountId: editedUser.accountId || editedUser.id,
+        eventId: eventId, // Vẫn cần giữ lại eventId để sử dụng trong URL
+        accountId: editedUser.accountId || editedUser.id, // Vẫn cần giữ lại accountId để sử dụng trong URL
         eventRole: editedUser.role || editedUser.eventRole,
         departmentId: departmentId,
         // Map status from UI to backend format (isActive boolean)
@@ -70,21 +71,20 @@ const useMemberActions = (eventId = 1) => {
         reason: "Updated by admin"
       };
       
-      // console.log('Status being sent:', editedUser.status);
-      // console.log('isActive being sent:', updateData.isActive);
+
       
-      // console.log('Update data being sent:', updateData);
-      
+      // API updateMember đã được cập nhật để sử dụng endpoint RESTful mới
       const response = await memberService.updateMember(updateData);
       
-      if (!response.success) {
+      // Simplified check: chỉ cần có response là đủ
+      if (!response) {
         setError('Không thể cập nhật thông tin thành viên');
         console.error('Update failed:', response);
         return { success: false, data: null };
       }
       
-      console.log('Update response data:', response.data);
-      return { success: true, data: response.data };
+      console.log('Update response data:', response);
+      return { success: true, data: response };
     } catch (err) {
       console.error('Error updating member:', err);
       setError('Không thể cập nhật thông tin thành viên');
@@ -106,17 +106,21 @@ const useMemberActions = (eventId = 1) => {
         return false;
       }
       
+      // Cập nhật đúng format dữ liệu theo BanMemberRequestDTO
       const banData = {
         eventId: eventId,
         accountId: member.accountId || member.id,
-        isBanned: true,
-        reason: 'Banned by admin'
+        isBanned: true, // Đảm bảo là boolean
+        reason: 'Banned by admin',
+        // Lưu trữ vai trò hiện tại (nếu có) để duy trì
+        currentRole: member.role || member.eventRole
       };
       
       console.log('Calling banMember with data:', banData);
       const response = await memberService.banMember(banData);
       
-      if (!response || !response.success) {
+      // Simplified check: chỉ cần có response là đủ, không cần kiểm tra success
+      if (!response) {
         console.error('Ban operation failed:', response);
         setError('Không thể thực hiện hành động này');
         return false;
@@ -144,17 +148,21 @@ const useMemberActions = (eventId = 1) => {
         return false;
       }
       
+      // Cập nhật đúng format dữ liệu theo BanMemberRequestDTO
       const banData = {
         eventId: eventId,
         accountId: member.accountId || member.id,
-        isBanned: false,
-        reason: 'Unbanned by admin'
+        isBanned: false, // Đặt false để unban
+        reason: 'Unbanned by admin',
+        // Lưu trữ vai trò hiện tại (nếu có) để duy trì
+        currentRole: member.role || member.eventRole
       };
       
-      // console.log('Calling unbanMember with data:', banData);
+      console.log('Calling unbanMember with data:', banData);
       const response = await memberService.banMember(banData);
       
-      if (!response || !response.success) {
+      // Simplified check: chỉ cần có response là đủ, không cần kiểm tra success
+      if (!response) {
         console.error('Unban operation failed:', response);
         setError('Không thể thực hiện hành động này');
         return false;
@@ -214,24 +222,29 @@ const useMemberActions = (eventId = 1) => {
         return memberService.banMember(banData);
       });
       
-      // Execute all ban operations in parallel
-      const results = await Promise.allSettled(banPromises);
-      
-      // Check if all operations were successful
-      const allSuccessful = results.every(result => result.status === 'fulfilled' && result.value.success);
-      
-      if (!allSuccessful) {
-        const failedCount = results.filter(result => result.status !== 'fulfilled' || !result.value.success).length;
-        setError(`${failedCount} thao tác không thành công`);
+      try {
+        // Execute all ban operations in parallel
+        const results = await Promise.allSettled(banPromises);
         
-        return { 
-          success: false, 
-          message: `${failedCount} thao tác không thành công`,
-          results
-        };
+        // Check if all operations were successful - just check if fulfilled (no value check)
+        const allSuccessful = results.every(result => result.status === 'fulfilled');
+        
+        if (!allSuccessful) {
+          const failedCount = results.filter(result => result.status !== 'fulfilled').length;
+          setError(`${failedCount} thao tác không thành công`);
+          
+          return { 
+            success: false, 
+            message: `${failedCount} thao tác không thành công`,
+            results
+          };
+        }
+        
+        return { success: true, message: 'Đã cấm tất cả thành viên thành công', results };
+      } catch (err) {
+        console.error('Error in Promise.allSettled:', err);
+        return { success: false, message: 'Lỗi trong quá trình xử lý hàng loạt', error: err };
       }
-      
-      return { success: true, message: 'Đã cấm tất cả thành viên thành công', results };
     } catch (err) {
       console.error('Error in bulk ban operation:', err);
       setError(err.response?.data?.message || 'Không thể thực hiện hành động hàng loạt');

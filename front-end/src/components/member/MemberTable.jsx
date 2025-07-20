@@ -7,7 +7,7 @@ import {
   faEye,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
-import LoadingSpinner from "./visual/LoadingSpinner";
+import LoadingSpinner from "../visual/LoadingSpinner";
 
 const MemberTable = (props) => {
   const {

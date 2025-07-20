@@ -6,6 +6,7 @@ import com.mavent.dev.entity.Account;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -64,9 +65,14 @@ public class JwtUtil {
     }
 
     // Validate token
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return userDetails.getUsername().equals(username) && !isTokenExpired(token);
+    }
+    
+    // Validate token with Account
     public boolean isTokenValid(String token, Account account) {
         final String username = extractUsername(token);
-//        return accountService.getAccount(username) != null && !isTokenExpired(token);
         return account.getUsername().equals(username) && !isTokenExpired(token);
     }
 

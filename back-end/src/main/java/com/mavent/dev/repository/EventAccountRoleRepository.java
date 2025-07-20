@@ -248,16 +248,12 @@ public interface EventAccountRoleRepository extends JpaRepository<EventAccountRo
             "     LOWER(a.username) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
             "     LOWER(a.fullName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
             "     LOWER(a.email) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "     LOWER(COALESCE(a.studentId, '')) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) " +
-            "AND (:startDate IS NULL OR DATE(ear.createdAt) >= DATE(:startDate)) " +
-            "AND (:endDate IS NULL OR DATE(ear.createdAt) <= DATE(:endDate))")
+            "     LOWER(COALESCE(a.studentId, '')) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
     Page<EventAccountRole> findByEventIdWithFilters(@Param("eventId") Integer eventId,
                                                     @Param("isActive") Boolean isActive,
                                                     @Param("eventRole") EventAccountRole.EventRole eventRole,
                                                     @Param("departmentId") Integer departmentId,
                                                     @Param("searchTerm") String searchTerm,
-                                                    @Param("startDate") java.util.Date startDate,
-                                                    @Param("endDate") java.util.Date endDate,
                                                     Pageable pageable);
 
     @Query(value = """

@@ -55,8 +55,6 @@ public interface EventAccountRoleService {
                                                  EventAccountRole.EventRole role,
                                                  Integer departmentId,
                                                  String searchTerm,
-                                                 java.util.Date startDate,
-                                                 java.util.Date endDate,
                                                  Pageable pageable);
 
     List<EventCountDTO> getMonthlyStatistic(Integer accountId, String eventRole);

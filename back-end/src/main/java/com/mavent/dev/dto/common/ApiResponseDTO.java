@@ -6,7 +6,10 @@ import lombok.NoArgsConstructor;
 
 /**
  * Generic dto for API responses.
+ * @deprecated This class is being phased out in favor of direct ResponseEntity responses.
+ * Use direct ResponseEntity returns with appropriate status codes and headers instead.
  */
+@Deprecated(since = "2025-07", forRemoval = true)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

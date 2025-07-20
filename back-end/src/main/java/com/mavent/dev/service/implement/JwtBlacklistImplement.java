@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Service
+@Service("jwtBlacklistService")
 public class JwtBlacklistImplement implements JwtBlacklistService {
 
     private final Set<String> blacklistedTokens = ConcurrentHashMap.newKeySet();

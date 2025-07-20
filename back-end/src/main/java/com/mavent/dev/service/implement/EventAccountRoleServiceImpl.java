@@ -139,10 +139,8 @@ public class EventAccountRoleServiceImpl implements EventAccountRoleService {
                                                         EventAccountRole.EventRole role,
                                                         Integer departmentId,
                                                         String searchTerm,
-                                                        java.util.Date startDate,
-                                                        java.util.Date endDate,
                                                         Pageable pageable) {
-        return eventAccountRoleRepository.findByEventIdWithFilters(eventId, isActive, role, departmentId, searchTerm, startDate, endDate, pageable);
+        return eventAccountRoleRepository.findByEventIdWithFilters(eventId, isActive, role, departmentId, searchTerm, pageable);
     }
 
     @Override

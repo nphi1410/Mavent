@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import useMemberManagement from '../../hooks/useMemberManagement';
 import useUserPermissions from '../../hooks/useUserPermissions';
-import MemberFilters from '../../components/MemberFilters';
-import MemberTable from '../../components/MemberTable';
-import MemberCard from './MemberCard';
-import Pagination from './Pagination';
-import MemberDetailModal from '../../components/MemberDetailModal';
-import EditMemberModal from '../../components/EditMemberModal';
-import NoResults from './NoResults';
-import Layout from '../../components/layout/AdminLayout';
+import MemberFilters from '../../components/filter/MemberFilters';
+import MemberTable from '../../components/member/MemberTable';
+import MemberCard from '../../components/member/MemberCard';
+import Pagination from '../../components/member/Pagination';
+import NoResults from '../../components/member/NoResults';
+import MemberDetailModal from '../../components/member/MemberDetailModal';
+import EditMemberModal from '../../components/member/EditMemberModal';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faCheckSquare } from '@fortawesome/free-solid-svg-icons';
 import LoadingSpinner from '../../components/visual/LoadingSpinner';
@@ -19,6 +19,14 @@ const Members = () => {
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [isBulkActionOpen, setIsBulkActionOpen] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  
+  // For debugging - log when the component mounts
+  React.useEffect(() => {
+    console.log("Members component mounted");
+    // Clear any localStorage or sessionStorage values that might be causing issues
+    // sessionStorage.removeItem('editUserModal');
+    // localStorage.removeItem('editUserModal');
+  }, []);
 
   // Toast notification state
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
@@ -182,6 +190,21 @@ const Members = () => {
     );
   };
 
+  // Debug info - log modal states before rendering
+  React.useEffect(() => {
+    console.log("Modal states before rendering:", {
+      showEditModal,
+      editedUser: editedUser ? `${editedUser.name || 'Unknown'} (ID: ${editedUser.id || 'Unknown'})` : null
+    });
+    
+    // If modal is unexpectedly open on load, close it
+    if (showEditModal && !editedUser) {
+      console.warn("Modal is open with no edited user - this might be an error state");
+      // Consider uncommenting this line if modal is always open on load unexpectedly
+      // handleCancelEdit();
+    }
+  }, [showEditModal, editedUser]);
+
   return (
 
     <div className="container mx-auto px-2 sm:px-4 lg:px-6 relative">
@@ -293,7 +316,7 @@ const Members = () => {
       />
 
       {/* Edit Member Modal */}        <EditMemberModal
-        isOpen={!!showEditModal}
+        isOpen={showEditModal === true}
         user={editedUser || null}
         departments={departments || []}
         onClose={() => {

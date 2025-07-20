@@ -61,6 +61,34 @@ public class GlobalExceptionHandler {
         
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
+    
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ApiResponseDTO<Object>> handleUnauthorizedException(
+            UnauthorizedException ex, WebRequest request) {
+        
+        ApiResponseDTO<Object> response = ApiResponseDTO.<Object>builder()
+                .success(false)
+                .message(ex.getMessage())
+                .data(null)
+                .timestamp(LocalDateTime.now().toString())
+                .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+    
+    @ExceptionHandler(DuplicateRoleException.class)
+    public ResponseEntity<ApiResponseDTO<Object>> handleDuplicateRoleException(
+            DuplicateRoleException ex, WebRequest request) {
+        
+        ApiResponseDTO<Object> response = ApiResponseDTO.<Object>builder()
+                .success(false)
+                .message(ex.getMessage())
+                .data(null)
+                .timestamp(LocalDateTime.now().toString())
+                .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
 
     @ExceptionHandler(BusinessLogicException.class)
     public ResponseEntity<ApiResponseDTO<Object>> handleBusinessLogicException(

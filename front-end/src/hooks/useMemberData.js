@@ -122,9 +122,25 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
         abortControllerRef.current.signal
       );
 
-      if (response.success && response.data) {
+      // Xử lý dữ liệu từ API MemberController mới
+      // API có thể trả về trực tiếp array hoặc đối tượng Page với thuộc tính content
+      let responseData = response;
+      
+      // Xác định cấu trúc dữ liệu trả về
+      if (response && response.content) {
+        // Nếu response là Page object
+        responseData = response.content;
+      } else if (response && Array.isArray(response)) {
+        // Nếu response là array trực tiếp
+        responseData = response;
+      } else if (response && response.data) {
+        // Nếu response được bọc trong data
+        responseData = Array.isArray(response.data) ? response.data : response.data.content || [];
+      }
+
+      if (response) {
         // Transform API data to match front-end expectations
-        const transformedMembers = (response.data.content || []).map(
+        const transformedMembers = (Array.isArray(responseData) ? responseData : []).map(
           (member) => {
             // Ensure isActive value is properly converted to boolean
             const isActive =
@@ -136,7 +152,7 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
               ...member,
               id: member.accountId, // Add id field for UI compatibility
               name: member.fullName, // Transform fullName to name
-              role: member.eventRole, // Transform eventRole to role
+              role: member.eventRole || member.role, // Handle both eventRole and role fields
               status: isActive ? "Active" : "Inactive", // Transform isActive to status
               department: member.departmentName || "N/A", // Transform departmentName to department
               isBanned: !isActive, // Map inactive to banned for UI logic
@@ -155,8 +171,8 @@ const useMemberData = (eventId = 1, filters = {}, pagination = {}) => {
         }
 
         setMembers(transformedMembers);
-        setTotalPages(response.data.totalPages || 0);
-        setTotalElements(response.data.totalElements || 0);
+        setTotalPages(response.data && response.data.totalPages || 0);
+        setTotalElements(response.data && response.data.totalElements || 0);
       } else {
         setError("Không thể tải danh sách thành viên");
         setMembers([]);

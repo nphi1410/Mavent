@@ -64,14 +64,7 @@ const useMemberManagement = () => {
       fetchCallbackCountRef.current += 1;
       lastFetchTimeRef.current = now;
       
-      if (process.env.NODE_ENV === 'development') {
-        // console.log(`Triggering fetch #${fetchCallbackCountRef.current}, interval: ${timeSinceLastFetch}ms`);        // console.log('Current filter values:', {
-        //   searchTerm: filterHook?.filterValues?.searchTerm,
-        //   statusFilter: filterHook?.filterValues?.statusFilter,
-        //   roleFilter: filterHook?.filterValues?.roleFilter,
-        //   departmentFilter: filterHook?.filterValues?.departmentFilter
-        // });
-      }
+    
       
       fetchMembers();
     } else {
@@ -553,6 +546,5 @@ const useMemberManagement = () => {
   };
 };
 
-// Export the hook as both named and default export
 export { useMemberManagement };
 export default useMemberManagement;

@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 
-@Service
+@Service("accountService")
 public class AccountImplement implements AccountService, UserDetailsService {
 
     @Autowired
@@ -45,7 +45,6 @@ public class AccountImplement implements AccountService, UserDetailsService {
     @Autowired
     private MailConfig mailConfig;
 
-//    @Autowired
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
@@ -120,7 +119,6 @@ public class AccountImplement implements AccountService, UserDetailsService {
         List<GrantedAuthority> authorities = List.of(
                 new SimpleGrantedAuthority("ROLE_" + account.getSystemRole().name())
         );
-
 
         return new org.springframework.security.core.userdetails.User(
                 account.getUsername(), account.getPasswordHash(), authorities
@@ -635,6 +633,12 @@ public class AccountImplement implements AccountService, UserDetailsService {
             return null;
         }
         return accountRepository.findByUsername(username);
+    }
+
+    @Override
+    public Boolean isSuperAdmin(Integer accountId) {
+        Account account = getAccountById(accountId);
+        return account.getSystemRole().name().equals("SUPER_ADMIN");
     }
 }
 
