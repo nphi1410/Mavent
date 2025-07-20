@@ -673,6 +673,56 @@ public class AccountController {
         }
     }
 
+    @GetMapping("/user/notifications")
+    public ResponseEntity<List<NotificationDTO>> getUserNotifications(HttpServletRequest request) {
+        Account account = getAuthenticatedAccount(request);
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        List<NotificationDTO> notifications = accountService.getUserNotifications(account.getAccountId());
+        return ResponseEntity.ok(notifications);
+    }
+
+    @PutMapping("/user/notifications/{notificationId}/read")
+    public ResponseEntity<?> markNotificationAsRead(
+            @PathVariable Integer notificationId,
+            HttpServletRequest request) {
+        Account account = getAuthenticatedAccount(request);
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            accountService.markNotificationAsRead(notificationId, account.getAccountId());
+            return ResponseEntity.ok("Notification marked as read");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/user/notifications/read-all")
+    public ResponseEntity<?> markAllNotificationsAsRead(HttpServletRequest request) {
+        Account account = getAuthenticatedAccount(request);
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        accountService.markAllNotificationsAsRead(account.getAccountId());
+        return ResponseEntity.ok("All notifications marked as read");
+    }
+
+    @GetMapping("/user/notifications/unread-count")
+    public ResponseEntity<Long> getUnreadNotificationCount(HttpServletRequest request) {
+        Account account = getAuthenticatedAccount(request);
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Long count = accountService.getUnreadNotificationCount(account.getAccountId());
+        return ResponseEntity.ok(count);
+    }
+
     private Account getAuthenticatedAccount(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {

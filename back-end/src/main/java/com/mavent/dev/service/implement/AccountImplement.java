@@ -1,5 +1,6 @@
 package com.mavent.dev.service.implement;
 
+import com.mavent.dev.dto.NotificationDTO;
 import com.mavent.dev.dto.task.TaskAttendeeDTO;
 import com.mavent.dev.dto.task.TaskFeedbackDTO;
 import com.mavent.dev.entity.*;
@@ -639,6 +640,60 @@ public class AccountImplement implements AccountService, UserDetailsService {
     public Boolean isSuperAdmin(Integer accountId) {
         Account account = getAccountById(accountId);
         return account.getSystemRole().name().equals("SUPER_ADMIN");
+    }
+
+    // Add these imports and autowired repository to AccountImplement
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Override
+    public List<NotificationDTO> getUserNotifications(Integer accountId) {
+        List<Notification> notifications = notificationRepository.findByRecipientAccountIdOrderByCreatedAtDesc(accountId);
+
+        return notifications.stream().map(this::mapNotificationToDTO).collect(Collectors.toList());
+    }
+
+    private NotificationDTO mapNotificationToDTO(Notification notification) {
+        NotificationDTO dto = new NotificationDTO();
+        dto.setNotificationId(notification.getNotificationId());
+        dto.setRecipientAccountId(notification.getRecipientAccountId());
+        dto.setEventId(notification.getEventId());
+        dto.setRequestId(notification.getRequestId());
+        dto.setTaskId(notification.getTaskId());
+        dto.setType(notification.getType());
+        dto.setMessage(notification.getMessage());
+        dto.setCreatedAt(notification.getCreatedAt());
+        dto.setIsRead(notification.getIsRead());
+        return dto;
+    }
+
+    @Override
+    @Transactional
+    public void markNotificationAsRead(Integer notificationId, Integer accountId) {
+        Notification notification = notificationRepository.findById(notificationId)
+            .orElseThrow(() -> new IllegalArgumentException("Notification not found"));
+
+        if (!notification.getRecipientAccountId().equals(accountId)) {
+            throw new IllegalArgumentException("Access denied");
+        }
+
+        notification.setIsRead(true);
+        notificationRepository.save(notification);
+    }
+
+    @Override
+    @Transactional
+    public void markAllNotificationsAsRead(Integer accountId) {
+        List<Notification> notifications = notificationRepository
+            .findByRecipientAccountIdAndIsReadFalse(accountId);
+
+        notifications.forEach(n -> n.setIsRead(true));
+        notificationRepository.saveAll(notifications);
+    }
+
+    @Override
+    public Long getUnreadNotificationCount(Integer accountId) {
+        return notificationRepository.countUnreadByRecipientAccountId(accountId);
     }
 }
 
