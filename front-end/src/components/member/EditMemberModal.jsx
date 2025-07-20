@@ -12,14 +12,7 @@ const EditMemberModal = ({
   canEdit,
   userRole,
 }) => {
-  // Log trạng thái của modal để debug
-  React.useEffect(() => {
-    console.log("EditMemberModal rendered with props:", { 
-      isOpen, 
-      userId: user ? user.id : null,
-      userName: user ? user.name : null
-    });
-  }, [isOpen, user]);
+ 
   
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -28,7 +21,7 @@ const EditMemberModal = ({
   
   // Nếu modal không được mở, không render gì cả
   if (!isOpen) {
-    console.log("EditMemberModal not rendering - isOpen is false");
+
     return null;
   }
   

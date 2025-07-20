@@ -18,13 +18,14 @@ import MeetingListPage from "./pages/meetingPages/MeetingListPage";
 // Department, Documents, and Members
 import DepartmentManagementPage from "./pages/Departments/DepartmentManagementPage";
 import Members from "./pages/Members/Members";
+import MembersEfficient from "./pages/Members/MembersEfficient";
 import DocumentsPage from "./pages/DocumentsPage";
 import EventDetailsByRoles from "./pages/eventDetailsByRoles/eventDetailsByRoles.jsx";
 
 // Auth
 import ProtectedRoute from "./auth/ProtectedRoute";
 import SuperAdminRoute from "./auth/SuperAdminRoute";
-import EventMemberRoute from "./auth/EventMemberRoute";
+
 
 // User
 import ProfilePage from "./pages/ProfilePage";
@@ -46,7 +47,7 @@ import SuperAdminManageUsers from "./pages/superadmin/SuperAdminManageUsers";
 import SuperAdminViewEventDetails from "./pages/superadmin/SuperAdminViewEventDetails";
 import SuperAdminEditEvent from "./pages/superadmin/SuperAdminEditEvent";
 import SuperAdminViewUserDetails from "./pages/superadmin/SuperAdminViewUserDetails";
-import SuperAdminLayout from "./layouts/SuperAdminLayout";
+
 import MeetingEditPage from "./pages/meetingPages/EditMeetingPage";
 import ViewEventFeedback from "./pages/ViewEventFeedback.jsx";
 import ParticipantFeedbackEvent from "./pages/ParticipantFeedbackEvent.jsx";
@@ -88,6 +89,7 @@ function App() {
                 <Route path="details" element={(<EventDetailsByRoles />)} />
                 <Route path="departments" element={<DepartmentManagementPage />} />
                 <Route path="members" element={(<Members />)} />
+                <Route path="members-efficient" element={(<MembersEfficient />)} />
                 <Route path="documents" element={(<DocumentsPage />)} />
                 <Route path="feedback" element={<ViewEventFeedback />} />
                 <Route path="requests" element={(<RequestHistory />)} />

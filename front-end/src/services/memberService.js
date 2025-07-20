@@ -55,16 +55,16 @@ const memberService = {
       // Cập nhật URL để phù hợp với MemberController
       const url = `/events/${eventId}/members?${queryParams.toString()}`;
       // Enhanced logging for easier debugging
-      // console.log('Calling API with parameters:', {
-      //   eventId: params.eventId,
-      //   search: params.search,
-      //   role: params.role,
-      //   department: params.department,
-      //   status: params.status,
-      //   page: params.page,
-      //   size: params.size
-      // });
-      // console.log('Full API URL:', url);
+      console.log('memberService.js - API parameters:', {
+        eventId: eventId,
+        search: params.search,
+        role: params.role,
+        department: params.department,
+        status: params.status,
+        page: params.page,
+        size: params.size
+      });
+      console.log('memberService.js - Full API URL:', url);
 
       // Pass AbortController signal to the request
       const response = await Api.get(url, { signal });

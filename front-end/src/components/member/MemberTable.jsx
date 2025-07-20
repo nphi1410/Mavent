@@ -86,7 +86,7 @@ const MemberTable = (props) => {
                       className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
-                        // console.log("Avatar clicked - opening view modal for:", member.name);
+  
                         onViewUser(member);
                       }}
                     >
@@ -117,7 +117,7 @@ const MemberTable = (props) => {
                         }`}
                         onClick={(e) => {
                           e.stopPropagation();
-                          // console.log("Name clicked - opening view modal for:", member.name);
+
                           onViewUser(member);
                         }}
                         title={member.name}
