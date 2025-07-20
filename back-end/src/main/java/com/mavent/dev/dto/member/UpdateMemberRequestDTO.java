@@ -12,10 +12,10 @@ import lombok.*;
 @Builder(toBuilder = true)
 public class UpdateMemberRequestDTO {
 
-    @NotNull(message = "Event ID is required")
+    // Không validate eventId vì sẽ được set từ path variable
     private Integer eventId;
 
-    @NotNull(message = "Account ID is required")
+    // Không validate accountId vì sẽ được set từ path variable
     private Integer accountId;
 
     @NotNull(message = "Event role is required")
@@ -24,6 +24,8 @@ public class UpdateMemberRequestDTO {
     private String eventRole;
 
     private Integer departmentId;
+
+    private Integer assignedByAccountId;
 
     @Size(max = 500, message = "Reason must not exceed 500 characters")
     private String reason;

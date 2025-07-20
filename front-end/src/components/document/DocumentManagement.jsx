@@ -26,7 +26,7 @@ const DocumentManagement = ({ eventId }) => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [filtersVisible, setFiltersVisible] = useState(false);useEffect(() => {
     if (eventId) {
-      console.log(`Loading document management for event ID: ${eventId}`);
+  
       
       // Ensure user profile is loaded to get accountId
       const ensureUserProfile = async () => {
@@ -35,7 +35,7 @@ const DocumentManagement = ({ eventId }) => {
             const profile = await getUserProfile();
             if (profile && profile.id) {
               sessionStorage.setItem("accountId", profile.id);
-              console.log("User accountId stored in session:", profile.id);
+             
             }
           }
         } catch (error) {
@@ -57,9 +57,9 @@ const DocumentManagement = ({ eventId }) => {
                 name: dept.name || 'Unknown Department'
               }))
             ]);
-            console.log('Departments loaded successfully:', response.length);
+         
           } else {
-            console.log('No departments found for this event');
+   
             setDepartments([{ id: 'all', name: 'All Departments' }]);
           }
         } catch (error) {

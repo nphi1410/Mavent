@@ -10,6 +10,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -26,7 +29,8 @@ public class JwtFilter extends OncePerRequestFilter {
     private final AccountService accountService;
     private final JwtBlacklistService blacklistService;
 
-    public JwtFilter(JwtUtil jwtUtil, AccountService accountService, JwtBlacklistService blacklistService) {
+    public JwtFilter(JwtUtil jwtUtil, AccountService accountService, 
+                    @Qualifier("jwtBlacklistService") JwtBlacklistService blacklistService) {
         this.jwtUtil = jwtUtil;
         this.accountService = accountService;
         this.blacklistService = blacklistService;
@@ -51,8 +55,14 @@ public class JwtFilter extends OncePerRequestFilter {
 
             try {
                 final String username = jwtUtil.extractUsername(token);
-                if (!jwtUtil.isTokenValid(token, accountService.getAccount(username))) {
-                    System.out.println("JwtFilter: Invalid token for user: " + username); // Debugging line for invalid token
+                try {
+                    UserDetails userDetails = accountService.loadUserByUsername(username);
+                    if (!jwtUtil.isTokenValid(token, userDetails)) {
+                        System.out.println("JwtFilter: Invalid token for user: " + username); // Debugging line for invalid token
+                        SecurityContextHolder.getContext().setAuthentication(null);
+                    }
+                } catch (UsernameNotFoundException e) {
+                    System.out.println("JwtFilter: User not found: " + username);
                     SecurityContextHolder.getContext().setAuthentication(null);
                 }
 //            else {

@@ -1,10 +1,12 @@
 import Api from "../config/Api";
 
-// Cập nhật hàm handleAuthError để xử lý thêm lỗi 403
+// Service cung cấp các hàm gọi API liên quan đến người dùng và sự kiện
+
+// Xử lý lỗi xác thực
 const handleAuthError = (error) => {
   console.error("Auth Error:", {
     status: error.response?.status,
-    data: error.response?.data,
+    data: error.response?.data
   });
 
   if (error.response?.status === 401) {
@@ -173,10 +175,10 @@ export const createTask = async (taskData) => {
   }
 };
 
-// Thêm hàm lấy role trong event
 export const getUserRoleInEvent = async (eventId) => {
   try {
-    const response = await Api.get(`/user/role/${eventId}`);
+    // Đơn giản hóa: Chỉ gọi API và trả về dữ liệu
+    const response = await Api.get(`/events/${eventId}/members/me`);
     return response.data;
   } catch (error) {
     console.error("Error fetching user role in event:", error);
@@ -188,7 +190,11 @@ export const getUserRoleInEvent = async (eventId) => {
 export const getEventMembers = async (eventId) => {
   try {
     const response = await Api.get(`/events/${eventId}/members`);
+    
+    // Đơn giản hóa: Chỉ trả về response.data thay vì xử lý nhiều trường hợp
     return response.data;
+    
+    return adaptedData;
   } catch (error) {
     console.error("Error fetching event members:", error);
     handleAuthError(error);
@@ -226,6 +232,18 @@ export const getEventDepartments = async (eventId) => {
     console.error("Error fetching event departments:", error);
     handleAuthError(error);
     throw error;
+  }
+};
+
+// Lấy thông tin một thành viên cụ thể
+export const getEventMember = async (eventId, accountId) => {
+  try {
+    const response = await Api.get(`/events/${eventId}/members/${accountId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching event member details:", error);
+    handleAuthError(error);
+    return null;
   }
 };
 

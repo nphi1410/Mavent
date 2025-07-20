@@ -64,5 +64,7 @@ public interface AccountService extends UserDetailsService {
     Account getAccountById(Integer id);
 
     Account getAccountByToken(String token);
+
+    Boolean isSuperAdmin(Integer accountId);
 }
 

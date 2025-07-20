@@ -1,7 +1,8 @@
 package com.mavent.dev.service;
 
 import com.mavent.dev.dto.member.*;
-import com.mavent.dev.dto.common.PagedResponseDTO;
+
+import java.util.List;
 
 /**
  * Service interface for member management operations.
@@ -10,9 +11,10 @@ import com.mavent.dev.dto.common.PagedResponseDTO;
 public interface MemberService {
 
     /**
-     * Get paginated and filtered list of members for an event.
+     * Get all members by event ID
      */
-    PagedResponseDTO<MemberResponseDTO> getMembers(MemberFilterRequestDTO filterRequest);
+    List<MemberResponseDTO> getAllMembersByEventId(Integer eventId);
+
 
     /**
      * Get member details by event and account ID.

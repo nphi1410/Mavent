@@ -24,6 +24,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -64,6 +65,7 @@ public class AccountController {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
+    @Qualifier("jwtBlacklistService")
     private JwtBlacklistService jwtBlacklistService;
 
     @Autowired
@@ -577,17 +579,8 @@ public class AccountController {
         }
     }
 
-    // Cần thêm endpoint này trong EventController trên backend
-    @GetMapping("/events/{eventId}/members")
-    public ResponseEntity<List<EventMemberDTO>> getEventMembers(@PathVariable Integer eventId, HttpServletRequest request) {
-        Account account = getAuthenticatedAccount(request);
-        if (account == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        List<EventMemberDTO> members = eventService.getEventMembers(eventId);
-        return ResponseEntity.ok(members);
-    }
+    // Đã loại bỏ phương thức trùng lặp getEventMembers, sử dụng MemberController ở /api/events/{eventId}/members thay thế
+    // hoặc sử dụng EventController nếu muốn xem thông tin không cần xác thực
 
     @GetMapping("/user/events")
     public ResponseEntity<?> getUserEvents(HttpServletRequest request) {
