@@ -81,7 +81,6 @@ const MemberCard = ({
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      console.log("Mobile - Name clicked for:", member.name);
                       onViewUser(member);
                     }}
                   >
@@ -119,10 +118,6 @@ const MemberCard = ({
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        console.log(
-                          "Mobile - Admin view button clicked for:",
-                          member.name
-                        );
                         onViewUser(member);
                       }}
                       className="p-1 mr-2 text-blue-600 hover:text-blue-800"
@@ -136,10 +131,6 @@ const MemberCard = ({
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        console.log(
-                          "Mobile - Admin edit button clicked for:",
-                          member.name
-                        );
                         onEditUser(member);
                       }}
                       className="p-1 mr-2 text-green-600 hover:text-green-800"
@@ -152,10 +143,6 @@ const MemberCard = ({
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        console.log(
-                          "Mobile - Admin ban/unban button clicked for:",
-                          member.name
-                        );
                         onBanUser(member, !bannedUsers[member.id]);
                       }}
                       className={`p-1 ${
@@ -190,10 +177,6 @@ const MemberCard = ({
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          console.log(
-                            "Mobile - Direct view button clicked for:",
-                            member.name
-                          );
                           onViewUser(member);
                         }}
                         className="p-1 mr-2 text-blue-600 hover:text-blue-800"
@@ -209,10 +192,6 @@ const MemberCard = ({
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          console.log(
-                            "Mobile - Direct edit button clicked for:",
-                            member.name
-                          );
                           onEditUser(member);
                         }}
                         className="p-1 mr-2 text-green-600 hover:text-green-800"
@@ -228,10 +207,6 @@ const MemberCard = ({
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          console.log(
-                            "Mobile - Direct ban/unban button clicked for:",
-                            member.name
-                          );
                           onBanUser(member, !bannedUsers[member.id]);
                         }}
                         className={`p-1 ${

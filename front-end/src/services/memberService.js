@@ -33,9 +33,9 @@ const memberService = {
             ? Number(params.department)
             : params.department.toString().trim();
         queryParams.append("department", departmentValue);
-        // console.log('Adding department parameter:', departmentValue, 'Type:', typeof departmentValue);
+      
       } else {
-        // console.log('No department filter applied');
+
       }
 
       // Map status to backend format - ensure consistent casing
@@ -46,7 +46,7 @@ const memberService = {
             ? "active"
             : "inactive";
         queryParams.append("status", normalizedStatus);
-        // console.log('Adding status parameter:', normalizedStatus);
+    
       }
 
       if (params.page !== undefined) queryParams.append("page", params.page);
@@ -54,20 +54,9 @@ const memberService = {
 
       // Cập nhật URL để phù hợp với MemberController
       const url = `/events/${eventId}/members?${queryParams.toString()}`;
-      // Enhanced logging for easier debugging
-      console.log('memberService.js - API parameters:', {
-        eventId: eventId,
-        search: params.search,
-        role: params.role,
-        department: params.department,
-        status: params.status,
-        page: params.page,
-        size: params.size
-      });
-      console.log('memberService.js - Full API URL:', url);
-
-      // Pass AbortController signal to the request
+  
       const response = await Api.get(url, { signal });
+
 
       return response.data;
     } catch (error) {
@@ -77,11 +66,11 @@ const memberService = {
         error.code === "ECONNABORTED" ||
         (error.message && error.message.includes("canceled"))
       ) {
-        // console.log('Request was cancelled');
+   
         throw { name: "AbortError", message: "Request aborted" };
       }
 
-      console.error("Error fetching members:", error);
+
       throw error;
     }
   },
@@ -101,7 +90,7 @@ const memberService = {
         error.code === "ECONNABORTED" ||
         (error.message && error.message.includes("canceled"))
       ) {
-        // console.log('Member details request was cancelled');
+
         throw { name: "AbortError", message: "Request aborted" };
       }
 
@@ -113,7 +102,7 @@ const memberService = {
   // Cập nhật thông tin member (role, department, status)
   updateMember: async (memberData) => {
     try {
-      console.log('memberService.updateMember called with data:', memberData);
+  
 
       // Transform frontend data to backend DTO format
       const isActive =
@@ -142,14 +131,13 @@ const memberService = {
         assignedByAccountId: memberData.assignedByAccountId || currentUserId,
       };
 
-      console.log('Final update request:', updateRequest);
 
       const eventId = memberData.eventId;
       const accountId = memberData.accountId;
       
       // Sử dụng POST đúng với định nghĩa @PostMapping trong backend controller
       const response = await Api.post(`/events/${eventId}/members/${accountId}`, updateRequest);
-      console.log('Update response:', response.data);
+     
       return response.data;
     } catch (error) {
       console.error("Error updating member:", error);
@@ -160,11 +148,11 @@ const memberService = {
   // Ban/unban member
   banMember: async (banData) => {
     try {
-      console.log('memberService.banMember called with data:', banData);
+
       
       // Ensure required fields are present
       if (!banData.eventId || !banData.accountId) {
-        console.error("Missing required fields in banData:", banData);
+    
         throw new Error("Missing required fields for ban operation");
       }
 
@@ -191,12 +179,12 @@ const memberService = {
       // Sử dụng endpoint RESTful từ MemberController với phương thức POST đúng với backend (@PostMapping)
       const eventId = banData.eventId;
       const accountId = banData.accountId;
-      console.log('Ban request payload:', banRequest);
+
       const response = await Api.post(`/events/${eventId}/members/${accountId}/ban`, banRequest);
-      console.log('Ban response:', response.data);
+
       return response.data;
     } catch (error) {
-      console.error("Error banning/unbanning member:", error);
+
       throw error;
     }
   },
@@ -229,7 +217,7 @@ const memberService = {
   // Lấy danh sách departments của một event
   getDepartments: async (eventId, signal = undefined) => {
     try {
-      // console.log('Calling API to get departments for eventId:', eventId);
+
 
       // Kiểm tra eventId
       if (!eventId) {
@@ -250,7 +238,7 @@ const memberService = {
             timeout: 8000, // 8 giây timeout
           });
 
-          // console.log('Departments API response from /departments:', response);
+        
 
           // Xử lý phản hồi từ API
           let departments = [];
@@ -288,10 +276,7 @@ const memberService = {
             };
           }
         } catch (err) {
-          console.log(
-            "Error fetching from /departments, trying alternative endpoint:",
-            err
-          );
+ 
         }
 
         // Nếu endpoint đầu tiên thất bại, thử với endpoint thay thế
@@ -340,24 +325,10 @@ const memberService = {
           message: "Departments fetched successfully from alternative endpoint",
         };
       } catch (apiError) {
-        console.error("API error in getDepartments:", apiError);
-
-        // Kiểm tra nếu request bị hủy/timeout
-        if (
-          apiError.name === "AbortError" ||
-          apiError.code === "ECONNABORTED" ||
-          (apiError.message &&
-            (apiError.message.includes("canceled") ||
-              apiError.message.includes("timeout")))
-        ) {
-          console.log("Departments request was cancelled or timed out");
-        }
-
         // Rethrow để xử lý ở cấp cao hơn
         throw apiError;
       }
     } catch (error) {
-      console.error("Error fetching departments:", error);
 
       // Trả về đối tượng với dữ liệu rỗng để UI hiển thị trạng thái không có dữ liệu
       return {

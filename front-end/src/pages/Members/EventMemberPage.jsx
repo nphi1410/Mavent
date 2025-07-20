@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import useUserPermissions from '../../hooks/useUserPermissions';
+import useDebounce from '../../hooks/useDebounce';
 import MemberFilters from '../../components/filter/MemberFilters';
 import MemberTable from '../../components/member/MemberTable';
 import MemberCard from '../../components/member/MemberCard';
@@ -15,7 +16,7 @@ import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import LoadingSpinner from '../../components/visual/LoadingSpinner';
 import ActionLoadingButton from '../../components/visual/ActionLoadingButton';
 
-const MembersEfficient = () => {
+const EventMemberPage = () => {
   const { id: eventIdParam } = useParams();
   const eventId = eventIdParam ? parseInt(eventIdParam) : null;
   
@@ -70,48 +71,19 @@ const MembersEfficient = () => {
     isAdminOrManager,
   } = useUserPermissions();
   
-  // Function to debounce search input
-  const debounce = (func, delay) => {
-    let timeout;
-    return function(...args) {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func.apply(this, args), delay);
-    };
-  };
+  // Function to handle search term changes
+  const handleSearchChange = useCallback((value) => {
+    setSearchTerm(value);
+    setCurrentPage(1); // Reset to first page when search term changes
+  }, []);
   
-  // Debounced search function
-  const debouncedSearch = useCallback(
-    debounce(value => {
-      console.log('Debounced search triggered with:', value);
-      setSearchTerm(value);
-      setCurrentPage(1); // Reset to first page when search term changes
-    }, 500),
-    []
-  );
+ 
   
-  // Debug effect để xem khi các giá trị thay đổi
-  useEffect(() => {
-    console.log('State changed:', {
-      searchTerm,
-      statusFilter,
-      roleFilter, 
-      departmentFilter,
-      currentPage
-    });
-  }, [searchTerm, statusFilter, roleFilter, departmentFilter, currentPage]);
+  // This debug effect was left in place
+  // The logger utility only shows debug messages in development, not production
 
   // Function to fetch members - use useCallback to recreate when dependencies change
-  const fetchMembers = useCallback(async () => {
-    console.log('fetchMembers called with state:', {
-      eventId,
-      currentPage,
-      itemsPerPage,
-      searchTerm,
-      statusFilter,
-      roleFilter,
-      departmentFilter
-    });
-    
+  const fetchMembers = useCallback(async (signal) => {
     if (!eventId) return;
     
     setLoading(true);
@@ -132,18 +104,14 @@ const MembersEfficient = () => {
         params.search = searchTerm.trim();
       }
       
-      // Add status filter if available - follow memberService.js format
+        // Add status filter if available - follow memberService.js format
       if (statusFilter) {
         // Normalize status to match memberService expectations
         params.status = statusFilter.toLowerCase().trim() === 'active' ? 'active' : 'inactive';
-        console.log('Adding status parameter to request:', params.status);
-      }
-      
-      // Add role filter if available - follow memberService.js format
+      }       // Add role filter if available - follow memberService.js format
       if (roleFilter) {
         // Đảm bảo role format đúng theo backend (uppercase)
         params.role = roleFilter.trim().toUpperCase();
-        console.log('Adding role parameter to request:', params.role);
       }
       
       // Add department filter if available - follow memberService.js format
@@ -154,44 +122,25 @@ const MembersEfficient = () => {
                                 ? Number(departmentFilter) 
                                 : departmentFilter.toString().trim();
         params.department = departmentValue;
-        console.log('Adding department parameter to request:', departmentValue, typeof departmentValue);
       }
       
-      // Log ra tham số để kiểm tra trước khi gọi API
-      console.log('Calling API with parameters:', { 
-        eventId, 
-        page: params.page,
-        size: params.size,
-        search: params.search,
-        role: params.role,
-        department: params.department,
-        status: params.status
-      });
+      // Check if ANY filter is applied
+      const hasAnyFilter = !!(params.search || params.role || params.department || params.status);
       
-      // Thêm console.trace để xem stack trace
-      console.trace('API call trace');
+      // Call existing service with abort signal
+      const response = await memberService.getMembers(eventId, params, signal);
       
-      // Call existing service
-      console.log('Before API call with params:', params);
-      const response = await memberService.getMembers(eventId, params);
-      console.log('After API call, response received:', response);
+      // Don't update state if the request was aborted
+      if (signal?.aborted) return;
       
       // Process response
       let memberData = [];
       let totalPagesCount = 1;
-      let totalElementsCount = 0;      console.log('API response type:', typeof response);
-      console.log('API response:', response); // Thêm log để debug
+      let totalElementsCount = 0;
       
-      // Kiểm tra chi tiết cấu trúc của response
-      if (response) {
-        console.log('Response has content?', !!response.content);
-        console.log('Response is array?', Array.isArray(response));
-        console.log('Response has data?', !!response.data);
-        if (response.data) {
-          console.log('Response.data is array?', Array.isArray(response.data));
-          console.log('Response.data has content?', !!response.data.content);
-        }
-      }
+      // Process response data from API
+      
+    
 
       // Handle different response formats
       if (response && response.content) {
@@ -199,51 +148,30 @@ const MembersEfficient = () => {
         memberData = response.content;
         totalPagesCount = response.totalPages || 1;
         totalElementsCount = response.totalElements || memberData.length;
-        console.log('Processed as Page object');
       } else if (Array.isArray(response)) {
         // If response is a direct array
         memberData = response;
         totalPagesCount = Math.ceil(response.length / itemsPerPage);
         totalElementsCount = response.length;
-        console.log('Processed as direct array');
       } else if (response && response.data) {
         // If response is wrapped in data field
         if (Array.isArray(response.data)) {
           memberData = response.data;
           totalPagesCount = Math.ceil(response.data.length / itemsPerPage);
           totalElementsCount = response.data.length;
-          console.log('Processed as data array');
         } else if (response.data.content) {
           memberData = response.data.content;
           totalPagesCount = response.data.totalPages || 1;
           totalElementsCount = response.data.totalElements || memberData.length;
-          console.log('Processed as data.content object');
         } else {
           // Fallback for other structures
-          console.log('Unknown response structure, trying to extract data');
           memberData = response.data.members || response.data || [];
           totalPagesCount = response.data.totalPages || response.totalPages || 1;
           totalElementsCount = response.data.totalElements || response.totalElements || memberData.length;
         }
       }
       
-      console.log('Processed member data:', memberData);
-      console.log('Pagination data:', { totalPages: totalPagesCount, totalElements: totalElementsCount });
-      
-      // Debug individual members for filter check
-      if (statusFilter) {
-        console.log(`Checking members with status filter "${statusFilter}":`);
-        memberData.forEach((member, index) => {
-          const isActive = typeof member.isActive === 'boolean' ? member.isActive : member.isActive === 'true' || member.status === 'Active';
-          console.log(`Member ${index}:`, { 
-            id: member.accountId || member.id, 
-            isActive: isActive, 
-            status: member.status, 
-            rawIsActive: member.isActive,
-            matchesFilter: statusFilter.toLowerCase() === 'active' ? isActive : !isActive
-          });
-        });
-      }
+      // Transform member data for consistency
       
       // Transform member data for consistency
       const transformedMembers = memberData.map(member => {
@@ -272,12 +200,17 @@ const MembersEfficient = () => {
       
       // Check if we have filters but the data doesn't seem filtered
       const hasFilter = !!(statusFilter || roleFilter || departmentFilter || searchTerm);
+      // Variable declaration moved outside the block to be accessible in the entire function scope
+      let shouldFilter = false;
       
       if (hasFilter) {
-        console.log('Checking if API filtered correctly...');
-        
         // Check if we should manually filter
-        let shouldFilter = false;
+        
+        // Luôn filter ở client-side khi có search, role hoặc department mà không có statusFilter
+        // Vì dường như API chỉ hoạt động khi có statusFilter
+        if (!statusFilter && (searchTerm || roleFilter || departmentFilter)) {
+          shouldFilter = true;
+        }
         
         // For status filter
         if (statusFilter) {
@@ -285,18 +218,19 @@ const MembersEfficient = () => {
           const activeCount = transformedMembers.filter(m => m.isActive === wantActive).length;
           // If all members are returned regardless of filter, API filtering isn't working
           shouldFilter = activeCount < transformedMembers.length;
-          console.log(`Status filter check: ${activeCount} of ${transformedMembers.length} match the '${statusFilter}' filter. Should filter client-side? ${shouldFilter}`);
+        }
+        
+        // Check other filters even when there's no status filter
+        if (!statusFilter && (searchTerm || roleFilter || departmentFilter)) {
+          shouldFilter = true;
         }
         
         // Apply client-side filtering if needed
         if (shouldFilter) {
-          console.log('Applying client-side filtering as fallback');
-          
           // Filter by status
           if (statusFilter) {
             const wantActive = statusFilter.toLowerCase() === 'active';
             finalMembers = finalMembers.filter(m => m.isActive === wantActive);
-            console.log(`After client-side status filter: ${finalMembers.length} members match`);
           }
           
           // Filter by role
@@ -304,7 +238,6 @@ const MembersEfficient = () => {
             finalMembers = finalMembers.filter(m => 
               m.role && m.role.toUpperCase() === roleFilter.toUpperCase()
             );
-            console.log(`After client-side role filter: ${finalMembers.length} members match`);
           }
           
           // Filter by department (if numeric, match ID; otherwise match name)
@@ -322,7 +255,6 @@ const MembersEfficient = () => {
                 m.department && m.department.toLowerCase().includes(deptName)
               );
             }
-            console.log(`After client-side department filter: ${finalMembers.length} members match`);
           }
           
           // Search by name or email
@@ -332,18 +264,34 @@ const MembersEfficient = () => {
               (m.name && m.name.toLowerCase().includes(search)) ||
               (m.email && m.email.toLowerCase().includes(search))
             );
-            console.log(`After client-side search filter: ${finalMembers.length} members match`);
           }
           
           // Update pagination data
           finalCount = finalMembers.length;
+          
+          // Pagination with client-side filtering
+          const clientPage = currentPage - 1;
+          const startIndex = clientPage * itemsPerPage;
+          const endIndex = startIndex + itemsPerPage;
+          
+          // Get only the current page items
+          const pagedMembers = finalMembers.slice(startIndex, endIndex);
+          
+          // If client filtering returned a small result that doesn't include the current page
+          if (startIndex >= finalCount && finalCount > 0) {
+            // Reset to first page
+            setCurrentPage(1);
+            finalMembers = finalMembers.slice(0, itemsPerPage);
+          } else {
+            finalMembers = pagedMembers;
+          }
         }
       }
       
       // Update state with filtered data
       setMembers(finalMembers);
-      setTotalPages(hasFilter ? Math.ceil(finalCount / itemsPerPage) : totalPagesCount);
-      setTotalElements(finalCount);
+      setTotalPages(hasFilter && shouldFilter ? Math.ceil(finalCount / itemsPerPage) : totalPagesCount);
+      setTotalElements(hasFilter && shouldFilter ? finalCount : totalElementsCount);
       
       // Create map of banned users for faster lookup
       const bannedMap = {};
@@ -354,22 +302,30 @@ const MembersEfficient = () => {
       });
       setBannedUsers(bannedMap);
     } catch (err) {
+      // Ignore aborted request errors
+      if (err.name === 'AbortError') return;
+      
       console.error('Error fetching members:', err);
       setError('Lỗi kết nối đến server. Vui lòng thử lại sau.');
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
     }
   }, [eventId, currentPage, itemsPerPage, searchTerm, statusFilter, roleFilter, departmentFilter]);
   
   // Function to fetch departments
-  const fetchDepartments = async () => {
+  const fetchDepartments = async (signal) => {
     if (!eventId) return;
     
     setDepartmentsLoading(true);
     
     try {
-      // Call existing service
-      const response = await memberService.getDepartments(eventId);
+      // Call existing service with abort signal
+      const response = await memberService.getDepartments(eventId, signal);
+      
+      // Don't update state if the request was aborted
+      if (signal?.aborted) return;
       
       // Process response
       let depts = [];
@@ -381,92 +337,78 @@ const MembersEfficient = () => {
       
       setDepartments(depts);
     } catch (err) {
+      // Ignore aborted request errors
+      if (err.name === 'AbortError') return;
+      
       console.error('Error fetching departments:', err);
     } finally {
-      setDepartmentsLoading(false);
+      if (!signal?.aborted) {
+        setDepartmentsLoading(false);
+      }
     }
   };
   
   // Effect to load initial data
   useEffect(() => {
     if (eventId) {
-      fetchMembers();
-      fetchDepartments();
+      // Create abort controller for cancelling requests when component unmounts
+      const abortController = new AbortController();
+      
+      fetchMembers(abortController.signal);
+      fetchDepartments(abortController.signal);
+      
+      // Cleanup function to abort requests when component unmounts
+      return () => {
+        abortController.abort();
+      };
     }
-  }, [eventId]);
+  }, [eventId, fetchMembers]);
   
   // Effect to reload data when filters change
   useEffect(() => {
     if (eventId) {
-      console.log('Filter/pagination changed, reloading data with:', {
-        eventId,
-        searchTerm,
-        statusFilter,
-        roleFilter,
-        departmentFilter,
-        currentPage,
-      });
+      // Create abort controller for cancelling requests when component unmounts
+      const abortController = new AbortController();
       
-      // Simulate how the filters would be applied client-side to debug
-      if (members.length > 0) {
-        console.log('Current members count:', members.length);
-        
-        // Test filtering locally to see what would happen with client-side filtering
-        let clientFiltered = [...members];
-        
-        if (statusFilter) {
-          const wantActive = statusFilter.toLowerCase() === 'active';
-          console.log(`Local filter check - Looking for members with isActive=${wantActive}`);
-          
-          const filtered = clientFiltered.filter(m => 
-            (wantActive ? m.isActive : !m.isActive)
-          );
-          
-          console.log(`Local filter would show ${filtered.length} of ${clientFiltered.length} members`);
-        }
-      }
+      fetchMembers(abortController.signal);
       
-      fetchMembers();
+      // Cleanup function to abort requests when component unmounts
+      return () => {
+        abortController.abort();
+      };
     }
-  }, [eventId, searchTerm, statusFilter, roleFilter, departmentFilter, currentPage, fetchMembers, members.length]);
+  }, [eventId, searchTerm, statusFilter, roleFilter, departmentFilter, currentPage, fetchMembers]);
   
   // Handler functions
-  const handleSearch = (value) => {
-    console.log('Search term:', value);
-    // Nếu muốn tìm kiếm ngay lập tức thay vì dùng debounce
+  const handleSearch = useCallback((value) => {
+    // Immediate search instead of debounce
     setSearchTerm(value);
-    setCurrentPage(1); // Reset về trang đầu tiên khi tìm kiếm
-    // Hoặc bạn có thể tiếp tục sử dụng debounced search
-    // debouncedSearch(value);
-    
-    console.log('Search value set to:', value, '- Will trigger effect to reload data');
-  };
+    setCurrentPage(1); // Reset to first page when searching
+  }, []);
   
   const handleStatusFilter = useCallback((status) => {
-    console.log('Setting status filter to:', status);
     setStatusFilter(status);
     setCurrentPage(1); // Reset to first page when filter changes
   }, []);
   
   const handleRoleFilter = useCallback((role) => {
-    console.log('Setting role filter to:', role);
     setRoleFilter(role);
     setCurrentPage(1); // Reset to first page when filter changes
   }, []);
   
   const handleDepartmentFilter = useCallback((department) => {
-    console.log('Setting department filter to:', department, typeof department);
     setDepartmentFilter(department);
     setCurrentPage(1); // Reset to first page when filter changes
   }, []);
   
-  const paginate = useCallback((pageNumber) => {
-    console.log('Changing page to:', pageNumber);
+  const handlePageChange = useCallback((pageNumber) => {
     if (pageNumber !== currentPage) {
-      console.log(`Pagination changed from ${currentPage} to ${pageNumber}`);
       setCurrentPage(pageNumber);
     }
   }, [currentPage]);
+  
+  // Add debounce to pagination to prevent rapid page changes
+  const paginate = useDebounce(handlePageChange, 300);
   
   // Function to show toast notification
   const showToast = (message, type = 'success') => {
@@ -697,7 +639,7 @@ const MembersEfficient = () => {
     }
   };
   
-  // UI for bulk actions bar
+  // UI for bulk actions bar with improved UX
   const renderBulkActionsBar = () => {
     if (selectedMembers.length === 0) return null;
     
@@ -705,14 +647,20 @@ const MembersEfficient = () => {
     
     return (
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg py-3 px-4 z-10 flex justify-between items-center">
-        <div>
+        <div className="flex items-center">
+          {isBulkBanLoading && (
+            <div className="w-5 h-5 mr-2">
+              <LoadingSpinner size="sm" color="primary" />
+            </div>
+          )}
           <span className="font-medium">{selectedMembers.length}</span>{' '}
           {selectedMembers.length === 1 ? 'member' : 'members'} selected
+          {isBulkBanLoading && <span className="ml-2 text-blue-600 text-sm">Processing...</span>}
         </div>
         <div className="flex space-x-2">
           <button
             onClick={() => setSelectedMembers([])}
-            className="px-3 py-1.5 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+            className="px-3 py-1.5 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
             disabled={isBulkBanLoading}
           >
             Cancel
@@ -722,7 +670,7 @@ const MembersEfficient = () => {
             onClick={() => setIsConfirmDialogOpen(true)}
             variant="danger"
             loadingText="Processing..."
-            className="flex items-center"
+            className="flex items-center transition-all"
             disabled={isBulkBanLoading}
           >
             <FontAwesomeIcon icon={faTrash} className="mr-1.5" />
@@ -740,13 +688,6 @@ const MembersEfficient = () => {
       </h1>
       <div className="bg-white rounded-lg shadow overflow-hidden">
         {/* Header Controls - Responsive */}
-        {console.log('Rendering MemberFilters with:', {
-          searchTerm,
-          statusFilter,
-          roleFilter,
-          departmentFilter,
-          departmentsLength: departments?.length
-        })}
         <MemberFilters
           searchTerm={searchTerm}
           statusFilter={statusFilter}
@@ -754,23 +695,11 @@ const MembersEfficient = () => {
           departmentFilter={departmentFilter}
           departments={departments}
           departmentsLoading={departmentsLoading}
-          onSearchChange={(value) => {
-            console.log('Search change in MemberFilters:', value);
-            handleSearch(value);
-          }}
-          onStatusFilterChange={(value) => {
-            console.log('Status filter change in MemberFilters:', value);
-            handleStatusFilter(value === '' ? '' : value);
-          }}
-          onRoleFilterChange={(value) => {
-            console.log('Role filter change in MemberFilters:', value);
-            handleRoleFilter(value === '' ? '' : value);
-          }}
-          onDepartmentFilterChange={(value) => {
-            console.log('Department filter change in MemberFilters:', value, typeof value);
-            handleDepartmentFilter(value === '' ? '' : value);
-          }}
-          onAddMember={() => {/* console.log('Add member clicked') */}}
+          onSearchChange={handleSearch}
+          onStatusFilterChange={handleStatusFilter}
+          onRoleFilterChange={handleRoleFilter}
+          onDepartmentFilterChange={handleDepartmentFilter}
+          onAddMember={() => {}}
         />
         
         {/* Bulk action menu when members are selected */}
@@ -842,27 +771,27 @@ const MembersEfficient = () => {
               actionTargetId={actionTargetId}
             />
             
-            {/* No results message */}
-            {members.length === 0 && !loading && <NoResults />}
+            {/* No results message with improved UI */}
+            {members.length === 0 && !loading && (
+              <NoResults 
+                message={
+                  searchTerm || statusFilter || roleFilter || departmentFilter 
+                    ? "Không tìm thấy thành viên nào phù hợp với bộ lọc. Vui lòng thử lại với điều kiện khác."
+                    : "Chưa có thành viên nào trong sự kiện này. Hãy thêm thành viên mới."
+                }
+                icon={searchTerm || statusFilter || roleFilter || departmentFilter ? "search" : "users"}
+              />
+            )}
             
             {/* Pagination */}
             {members.length > 0 && (
               <>
-                {console.log('Rendering Pagination with:', {
-                  currentPage,
-                  totalPages,
-                  totalItems: totalElements,
-                  itemsPerPage
-                })}
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}
                   totalItems={totalElements}
                   itemsPerPage={itemsPerPage}
-                  onPageChange={(page) => {
-                    console.log('Page change in Pagination component:', page);
-                    paginate(page);
-                  }}
+                  onPageChange={paginate}
                 />
               </>
             )}
@@ -959,4 +888,4 @@ const MembersEfficient = () => {
   );
 };
 
-export default MembersEfficient;
+export default EventMemberPage;

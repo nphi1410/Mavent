@@ -17,8 +17,8 @@ import MeetingListPage from "./pages/meetingPages/MeetingListPage";
 
 // Department, Documents, and Members
 import DepartmentManagementPage from "./pages/Departments/DepartmentManagementPage";
-import Members from "./pages/Members/Members";
-import MembersEfficient from "./pages/Members/MembersEfficient";
+
+import Members from "./pages/Members/EventMemberPage.jsx";
 import DocumentsPage from "./pages/DocumentsPage";
 import EventDetailsByRoles from "./pages/eventDetailsByRoles/eventDetailsByRoles.jsx";
 
@@ -88,8 +88,8 @@ function App() {
                 <Route index element={<EventDetailsByRoles />} />
                 <Route path="details" element={(<EventDetailsByRoles />)} />
                 <Route path="departments" element={<DepartmentManagementPage />} />
+            
                 <Route path="members" element={(<Members />)} />
-                <Route path="members-efficient" element={(<MembersEfficient />)} />
                 <Route path="documents" element={(<DocumentsPage />)} />
                 <Route path="feedback" element={<ViewEventFeedback />} />
                 <Route path="requests" element={(<RequestHistory />)} />
