@@ -15,7 +15,7 @@ function DepartmentList({ eventId }) {
       try {
         setLoading(true);
         const data = await getDepartmentsByEventId(eventId);
-        console.log("Departments data:", data); // Log để kiểm tra dữ liệu
+    
 
         // Store the departments initially
         setDepartments(data);

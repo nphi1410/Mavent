@@ -340,7 +340,7 @@ const DepartmentManagementPage = () => {
       try {
         setLoading(true);
         const data = await departmentService.getDepartmentsByEventId(eventId);
-        console.log("Fetched departments:", data);
+  
 
         let departmentsArray = [];
 
@@ -496,7 +496,7 @@ const DepartmentManagementPage = () => {
       return;
     }
 
-    console.log("Department detail from local data:", deptDetail);
+  
 
     // Set the department detail to state and open the modal
     setDepartmentDetail(deptDetail);
@@ -553,7 +553,7 @@ const DepartmentManagementPage = () => {
       setLoading(true);
 
       // First check: Get the latest member count
-      console.log(`Checking member count for department ${departmentId}`);
+    
       const memberCount = await departmentService.getMemberCount(
         numericEventId,
         numericDepartmentId
@@ -569,7 +569,7 @@ const DepartmentManagementPage = () => {
       }
 
       // Second check: Check for tasks (if available)
-      console.log(`Checking tasks for department ${departmentId}`);
+    
       const tasksCheck = await departmentService.checkDepartmentHasTasks(
         numericEventId,
         numericDepartmentId
@@ -592,9 +592,7 @@ const DepartmentManagementPage = () => {
       ) {
         try {
           setLoading(true);
-          console.log(
-            `Attempting to delete department ${departmentId} from event ${eventId}`
-          );
+      
 
           // Try to delete using our enhanced service method
           await departmentService.deleteDepartment(
@@ -603,7 +601,7 @@ const DepartmentManagementPage = () => {
           );
 
           // If we get here, deletion was successful
-          console.log(`Successfully deleted department ${departmentId}`);
+      
 
           // Update local state after successful deletion
           setDepartments(
@@ -720,7 +718,7 @@ const DepartmentManagementPage = () => {
           description: formData.description,
         };
 
-        console.log("Submitting department with data:", newDeptData);
+     
 
         // Add new department
         const newDepartment = await departmentService.addDepartment(
