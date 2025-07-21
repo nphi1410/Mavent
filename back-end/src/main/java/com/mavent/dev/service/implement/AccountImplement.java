@@ -7,6 +7,7 @@ import com.mavent.dev.entity.*;
 import com.mavent.dev.dto.task.TaskCreateDTO;
 import com.mavent.dev.dto.superadmin.AccountDTO;
 import com.mavent.dev.repository.*;
+import com.mavent.dev.service.NotificationService;
 import com.mavent.dev.util.JwtUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -45,6 +46,10 @@ public class AccountImplement implements AccountService, UserDetailsService {
 
     @Autowired
     private MailConfig mailConfig;
+
+    @Autowired
+    private NotificationService notificationService;
+
 
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
@@ -357,19 +362,41 @@ public class AccountImplement implements AccountService, UserDetailsService {
         if (!attendees.contains(assignedUserId)) {
             attendees.add(assignedUserId);
         }
+        Set<Integer> notifiedUsers = new HashSet<>();
 
         for (Integer attendeeId : attendees) {
+            if (notifiedUsers.contains(attendeeId)) {
+                continue;
+            }
+            notifiedUsers.add(attendeeId);
+
             TaskAttendee taskAttendee = new TaskAttendee();
             taskAttendee.setTaskId(savedTask.getTaskId());
             taskAttendee.setAccountId(attendeeId);
-            if (attendeeId.equals(assignedUserId)) {
-                taskAttendee.setStatus(TaskAttendee.Status.ACCEPTED);
-            } else {
-                taskAttendee.setStatus(TaskAttendee.Status.ACCEPTED);
-            }
+            taskAttendee.setStatus(TaskAttendee.Status.ACCEPTED);
 
             taskAttendeeRepository.save(taskAttendee);
+
+            String message;
+            String type;
+            if (attendeeId.equals(assignedUserId)) {
+                message = "You have been assigned as the main assignee for task: " + savedTask.getTitle();
+                type = "TASK ASSIGNMENT";
+            } else {
+                message = "You have been added as an attendee to task: " + savedTask.getTitle();
+                type = "TASK ATTENDEE";
+            }
+
+            notificationService.createNotification(
+                    attendeeId,
+                    savedTask.getEventId(),
+                    null,
+                    savedTask.getTaskId(),
+                    type,
+                    message
+            );
         }
+
         return convertToTaskDTO(savedTask);
     }
 
