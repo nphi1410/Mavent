@@ -71,6 +71,7 @@ const Layout = () => {
 
   // console.log('AdminLayout: ', user)
   const userRole = user.role;
+  const sponsorManageable = user.sponsorManageable;
 
   // Kiểm tra xem có phải đang ở trang quản lý (members, departments hoặc documents)
   // const isManagementPage =
@@ -153,14 +154,22 @@ const Layout = () => {
   // Filter items based on user role
   const mainItems = allMenuItems.filter((item) => {
     if (item.requiredRole === "ADMIN") return userRole.includes("ADMIN");
-    if (item.requiredRole === "DEPARTMENT_MANAGER")
+    if (item.requiredRole === "DEPARTMENT_MANAGER") {
+      if (item.name === "sponsorship" || item.name === "sponsorship packages") {
+        return sponsorManageable || userRole.includes("ADMIN");
+      }
       return ["ADMIN", "DEPARTMENT_MANAGER"].some((role) =>
         userRole.includes(role)
       );
-    if (item.requiredRole === "MEMBER")
+    }
+    if (item.requiredRole === "MEMBER") {
+      if (item.name === "sponsorship" || item.name === "sponsorship packages") {
+        return sponsorManageable || userRole.includes("ADMIN");
+      }
       return ["ADMIN", "DEPARTMENT_MANAGER", "MEMBER"].some((role) =>
         userRole.includes(role)
       );
+    }
     return item.requiredRole === "PARTICIPANT";
   });
 

@@ -1,7 +1,8 @@
 package com.mavent.dev.service.implement;
 
-import com.mavent.dev.dto.department.UserEventInfoDTO;
 import com.mavent.dev.dto.EventCountDTO;
+import com.mavent.dev.dto.department.DepartmentResponseDTO;
+import com.mavent.dev.dto.department.UserEventInfoDTO;
 import com.mavent.dev.dto.event.EventAccountRoleDTO;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.EventAccountRole;
@@ -9,7 +10,6 @@ import com.mavent.dev.repository.EventAccountRoleRepository;
 import com.mavent.dev.service.AccountService;
 import com.mavent.dev.service.DepartmentService;
 import com.mavent.dev.service.EventAccountRoleService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -171,10 +171,14 @@ public class EventAccountRoleImplement implements EventAccountRoleService {
             EventAccountRole eventAccountRole = ear.get();
 //            System.out.println("EventAccountRoleServiceImplement.getUserEventInfo: " + eventAccountRole.getEventRole());
             Account account = accountService.getAccountById(accountId);
-//            DepartmentResponseDTO department = departmentService.getDepartmentById(eventAccountRole.getDepartmentId());
+            DepartmentResponseDTO department = null;
+            if (eventAccountRole.getDepartmentId() != null) {
+                department = departmentService.getDepartmentById(eventAccountRole.getDepartmentId());
+            }
             return new UserEventInfoDTO(
                     eventAccountRole.getEventId(),
                     eventAccountRole.getDepartmentId(),
+                    department != null ? department.getSponsorManageable() : null,
 //                    department.getName(),
                     eventAccountRole.getAccountId(),
                     account.getFullName(),
