@@ -43,7 +43,7 @@ addKeyframesToDocument();
 
 const Layout = () => {
   const { user } = useEventRole();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const location = useLocation();
   const [loading, setLoading] = useState(true);
 
@@ -62,7 +62,7 @@ const Layout = () => {
       </div>
     );
   }
-
+  
   // console.log('AdminLayout: ', user)
   const userRole = user.role;
 
@@ -127,7 +127,15 @@ const Layout = () => {
       icon: <FontAwesomeIcon icon={faInbox} />,
       link: `requests`,
       requiredRole: 'MEMBER' // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
+    },
+    {
+      name: 'tasks',
+      displayName: 'Tasks',
+      icon: <FontAwesomeIcon icon={faFileAlt} />,
+      link: `tasks`,
+      requiredRole: 'MEMBER' // Visible to all roles
     }
+
 
 
   ];
@@ -166,51 +174,51 @@ const Layout = () => {
   }
 
   // Nếu là trang quản lý, render với Sidebar
-  
+
   return (
     // <EventRoleProvider>
-      <div className="flex min-h-screen bg-gray-50">
-        {" "}
-        {/* Mobile Sidebar Overlay with blur effect */}
-        {isSidebarOpen && (
-          <div
-            className="fixed inset-0 backdrop-blur-sm bg-black/30 z-40 lg:hidden animate-fadeIn"
-            onClick={() => setIsSidebarOpen(false)}
-            style={{ animation: "fadeIn 0.2s ease-in-out" }}
-            aria-label="Close sidebar overlay"
-          />
+    <div className="flex min-h-screen bg-gray-50">
+      {" "}
+      {/* Mobile Sidebar Overlay with blur effect */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 backdrop-blur-sm bg-black/30 z-40 lg:hidden animate-fadeIn"
+          onClick={() => setIsSidebarOpen(false)}
+          style={{ animation: "fadeIn 0.2s ease-in-out" }}
+          aria-label="Close sidebar overlay"
+        />
+      )}
+      {/* Sidebar with Sticky Help Button on Mobile */}
+      <div className="relative">
+        <Sidebar
+          // activeItem={activeItem}
+          mainItems={mainItems}
+          isOpen={isSidebarOpen}
+          onToggle={toggleSidebar}
+        />
+
+        {/* Floating help button for very small screens */}
+        {!isSidebarOpen && (
+          <button
+            onClick={toggleSidebar}
+            className="fixed bottom-4 left-4 z-40 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            style={{
+              animation: isSidebarOpen ? undefined : "pulse 2s infinite",
+            }}
+            aria-label="Open sidebar menu"
+          >
+            <FontAwesomeIcon icon={faBars} className="h-5 w-5 transition-transform duration-200" />
+          </button>
         )}
-        {/* Sidebar with Sticky Help Button on Mobile */}
-        <div className="relative">
-          <Sidebar
-            // activeItem={activeItem}
-            mainItems={mainItems}
-            isOpen={isSidebarOpen}
-            onToggle={toggleSidebar}
-          />
-
-          {/* Floating help button for very small screens */}
-          {!isSidebarOpen && (
-            <button
-              onClick={toggleSidebar}
-              className="lg:hidden fixed bottom-4 left-4 z-40 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              style={{
-                animation: isSidebarOpen ? undefined : "pulse 2s infinite",
-              }}
-              aria-label="Open sidebar menu"
-            >
-              <FontAwesomeIcon icon={faBars} className="h-5 w-5" />
-            </button>
-          )}
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 lg:ml-64 min-w-0 transition-all duration-300">
-          <main className="p-3 sm:p-4 lg:p-6">
-            <Outlet />
-          </main>
-        </div>
       </div>
+
+      {/* Main Content */}
+      <div className="flex-1 lg:ml-64 min-w-0 transition-all duration-300">
+        <main className="p-3 sm:p-4 lg:p-6">
+          <Outlet />
+        </main>
+      </div>
+    </div>
   );
 };
 

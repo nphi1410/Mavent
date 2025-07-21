@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useLocation, useParams, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUsers,
@@ -7,7 +7,7 @@ import {
   faSitemap,
   faFileAlt,
   faInbox,
-  faHouse, 
+  faHouse,
   faComments
 } from "@fortawesome/free-solid-svg-icons";
 
@@ -15,7 +15,7 @@ import {
 // Sidebar component for admin dashboard
 const Sidebar = ({ isOpen, onToggle, mainItems }) => {
   const location = useLocation();
-
+  const sidebarRef = useRef(null);
   const pathSegments = location.pathname.split('/').filter(Boolean);
   // console.log("pathSegments: " + pathSegments);
 
@@ -25,7 +25,9 @@ const Sidebar = ({ isOpen, onToggle, mainItems }) => {
     <>
       {/* Desktop Sidebar */}
       <aside
-        className={`hidden lg:block w-64 bg-white shadow-md h-screen fixed left-0 top-0 pt-16 z-30`}
+        className={`w-64 bg-white shadow-md h-screen fixed left-0 top-0 pt-16 z-30 transition-transform duration-300 ${
+          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}
       >
         <div className="px-4 py-6 h-full overflow-y-auto">
           <h2 className="mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -40,7 +42,7 @@ const Sidebar = ({ isOpen, onToggle, mainItems }) => {
                     activeItem === item.name.toLowerCase()
                       ? "bg-blue-100 text-blue-700 border-r-2 border-blue-700"
                       : "text-gray-900"
-                  }`}
+                    }`}
                 >
                   <span className="w-5 h-5 text-gray-500">{item.icon}</span>
                   <span className="ml-3">{item.displayName || item.name}</span>
@@ -112,11 +114,10 @@ const Sidebar = ({ isOpen, onToggle, mainItems }) => {
                 <Link
                   to={item.link}
                   onClick={onToggle}
-                  className={`flex items-center p-3 text-sm font-medium rounded-lg transition-colors duration-200 hover:bg-gray-100 ${
-                    activeItem === item.name.toLowerCase()
+                  className={`flex items-center p-3 text-sm font-medium rounded-lg transition-colors duration-200 hover:bg-gray-100 ${activeItem === item.name.toLowerCase()
                       ? "bg-blue-100 text-blue-700"
                       : "text-gray-900"
-                  }`}
+                    }`}
                 >
                   <span className="w-5 h-5 text-gray-500">{item.icon}</span>
                   <span className="ml-3">{item.displayName || item.name}</span>
