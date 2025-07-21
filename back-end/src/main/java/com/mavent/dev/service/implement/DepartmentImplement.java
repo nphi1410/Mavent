@@ -47,14 +47,14 @@ public class DepartmentImplement implements DepartmentService {
     @Override
     public DepartmentResponseDTO updateDepartment(Integer departmentId, DepartmentRequestDTO departmentRequestDTO) {
 
-        // Convert DTO to entity
+
         Department existingDepartment = departmentRepository.findById(departmentId)
                 .orElseThrow(() -> new EntityNotFoundException("Department not found"));
 
         existingDepartment.setName(departmentRequestDTO.getName());
         existingDepartment.setDescription(departmentRequestDTO.getDescription());
 
-        // Update timestamps
+
         Department updatedDepartment = departmentRepository.save(existingDepartment);
 
         return DepartmentMapper.toDTO(updatedDepartment);

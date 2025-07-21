@@ -323,16 +323,7 @@ const DepartmentManagementPage = () => {
     };
   }, []);
 
-  // Mock data cho departments dựa trên mockup
-  const mockDepartments = [
-    { id: 1, deptNo: "MKT-001", name: "Marketing Department" },
-    { id: 2, deptNo: "FIN-002", name: "Finance Department" },
-    { id: 3, deptNo: "HR-003", name: "Human Resources Department" },
-    { id: 4, deptNo: "CUL-004", name: "Culture Department" },
-    { id: 5, deptNo: "OPS-005", name: "Operations Department" },
-    { id: 6, deptNo: "IT-006", name: "IT Department" },
-    { id: 7, deptNo: "RD-007", name: "Research & Development" },
-  ];
+
 
   // Load real data from API
   useEffect(() => {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUsers,
@@ -34,8 +34,8 @@ const Sidebar = ({ isOpen, onToggle, mainItems }) => {
           <ul className="space-y-1">
             {mainItems.map((item) => (
               <li key={item.name}>
-                <a
-                  href={item.link}
+                <Link
+                  to={item.link}
                   className={`flex items-center p-3 text-sm font-medium rounded-lg transition-colors duration-200 hover:bg-gray-100 ${
                     activeItem === item.name.toLowerCase()
                       ? "bg-blue-100 text-blue-700 border-r-2 border-blue-700"
@@ -44,7 +44,7 @@ const Sidebar = ({ isOpen, onToggle, mainItems }) => {
                 >
                   <span className="w-5 h-5 text-gray-500">{item.icon}</span>
                   <span className="ml-3">{item.displayName || item.name}</span>
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
@@ -109,8 +109,8 @@ const Sidebar = ({ isOpen, onToggle, mainItems }) => {
           <ul className="space-y-1">
             {mainItems.map((item) => (
               <li key={item.name}>
-                <a
-                  href={item.link}
+                <Link
+                  to={item.link}
                   onClick={onToggle}
                   className={`flex items-center p-3 text-sm font-medium rounded-lg transition-colors duration-200 hover:bg-gray-100 ${
                     activeItem === item.name.toLowerCase()
@@ -120,7 +120,7 @@ const Sidebar = ({ isOpen, onToggle, mainItems }) => {
                 >
                   <span className="w-5 h-5 text-gray-500">{item.icon}</span>
                   <span className="ml-3">{item.displayName || item.name}</span>
-                </a>
+                </Link>
               </li>
             ))}
           </ul>

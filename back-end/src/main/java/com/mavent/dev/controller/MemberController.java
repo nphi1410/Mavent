@@ -89,7 +89,7 @@ public class MemberController {
             @PathVariable Integer accountId,
             @RequestBody @Valid BanMemberRequestDTO request) {
 
-        // Phải set ID trước khi validation (đoạn này vẫn giữ lại vì tính nhất quán)
+
         request.setEventId(eventId);
         request.setAccountId(accountId);
         

@@ -12,7 +12,7 @@ const TaskFeedbackModal = ({ taskId, isOpen, onClose }) => {
     const [usersMap, setUsersMap] = useState({});
 
     useEffect(() => {
-        console.log("TaskFeedbackModal mounted with taskId:", taskId);
+        // console.log("TaskFeedbackModal mounted with taskId:", taskId);
 
         if (isOpen && taskId) {
             fetchFeedback();
@@ -23,7 +23,7 @@ const TaskFeedbackModal = ({ taskId, isOpen, onClose }) => {
     const fetchAllAccounts = async () => {
         try {
             const accounts = await getAllAccounts();
-            console.log("Fetched all accounts:", accounts);
+            // console.log("Fetched all accounts:", accounts);
 
             setUserAccounts(accounts || []);
 
@@ -33,7 +33,7 @@ const TaskFeedbackModal = ({ taskId, isOpen, onClose }) => {
             });
             setUsersMap(accountsMap);
 
-            console.log("User accounts map:", accountsMap);
+            // console.log("User accounts map:", accountsMap);
         } catch (err) {
             console.error("Failed to fetch accounts:", err);
         }

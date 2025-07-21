@@ -3,14 +3,10 @@ import Api from "../config/Api";
 
 // Member API service - chỉ quản lý member, không liên quan đến event management
 const memberService = {
-  // Lấy danh sách members của một event với phân trang và filter
+  // Lấy danh sách members của một event
   getMembers: async (eventId, params = {}, signal = undefined) => {
     try {
-     
-
       const queryParams = new URLSearchParams();
-      
- 
       
       // Only append search parameter if it's not empty after trimming
       if (params.search && params.search.trim()) {
@@ -52,11 +48,10 @@ const memberService = {
       if (params.page !== undefined) queryParams.append("page", params.page);
       if (params.size !== undefined) queryParams.append("size", params.size);
 
-      // Cập nhật URL để phù hợp với MemberController
+   
       const url = `/events/${eventId}/members?${queryParams.toString()}`;
   
       const response = await Api.get(url, { signal });
-
 
       return response.data;
     } catch (error) {
@@ -69,7 +64,6 @@ const memberService = {
    
         throw { name: "AbortError", message: "Request aborted" };
       }
-
 
       throw error;
     }
@@ -148,11 +142,8 @@ const memberService = {
   // Ban/unban member
   banMember: async (banData) => {
     try {
-
-      
       // Ensure required fields are present
       if (!banData.eventId || !banData.accountId) {
-    
         throw new Error("Missing required fields for ban operation");
       }
 
@@ -168,15 +159,12 @@ const memberService = {
 
       // Cấu trúc lại request theo đúng định dạng của BanMemberRequestDTO
       const banRequest = {
-        // Cần giữ nguyên trường isBanned theo yêu cầu của BanMemberRequestDTO
         isBanned: banData.isBanned,
-        // Thêm reason - bắt buộc theo @NotBlank annotation
         reason: banData.reason || (banData.isBanned ? "Banned by admin" : "Unbanned by admin"),
-        // Thêm trường assignedByAccountId là bắt buộc cho việc xác thực quyền (đảm bảo là số hợp lệ > 0)
         assignedByAccountId: banData.assignedByAccountId || currentUserId,
       };
 
-      // Sử dụng endpoint RESTful từ MemberController với phương thức POST đúng với backend (@PostMapping)
+
       const eventId = banData.eventId;
       const accountId = banData.accountId;
 
@@ -218,7 +206,6 @@ const memberService = {
   getDepartments: async (eventId, signal = undefined) => {
     try {
 
-
       // Kiểm tra eventId
       if (!eventId) {
         console.warn("No eventId provided for getDepartments");
@@ -229,16 +216,13 @@ const memberService = {
         };
       }
 
-      // Gọi API thực tế để lấy danh sách phòng ban của sự kiện
+
       try {
-        // Thử gọi API với endpoint /departments trước
         try {
           const response = await Api.get(`/events/${eventId}/departments`, {
             signal,
             timeout: 8000, // 8 giây timeout
           });
-
-        
 
           // Xử lý phản hồi từ API
           let departments = [];

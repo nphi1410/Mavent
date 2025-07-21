@@ -19,8 +19,8 @@ public class UpdateMemberRequestDTO {
     private Integer accountId;
 
     @NotNull(message = "Event role is required")
-    @Pattern(regexp = "^(ADMIN|DEPARTMENT_MANAGER|MEMBER|PARTICIPANT|GUEST)$",
-            message = "Event role must be one of: ADMIN, DEPARTMENT_MANAGER, MEMBER, PARTICIPANT, GUEST")
+    @Pattern(regexp = "^(ADMIN|DEPARTMENT_MANAGER|MEMBER|PARTICIPANT)$",
+            message = "Event role must be one of: ADMIN, DEPARTMENT_MANAGER, MEMBER, PARTICIPANT")
     private String eventRole;
 
     private Integer departmentId;
@@ -30,6 +30,5 @@ public class UpdateMemberRequestDTO {
     @Size(max = 500, message = "Reason must not exceed 500 characters")
     private String reason;
 
-    // Field to handle active/inactive status
     private Boolean isActive;
 }
