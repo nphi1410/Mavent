@@ -88,7 +88,7 @@ function App() {
                 <Route index element={<EventDetailsByRoles />} />
                 <Route path="details" element={(<EventDetailsByRoles />)} />
                 <Route path="departments" element={<DepartmentManagementPage />} />
-            
+                <Route path="tasks" element={<UserTasksPage />} />
                 <Route path="members" element={(<Members />)} />
                 <Route path="documents" element={(<DocumentsPage />)} />
                 <Route path="feedback" element={<ViewEventFeedback />} />
