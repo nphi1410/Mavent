@@ -30,8 +30,6 @@ public class UpdateMemberRequestDTO {
     @Size(max = 500, message = "Reason must not exceed 500 characters")
     private String reason;
 
-    private Integer assignedByAccountId;
-
     // Field to handle active/inactive status
     private Boolean isActive;
 }

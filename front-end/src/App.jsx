@@ -17,7 +17,6 @@ import MeetingListPage from "./pages/meetingPages/MeetingListPage";
 
 // Department, Documents, and Members
 import DepartmentManagementPage from "./pages/Departments/DepartmentManagementPage";
-import Members from "./pages/Members/Members";
 import DocumentsPage from "./pages/DocumentsPage";
 import EventDetailsByRoles from "./pages/eventDetailsByRoles/eventDetailsByRoles.jsx";
 
@@ -56,6 +55,7 @@ import EventWrapper from "./wrapper/EventWrapper.jsx";
 import SponsorshipPackagesPage from "./pages/SponsorshipPackagesPage.jsx";
 import SponsorshipPage from "./pages/SponsorshipPage.jsx";
 import CreateSponsorshipPage from "./pages/CreateSponsorshipPage.jsx";
+import EventMemberPage from "./pages/Members/EventMemberPage.jsx";
 
 // Higher Order Components for Route Protection
 // const Protect = (Component) => <ProtectedRoute children={Component} />;
@@ -98,7 +98,7 @@ function App() {
                   path="departments"
                   element={<DepartmentManagementPage />}
                 />
-                <Route path="members" element={<Members />} />
+                <Route path="members" element={<EventMemberPage />} />
                 <Route path="documents" element={<DocumentsPage />} />
                 <Route path="feedback" element={<ViewEventFeedback />} />
                 <Route path="requests" element={<RequestHistory />} />

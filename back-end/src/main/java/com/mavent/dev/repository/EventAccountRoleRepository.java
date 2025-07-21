@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -258,8 +259,8 @@ public interface EventAccountRoleRepository extends JpaRepository<EventAccountRo
                                                     @Param("eventRole") EventAccountRole.EventRole eventRole,
                                                     @Param("departmentId") Integer departmentId,
                                                     @Param("searchTerm") String searchTerm,
-                                                    @Param("startDate") java.util.Date startDate,
-                                                    @Param("endDate") java.util.Date endDate,
+                                                    @Param("startDate") Date startDate,
+                                                    @Param("endDate") Date endDate,
                                                     @Param("status") String status,
                                                     Pageable pageable);
 

@@ -256,7 +256,8 @@ const EditMemberModal = ({
             onClick={onSave}
           >
             <FontAwesomeIcon icon={faSave} className="mr-2" />
-            {!user.assignedByAccountId ? "Approve application" : "Save changes"}
+            {"Save changes"}
+            {/* {!user.assignedByAccountId ? "Approve application" : } */}
           </button>
           <button
             className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors duration-200 flex items-center justify-center"

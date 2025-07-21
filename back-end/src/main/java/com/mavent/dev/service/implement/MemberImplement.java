@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class MemberServiceImpl implements MemberService {
+public class MemberImplement implements MemberService {
 
     private final EventAccountRoleRepository eventAccountRoleRepository;
     private final AccountRepository accountRepository;

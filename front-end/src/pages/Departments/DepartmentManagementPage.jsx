@@ -340,7 +340,6 @@ const DepartmentManagementPage = () => {
       try {
         setLoading(true);
         const data = await departmentService.getDepartmentsByEventId(eventId);
-  
 
         let departmentsArray = [];
 
@@ -360,6 +359,7 @@ const DepartmentManagementPage = () => {
 
         // Store the departments in state without member counts
         setDepartments(departmentsArray);
+
         setError(null);
 
         // Once departments are loaded, fetch member counts for each
@@ -496,8 +496,6 @@ const DepartmentManagementPage = () => {
       return;
     }
 
-  
-
     // Set the department detail to state and open the modal
     setDepartmentDetail(deptDetail);
     setIsDetailModalOpen(true);
@@ -553,7 +551,7 @@ const DepartmentManagementPage = () => {
       setLoading(true);
 
       // First check: Get the latest member count
-    
+
       const memberCount = await departmentService.getMemberCount(
         numericEventId,
         numericDepartmentId
@@ -569,7 +567,7 @@ const DepartmentManagementPage = () => {
       }
 
       // Second check: Check for tasks (if available)
-    
+
       const tasksCheck = await departmentService.checkDepartmentHasTasks(
         numericEventId,
         numericDepartmentId
@@ -592,7 +590,6 @@ const DepartmentManagementPage = () => {
       ) {
         try {
           setLoading(true);
-      
 
           // Try to delete using our enhanced service method
           await departmentService.deleteDepartment(
@@ -601,7 +598,6 @@ const DepartmentManagementPage = () => {
           );
 
           // If we get here, deletion was successful
-      
 
           // Update local state after successful deletion
           setDepartments(
@@ -717,9 +713,8 @@ const DepartmentManagementPage = () => {
           eventId: parseInt(eventId, 10), // Add eventId to match backend DTO
           name: formData.name,
           description: formData.description,
+          sponsorManageable: formData.sponsorManageable,
         };
-
-     
 
         // Add new department
         const newDepartment = await departmentService.addDepartment(
@@ -1167,6 +1162,9 @@ const DepartmentManagementPage = () => {
                 <th className="px-3 py-4 text-sm font-medium text-gray-600">
                   Members
                 </th>
+                <th className="px-3 py-4 text-sm font-medium text-gray-600">
+                  Sponsor manageable
+                </th>
                 <th className="px-3 py-4 text-center text-sm font-medium text-gray-600 w-32">
                   Action
                 </th>
@@ -1240,6 +1238,17 @@ const DepartmentManagementPage = () => {
                     ) : (
                       <span className="text-gray-400">Đang tải...</span>
                     )}
+                  </td>
+                  <td className="px-3 py-4">
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        department.sponsorManageable
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {department.sponsorManageable ? "Yes" : "No"}
+                    </span>
                   </td>
                   <td className="px-3 py-4">
                     <div className="flex justify-center space-x-1">

@@ -53,6 +53,7 @@ public class DepartmentImplement implements DepartmentService {
 
         existingDepartment.setName(departmentRequestDTO.getName());
         existingDepartment.setDescription(departmentRequestDTO.getDescription());
+        existingDepartment.setSponsorManageable(departmentRequestDTO.getSponsorManageable());
 
         // Update timestamps
         Department updatedDepartment = departmentRepository.save(existingDepartment);
@@ -75,5 +76,10 @@ public class DepartmentImplement implements DepartmentService {
         }
         // Use the repository method to get the count
         return departmentRepository.countMembersByDepartmentId(departmentId);
+    }
+
+    @Override
+    public List<Department> getSponsorManageableDepartment(Integer eventId) {
+        return departmentRepository.getSponsorManageable(eventId);
     }
 }
