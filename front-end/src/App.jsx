@@ -54,6 +54,7 @@ import ParticipantFeedbackEvent from "./pages/ParticipantFeedbackEvent.jsx";
 import RequestHistory from "./pages/request/member/RequestHistory.jsx";
 // import { EventRoleContext, EventRoleProvider } from "./context/EventRoleContext.jsx";
 import EventWrapper from "./wrapper/EventWrapper.jsx";
+import PendingEventView from "./pages/superadmin/PendingEventDetails.jsx";
 
 // Higher Order Components for Route Protection
 // const Protect = (Component) => <ProtectedRoute children={Component} />;
@@ -123,7 +124,10 @@ function App() {
         <Route path="superadmin" element={<SuperAdminRoute />}>
           <Route index element={<SuperAdminDashboard />} />
           <Route path="events" element={<SuperAdminManageEvents />} />
-          <Route path="events/pending" element={<SuperAdminPendingEvents />} />
+          <Route path="events/pending">
+            <Route index element={<SuperAdminPendingEvents />} />
+            <Route path=":eventId" element={<PendingEventView />} />
+          </Route>
           <Route path="users" element={<SuperAdminManageUsers />} />
           <Route path="event-detail/:eventId" element={<SuperAdminViewEventDetails />} />
           <Route path="edit-event/:eventId" element={<SuperAdminEditEvent />} />

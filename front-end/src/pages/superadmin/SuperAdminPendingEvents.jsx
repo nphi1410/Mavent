@@ -1,10 +1,11 @@
 import { useEffect, useState, useMemo } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { faChevronDown, faEye, faPencil } from "@fortawesome/free-solid-svg-icons";
 import { getEvents, updateEvent } from '../../services/eventService';
 import { getAllLocations } from '../../services/eventLocationService';
 import SuperAdminSidebar from '../../components/superadmin/SuperAdminSidebar';
 import SuperAdminHeader from '../../components/superadmin/SuperAdminHeader';
+import { useNavigate } from 'react-router-dom';
 
 // Simple Popup Component
 const Popup = ({ message, onClose }) => {
@@ -33,6 +34,8 @@ function SuperAdminPendingEvents() {
     const [currentPage, setCurrentPage] = useState(1);
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
+
+    const navigate = useNavigate();
 
     const eventsPerPage = 10;
 
@@ -123,18 +126,18 @@ function SuperAdminPendingEvents() {
             <div className='flex flex-col flex-1'>
                 <main className='flex-1 overflow-y-auto p-10 bg-gray-100'>
                     <div className="py-10 w-full">
-                        <h1 className="text-4xl font-bold text-gray-800 mb-4">Sự kiện đang chờ duyệt</h1>
-                        <p className="text-gray-500 mb-6">Quản lý và xem tất cả các sự kiện đang chờ duyệt</p>
+                        <h1 className="text-4xl font-bold text-gray-800 mb-4">Pending Events</h1>
+                        <p className="text-gray-500 mb-6">Manage all Pending Events</p>
 
                         <div className="border border-gray-200 rounded-lg p-4 bg-white">
-                            <h2 className="text-2xl font-semibold mb-1 text-black">Tất cả sự kiện đang chờ</h2>
-                            <p className="text-sm text-gray-500 mb-4">Xem và quản lý các sự kiện đang ở trạng thái PENDING</p>
+                            <h2 className="text-2xl font-semibold mb-1 text-black">All Pending Events</h2>
+                            <p className="text-sm text-gray-500 mb-4">View and Update Pending Events</p>
 
                             {/* Search only */}
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
                                 <input
                                     type="text"
-                                    placeholder="Tìm kiếm sự kiện..."
+                                    placeholder="Search by event name..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     className="border border-gray-300 rounded px-3 py-2 sm:w-1/2 placeholder:text-gray-500"
@@ -146,11 +149,12 @@ function SuperAdminPendingEvents() {
                                 <table className="w-full text-left border border-gray-200">
                                     <thead>
                                         <tr className="text-sm text-gray-500 border-b border-gray-200">
-                                            <th className="p-2 font-medium">Tên sự kiện</th>
-                                            <th className="p-2 font-medium">Ngày bắt đầu</th>
-                                            <th className="p-2 font-medium">Ngày kết thúc</th>
-                                            <th className="p-2 font-medium">Địa điểm</th> {/* Đổi tên cột */}
-                                            <th className="p-2 font-medium">Trạng thái</th>
+                                            <th className="p-2 font-medium">Event Name</th>
+                                            <th className="p-2 font-medium">Start Date</th>
+                                            <th className="p-2 font-medium">End Date</th>
+                                            <th className="p-2 font-medium">Location</th> {/* Đổi tên cột */}
+                                            <th className="p-2 font-medium">Status</th>
+                                            <th className="p-2 font-medium mx-6">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -165,13 +169,13 @@ function SuperAdminPendingEvents() {
                                                 </td>
                                                 <td className="p-2 whitespace-nowrap text-gray-600 relative">
                                                     <button
-                                                        onClick={() => setDropdownOpen(dropdownOpen === event.eventId ? null : event.eventId)}
-                                                        className={`bg-purple-100 text-purple-600 cursor-pointer text-xs font-semibold px-2 py-1 rounded-full flex items-center justify-between w-32`}
+                                                        // onClick={() => setDropdownOpen(dropdownOpen === event.eventId ? null : event.eventId)}
+                                                        className={`bg-purple-100 text-purple-600 cursor-pointer text-xs font-semibold px-2 py-1 rounded-full flex items-center justify-between`}
                                                     >
                                                         {event.status}
-                                                        <FontAwesomeIcon icon={faChevronDown} className="ml-2 w-3 h-3" />
+                                                        {/* <FontAwesomeIcon icon={faChevronDown} className="ml-2 w-3 h-3" /> */}
                                                     </button>
-                                                    {dropdownOpen === event.eventId && (
+                                                    {/* {dropdownOpen === event.eventId && (
                                                         <ul className="absolute z-[500] bg-white border border-gray-300 rounded mt-1 w-32 shadow-lg">
                                                             {allowedUpdateStatuses.map((status) => (
                                                                 <li
@@ -183,7 +187,19 @@ function SuperAdminPendingEvents() {
                                                                 </li>
                                                             ))}
                                                         </ul>
-                                                    )}
+                                                    )} */}
+                                                </td>
+                                                <td className="p-2 whitespace-nowrap text-gray-600 relative">
+                                                    <button className='m-1 rounded hover:bg-gray-100 mr-2'
+                                                        onClick={() => navigate(`${event.eventId}`)}
+                                                    >
+                                                        <FontAwesomeIcon icon={faEye} color='blue' />
+                                                    </button>
+                                                    <button 
+                                                        
+                                                    >
+                                                        <FontAwesomeIcon icon={faPencil} color='red' />
+                                                    </button>
                                                 </td>
                                             </tr>
                                         ))}
