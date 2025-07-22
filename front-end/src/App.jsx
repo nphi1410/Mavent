@@ -95,13 +95,12 @@ function App() {
                 element={<ProtectedRoute isRequiredToHaveEventRole={true} />}
               >
                 <Route index element={<EventDetailsByRoles />} />
-                <Route path="details" element={<EventDetailsByRoles />} />
-                <Route
-                  path="departments"
-                  element={<DepartmentManagementPage />}
-                />
-                <Route path="members" element={<EventMemberPage />} />
-                <Route path="documents" element={<DocumentsPage />} />
+                <Route path="details" element={(<EventDetailsByRoles />)} />
+                <Route path="departments" element={<DepartmentManagementPage />} />
+                <Route path="tasks" element={<UserTasksPage />} />
+                <Route path="tasks/history" element={<TaskHistory />} />
+                <Route path="members" element={(<EventMemberPage />)} />
+                <Route path="documents" element={(<DocumentsPage />)} />
                 <Route path="feedback" element={<ViewEventFeedback />} />
                 <Route path="requests" element={(<RequestHistory />)} />
                 <Route path="create-feedback" element={<ParticipantFeedbackEvent />} />

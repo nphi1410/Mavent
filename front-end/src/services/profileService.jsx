@@ -270,3 +270,27 @@ export const createTaskFeedback = async (taskId, comment) => {
     throw error;
   }
 };
+
+export const getTaskDocuments = async (taskId) => {
+  try {
+    const response = await Api.get(`/user/tasks/${taskId}/documents`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching task documents:", error);
+    handleAuthError(error);
+    throw error;
+  }
+};
+
+export const updateTaskDocuments = async (taskId, documentIds) => {
+  try {
+    const response = await Api.put(`/user/tasks/${taskId}/documents`, { 
+      documentIds: documentIds 
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating task documents:", error);
+    handleAuthError(error);
+    throw error;
+  }
+};

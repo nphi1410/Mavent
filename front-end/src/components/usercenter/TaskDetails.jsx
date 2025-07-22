@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getTaskDetails, updateTaskStatus, getUserProfile, getTaskAttendees } from '../../services/profileService';
+import { getTaskDetails, updateTaskStatus, getUserProfile, getTaskAttendees, getTaskDocuments } from '../../services/profileService';
 import AttendeesModal from './AttendeesModal';
 import UpdateTaskModal from './UpdateTaskModal';
 import TaskFeedbackModal from './TaskFeedbackModal';
@@ -17,6 +17,10 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
   const [attendees, setAttendees] = useState([]);
   const [loadingAttendees, setLoadingAttendees] = useState(false);
   const [showAttendeesModal, setShowAttendeesModal] = useState(false);
+
+  // State cho documents
+  const [documents, setDocuments] = useState([]);
+  const [loadingDocuments, setLoadingDocuments] = useState(false);
 
   // state cho update modal
   const [showUpdateModal, setShowUpdateModal] = useState(false);
@@ -49,6 +53,7 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
       const data = await getTaskDetails(taskId);
       if (data) {
         setTask(data);
+        await fetchDocuments();
       } else {
         setError('Failed to load task details');
       }
@@ -77,6 +82,22 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
       console.error("Error while loading attendee list:", err);
     } finally {
       setLoadingAttendees(false);
+    }
+  };
+
+  const fetchDocuments = async () => {
+    if (!taskId) return;
+
+    setLoadingDocuments(true);
+    try {
+      const data = await getTaskDocuments(taskId);
+      if (data) {
+        setDocuments(data);
+      }
+    } catch (err) {
+      console.error("Error while loading documents:", err);
+    } finally {
+      setLoadingDocuments(false);
     }
   };
 
@@ -416,7 +437,59 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
             ) : (
               <div className="p-4 text-center">Can not find detail</div>
             )}
+            {/* Thêm section Documents */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-2">Documents:</h3>
+              {loadingDocuments ? (
+                <div className="flex items-center justify-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#00155c]"></div>
+                  <span className="ml-2 text-gray-600">Loading documents...</span>
+                </div>
+              ) : documents && documents.length > 0 ? (
+                <div className="space-y-2">
+                  {documents.map((doc) => (
+                    <div key={doc.documentId} className="flex items-center p-3 bg-gray-50 rounded-lg">
+                      <div className="flex-shrink-0 mr-3">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-6 w-6 text-gray-400"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                      </div>
+                      <div className="flex-grow">
+                        <p className="font-medium text-gray-900">{doc.title}</p>
+                        {doc.description && (
+                          <p className="text-sm text-gray-600">{doc.description}</p>
+                        )}
+                      </div>
+                      {doc.url && (
+                        <a
+                          href={doc.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="ml-3 text-[#00155c] hover:text-[#172c70] font-medium text-sm"
+                        >
+                          View
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 italic">No documents attached to this task.</p>
+              )}
+            </div>
           </div>
+
         </div>
       </div>
 

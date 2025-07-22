@@ -8,6 +8,7 @@ import com.mavent.dev.dto.superadmin.AccountDTO;
 import com.mavent.dev.dto.UserProfileDTO;
 import com.mavent.dev.dto.task.TaskFeedbackDTO;
 import com.mavent.dev.entity.Account;
+import com.mavent.dev.entity.Document;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -75,5 +76,9 @@ public interface AccountService extends UserDetailsService {
     void markAllNotificationsAsRead(Integer accountId);
 
     Long getUnreadNotificationCount(Integer accountId);
+
+    List<Document> getTaskDocuments(Integer taskId);
+    
+    void updateTaskDocuments(Integer taskId, List<Integer> documentIds);
 }
 
