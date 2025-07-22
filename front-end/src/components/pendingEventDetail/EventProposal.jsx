@@ -55,10 +55,10 @@ export default function EventProposal({ proposal, onAssignProposer, onAssignAdmi
       <div className="space-y-4">
         {/* Proposal Info */}
         <div className="bg-gray-50 rounded-lg p-4">
-          <h3 className="font-medium text-gray-900 mb-2">{proposal.title}</h3>
+          <h3 className="font-medium text-gray-900 mb-2">{proposal?.title}</h3>
           <div className="flex items-center gap-4 mb-3">
             <a
-              href={proposal.link}
+              href={proposal?.link}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 hover:text-blue-800 underline text-sm"
@@ -66,7 +66,7 @@ export default function EventProposal({ proposal, onAssignProposer, onAssignAdmi
               View Proposal Document
             </a>
           </div>
-          {proposal.note && <p className="text-gray-600 text-sm">{proposal.note}</p>}
+          {proposal?.note && <p className="text-gray-600 text-sm">{proposal?.note}</p>}
         </div>
 
         {/* Admin Assignment Section */}
@@ -110,7 +110,7 @@ export default function EventProposal({ proposal, onAssignProposer, onAssignAdmi
                     className="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
                   >
                     <Avatar
-                      src={user.avatar || "/placeholder.svg"}
+                      src={user.avatarUrl || "/placeholder.svg"}
                       alt={user.username}
                       fallback={user.username.charAt(0).toUpperCase()}
                       size="md"

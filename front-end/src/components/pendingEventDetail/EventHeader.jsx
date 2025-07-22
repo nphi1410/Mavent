@@ -2,6 +2,7 @@ import { Calendar, MapPin, Users } from "lucide-react"
 import { Link } from "react-router-dom"
 import { Avatar } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import { vietnameseDate } from "../../utils/DateConvert"
 
 export default function EventHeader({ event }) {
   const getDaysUntilEvent = (startDate) => {
@@ -47,7 +48,7 @@ export default function EventHeader({ event }) {
           <Calendar className="h-5 w-5 text-gray-500" />
           <div>
             <div className="text-sm text-gray-500">Start Date</div>
-            <div className="font-medium">{new Date(event.startDate).toLocaleDateString()}</div>
+            <div className="font-medium">{vietnameseDate(event.startDate)}</div>
           </div>
         </div>
 
@@ -55,7 +56,7 @@ export default function EventHeader({ event }) {
           <Calendar className="h-5 w-5 text-gray-500" />
           <div>
             <div className="text-sm text-gray-500">End Date</div>
-            <div className="font-medium">{new Date(event.endDate).toLocaleDateString()}</div>
+            <div className="font-medium">{vietnameseDate(event.endDate)}</div>
           </div>
         </div>
 
@@ -79,28 +80,28 @@ export default function EventHeader({ event }) {
       {/* Creator Info */}
       <div className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg">
         <div className="flex items-center gap-3">
-          <Link href={`/profile/${event.createdBy.username}`}>
+          <Link href={`/profile/${event.creator?.username}`}>
             <Avatar
-              src={event.createdBy.avatar || "/placeholder.svg"}
-              alt={event.createdBy.username}
-              fallback={event.createdBy.username.charAt(0).toUpperCase()}
+              src={event.creator?.avatarUrl || "/placeholder.svg"}
+              alt={event.creator?.username}
+              fallback={event.creator?.username.charAt(0).toUpperCase()}
               size="lg"
               className="cursor-pointer hover:ring-2 hover:ring-blue-500"
             />
           </Link>
           <div>
             <Link
-              href={`/profile/${event.createdBy.username}`}
+              href={`/profile/${event.creator?.username}`}
               className="font-medium text-blue-600 hover:text-blue-800"
             >
-              @{event.createdBy.username}
+              @{event.creator?.username}
             </Link>
             <div className="text-sm text-gray-500">Event Creator</div>
           </div>
         </div>
         <div className="text-right">
           <div className="text-sm text-gray-500">Created</div>
-          <div className="font-medium">{new Date(event.createdAt).toLocaleDateString()}</div>
+          <div className="font-medium">{vietnameseDate(event.createdAt)}</div>
         </div>
       </div>
 

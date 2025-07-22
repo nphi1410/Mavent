@@ -2,6 +2,7 @@ package com.mavent.dev.service.implement;
 
 import com.mavent.dev.dto.event.ProposalDTO;
 import com.mavent.dev.entity.Proposal;
+import com.mavent.dev.mapper.ProposalMapper;
 import com.mavent.dev.repository.ProposalRepository;
 import com.mavent.dev.service.ProposalService;
 import lombok.RequiredArgsConstructor;
@@ -37,5 +38,13 @@ public class ProposalImplement implements ProposalService {
 //                .createdByAccountId(dto.getCreatedByAccountId())
                 .defenseDate(dto.getDefenseDate())
                 .build();
+    }
+
+    @Override
+    public ProposalDTO getProposalByEventId(Integer eventId) {
+        return ProposalMapper.toDto(
+                proposalRepository.findByEventId(eventId)
+                        .orElseThrow(() -> new RuntimeException("Proposal not found for event ID: " + eventId))
+        );
     }
 }

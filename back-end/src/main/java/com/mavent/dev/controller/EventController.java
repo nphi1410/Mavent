@@ -9,6 +9,7 @@ import com.mavent.dev.dto.FilterEventDTO;
 import com.mavent.dev.dto.FilterRequestDTO;
 import com.mavent.dev.dto.department.UserEventInfoDTO;
 import com.mavent.dev.dto.event.EventAccountRoleDTO;
+import com.mavent.dev.dto.event.PendingEventDTO;
 import com.mavent.dev.dto.superadmin.EventDTO;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.Event;
@@ -203,5 +204,18 @@ public class EventController {
         }
     }
 
+    @GetMapping("pending/{id}")
+    public ResponseEntity<?> getPendingEventById(@PathVariable("id") Integer eventId) {
+        System.out.println("Fetching pending event with ID: " + eventId);
+        try {
+            PendingEventDTO pendingEventDTO = eventService.getPendingEventById(eventId);
+            if (pendingEventDTO == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Event not found with ID: " + eventId);
+            }
+            return ResponseEntity.ok(eventService.getPendingEventById(eventId));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi lấy sự kiện: " + e.getMessage());
+        }
+    }
 
 }
