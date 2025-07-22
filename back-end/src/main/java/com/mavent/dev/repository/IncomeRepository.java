@@ -24,4 +24,6 @@ public interface IncomeRepository extends JpaRepository<Income, Integer> {
     // Phương thức MỚI: Lấy tất cả thu nhập theo EventId
     List<Income> findAllByEventId(Integer eventId); // Đổi tên rõ ràng hơn nếu cần, nhưng findByEventId đã có chức năng này
     // Sử dụng findByEventId để tránh trùng lặp
+
+    Income findBySourceId(Integer sourceId);
 }

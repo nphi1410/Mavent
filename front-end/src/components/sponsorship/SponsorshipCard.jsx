@@ -47,8 +47,13 @@ const SponsorshipCard = ({ item }) => {
             <span>Delete</span>
           </button>
         </div>
-        <div className="text-green-700 bg-green-100 text-sm font-semibold px-3 py-1 rounded-full w-fit">
-          {item.amount.toLocaleString()}₫
+        <div className="flex items-center gap-3">
+          <div className="px-3 py-1 bg-green-100 text-green-700 text-sm font-semibold rounded-full">
+            {item.amount.toLocaleString()}₫
+          </div>
+          <div className="px-2 py-1 bg-slate-100 text-slate-700 text-xs font-medium rounded-full">
+            {item.status}
+          </div>
         </div>
       </div>
 

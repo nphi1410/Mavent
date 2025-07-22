@@ -6,8 +6,10 @@ import {
   updateTask,
   getUserRoleInEvent,
   getTaskAttendees,
-  getEventDepartments
+  getEventDepartments,
+  getTaskDocuments
 } from '../../services/profileService';
+import { getDocumentsByEvent, uploadDocument } from '../../services/documentService';
 
 const UpdateTaskModal = ({ isOpen, onClose, taskData, onTaskUpdated }) => {
   const [formData, setFormData] = useState({
@@ -30,6 +32,21 @@ const UpdateTaskModal = ({ isOpen, onClose, taskData, onTaskUpdated }) => {
   const [loadingDepartments, setLoadingDepartments] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
 
+  // Thêm state cho documents
+  const [documents, setDocuments] = useState([]);
+  const [taskDocuments, setTaskDocuments] = useState([]);
+  const [selectedDocuments, setSelectedDocuments] = useState([]);
+  const [loadingDocuments, setLoadingDocuments] = useState(false);
+  const [loadingTaskDocuments, setLoadingTaskDocuments] = useState(false);
+  const [uploadingDocument, setUploadingDocument] = useState(false);
+  const [showUploadForm, setShowUploadForm] = useState(false);
+  const [documentsChanged, setDocumentsChanged] = useState(false);
+  const [newDocument, setNewDocument] = useState({
+    file: null,
+    title: '',
+    description: ''
+  });
+
   useEffect(() => {
     if (taskData) {
       setError("");
@@ -50,6 +67,8 @@ const UpdateTaskModal = ({ isOpen, onClose, taskData, onTaskUpdated }) => {
       fetchTaskAttendees(taskData.taskId);
       fetchEventMembers(taskData.eventId);
       fetchEventDepartments(taskData.eventId);
+      fetchEventDocuments(taskData.eventId);
+      fetchTaskDocuments(taskData.taskId);
     }
   }, [taskData]);
 
@@ -63,6 +82,96 @@ const UpdateTaskModal = ({ isOpen, onClose, taskData, onTaskUpdated }) => {
       console.error("Error loading department list:", err);
     } finally {
       setLoadingDepartments(false);
+    }
+  };
+
+  // Thêm các hàm fetch documents
+  const fetchEventDocuments = async (eventId) => {
+    if (!eventId) return;
+    setLoadingDocuments(true);
+    try {
+      const documents = await getDocumentsByEvent(eventId);
+      setDocuments(documents || []);
+    } catch (err) {
+      console.error("Error loading event documents:", err);
+    } finally {
+      setLoadingDocuments(false);
+    }
+  };
+
+  const fetchTaskDocuments = async (taskId) => {
+    if (!taskId) return;
+    setLoadingTaskDocuments(true);
+    try {
+      const taskDocs = await getTaskDocuments(taskId);
+      setTaskDocuments(taskDocs || []);
+      setSelectedDocuments((taskDocs || []).map(doc => doc.documentId));
+    } catch (err) {
+      console.error("Error loading task documents:", err);
+    } finally {
+      setLoadingTaskDocuments(false);
+    }
+  };
+
+  // Thêm các hàm xử lý documents
+  const handleDocumentToggle = (documentId) => {
+    setSelectedDocuments(prev => {
+      const newSelection = prev.includes(documentId)
+        ? prev.filter(id => id !== documentId)
+        : [...prev, documentId];
+      
+      setDocumentsChanged(true);
+      return newSelection;
+    });
+  };
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setNewDocument(prev => ({
+        ...prev,
+        file,
+        title: file.name
+      }));
+    }
+  };
+
+  const handleUploadDocument = async () => {
+    if (!newDocument.file) {
+      setError('Vui lòng chọn file');
+      return;
+    }
+
+    try {
+      setUploadingDocument(true);
+      const documentData = {
+        eventId: taskData.eventId,
+        departmentId: formData.departmentId || null,
+        title: newDocument.title || newDocument.file.name,
+        description: newDocument.description
+      };
+
+      const response = await uploadDocument(newDocument.file, documentData, null);
+      
+      // Thêm document mới vào danh sách và tự động chọn
+      const newDoc = response;
+      setDocuments(prev => [...prev, newDoc]);
+      setSelectedDocuments(prev => [...prev, newDoc.documentId]);
+      setDocumentsChanged(true);
+      
+      // Reset form upload
+      setNewDocument({ file: null, title: '', description: '' });
+      setShowUploadForm(false);
+      
+      // Reset file input
+      const fileInput = document.querySelector('input[type="file"]');
+      if (fileInput) fileInput.value = '';
+      
+    } catch (err) {
+      setError('Không thể upload document: ' + err.message);
+      console.error(err);
+    } finally {
+      setUploadingDocument(false);
     }
   };
 
@@ -177,6 +286,7 @@ const UpdateTaskModal = ({ isOpen, onClose, taskData, onTaskUpdated }) => {
     return Object.keys(errors).length === 0;
   };
 
+  // Cập nhật hàm handleSubmit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -194,14 +304,19 @@ const UpdateTaskModal = ({ isOpen, onClose, taskData, onTaskUpdated }) => {
       dueDate: formData.dueDate.toISOString(),
       priority: formData.priority,
       eventId: taskData.eventId,
-      assignedToAccountId: parseInt(formData.assignedToAccountId)
+      assignedToAccountId: parseInt(formData.assignedToAccountId),
+      documentIds: selectedDocuments // Luôn gửi selectedDocuments
     };
 
     updateData.departmentId = formData.departmentId ? parseInt(formData.departmentId) : null;
 
+    console.log("Updating task with data:", updateData); // Debug log
+
     try {
       setSubmitting(true);
+      
       const updatedTask = await updateTask(taskData.taskId, updateData);
+      
       if (updatedTask && onTaskUpdated) {
         onTaskUpdated();
         handleClose();
@@ -216,6 +331,7 @@ const UpdateTaskModal = ({ isOpen, onClose, taskData, onTaskUpdated }) => {
 
   const handleClose = () => {
     setError("");
+    setDocumentsChanged(false);
     onClose();
   };
 
@@ -268,12 +384,11 @@ const UpdateTaskModal = ({ isOpen, onClose, taskData, onTaskUpdated }) => {
                 Close
               </button>
             </div>
-          ) : loading || loadingAttendees || loadingDepartments ? (
+          ) : loading || loadingAttendees || loadingDepartments || loadingDocuments || loadingTaskDocuments ? (
             <div className="flex justify-center py-10">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" />
             </div>
           ) : (
-            // form continues from here...
             <form onSubmit={handleSubmit}>
               <div className="space-y-6">
                 <div>
@@ -357,6 +472,113 @@ const UpdateTaskModal = ({ isOpen, onClose, taskData, onTaskUpdated }) => {
                   {formErrors.departmentId && <p className="text-red-500 text-xs mt-1">{formErrors.departmentId}</p>}
                 </div>
 
+                {/* Thêm section Documents */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Documents
+                  </label>
+                  
+                  {/* Danh sách documents có sẵn */}
+                  <div className="border border-gray-300 rounded-lg p-4 max-h-48 overflow-y-auto mb-3">
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-sm font-medium">Available Documents ({documents.length})</span>
+                      <button
+                        type="button"
+                        onClick={() => setShowUploadForm(!showUploadForm)}
+                        className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                      >
+                        + Upload New Document
+                      </button>
+                    </div>
+
+                    {documents.length > 0 ? (
+                      <div className="space-y-2">
+                        {documents.map(doc => (
+                          <div key={doc.documentId} className="flex items-center p-2 hover:bg-gray-50 rounded">
+                            <input
+                              type="checkbox"
+                              checked={selectedDocuments.includes(doc.documentId)}
+                              onChange={() => handleDocumentToggle(doc.documentId)}
+                              className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            />
+                            <div className="flex-grow">
+                              <p className="font-medium text-sm">{doc.title}</p>
+                              {doc.description && (
+                                <p className="text-xs text-gray-600">{doc.description}</p>
+                              )}
+                              <p className="text-xs text-gray-500">
+                                {doc.fileType} • {new Date(doc.createdAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-sm">No documents available for this event</p>
+                    )
+                    }
+                  </div>
+
+                  {/* Form upload document mới */}
+                  {showUploadForm && (
+                    <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                      <h4 className="font-medium mb-3">Upload New Document</h4>
+                      <div className="space-y-3">
+                        <div>
+                          <input
+                            type="file"
+                            onChange={handleFileSelect}
+                            className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                          />
+                        </div>
+                        <div>
+                          <input
+                            type="text"
+                            placeholder="Document title"
+                            value={newDocument.title}
+                            onChange={(e) => setNewDocument(prev => ({ ...prev, title: e.target.value }))}
+                            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <textarea
+                            placeholder="Description (optional)"
+                            value={newDocument.description}
+                            onChange={(e) => setNewDocument(prev => ({ ...prev, description: e.target.value }))}
+                            rows={2}
+                            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                          />
+                        </div>
+                        <div className="flex space-x-2">
+                          <button
+                            type="button"
+                            onClick={handleUploadDocument}
+                            disabled={!newDocument.file || uploadingDocument}
+                            className="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:bg-gray-400"
+                          >
+                            {uploadingDocument ? 'Uploading...' : 'Upload'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setShowUploadForm(false)}
+                            className="px-4 py-2 border border-gray-300 rounded text-sm hover:bg-gray-100"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedDocuments.length > 0 && (
+                    <p className="text-sm text-blue-600 mt-2">
+                      {selectedDocuments.length} document(s) selected
+                      {documentsChanged && <span className="text-orange-600"> (changed)</span>}
+                    </p>
+                  )}
+                </div>
+
+                {/* Assignee section */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Assignee (Leader) <span className="text-red-500">*</span>

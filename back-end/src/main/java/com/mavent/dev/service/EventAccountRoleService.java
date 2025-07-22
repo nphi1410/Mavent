@@ -54,6 +54,7 @@ public interface EventAccountRoleService {
                                                  EventAccountRole.EventRole role,
                                                  Integer departmentId,
                                                  String searchTerm,
+                                                 String status,
                                                  Pageable pageable);
 
     Page<EventAccountRole> getMembersWithFilters(Integer eventId, Boolean isActive,
@@ -62,6 +63,7 @@ public interface EventAccountRoleService {
                                                  String searchTerm,
                                                  java.util.Date startDate,
                                                  java.util.Date endDate,
+                                                 String status,
                                                  Pageable pageable);
 
     List<EventCountDTO> getMonthlyStatistic(Integer accountId, String eventRole);

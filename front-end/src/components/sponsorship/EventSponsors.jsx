@@ -22,7 +22,7 @@ const EventSponsors = ({ eventId }) => {
 
   return (
     <div className="w-full px-4 md:px-6 text-gray-900">
-      <div className="mb-6 border-b border-gray-300 pb-3">
+      <div className="my-6 border-b border-gray-300 pb-3">
         <h2 className="text-4xl font-bold tracking-tight">🌟 Our Sponsors</h2>
       </div>
 

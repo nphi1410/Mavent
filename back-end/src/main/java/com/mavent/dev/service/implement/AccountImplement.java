@@ -328,7 +328,6 @@ public class AccountImplement implements AccountService, UserDetailsService {
 
     @Override
     public TaskDTO createTask(TaskCreateDTO taskCreateDTO, Account creator) {
-
         if (taskCreateDTO.getTitle() == null || taskCreateDTO.getTitle().trim().isEmpty()) {
             throw new IllegalArgumentException("Task title is required");
         }
@@ -354,6 +353,24 @@ public class AccountImplement implements AccountService, UserDetailsService {
         task.setUpdatedAt(LocalDateTime.now());
 
         Task savedTask = taskRepository.save(task);
+
+        // Thêm documents nếu có
+        if (taskCreateDTO.getDocumentIds() != null && !taskCreateDTO.getDocumentIds().isEmpty()) {
+            List<Document> documents = documentRepository.findAllById(taskCreateDTO.getDocumentIds());
+            
+            // Validate documents belong to same event
+            for (Document doc : documents) {
+                if (!savedTask.getEventId().equals(doc.getEventId())) {
+                    throw new IllegalArgumentException("Document must belong to the same event as task");
+                }
+            }
+            
+            if (savedTask.getDocuments() == null) {
+                savedTask.setDocuments(new ArrayList<>());
+            }
+            savedTask.getDocuments().addAll(documents);
+            taskRepository.save(savedTask);
+        }
 
         List<Integer> attendees = new ArrayList<>();
         if (taskCreateDTO.getTaskAttendees() != null && !taskCreateDTO.getTaskAttendees().isEmpty()) {
@@ -414,24 +431,35 @@ public class AccountImplement implements AccountService, UserDetailsService {
         task.setAssignedToAccountId(updateDto.getAssignedToAccountId());
         task.setDepartmentId(updateDto.getDepartmentId());
 
+        // Cập nhật documents nếu có trong updateDto
+        if (updateDto.getDocumentIds() != null) {
+            // Clear existing documents
+            if (task.getDocuments() != null) {
+                task.getDocuments().clear();
+            }
+            
+            // Add new documents if provided
+            if (!updateDto.getDocumentIds().isEmpty()) {
+                List<Document> documents = documentRepository.findAllById(updateDto.getDocumentIds());
+                
+                // Validate documents belong to same event
+                for (Document doc : documents) {
+                    if (!task.getEventId().equals(doc.getEventId())) {
+                        throw new IllegalArgumentException("Document must belong to the same event as task");
+                    }
+                }
+                
+                if (task.getDocuments() == null) {
+                    task.setDocuments(new ArrayList<>());
+                }
+                task.getDocuments().addAll(documents);
+            }
+        }
+
         task.setUpdatedAt(LocalDateTime.now());
 
         Task saved = taskRepository.save(task);
-
-        TaskDTO dto = new TaskDTO();
-        dto.setTaskId(saved.getTaskId());
-        dto.setEventId(saved.getEventId());
-        dto.setDepartmentId(saved.getDepartmentId());
-        dto.setTitle(saved.getTitle());
-        dto.setDescription(saved.getDescription());
-        dto.setAssignedToAccountId(saved.getAssignedToAccountId());
-        dto.setAssignedByAccountId(saved.getAssignedByAccountId());
-        dto.setDueDate(saved.getDueDate());
-        dto.setStatus(saved.getStatus().name());
-        dto.setPriority(saved.getPriority().name());
-        dto.setCreatedAt(saved.getCreatedAt());
-        dto.setUpdatedAt(saved.getUpdatedAt());
-        return dto;
+        return convertToTaskDTO(saved);
     }
 
 
