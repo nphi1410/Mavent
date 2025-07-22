@@ -138,18 +138,8 @@ public class EventController {
         eventAccountRole.setEventRole(eventRegisterDto.getRole());
         eventAccountRole.setAccountId(accountId);
         eventAccountRole.setDepartmentId(eventRegisterDto.getDepartmentId());
-        if (eventRegisterDto.getRole().equals(EventAccountRole.EventRole.MEMBER)){
-            eventAccountRole.setIsActive(false);
-        }
         eventAccountRole.setCreatedAt(LocalDateTime.now());
-//        if(eventRegisterDto.getRole().equals(EventAccountRole.EventRole.PARTICIPANT)){
         return ResponseEntity.ok(eventAccountRoleService.addMemberToEvent(eventAccountRole).toString());
-//        }
-
-        // chua xu ly register as member
-//        eventAccountRole.setDepartmentId(eventRegisterDto.getDepartmentId());
-
-//        return ResponseEntity.ok(eventRegisterDto.toString());
     }
 
     // Lấy các sự kiện đang tham gia

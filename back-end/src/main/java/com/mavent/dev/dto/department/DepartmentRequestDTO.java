@@ -10,4 +10,5 @@ public class DepartmentRequestDTO {
     private Integer departmentId;
     private String name;
     private String description;
+    private Boolean sponsorManageable;
 }

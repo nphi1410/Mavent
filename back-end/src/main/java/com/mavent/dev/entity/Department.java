@@ -59,6 +59,7 @@ public class Department {
     // @OneToMany(mappedBy = "department")
     // private List<EventAccountRole> members = new ArrayList<>();
 
+    private Boolean sponsorManageable;
 
 }
 

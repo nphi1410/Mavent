@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class UserEventInfoDTO {
     private Integer eventId;
     private Integer departmentId;
+    private Boolean sponsorManageable;
 //    private String departmentName;
     private Integer accountId;
     private String username;

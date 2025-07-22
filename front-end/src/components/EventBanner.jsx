@@ -60,7 +60,7 @@ const EventBanner = ({ eventData }) => {
     const registerDTO = {
       eventId: eventData.eventId,
       accountId: sessionStorage.getItem("accountId"),
-      role: MEMBER_ROLE,
+      role: 'GUEST',
       departmentId: department.departmentId,
     };
 
