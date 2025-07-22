@@ -1,6 +1,6 @@
 import Select from "react-select";
 
-const PackageSelect = ({ packages, onChange }) => {
+const PackageSelect = ({ packages, onChange, value }) => {
   const options = packages.map((pkg) => ({
     value: pkg.packageId,
     label: pkg.name,
@@ -44,10 +44,13 @@ const PackageSelect = ({ packages, onChange }) => {
     }),
   };
 
+  const selectedOption = options.find((opt) => opt.value === value) || null;
+
   return (
     <div className="w-full">
       <Select
         options={options}
+        value={selectedOption}
         onChange={(selected) => onChange(selected?.value)}
         formatOptionLabel={formatOptionLabel}
         placeholder="Select a package..."

@@ -1,6 +1,8 @@
 package com.mavent.dev.service.implement;
 
+import com.mavent.dev.dto.sponsorship.SponsorshipDTO;
 import com.mavent.dev.entity.EventSponsorship;
+import com.mavent.dev.entity.Sponsor;
 import com.mavent.dev.repository.EventSponsorshipRepository;
 import com.mavent.dev.service.EventSponsorshipService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,25 +14,25 @@ import java.util.List;
 public class EventSponsorshipImplement implements EventSponsorshipService {
 
     @Autowired
-    private EventSponsorshipRepository repository;
+    private EventSponsorshipRepository eventSponsorshipRepository;
 
     @Override
-    public List<EventSponsorship> getAll() {
-        return repository.findAll();
+    public List<SponsorshipDTO> getAll(Integer eventId) {
+        return eventSponsorshipRepository.findSponsorshipByEventId(eventId);
     }
 
     @Override
-    public EventSponsorship getById(Integer id) {
-        return repository.findById(id).orElse(null);
+    public List<Sponsor> getByEventId(Integer eventId) {
+        return eventSponsorshipRepository.findByEventId(eventId);
     }
 
     @Override
     public EventSponsorship save(EventSponsorship sponsorship) {
-        return repository.save(sponsorship);
+        return eventSponsorshipRepository.save(sponsorship);
     }
 
     @Override
     public void delete(Integer id) {
-        repository.deleteById(id);
+        eventSponsorshipRepository.deleteById(id);
     }
 }

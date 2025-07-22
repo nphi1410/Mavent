@@ -1,15 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
-import { useParams } from "react-router-dom";
-import { getSponsors } from "../services/SponsorService";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import {
+  createSponsor,
+  getSponsorById,
+  getSponsors,
+} from "../services/SponsorService";
 import SponsorSelect from "../components/sponsorship/SponsorSelect";
-import { getSponsorshipPackages } from "../services/sponsorshipService";
+import {
+  createSponsorship,
+  getSponsorshipPackages,
+} from "../services/sponsorshipService";
 import PackageSelect from "../components/sponsorship/PackageSelect";
-import { getAllAccounts } from "../services/accountService";
 import ContactAccountSelect from "../components/sponsorship/ContactAccountSelect";
 import AgreementInput from "../components/sponsorship/AgreementInput";
+import CreateSponsorModal from "../components/sponsorship/CreateSponsorModal";
+import memberService from "../services/memberService";
 
-const CreateSponsorshipPage = () => {
+const SubmitSponsorshipPage = () => {
   const methods = useForm();
   const {
     register,
@@ -18,6 +26,7 @@ const CreateSponsorshipPage = () => {
     formState: { errors },
     reset,
     watch,
+    getValues,
     setValue,
   } = methods;
 
@@ -26,38 +35,52 @@ const CreateSponsorshipPage = () => {
   const [packages, setPackages] = useState([]);
   const [contactAccounts, setContactAccounts] = useState([]);
   const packageId = watch("packageId");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const existedSponsorship = location.state?.sponsorship;
+  const [successText, setSuccessText] = useState(
+    "Sponsorship created successfully!"
+  );
+  const [failedText, setFailedText] = useState("Sponsorship creation failed!");
 
   useEffect(() => {
-    const fetchSponsors = async () => {
+    const loadAllData = async () => {
       try {
-        const data = await getSponsors();
-        setSponsors(data);
+        const [packagesData, sponsorsData, contactsData] = await Promise.all([
+          getSponsorshipPackages(id),
+          getSponsors(id),
+          memberService.getSponsorManageableMembers(id),
+        ]);
+        setPackages(packagesData);
+        setContactAccounts(contactsData);
+
+        if (existedSponsorship) {
+          const existedSponsor = await getSponsorById(
+            existedSponsorship.sponsorId
+          );
+
+          const finalSponsors = [...sponsorsData, existedSponsor];
+
+          setSponsors(finalSponsors);
+
+          setSuccessText("Sponsorship updated successfully!");
+          setFailedText("Failed to update sponsorship!");
+          reset(existedSponsorship);
+          setTimeout(() => {
+            console.log("Form values after reset:", getValues());
+          }, 0);
+        } else {
+          setSponsors(sponsorsData);
+        }
       } catch (error) {
-        console.error("Error fetching sponsors:", error);
+        console.error("Error loading data:", error);
       }
     };
 
-    const fetchPackages = async () => {
-      try {
-        const data = await getSponsorshipPackages();
-        setPackages(data);
-      } catch (error) {
-        console.error("Error fetching sponsorship packages:", error);
-      }
-    };
-    const fetchContactAccounts = async () => {
-      try {
-        const data = await getAllAccounts();
-        setContactAccounts(data);
-      } catch (error) {
-        console.error("Error fetching contact accounts:", error);
-      }
-    };
-
-    fetchPackages();
-    fetchSponsors();
-    fetchContactAccounts();
-  }, []);
+    loadAllData();
+  }, [id]);
 
   useEffect(() => {
     if (packageId) {
@@ -69,6 +92,39 @@ const CreateSponsorshipPage = () => {
       setValue("amount", 0);
     }
   }, [packageId, packages, setValue]);
+
+  const fetchSponsors = async () => {
+    try {
+      const data = await getSponsors(id);
+      setSponsors(data);
+    } catch (error) {
+      console.error("Error fetching sponsors:", error);
+    }
+  };
+  const handleCloseCreateModal = () => {
+    setShowCreateModal(false);
+    const selected = getValues("sponsorId");
+    if (selected === "__create_new__") {
+      setValue("sponsorId", null);
+    }
+  };
+  const handleSubmitSponsor = async (newSponsor) => {
+    const createNewSponsor = async (sponsorData) => {
+      try {
+        const data = await createSponsor(sponsorData);
+        return data;
+      } catch (error) {
+        console.error("Error creating sponsor:", error);
+        return null;
+      }
+    };
+    const createdSponsor = await createNewSponsor(newSponsor);
+    // Add the new sponsor to list
+    fetchSponsors();
+
+    // Set form value to newly created sponsor's ID
+    setValue("sponsorId", createdSponsor.sponsorId); // assumes sponsorId is available
+  };
 
   const onSubmit = (data) => {
     const hasUrl = data.agreementDocumentUrl?.trim();
@@ -82,7 +138,19 @@ const CreateSponsorshipPage = () => {
       return;
     }
 
-    console.log("Submitting sponsorship:", data);
+    try {
+      setIsSubmitting(true);
+      createSponsorship(data);
+      alert(successText);
+    } catch (error) {
+      alert(failedText);
+      console.error("Error submitting sponsorship:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+
+    navigate(`/event/${id}/staff/sponsorship`, { replace: true });
+
     reset();
   };
 
@@ -111,6 +179,7 @@ const CreateSponsorshipPage = () => {
                     sponsors={sponsors}
                     value={field.value}
                     onChange={field.onChange}
+                    onCreateNew={() => setShowCreateModal(true)}
                   />
                 )}
               />
@@ -176,11 +245,24 @@ const CreateSponsorshipPage = () => {
               </label>
               <input
                 type="date"
-                {...register("endDate", { required: true })}
+                {...register("endDate", {
+                  required: true,
+                  validate: (endDate) => {
+                    const startDate = watch("startDate");
+                    if (!startDate || !endDate) return true;
+                    return (
+                      new Date(endDate) > new Date(startDate) ||
+                      "End date must be after start date"
+                    );
+                  },
+                })}
                 className="w-full border rounded-lg px-4 py-2"
               />
-              {errors.endDate && (
-                <p className="text-red-500 text-sm">Required</p>
+              {errors.endDate?.type === "required" && (
+                <p className="text-red-500 text-sm">End date is required</p>
+              )}
+              {errors.endDate?.type === "validate" && (
+                <p className="text-red-500 text-sm">{errors.endDate.message}</p>
               )}
             </div>
           </div>
@@ -194,7 +276,6 @@ const CreateSponsorshipPage = () => {
               type="number"
               {...register("amount", { required: true, min: 0 })}
               className="w-full border rounded-lg px-4 py-2"
-              
             />
             {errors.amount && (
               <p className="text-red-500 text-sm">Must be a positive number</p>
@@ -241,14 +322,22 @@ const CreateSponsorshipPage = () => {
           {/* Submit */}
           <button
             type="submit"
-            className="bg-green-600 text-white px-6 py-2 rounded-xl hover:bg-green-700"
+            className="bg-green-600 text-white px-6 py-2 rounded-xl hover:bg-green-700 disabled:opacity-50"
+            disabled={isSubmitting}
           >
-            Create Sponsorship
+            {isSubmitting ? "Submitting..." : "Create Sponsorship"}
           </button>
         </form>
       </FormProvider>
+      {showCreateModal && (
+        <CreateSponsorModal
+          isOpen={showCreateModal}
+          onClose={handleCloseCreateModal}
+          onSubmit={handleSubmitSponsor}
+        />
+      )}
     </div>
   );
 };
 
-export default CreateSponsorshipPage;
+export default SubmitSponsorshipPage;

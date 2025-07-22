@@ -1,6 +1,7 @@
 package com.mavent.dev.service.implement;
 
 import com.mavent.dev.dto.member.BanMemberRequestDTO;
+import com.mavent.dev.dto.member.MemberDTO;
 import com.mavent.dev.dto.member.MemberResponseDTO;
 import com.mavent.dev.dto.member.UpdateMemberRequestDTO;
 import com.mavent.dev.entity.Account;
@@ -136,7 +137,12 @@ public class MemberImplement implements MemberService {
 
         return memberMapper.toMemberResponseDTO(updated);
     }
-    
+
+    @Override
+    public List<MemberDTO> getSponsorManageable(Integer eventId) {
+        return eventAccountRoleRepository.findSponsorManageable(eventId);
+    }
+
     /**
      * Find a member role by event and account IDs or throw exception if not found
      */

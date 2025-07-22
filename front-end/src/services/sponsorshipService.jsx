@@ -3,9 +3,9 @@ import Api from "../config/Api";
 const baseSponsorshipPackageUrl = "/sponsorship/package";
 const baseEventSponsorshipUrl = "/event/sponsorship";
 
-export const getSponsorshipPackages = async () => {
+export const getSponsorshipPackages = async (id) => {
   try {
-    const response = await Api.get(baseSponsorshipPackageUrl);
+    const response = await Api.get(`${baseSponsorshipPackageUrl}/${id}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching sponsorship package:", error);
@@ -56,9 +56,9 @@ export const deleteSponsorshipPackage = async (id) => {
   }
 };
 
-export const getSponsorships = async () => {
+export const getSponsorships = async (id) => {
   try {
-    const response = await Api.get(baseEventSponsorshipUrl);
+    const response = await Api.get(`${baseEventSponsorshipUrl}/manage/${id}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching sponsorship requests:", error);

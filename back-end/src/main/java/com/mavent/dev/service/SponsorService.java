@@ -5,9 +5,9 @@ import com.mavent.dev.entity.Sponsor;
 import java.util.List;
 
 public interface SponsorService {
-    List<Sponsor> getAll();
+    List<Sponsor> getAll(Integer eventId);
 
-    Sponsor getById(Integer id);
+    Sponsor getBySponsorId(Integer sponsorId);
 
     Sponsor save(Sponsor sponsor);
 

@@ -54,7 +54,7 @@ import RequestHistory from "./pages/request/member/RequestHistory.jsx";
 import EventWrapper from "./wrapper/EventWrapper.jsx";
 import SponsorshipPackagesPage from "./pages/SponsorshipPackagesPage.jsx";
 import SponsorshipPage from "./pages/SponsorshipPage.jsx";
-import CreateSponsorshipPage from "./pages/CreateSponsorshipPage.jsx";
+import SubmitSponsorshipPage from "./pages/SubmitSponsorshipPage.jsx";
 import EventMemberPage from "./pages/Members/EventMemberPage.jsx";
 
 // Higher Order Components for Route Protection
@@ -109,7 +109,7 @@ function App() {
                 <Route path="sponsorship" element={<SponsorshipPage />} />
                 <Route
                   path="sponsorship/create"
-                  element={<CreateSponsorshipPage />}
+                  element={<SubmitSponsorshipPage />}
                 />
 
                 <Route

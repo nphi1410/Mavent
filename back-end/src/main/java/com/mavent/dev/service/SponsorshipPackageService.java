@@ -7,7 +7,7 @@ import java.util.List;
 public interface SponsorshipPackageService {
     List<SponsorshipPackage> getAll();
 
-    SponsorshipPackage getById(Integer id);
+    List<SponsorshipPackage> getByEventId(Integer eventId);
 
     SponsorshipPackage save(SponsorshipPackage pkg);
 

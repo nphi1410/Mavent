@@ -1,6 +1,6 @@
 import Select from "react-select";
 
-const ContactAccountSelect = ({ accounts, onChange }) => {
+const ContactAccountSelect = ({ accounts, onChange, value }) => {
   const options = accounts.map((account) => ({
     value: account.accountId,
     label: account.fullName,
@@ -52,10 +52,13 @@ const ContactAccountSelect = ({ accounts, onChange }) => {
     }),
   };
 
+  const selectedOption = options.find((opt) => opt.value === value) || null;
+  
   return (
     <div className="w-full">
       <Select
         options={options}
+        value={selectedOption}
         onChange={(selected) => onChange(selected?.value)}
         formatOptionLabel={formatOptionLabel}
         placeholder="Select a contact..."

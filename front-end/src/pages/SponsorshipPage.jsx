@@ -10,10 +10,9 @@ const SponsorshipPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await getSponsorships();
+      const data = await getSponsorships(id);
       if (data) {
         setSponsorship(data);
-        console.log(data);
       }
     };
 

@@ -2,6 +2,7 @@ package com.mavent.dev.repository;
 
 import com.mavent.dev.dto.EventCountDTO;
 import com.mavent.dev.dto.event.EventAccountRoleDTO;
+import com.mavent.dev.dto.member.MemberDTO;
 import com.mavent.dev.entity.EventAccountRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -336,5 +337,29 @@ public interface EventAccountRoleRepository extends JpaRepository<EventAccountRo
             WHERE ear.account_id = :accountId
             """, nativeQuery = true)
     List<EventAccountRoleDTO> findByAccountIdWithoutParticipant(@Param("accountId") Integer accountId);
+
+    @Query(value = """
+                SELECT 
+                  a.account_id AS accountId,
+                  a.username AS username,
+                  a.email AS email,
+                  a.full_name AS fullName,
+                  a.avatar_url AS avatarUrl,
+                  a.phone_number AS phoneNumber,
+                  a.gender AS gender,
+                  a.student_id AS studentId,
+                  a.date_of_birth AS dateOfBirth,
+                  ear.created_at AS createdAt,
+                  ear.updated_at AS updatedAt,
+                  ear.is_active AS isActive,
+                  ear.event_role AS eventRole
+                FROM event_account_role ear
+                JOIN accounts a ON ear.account_id = a.account_id
+                LEFT JOIN departments d ON ear.department_id = d.department_id
+                WHERE (ear.event_role = 'ADMIN' OR d.sponsor_manageable = true)
+                  AND ear.is_active = true
+                  AND ear.event_id = :eventId
+            """, nativeQuery = true)
+    List<MemberDTO> findSponsorManageable(@Param("eventId") Integer eventId);
 
 }

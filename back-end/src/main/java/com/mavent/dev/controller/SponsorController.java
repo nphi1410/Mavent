@@ -13,14 +13,14 @@ public class SponsorController {
     @Autowired
     private SponsorService service;
 
-    @GetMapping
-    public List<Sponsor> getAll() {
-        return service.getAll();
+    @GetMapping("/{eventId}")
+    public List<Sponsor> getAll(@PathVariable Integer eventId) {
+        return service.getAll(eventId);
     }
 
-    @GetMapping("/{id}")
-    public Sponsor getById(@PathVariable Integer id) {
-        return service.getById(id);
+    @GetMapping("/get/{sponsorId}")
+    public Sponsor getBySponsorId(@PathVariable Integer sponsorId) {
+        return service.getBySponsorId(sponsorId);
     }
 
     @PostMapping

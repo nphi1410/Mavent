@@ -14,13 +14,13 @@ public class SponsorImplement implements SponsorService {
     private SponsorRepository repository;
 
     @Override
-    public List<Sponsor> getAll() {
-        return repository.findAll();
+    public List<Sponsor> getAll(Integer eventId) {
+        return repository.findSponsorsNotInEvent(eventId);
     }
 
     @Override
-    public Sponsor getById(Integer id) {
-        return repository.findById(id).orElse(null);
+    public Sponsor getBySponsorId(Integer sponsorId) {
+        return repository.findBySponsorId(sponsorId);
     }
 
     @Override

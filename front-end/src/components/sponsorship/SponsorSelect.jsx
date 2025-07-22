@@ -1,25 +1,56 @@
 import Select from "react-select";
+import { getLogoUrl } from "../../services/logoService";
 
-const SponsorSelect = ({ sponsors, onChange }) => {
-  const options = sponsors.map((sponsor) => ({
-    value: sponsor.sponsorId,
-    label: sponsor.name,
-    data: sponsor,
-  }));
+const SponsorSelect = ({ sponsors, value, onChange, onCreateNew }) => {
+  const CREATE_NEW_OPTION = {
+    value: "__create_new__",
+    label: "➕ Create New Sponsor",
+    data: {},
+  };
 
-  const formatOptionLabel = ({ label, data }) => (
-    <div className="flex items-center gap-4">
-      <img
-        src={data.logoUrl}
-        alt={label}
-        className="w-10 h-10 rounded-md object-cover border border-gray-200 shadow-sm"
-      />
-      <div className="flex flex-col">
-        <span className="text-base font-medium text-gray-800">{label}</span>
-        <span className="text-sm text-gray-500">{data.industry}</span>
+  const options = [
+    CREATE_NEW_OPTION,
+    ...sponsors.map((sponsor) => ({
+      value: sponsor.sponsorId,
+      label: sponsor.name,
+      data: sponsor,
+    })),
+  ];
+
+  const formatOptionLabel = ({ label, data }) => {
+    if (label === CREATE_NEW_OPTION.label) {
+      return <div className="text-blue-600 font-semibold text-sm">{label}</div>;
+    }
+
+    return (
+      <div className="flex items-center gap-4">
+        {data.logoUrl ? (
+          <img
+            src={getLogoUrl(data.logoUrl)}
+            alt={label}
+            className="w-10 h-10 rounded-md object-cover border border-gray-200 shadow-sm"
+          />
+        ) : (
+          <div className="w-10 h-10 rounded-md bg-gray-200 border border-gray-200 shadow-sm flex items-center justify-center text-xs text-gray-500">
+            N/A
+          </div>
+        )}
+        <div className="flex flex-col">
+          <span className="text-base font-medium text-gray-800">{label}</span>
+          <span className="text-sm text-gray-500">{data.industry}</span>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
+
+  const handleChange = (selected) => {
+    if (selected?.value === "__create_new__") {
+      onCreateNew?.(); // Trigger modal or form if defined
+      onChange(null);
+    } else {
+      onChange(selected?.value);
+    }
+  };
 
   const customStyles = {
     control: (base) => ({
@@ -49,11 +80,13 @@ const SponsorSelect = ({ sponsors, onChange }) => {
     }),
   };
 
+  const selectedOption = options.find((o) => o.value === value) || null;
   return (
     <div className="w-full">
       <Select
         options={options}
-        onChange={(selected) => onChange(selected?.value)}
+        value={selectedOption}
+        onChange={handleChange}
         formatOptionLabel={formatOptionLabel}
         placeholder="Select a sponsor..."
         styles={customStyles}

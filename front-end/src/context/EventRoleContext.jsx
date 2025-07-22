@@ -24,7 +24,7 @@ export const EventRoleProvider = ({ children }) => {
         const response = await getUserInfoInEvent(eventId);
         // console.log("Fetched user:", response);
         if (response) {
-          console.log("context: response data: ", response);
+          // console.log("context: response data: ", response);
           setUser(response);
         } else {
           // console.log("No user found, redirecting.");

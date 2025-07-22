@@ -11,7 +11,7 @@ const AgreementInput = () => {
       {/* URL input */}
       <div>
         <label className="text-sm text-gray-600 mb-1 block">
-          Document URL (optional)
+          Document URL
         </label>
         <input
           type="url"

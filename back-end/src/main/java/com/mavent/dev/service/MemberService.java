@@ -32,4 +32,5 @@ public interface MemberService {
     MemberResponseDTO banMember(BanMemberRequestDTO request);
 
 
+    List<MemberDTO> getSponsorManageable(Integer eventId);
 }

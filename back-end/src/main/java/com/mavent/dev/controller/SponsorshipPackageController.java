@@ -18,9 +18,9 @@ public class SponsorshipPackageController {
         return service.getAll();
     }
 
-    @GetMapping("/{id}")
-    public SponsorshipPackage getById(@PathVariable Integer id) {
-        return service.getById(id);
+    @GetMapping("/{eventId}")
+    public List<SponsorshipPackage> getByEventId(@PathVariable Integer eventId) {
+        return service.getByEventId(eventId);
     }
 
     @PostMapping

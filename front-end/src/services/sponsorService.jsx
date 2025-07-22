@@ -1,8 +1,8 @@
 import Api from "../config/Api";
 
-export const getSponsors = async () => {
+export const getSponsors = async (id) => {
   try {
-    const response = await Api.get("/sponsors");
+    const response = await Api.get(`/sponsors/${id}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching sponsors:", error);
@@ -12,10 +12,20 @@ export const getSponsors = async () => {
 
 export const getSponsorById = async (id) => {
   try {
-    const response = await Api.get(`/sponsors/${id}`);
+    const response = await Api.get(`/sponsors/get/${id}`);
     return response.data;
   } catch (error) {
     console.error(`Error fetching sponsor with ID ${id}:`, error);
+    return null;
+  }
+};
+
+export const getSponsorByEventId = async (eventId) => {
+  try {
+    const response = await Api.get(`/event/sponsorship/public/${eventId}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching sponsor by event ID ${eventId}:`, error);
     return null;
   }
 };
