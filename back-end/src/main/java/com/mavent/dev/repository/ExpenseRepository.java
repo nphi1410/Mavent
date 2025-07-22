@@ -1,5 +1,6 @@
 package com.mavent.dev.repository;
 
+import com.mavent.dev.dto.PaymentMethodSummaryDTO;
 import com.mavent.dev.entity.Expense;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,10 +25,14 @@ public interface ExpenseRepository extends JpaRepository<Expense, Integer> { // 
     // Query to get expenses by department for a specific event
     @Query("SELECT e FROM Expense e WHERE e.eventId = :eventId AND e.departmentId = :departmentId")
     List<Expense> findByEventIdAndDepartmentId(@Param("eventId") Integer eventId, @Param("departmentId") Integer departmentId);
+//
+//    // Query to get distinct payment methods FOR A SPECIFIC EVENT
+//    @Query("SELECT DISTINCT e.paymentMethod FROM Expense e WHERE e.eventId = :eventId")
+//    Set<String> findDistinctPaymentMethodsByEventId(@Param("eventId") Integer eventId);
 
-    // Query to get distinct payment methods FOR A SPECIFIC EVENT
-    @Query("SELECT DISTINCT e.paymentMethod FROM Expense e WHERE e.eventId = :eventId")
-    Set<String> findDistinctPaymentMethodsByEventId(@Param("eventId") Integer eventId);
+    @Query("SELECT new com.mavent.dev.dto.PaymentMethodSummaryDTO(e.paymentMethod, SUM(e.amount)) " +
+            "FROM Expense e WHERE e.eventId = :eventId GROUP BY e.paymentMethod")
+    List<PaymentMethodSummaryDTO> findTotalAmountByPaymentMethodForEvent(@Param("eventId") Integer eventId);
 
     // Query to count expenses by status FOR A SPECIFIC EVENT
     @Query("SELECT e.status, COUNT(e) FROM Expense e WHERE e.eventId = :eventId GROUP BY e.status")
