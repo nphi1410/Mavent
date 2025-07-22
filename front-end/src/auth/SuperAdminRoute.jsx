@@ -8,7 +8,7 @@ const getUserRoles = () => {
 
   try {
     const decoded = jwtDecode(token);
-    console.log("roles:", decoded.roles);
+    // console.log("roles:", decoded.roles);
     return decoded.roles || [];
   } catch (e) {
     console.error("Invalid token: ", e);

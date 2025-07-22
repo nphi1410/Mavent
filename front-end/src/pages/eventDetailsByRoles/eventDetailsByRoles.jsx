@@ -6,7 +6,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getAgendaItemsByEventId } from "../../services/agendaService";
 import TagsList from "../../components/TagsList";
 import MapGuide from "../../components/MapGuide";
-import Layout from '../../components/layout/AdminLayout';
+import Layout from '../../layouts/AdminLayout';
 
 export default function EventDetailsByRoles() {
   // const [activeDropdown, setActiveDropdown] = useState("eventInfo");
