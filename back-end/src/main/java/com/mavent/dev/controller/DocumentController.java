@@ -71,7 +71,6 @@ public class DocumentController {
     @GetMapping("/event/{eventId}")
     public ResponseEntity<List<DocumentResponseDTO>> getDocumentsByEvent(
             @PathVariable Integer eventId) {
-
         List<DocumentResponseDTO> documents = documentService.getDocumentsByEventId(eventId);
         return ResponseEntity.ok(documents);
     }

@@ -471,9 +471,9 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
                           <p className="text-sm text-gray-600">{doc.description}</p>
                         )}
                       </div>
-                      {doc.url && (
+                      {doc.filePath && (
                         <a
-                          href={doc.url}
+                          href={doc.filePath}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="ml-3 text-[#00155c] hover:text-[#172c70] font-medium text-sm"
@@ -519,6 +519,10 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
         taskId={taskId}
         isOpen={showFeedbackModal}
         onClose={handleCloseFeedbackModal}
+        taskData={{
+          ...task,
+          currentUser: currentUser
+        }}
       />
     </>
   );

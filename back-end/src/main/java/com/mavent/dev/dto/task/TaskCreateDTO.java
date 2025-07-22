@@ -19,4 +19,5 @@ public class TaskCreateDTO {
     private LocalDateTime dueDate;
     private String priority; // OPTIONAL, LOW, MEDIUM, HIGH, CRITICAL
     private List<Integer> taskAttendees; // List of account IDs
+    private List<Integer> documentIds;
 }

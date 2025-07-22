@@ -348,18 +348,18 @@ public class AccountController {
         String evName = null;
         System.out.println("Event Name: " + eventName);
         System.out.println("Status: " + status);
-        if (eventName != null && !eventName.isEmpty()) {
-            try {
-                event = eventService.getEventById(Integer.parseInt(eventName));
-                if (event != null) {
-                    evName = event.getName();
-                    System.out.println("Event Name: " + evName);
-                }
-            } catch (NumberFormatException e) {
-                System.err.println("Invalid event ID format: " + eventName);
-                return ResponseEntity.badRequest().build();
-            }
-        }
+//        if (eventName != null && !eventName.isEmpty()) {
+//            try {
+//                event = eventService.getEventById(Integer.parseInt(eventName));
+//                if (event != null) {
+//                    evName = event.getName();
+//                    System.out.println("Event Name: " + evName);
+//                }
+//            } catch (NumberFormatException e) {
+//                System.err.println("Invalid event ID format: " + eventName);
+//                return ResponseEntity.badRequest().build();
+//            }
+//        }
 
         List<TaskDTO> tasks = accountService.getUserTasks(
                 account.getAccountId(),
@@ -530,9 +530,9 @@ public class AccountController {
         if (current == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        if (!account.getAccountId().equals(current.getAssignedByAccountId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+//        if (!account.getAccountId().equals(current.getAssignedByAccountId())) {
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+//        }
 
         TaskDTO updated = accountService.updateTask(taskId, updateDto);
         System.out.println(updated);
