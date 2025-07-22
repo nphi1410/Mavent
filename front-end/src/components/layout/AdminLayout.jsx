@@ -3,23 +3,17 @@ import { Outlet, useParams, useLocation } from "react-router-dom";
 import Sidebar from "./AdminSidebar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faCrown,
-  faHandHoldingDollar,
-  faHandshake,
-} from "@fortawesome/free-solid-svg-icons";
-import {
   faBars,
   faUsers,
+  faTimes,
   faSitemap,
   faFileAlt,
   faInbox,
   faHouse,
   faComments,
+  faMoneyBill1Wave
 } from "@fortawesome/free-solid-svg-icons";
-import {
-  EventRoleProvider,
-  useEventRole,
-} from "../../context/EventRoleContext";
+import { EventRoleProvider, useEventRole } from "../../context/EventRoleContext";
 
 // Add CSS for animations
 const fadeInKeyframes = `
@@ -154,8 +148,23 @@ const Layout = () => {
       displayName: "Tasks",
       icon: <FontAwesomeIcon icon={faFileAlt} />,
       link: `tasks`,
-      requiredRole: "MEMBER", // Visible to all roles
+      requiredRole: 'MEMBER' // Visible to all roles
     },
+    {
+      name: 'income',
+      displayName: 'Income',
+      icon: <FontAwesomeIcon icon={faMoneyBill1Wave} />,
+      link: `income`,
+      requiredRole: 'ADMIN'
+    },
+    {
+      name: 'expenses',
+      displayName: 'Expenses',
+      icon: <FontAwesomeIcon icon={faMoneyBill1Wave} />,
+      link: `expenses`,
+      requiredRole: 'ADMIN'
+    }
+
   ];
 
   // Filter items based on user role

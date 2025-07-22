@@ -1,15 +1,19 @@
+// src/main/java/com/mavent/dev/service/IncomeService.java
 package com.mavent.dev.service;
 
-import com.mavent.dev.entity.Income;
+import com.mavent.dev.dto.IncomeResponseDTO;
+import com.mavent.dev.dto.IncomeRequestDTO; // Thêm import này
 
 import java.util.List;
 
 public interface IncomeService {
-    List<Income> getAll();
+    IncomeResponseDTO getIncomeOverviewForEvent(Integer eventId, String dateRange);
 
-    Income getById(Integer id);
+    List<IncomeResponseDTO.IncomeEntryDTO> getIncomesListByEventId(Integer eventId);
 
-    Income save(Income income);
+    // Phương thức MỚI: Thêm khoản thu nhập mới
+    IncomeResponseDTO.IncomeEntryDTO createIncome(IncomeRequestDTO incomeRequestDTO);
 
-    void delete(Integer id);
+    // Phương thức MỚI: Cập nhật khoản thu nhập hiện có
+    IncomeResponseDTO.IncomeEntryDTO updateIncome(Integer incomeId, IncomeRequestDTO incomeRequestDTO);
 }
