@@ -1,6 +1,7 @@
 import React from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { jwtDecode } from 'jwt-decode';
+import RedirectPage from "../pages/UserAuthorization/UnauthorizedAccess";
 
 const getUserRoles = () => {
   const token = sessionStorage.getItem("token");
@@ -22,14 +23,21 @@ const SuperAdminRoute = () => {
 
   if (roles.length === 0) {
     console.log("No role found, redirecting to login");
-    alert("You have to login first")
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <RedirectPage
+      message={`You must be logged in first!`}
+      pageName="Login Page"
+      redirectUrl="/login"
+    />
   }
 
   if (!roles.includes("ROLE_SUPER_ADMIN")) {
     console.log("User access denied, redirecting to profile");
     alert("You don't have permission to view this page")
-    return <Navigate to="/" state={{ from: location }} replace />;
+    return <RedirectPage
+      message={`You must have ${requiredRoles} privileges to access this content`}
+      pageName="Home Page"
+      redirectUrl="/"
+    />
   }
 
   return <Outlet />; 

@@ -60,6 +60,7 @@ import SubmitSponsorshipPage from "./pages/SubmitSponsorshipPage.jsx";
 import EventMemberPage from "./pages/Members/EventMemberPage.jsx";
 import SponsorPage from "./pages/SponsorPage.jsx";
 import PendingEventView from "./pages/superadmin/PendingEventDetails.jsx";
+import RedirectPage from "./pages/UserAuthorization/UnauthorizedAccess.jsx";
 
 // Higher Order Components for Route Protection
 // const Protect = (Component) => <ProtectedRoute children={Component} />;
@@ -82,9 +83,10 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="events" element={<AllEvents />} />
           <Route path="events/:id" element={<EventDetails />} />
+          <Route path="unauthorized" element={<RedirectPage />} />
 
           {/* Meeting Routes */}
-          <Route path="meetings" element={<ProtectedRoute />}>
+          <Route path="meetings" element={<ProtectedRoute isRequiredToHaveRole={true} />}>
             <Route index element={<MeetingListPage />} />
             <Route path="edit" element={<MeetingEditPage />} />
           </Route>
@@ -92,26 +94,29 @@ function App() {
 
           {/* Routes that requires user to have ROLE in event */}
           <Route path="event/:id" element={<EventWrapper />}>
-            <Route path="staff" element={<Layout />}>
+            <Route path="staff"
+              element={
+                // <ProtectedRoute isRequiredToHaveRole={true}>
+                <Layout />
+                // {/* </ProtectedRoute> */}
+              }
+            >
+              {/* route for everyone from participants */}
               <Route
-                element={<ProtectedRoute isRequiredToHaveEventRole={true} />}
+                element={<ProtectedRoute isRequiredToHaveRole={true} />}
               >
                 <Route index element={<EventDetailsByRoles />} />
                 <Route path="details" element={<EventDetailsByRoles />} />
+              </Route>
+
+              {/* routes for admin */}
+              <Route element={<ProtectedRoute isRequiredToHaveRole={true} requiredRoles={["ADMIN"]} />}>
                 <Route
                   path="departments"
                   element={<DepartmentManagementPage />}
                 />
-                <Route path="tasks" element={<UserTasksPage />} />
-                <Route path="tasks/history" element={<TaskHistory />} />
                 <Route path="members" element={<EventMemberPage />} />
-                <Route path="documents" element={<DocumentsPage />} />
                 <Route path="feedback" element={<ViewEventFeedback />} />
-                <Route path="requests" element={<RequestHistory />} />
-                <Route
-                  path="create-feedback"
-                  element={<ParticipantFeedbackEvent />}
-                />
                 <Route path="income" element={<AdminViewIncome />} />
                 <Route path="expenses" element={<AdminViewExpense />} />
                 <Route
@@ -124,6 +129,17 @@ function App() {
                   element={<SubmitSponsorshipPage />}
                 />
               </Route>
+
+              <Route element={<ProtectedRoute isRequiredToHaveRole={true} requiredRoles={["PARITCIPANT"]} />}>
+                <Route
+                  path="create-feedback"
+                  element={<ParticipantFeedbackEvent />}
+                />
+              </Route>
+              <Route path="tasks" element={<UserTasksPage />} />
+              <Route path="tasks/history" element={<TaskHistory />} />
+              <Route path="documents" element={<DocumentsPage />} />
+              <Route path="requests" element={<RequestHistory />} />
             </Route>
           </Route>
 
@@ -179,8 +195,8 @@ function App() {
             <Route path="sponsors" element={<SponsorPage />} />
           </Route>
         </Route>
-      </Routes>
-    </Router>
+      </Routes >
+    </Router >
   );
 }
 
