@@ -10,6 +10,7 @@ import com.mavent.dev.dto.FilterRequestDTO;
 import com.mavent.dev.dto.department.UserEventInfoDTO;
 import com.mavent.dev.dto.event.EventAccountRoleDTO;
 import com.mavent.dev.dto.event.PendingEventDTO;
+import com.mavent.dev.dto.event.UpdatePendingEventDTO;
 import com.mavent.dev.dto.superadmin.EventDTO;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.Event;
@@ -219,10 +220,13 @@ public class EventController {
     }
 
     @PatchMapping("/pending/{id}")
-    public ResponseEntity<?> updatePendingEvent(@PathVariable("id") Integer eventId, @RequestBody PendingEventDTO pendingEventDTO) {
+    public ResponseEntity<?> updatePendingEvent(@PathVariable("id") Integer eventId, @RequestBody UpdatePendingEventDTO updatePendingEventDTO) {
         try {
-            eventService.updatePendingEvent(eventId, "upcoming");
-            return ResponseEntity.ok("Cập nhật sự kiện thành công với ID: " + eventId);
+            System.out.println("Updating pending event with ID: " + eventId + " to status: " + updatePendingEventDTO.getStatus());
+            boolean updated = eventService.updatePendingEvent(eventId, updatePendingEventDTO.getStatus());
+            return updated ? ResponseEntity.ok("Cập nhật sự kiện thành công với ID: " + eventId)
+            : ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy sự kiện với ID: " + eventId);
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi cập nhật sự kiện: " + e.getMessage());
         }

@@ -285,6 +285,7 @@ public class EventImplement implements EventService {
         // Cập nhật trạng thái sự kiện
         try {
             event.setStatus(Event.EventStatus.valueOf(status.toUpperCase()));
+            System.out.println("event status updated to: " + event.getStatus());
             eventRepository.save(event);
             return true;
         } catch (IllegalArgumentException e) {

@@ -6,20 +6,19 @@ import { getAllAccounts } from "@/services/accountService"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { set } from "react-hook-form"
 import { jwtDecode } from 'jwt-decode';
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
+import { updatePendingEvent } from "../../services/eventService"
+import { addNewRole } from "../../services/roleService"
 
 
-export default function EventApproval({eventData}) {
-    const [update, setUpdate] = useState({});
+export default function EventApproval({ eventData }) {
+
     const [status, setStatus] = useState("");
-
     const token = sessionStorage.getItem("token");
     const assignedBy = jwtDecode(token).accountId;
 
-
     const [adminAssigned, setAdminAssigned] = useState({
         eventRole: "ADMIN",
-        eventId: eventData.creator.id,
         assignedByAccountId: assignedBy
     });
     const [note, setNote] = useState("");
@@ -27,8 +26,9 @@ export default function EventApproval({eventData}) {
     const [searchQuery, setSearchQuery] = useState("")
     const [searchResults, setSearchResults] = useState([])
     const [isSearching, setIsSearching] = useState(false)
-    const [assignedAdmins, setAssignedAdmins] = useState([])
     const [users, setUsers] = useState([]) // Assuming you have a list of users to search from
+
+    const navigate = useNavigate();
 
     const handleAssignProposer = () => {
         console.log("Assigning proposer as event admin")
@@ -53,17 +53,35 @@ export default function EventApproval({eventData}) {
         // Implement actual assignment logic
     }
 
-    const handleSubmit = () => {
-        console.log("Submitting event approval with status:", status, "and note:", note);
+    const handleSubmit = async () => {
+        // console.log("Submitting event approval with status:", status, "and note:", note);
         // Implement actual submission logic
-        // Reset state after submission
-        setStatus("");
-        setNote("");
-        setAdminAssigned(null);
-        setUpdate({});
+
+        try {
+            const updateStatusRes = await updatePendingEvent(eventData.id, {
+                status: status,
+                note: note,
+                accountId: eventData.creator.id,
+                assignedByAccountId: assignedBy
+            });
+            if (updateStatusRes) {
+                console.log("Event status updated successfully:", updateStatusRes);
+                if( status.toUpperCase().includes("UPCOMING")) {
+                    const addRoleRes = await addNewRole(eventData.id, adminAssigned);
+                }
+                setTimeout(() => {
+                    navigate("/superadmin/events/pending");
+
+                    // Reset state after submission
+                    setStatus("");
+                    setNote("");
+                }, 2000);
+            }
+
+        } catch (error) {
+            console.error("Error submitting event approval:", error);
+        }
     }
-
-
 
     // Mock search function - replace with actual API call
     useEffect(() => {
@@ -80,9 +98,6 @@ export default function EventApproval({eventData}) {
         fetchUsers();
 
     }, []);
-
-    useEffect(() => {
-    }, [adminAssigned])
 
     const searchUsers = async (query) => {
         if (query.length <= 0) {
@@ -200,7 +215,7 @@ export default function EventApproval({eventData}) {
                     <div className="pl-5 col-span-1">
                         <h2 className="font-bold my-4">Confirm Submit</h2>
                         <button
-                            onClick={() => console.log("Submit event approval")}
+                            onClick={() => handleSubmit()}
                             className="inline-flex items-center px-4 py-2 cursor-pointer border border-blue-300 rounded-md shadow-sm text-sm font-medium text-blue-700 bg-white hover:bg-blue-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
                             SUBMIT
