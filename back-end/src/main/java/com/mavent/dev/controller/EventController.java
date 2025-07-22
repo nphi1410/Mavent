@@ -3,6 +3,7 @@ package com.mavent.dev.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.mavent.dev.config.MailConfig;
 import com.mavent.dev.dto.EventCountDTO;
 import com.mavent.dev.dto.EventRegisterDTO;
 import com.mavent.dev.dto.FilterEventDTO;
@@ -55,6 +56,11 @@ public class EventController {
 
     @Autowired
     private JwtUtil jwt;
+
+    @Autowired
+    private MailConfig mailConfig;
+    @Autowired
+    private UpdatePendingEventDTO updatePendingEventDTO;
 
     // Tạo sự kiện kèm ảnh banner và poster (fix multipart + JSON)
     @PostMapping(value = "/create-event", consumes = "multipart/form-data")
@@ -224,8 +230,23 @@ public class EventController {
         try {
             System.out.println("Updating pending event with ID: " + eventId + " to status: " + updatePendingEventDTO.getStatus());
             boolean updated = eventService.updatePendingEvent(eventId, updatePendingEventDTO.getStatus());
-            return updated ? ResponseEntity.ok("Cập nhật sự kiện thành công với ID: " + eventId)
-            : ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy sự kiện với ID: " + eventId);
+            String message = "Your request to Creat Event " + updatePendingEventDTO.getEventName() + " has been Updated with Status: " + updatePendingEventDTO.getStatus() + ".\n";
+            if (updatePendingEventDTO.getAssignedByAccountName() != null)
+                message += "This request was udpated by " + updatePendingEventDTO.getAssignedByAccountName() + ".\n";
+            if (updatePendingEventDTO.getNote() != null)
+                message += "Note: " + updatePendingEventDTO.getNote() + ".\n";
+            message += "If you have any questions, please contact the admin.";
+
+            if (updated) {
+                Account account = accountService.getAccountById(updatePendingEventDTO.getAccountId());
+                mailConfig.sendMail(
+                        account.getEmail(),
+                        "[MAVENT] Your Event-Creation Request has been Updated!",
+                        message
+                );
+                return ResponseEntity.ok("Cập nhật sự kiện thành công với ID: " + eventId);
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy sự kiện với ID: " + eventId);
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi cập nhật sự kiện: " + e.getMessage());
