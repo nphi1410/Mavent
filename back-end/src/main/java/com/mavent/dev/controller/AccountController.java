@@ -7,6 +7,7 @@ import com.mavent.dev.config.MailConfig;
 import com.mavent.dev.dto.task.*;
 import com.mavent.dev.dto.userAuthentication.*;
 import com.mavent.dev.entity.Account;
+import com.mavent.dev.entity.Document;
 import com.mavent.dev.entity.EventAccountRole;
 import com.mavent.dev.mapper.AccountMapper;
 import com.mavent.dev.repository.AccountRepository;
@@ -345,19 +346,20 @@ public class AccountController {
 
         EventDTO event = null;
         String evName = null;
-
-        if (eventName != null && !eventName.isEmpty()) {
-            try {
-                event = eventService.getEventById(Integer.parseInt(eventName));
-                if (event != null) {
-                    evName = event.getName();
-                    System.out.println("Event Name: " + evName);
-                }
-            } catch (NumberFormatException e) {
-                System.err.println("Invalid event ID format: " + eventName);
-                return ResponseEntity.badRequest().build();
-            }
-        }
+        System.out.println("Event Name: " + eventName);
+        System.out.println("Status: " + status);
+//        if (eventName != null && !eventName.isEmpty()) {
+//            try {
+//                event = eventService.getEventById(Integer.parseInt(eventName));
+//                if (event != null) {
+//                    evName = event.getName();
+//                    System.out.println("Event Name: " + evName);
+//                }
+//            } catch (NumberFormatException e) {
+//                System.err.println("Invalid event ID format: " + eventName);
+//                return ResponseEntity.badRequest().build();
+//            }
+//        }
 
         List<TaskDTO> tasks = accountService.getUserTasks(
                 account.getAccountId(),
@@ -366,6 +368,7 @@ public class AccountController {
                 keyword,
                 sortOrder,
                 evName);
+//        System.out.println("Tasks: " + tasks);
         return ResponseEntity.ok(tasks);
     }
 
@@ -527,9 +530,9 @@ public class AccountController {
         if (current == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        if (!account.getAccountId().equals(current.getAssignedByAccountId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+//        if (!account.getAccountId().equals(current.getAssignedByAccountId())) {
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+//        }
 
         TaskDTO updated = accountService.updateTask(taskId, updateDto);
         System.out.println(updated);
@@ -722,6 +725,63 @@ public class AccountController {
         Long count = accountService.getUnreadNotificationCount(account.getAccountId());
         return ResponseEntity.ok(count);
     }
+
+@GetMapping("/user/tasks/{taskId}/documents")
+public ResponseEntity<List<Document>> getTaskDocuments(
+        @PathVariable Integer taskId,
+        HttpServletRequest request) {
+    
+    Account account = getAuthenticatedAccount(request);
+    if (account == null) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+    
+    // Kiểm tra quyền truy cập task
+    TaskDTO task = accountService.getTaskDetails(account.getAccountId(), taskId);
+    if (task == null) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+    
+    try {
+        List<Document> documents = accountService.getTaskDocuments(taskId);
+        return ResponseEntity.ok(documents);
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+}
+
+@PutMapping("/user/tasks/{taskId}/documents")
+public ResponseEntity<?> updateTaskDocuments(
+        @PathVariable Integer taskId,
+        @RequestBody Map<String, List<Integer>> request,
+        HttpServletRequest httpRequest) {
+    
+    Account account = getAuthenticatedAccount(httpRequest);
+    if (account == null) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+    
+    TaskDTO task = accountService.getTaskDetails(account.getAccountId(), taskId);
+    if (task == null) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Task not found");
+    }
+    
+    // Kiểm tra quyền (creator hoặc assignee)
+    if (!account.getAccountId().equals(task.getAssignedByAccountId()) &&
+        !account.getAccountId().equals(task.getAssignedToAccountId())) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body("You don't have permission to modify this task");
+    }
+    
+    List<Integer> documentIds = request.get("documentIds");
+    
+    try {
+        accountService.updateTaskDocuments(taskId, documentIds);
+        return ResponseEntity.ok("Task documents updated successfully");
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
+}
 
     private Account getAuthenticatedAccount(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");

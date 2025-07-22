@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Layout from "../../../components/layout/AdminLayout";
+import Layout from "../../../layouts/AdminLayout.jsx";
 import { useParams } from "react-router-dom";
 import {
   getRequestsByEventIdAndAccountId, // for member

@@ -2,7 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 // Layout
 import MainLayout from "./layouts/MainLayout";
-import Layout from "./components/layout/AdminLayout";
+import Layout from "./layouts/AdminLayout.jsx";
+import SuperAdminLayout from "./layouts/SuperAdminLayout";
 
 // Public
 import Login from "./pages/UserAuthorization/Login";
@@ -46,7 +47,6 @@ import SuperAdminManageUsers from "./pages/superadmin/SuperAdminManageUsers";
 import SuperAdminViewEventDetails from "./pages/superadmin/SuperAdminViewEventDetails";
 import SuperAdminEditEvent from "./pages/superadmin/SuperAdminEditEvent";
 import SuperAdminViewUserDetails from "./pages/superadmin/SuperAdminViewUserDetails";
-import SuperAdminLayout from "./layouts/SuperAdminLayout";
 import MeetingEditPage from "./pages/meetingPages/EditMeetingPage";
 import ViewEventFeedback from "./pages/ViewEventFeedback.jsx";
 import ParticipantFeedbackEvent from "./pages/ParticipantFeedbackEvent.jsx";
@@ -58,6 +58,7 @@ import SponsorshipPage from "./pages/SponsorshipPage.jsx";
 import SubmitSponsorshipPage from "./pages/SubmitSponsorshipPage.jsx";
 import EventMemberPage from "./pages/Members/EventMemberPage.jsx";
 import SponsorPage from "./pages/SponsorPage.jsx";
+import PendingEventView from "./pages/superadmin/PendingEventDetails.jsx";
 
 // Higher Order Components for Route Protection
 // const Protect = (Component) => <ProtectedRoute children={Component} />;
@@ -100,6 +101,8 @@ function App() {
                   path="departments"
                   element={<DepartmentManagementPage />}
                 />
+                <Route path="tasks" element={<UserTasksPage />} />
+                <Route path="tasks/history" element={<TaskHistory />} />
                 <Route path="members" element={<EventMemberPage />} />
                 <Route path="documents" element={<DocumentsPage />} />
                 <Route path="feedback" element={<ViewEventFeedback />} />
@@ -151,20 +154,28 @@ function App() {
 
         {/* Super Admin Routes */}
         <Route path="superadmin" element={<SuperAdminRoute />}>
-          <Route index element={<SuperAdminDashboard />} />
-          <Route path="events" element={<SuperAdminManageEvents />} />
-          <Route path="events/pending" element={<SuperAdminPendingEvents />} />
-          <Route path="users" element={<SuperAdminManageUsers />} />
-          <Route
-            path="event-detail/:eventId"
-            element={<SuperAdminViewEventDetails />}
-          />
-          <Route path="edit-event/:eventId" element={<SuperAdminEditEvent />} />
-          <Route
-            path="user-detail/:id"
-            element={<SuperAdminViewUserDetails />}
-          />
-          <Route path="sponsors" element={<SponsorPage />} />
+          <Route element={<SuperAdminLayout />}>
+            <Route index element={<SuperAdminDashboard />} />
+            <Route path="events" element={<SuperAdminManageEvents />} />
+            <Route path="events/pending">
+              <Route index element={<SuperAdminPendingEvents />} />
+              <Route path=":eventId" element={<PendingEventView />} />
+            </Route>
+            <Route path="users" element={<SuperAdminManageUsers />} />
+            <Route
+              path="event-detail/:eventId"
+              element={<SuperAdminViewEventDetails />}
+            />
+            <Route
+              path="edit-event/:eventId"
+              element={<SuperAdminEditEvent />}
+            />
+            <Route
+              path="user-detail/:id"
+              element={<SuperAdminViewUserDetails />}
+            />
+            <Route path="sponsors" element={<SponsorPage />} />
+          </Route>
         </Route>
       </Routes>
     </Router>

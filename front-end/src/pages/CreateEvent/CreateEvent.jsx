@@ -2,8 +2,14 @@ import React, { useState, useEffect } from "react";
 import { createEvent } from "../../services/eventService";
 import { getAllLocations } from "../../services/eventLocationService";
 import { useNavigate } from "react-router-dom";
+import { jwtDecode } from 'jwt-decode'; 
 
 const CreateEvent = () => {
+    // get account id from JWT token
+    const token = sessionStorage.getItem("token");
+    const decoded = jwtDecode(token);
+    // console.log("Decoded JWT:", decoded);
+
     const [formData, setFormData] = useState({
         name: "",
         description: "",
@@ -14,8 +20,9 @@ const CreateEvent = () => {
         maxMemberNumber: 0,
         maxParticipantNumber: 0,
         status: "PENDING",
+        createdBy: decoded.accountId || "",
     });
-
+    
     const [bannerFile, setBannerFile] = useState(null);
     const [posterFile, setPosterFile] = useState(null);
 

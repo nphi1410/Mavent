@@ -35,6 +35,7 @@ public class JwtUtil {
     public String generateToken(Account account) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", List.of("ROLE_" + account.getSystemRole().name()));
+        claims.put("accountId", account.getAccountId()); // Add account id to claims
 
         return Jwts.builder()
                 .claims(claims) // <- use builder-style claim setting

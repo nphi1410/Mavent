@@ -91,9 +91,7 @@ const SponsorListPage = () => {
   };
 
   return (
-    <div className="h-screen w-screen flex">
-      <SuperAdminHeader />
-      <SuperAdminSidebar />
+    <>
       <div className="flex-1 p-6 space-y-6 overflow-auto bg-gray-50 mt-12">
         <h1 className="text-3xl font-semibold">Sponsors</h1>
 
@@ -142,7 +140,7 @@ const SponsorListPage = () => {
         onSubmit={handleCreate}
         sponsor={selectedSponsor}
       />
-    </div>
+    </>
   );
 };
 

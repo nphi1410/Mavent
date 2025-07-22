@@ -12,13 +12,10 @@ import {
   faHouse,
   faComments,
   faMoneyBill1Wave,
-  faCrown,
   faHandHoldingDollar,
+  faCrown
 } from "@fortawesome/free-solid-svg-icons";
-import {
-  EventRoleProvider,
-  useEventRole,
-} from "../../context/EventRoleContext";
+import { EventRoleProvider, useEventRole } from "../context/EventRoleContext";
 
 // Add CSS for animations
 const fadeInKeyframes = `
