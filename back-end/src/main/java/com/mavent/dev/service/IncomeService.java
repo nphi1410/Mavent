@@ -2,15 +2,18 @@
 package com.mavent.dev.service;
 
 import com.mavent.dev.dto.IncomeResponseDTO;
+import com.mavent.dev.dto.IncomeRequestDTO; // Thêm import này
+
+import java.util.List;
 
 public interface IncomeService {
+    IncomeResponseDTO getIncomeOverviewForEvent(Integer eventId, String dateRange);
 
-    /**
-     * Lấy dữ liệu tổng quan thu nhập cho một sự kiện cụ thể.
-     *
-     * @param eventId ID của sự kiện.
-     * @param dateRange Lọc theo phạm vi ngày ("all", "30", "7", "today").
-     * @return IncomeResponseDTO chứa tất cả thông tin thu nhập tổng hợp.
-     */
-    IncomeResponseDTO getIncomeOverviewForEvent(Integer eventId, String dateRange); // Đổi từ Long sang Integer
+    List<IncomeResponseDTO.IncomeEntryDTO> getIncomesListByEventId(Integer eventId);
+
+    // Phương thức MỚI: Thêm khoản thu nhập mới
+    IncomeResponseDTO.IncomeEntryDTO createIncome(IncomeRequestDTO incomeRequestDTO);
+
+    // Phương thức MỚI: Cập nhật khoản thu nhập hiện có
+    IncomeResponseDTO.IncomeEntryDTO updateIncome(Integer incomeId, IncomeRequestDTO incomeRequestDTO);
 }
