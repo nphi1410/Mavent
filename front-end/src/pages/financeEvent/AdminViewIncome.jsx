@@ -182,8 +182,8 @@ const AdminViewIncome = () => {
 
     if (loading && !incomeOverview) {
         return (
-            <div className="min-h-screen bg-gray-50 p-4 lg:p-8 flex items-center justify-center">
-                <p className="text-gray-700 text-lg">Đang tải dữ liệu thu nhập...</p>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <p className="text-lg text-gray-700">Loading...</p>
             </div>
         );
     }
@@ -205,8 +205,8 @@ const AdminViewIncome = () => {
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 lg:p-8">
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
                         <div>
-                            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">Bảng điều khiển doanh thu</h1>
-                            <p className="text-gray-600 mt-2">Theo dõi và phân tích thu nhập sự kiện của bạn</p>
+                            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">Dashboard Income Overview</h1>
+                            <p className="text-gray-600 mt-2">Event: {currentEventName}</p>
                         </div>
 
                         <div className="flex flex-col sm:flex-row gap-3">
@@ -240,7 +240,7 @@ const AdminViewIncome = () => {
                                 <div className="p-3 bg-white/20 rounded-full">
                                     <FontAwesomeIcon icon={faDollarSign} className="text-2xl" />
                                 </div>
-                                <h2 className="text-xl lg:text-2xl font-semibold">Tổng doanh thu</h2>
+                                <h2 className="text-xl lg:text-2xl font-semibold">Total Income</h2>
                             </div>
                             <p className="text-5xl lg:text-6xl font-bold mb-2">
                                 {totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })} VNĐ
@@ -248,10 +248,6 @@ const AdminViewIncome = () => {
                             <p className="text-blue-100 text-lg">
                                 từ {numberOfSources} nguồn thu nhập
                             </p>
-                        </div>
-                        <div className="hidden lg:block text-right">
-                            <p className="text-blue-100 mb-2">Sự kiện</p>
-                            <p className="text-xl font-semibold">{currentEventName}</p>
                         </div>
                     </div>
                 </div>
