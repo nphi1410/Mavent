@@ -6,8 +6,8 @@ import { useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDollarSign, faPlus, faEdit } from '@fortawesome/free-solid-svg-icons'; // Import icons for buttons
 import { getIncomeOverview, getIncomesListByEventId } from '../../services/incomeService';
-import CreateIncomeModal from '../components/income/CreateIncomeModal'; // Import Create modal
-import UpdateIncomeModal from '../components/income/UpdateIncomeModal'; // Import Update modal
+import CreateIncomeModal from '../../components/income/CreateIncomeModal'; // Import Create modal
+import UpdateIncomeModal from '../../components/income/UpdateIncomeModal'; // Import Update modal
 
 Chart.register(...registerables);
 
