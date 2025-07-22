@@ -49,8 +49,8 @@ const SubmitSponsorshipPage = () => {
     const loadAllData = async () => {
       try {
         const [packagesData, sponsorsData, contactsData] = await Promise.all([
-          getSponsorshipPackages(id),
-          getSponsors(id),
+          getSponsorshipPackages(id, true),
+          getSponsors(id, true),
           memberService.getSponsorManageableMembers(id),
         ]);
         setPackages(packagesData);

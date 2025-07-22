@@ -19,8 +19,10 @@ public class SponsorshipPackageController {
     }
 
     @GetMapping("/{eventId}")
-    public List<SponsorshipPackage> getByEventId(@PathVariable Integer eventId) {
-        return service.getByEventId(eventId);
+    public List<SponsorshipPackage> getByEventId(
+            @PathVariable Integer eventId,
+            @RequestParam(value = "isActive", required = false) Boolean isActive) {
+        return service.getByEventId(eventId,isActive);
     }
 
     @PostMapping

@@ -59,6 +59,8 @@ const memberService = {
    
       const url = `/events/${eventId}/members?${queryParams.toString()}`;
 
+      const response = await Api.get(url, { signal });
+
       return response.data;
     } catch (error) {
       // Properly handle AbortError vs other errors

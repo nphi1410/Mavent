@@ -3,9 +3,13 @@ import Api from "../config/Api";
 const baseSponsorshipPackageUrl = "/sponsorship/package";
 const baseEventSponsorshipUrl = "/event/sponsorship";
 
-export const getSponsorshipPackages = async (id) => {
+export const getSponsorshipPackages = async (id, isActive = null) => {
+  let url = `${baseSponsorshipPackageUrl}/${id}`;
+  if (isActive !== null) {
+    url += `?isActive=${isActive}`;
+  }
   try {
-    const response = await Api.get(`${baseSponsorshipPackageUrl}/${id}`);
+    const response = await Api.get(url);
     return response.data;
   } catch (error) {
     console.error("Error fetching sponsorship package:", error);

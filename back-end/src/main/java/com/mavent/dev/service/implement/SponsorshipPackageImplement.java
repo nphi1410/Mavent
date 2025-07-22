@@ -20,8 +20,10 @@ public class SponsorshipPackageImplement implements SponsorshipPackageService {
     }
 
     @Override
-    public List<SponsorshipPackage> getByEventId(Integer eventId) {
-        return repository.findByEventId(eventId);
+    public List<SponsorshipPackage> getByEventId(Integer eventId, Boolean isActive) {
+        return isActive != null
+                ? repository.findByEventIdAndIsActive(eventId, isActive)
+                : repository.findByEventId(eventId);
     }
 
     @Override
