@@ -87,7 +87,7 @@ export default function RequestForm({ eventId, accountId, departmentId, onClose,
                   <option value="" disabled>
                     Select Request Type
                   </option>
-                  {requestTypes?.map((type) => (
+                  {requestTypes?.filter(filteredType => filteredType.isActive).map((type) => (
                     <option key={type.requestTypeId} value={type.requestTypeId}>
                       {type.name}
                     </option>

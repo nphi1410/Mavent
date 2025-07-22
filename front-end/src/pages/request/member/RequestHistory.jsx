@@ -159,7 +159,7 @@ export default function RequestHistory() {
 
   const handleCloseForm = () => {
     setShowCreateForm(false);
-    console.log("Form closed");
+    // console.log("Form closed");
   };
 
   const handleViewDetail = (id) => {
@@ -170,12 +170,12 @@ export default function RequestHistory() {
       return;
     }
     setViewRequest(request);
-    console.log("Request to view:", request);
+    // console.log("Request to view:", request);
     setIsPopupOpen(true);
   };
 
   if (loading) return <p>Loading...</p>;
-  console.log("request: ", requests)
+  // console.log("request: ", requests)
   // if (!requests || requests.length === 0) {
   //   return (
   //     <div className="min-h-screen bg-gray-50 py-8">

@@ -11,7 +11,9 @@ import {
   faInbox,
   faHouse,
   faComments,
-  faMoneyBill1Wave
+  faMoneyBill1Wave,
+  faCrown,
+  faHandHoldingDollar
 } from "@fortawesome/free-solid-svg-icons";
 import { EventRoleProvider, useEventRole } from "../../context/EventRoleContext";
 

@@ -37,6 +37,4 @@ public class RequestType {
     @Column(name = "updated_at")
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-
-
 }
