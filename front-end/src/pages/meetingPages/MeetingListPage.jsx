@@ -10,8 +10,8 @@ import { getJoiningEvent } from "../../services/eventService";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import MeetingFilter from "../../components/filter/MeetingFilter";
 import ClockCard from "../../components/visual/CLockCard";
-import MeetingDetailsBoard from "../../components/MeetingDetailsBoard";
-import MeetingTable from "../../components/MeetingTable";
+import MeetingDetailsBoard from "../../components/meeting/MeetingDetailsBoard";
+import MeetingTable from "../../components/meeting/MeetingTable";
 
 const MeetingListPage = () => {
   const navigate = useNavigate();
@@ -51,7 +51,8 @@ const MeetingListPage = () => {
       const filters = {
         page: currentPage,
         size: 10,
-        searchTitle: !searchTitle || searchTitle === "undefined" ? undefined : searchTitle,
+        searchTitle:
+          !searchTitle || searchTitle === "undefined" ? undefined : searchTitle,
         eventId: !eventId || eventId === "undefined" ? undefined : eventId,
       };
       const data = await getMeetingByAccountId(accountId, filters);

@@ -50,7 +50,7 @@ const SubmitSponsorshipPage = () => {
       try {
         const [packagesData, sponsorsData, contactsData] = await Promise.all([
           getSponsorshipPackages(id, true),
-          getSponsors(id, true),
+          getSponsors(id),
           memberService.getSponsorManageableMembers(id),
         ]);
         setPackages(packagesData);

@@ -134,8 +134,8 @@ public class EventAccountRoleImplement implements EventAccountRoleService {
     }
 
     @Override
-    public Page<EventAccountRole> getMembersWithFilters(Integer eventId, Boolean isActive, EventAccountRole.EventRole role, Integer departmentId, String searchTerm, Pageable pageable) {
-        return eventAccountRoleRepository.findByEventIdWithFilters(eventId,isActive,role,departmentId,searchTerm,null, null,null,pageable);
+    public Page<EventAccountRole> getMembersWithFilters(Integer eventId, Boolean isActive, EventAccountRole.EventRole role, Integer departmentId, String searchTerm, String status, Pageable pageable) {
+        return eventAccountRoleRepository.findByEventIdWithFilters(eventId, isActive, role, departmentId, searchTerm, null, null, status, pageable);
     }
 
     @Override
@@ -145,8 +145,9 @@ public class EventAccountRoleImplement implements EventAccountRoleService {
                                                         String searchTerm,
                                                         java.util.Date startDate,
                                                         java.util.Date endDate,
+                                                        String status,
                                                         Pageable pageable) {
-        return eventAccountRoleRepository.findByEventIdWithFilters(eventId, isActive, role, departmentId, searchTerm, startDate, endDate,null, pageable);
+        return eventAccountRoleRepository.findByEventIdWithFilters(eventId, isActive, role, departmentId, searchTerm, startDate, endDate, status, pageable);
     }
 
     @Override

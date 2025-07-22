@@ -1,6 +1,8 @@
 package com.mavent.dev.controller;
 
+import com.mavent.dev.dto.MeetingAttendeeDTO;
 import com.mavent.dev.dto.MeetingDTO;
+import com.mavent.dev.dto.MeetingRequest;
 import com.mavent.dev.entity.Meeting;
 import com.mavent.dev.service.MeetingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +23,8 @@ public class MeetingController {
     private MeetingService meetingService;
 
     @PostMapping
-    public ResponseEntity<Meeting> createMeeting(@RequestBody Meeting meeting) {
-        List<String> attendeeIds = new ArrayList<>();
+    public ResponseEntity<Meeting> createMeeting(@RequestBody MeetingRequest meeting) {
+        List<Integer> attendeeIds = meeting.getAttendees();
         return ResponseEntity.ok(meetingService.createMeeting(meeting,attendeeIds));
     }
 
@@ -78,5 +80,10 @@ public class MeetingController {
     @GetMapping("/status/{status}")
     public ResponseEntity<List<Meeting>> getByStatus(@PathVariable("status") Meeting.Status status) {
         return ResponseEntity.ok(meetingService.getMeetingsByStatus(status));
+    }
+
+    @GetMapping("/attendee/{meetingId}")
+    public ResponseEntity<List<MeetingAttendeeDTO>> getMeetingAttendees(@PathVariable Integer meetingId){
+        return ResponseEntity.ok(meetingService.getMeetingAttendees(meetingId));
     }
 }

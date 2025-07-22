@@ -8,7 +8,7 @@ import TaskDetails from './TaskDetails';
 import { useParams } from 'react-router-dom';
 
 const parseStatus = (status) => {
-  if (status === 'active') return ['TODO', 'DOING', 'REVIEW', 'OVERDUE'];
+  if (status === "active") return ["TODO", "DOING", "REVIEW", "OVERDUE"];
   if (!status) return [];
   return [status];
 };
@@ -40,7 +40,9 @@ const UserTasksContent = () => {
   const navigate = useNavigate();
 
   const filterActiveTasks = (tasks) => {
-    return tasks.filter(task => ['TODO', 'DOING', 'REVIEW', 'OVERDUE'].includes(task.status));
+    return tasks.filter((task) =>
+      ["TODO", "DOING", "REVIEW", "OVERDUE"].includes(task.status)
+    );
   };
 
   useEffect(() => {
@@ -67,9 +69,9 @@ const UserTasksContent = () => {
         setDisplayTasks(activeTasks);
       } catch (err) {
         if (err.response?.status === 401) {
-          navigate('/login');
+          navigate("/login");
         } else {
-          setError(err.message || 'Failed to load data');
+          setError(err.message || "Failed to load data");
         }
       } finally {
         setLoading(false);
@@ -83,7 +85,7 @@ const UserTasksContent = () => {
       setFilterLoading(true);
       try {
         const statusList = parseStatus(filters.status);
-        const statusString = statusList.join(',');
+        const statusString = statusList.join(",");
 
         const response = await getUserTasks({
           ...filters,
@@ -101,25 +103,30 @@ const UserTasksContent = () => {
         // Filter by role (only on frontend)
         if (filters.role && userProfile) {
           const userId = userProfile.id;
-          if (filters.role === 'CREATOR') {
-            fetchedTasks = fetchedTasks.filter(task => task.assignedByAccountId === userId);
-          } else if (filters.role === 'LEADER') {
-            fetchedTasks = fetchedTasks.filter(task => task.assignedToAccountId === userId);
-          } else if (filters.role === 'ASSIGNEE') {
-            fetchedTasks = fetchedTasks.filter(task =>
-              task.assignedByAccountId !== userId &&
-              task.assignedToAccountId !== userId
+          if (filters.role === "CREATOR") {
+            fetchedTasks = fetchedTasks.filter(
+              (task) => task.assignedByAccountId === userId
+            );
+          } else if (filters.role === "LEADER") {
+            fetchedTasks = fetchedTasks.filter(
+              (task) => task.assignedToAccountId === userId
+            );
+          } else if (filters.role === "ASSIGNEE") {
+            fetchedTasks = fetchedTasks.filter(
+              (task) =>
+                task.assignedByAccountId !== userId &&
+                task.assignedToAccountId !== userId
             );
           }
         }
 
         setFilteredTasks(fetchedTasks);
-        if (!filters.status || filters.status === 'active') {
+        if (!filters.status || filters.status === "active") {
           fetchedTasks = filterActiveTasks(fetchedTasks);
         }
         setDisplayTasks(fetchedTasks);
       } catch (err) {
-        console.error('Error fetching filtered tasks:', err);
+        console.error("Error fetching filtered tasks:", err);
         setDisplayTasks([]);
         setFilteredTasks([]);
       } finally {
@@ -148,7 +155,7 @@ const UserTasksContent = () => {
   const totalPages = Math.ceil(displayTasks.length / tasksPerPage);
 
   const handleFilterChange = (name, value) => {
-    setFilters(prev => ({ ...prev, [name]: value }));
+    setFilters((prev) => ({ ...prev, [name]: value }));
     setCurrentPage(1);
   };
 
@@ -163,7 +170,7 @@ const UserTasksContent = () => {
       setFilterLoading(true);
 
       const statusList = parseStatus(filters.status);
-      const statusString = statusList.join(',');
+      const statusString = statusList.join(",");
 
       const response = await getUserTasks({
         ...filters,
@@ -181,25 +188,30 @@ const UserTasksContent = () => {
       // Apply role filter again
       if (filters.role && userProfile) {
         const userId = userProfile.id;
-        if (filters.role === 'CREATOR') {
-          fetchedTasks = fetchedTasks.filter(task => task.assignedByAccountId === userId);
-        } else if (filters.role === 'LEADER') {
-          fetchedTasks = fetchedTasks.filter(task => task.assignedToAccountId === userId);
-        } else if (filters.role === 'ASSIGNEE') {
-          fetchedTasks = fetchedTasks.filter(task =>
-            task.assignedByAccountId !== userId &&
-            task.assignedToAccountId !== userId
+        if (filters.role === "CREATOR") {
+          fetchedTasks = fetchedTasks.filter(
+            (task) => task.assignedByAccountId === userId
+          );
+        } else if (filters.role === "LEADER") {
+          fetchedTasks = fetchedTasks.filter(
+            (task) => task.assignedToAccountId === userId
+          );
+        } else if (filters.role === "ASSIGNEE") {
+          fetchedTasks = fetchedTasks.filter(
+            (task) =>
+              task.assignedByAccountId !== userId &&
+              task.assignedToAccountId !== userId
           );
         }
       }
 
       setFilteredTasks(fetchedTasks);
-      if (!filters.status || filters.status === 'active') {
+      if (!filters.status || filters.status === "active") {
         fetchedTasks = filterActiveTasks(fetchedTasks);
       }
       setDisplayTasks(fetchedTasks);
     } catch (err) {
-      console.error('Error refreshing tasks:', err);
+      console.error("Error refreshing tasks:", err);
     } finally {
       setFilterLoading(false);
     }
@@ -214,7 +226,7 @@ const UserTasksContent = () => {
         const profile = await getUserProfile();
         setUserProfile(profile);
       } catch (err) {
-        console.error('Error fetching user profile:', err);
+        console.error("Error fetching user profile:", err);
       }
     };
 
@@ -254,7 +266,10 @@ const UserTasksContent = () => {
               )}
             </div>
             <div className="flex gap-4">
-              <button onClick={openCreateModal} className="bg-[#00155c] hover:bg-[#172c70] text-white px-4 py-2 rounded-lg">
+              <button
+                onClick={openCreateModal}
+                className="bg-[#00155c] hover:bg-[#172c70] text-white px-4 py-2 rounded-lg"
+              >
                 Create Task
               </button>
               <Link to={`/event/${eventId}/staff/tasks/history`} className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg">
@@ -274,46 +289,46 @@ const UserTasksContent = () => {
             <div className="flex flex-wrap gap-2">
               {[
                 {
-                  label: 'Sort by',
-                  name: 'sortOrder',
+                  label: "Sort by",
+                  name: "sortOrder",
                   options: [
-                    { value: '', label: 'Sort by' },
-                    { value: 'asc', label: 'Due Date (Earliest)' },
-                    { value: 'desc', label: 'Due Date (Latest)' }
-                  ]
+                    { value: "", label: "Sort by" },
+                    { value: "asc", label: "Due Date (Earliest)" },
+                    { value: "desc", label: "Due Date (Latest)" },
+                  ],
                 },
                 {
                   label: 'Status',
                   name: 'status',
                   options: [
-                    { value: '', label: 'Active Tasks' },
-                    { value: 'TODO', label: 'To Do' },
-                    { value: 'DOING', label: 'Doing' },
-                    { value: 'REVIEW', label: 'Review' },
-                    { value: 'OVERDUE', label: 'Overdue' }
-                  ]
+                    { value: "", label: "Active Tasks" },
+                    { value: "TODO", label: "To Do" },
+                    { value: "DOING", label: "Doing" },
+                    { value: "REVIEW", label: "Review" },
+                    { value: "OVERDUE", label: "Overdue" },
+                  ],
                 },
                 {
-                  label: 'Priority',
-                  name: 'priority',
+                  label: "Priority",
+                  name: "priority",
                   options: [
-                    { value: '', label: 'All Priorities' },
-                    { value: 'CRITICAL', label: 'Critical' },
-                    { value: 'HIGH', label: 'High' },
-                    { value: 'MEDIUM', label: 'Medium' },
-                    { value: 'LOW', label: 'Low' }
-                  ]
+                    { value: "", label: "All Priorities" },
+                    { value: "CRITICAL", label: "Critical" },
+                    { value: "HIGH", label: "High" },
+                    { value: "MEDIUM", label: "Medium" },
+                    { value: "LOW", label: "Low" },
+                  ],
                 },
                 {
-                  label: 'Role',
-                  name: 'role',
+                  label: "Role",
+                  name: "role",
                   options: [
-                    { value: '', label: 'All Roles' },
-                    { value: 'CREATOR', label: 'CREATOR' },
-                    { value: 'LEADER', label: 'LEADER' },
-                    { value: 'ASSIGNEE', label: 'ASSIGNEE' }
-                  ]
-                }
+                    { value: "", label: "All Roles" },
+                    { value: "CREATOR", label: "CREATOR" },
+                    { value: "LEADER", label: "LEADER" },
+                    { value: "ASSIGNEE", label: "ASSIGNEE" },
+                  ],
+                },
               ].map(({ label, name, options }) => (
                 <div key={name} className="relative">
                   <select
@@ -321,12 +336,18 @@ const UserTasksContent = () => {
                     onChange={(e) => handleFilterChange(name, e.target.value)}
                     className="max-w-40 appearance-none px-4 py-2 border rounded-lg bg-white pr-8"
                   >
-                    {options.map(opt => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    {options.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
                     ))}
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2">
-                    <svg className="h-4 w-4 fill-current text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <svg
+                      className="h-4 w-4 fill-current text-gray-500"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                    >
                       <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                     </svg>
                   </div>
@@ -340,11 +361,19 @@ const UserTasksContent = () => {
                 placeholder="Search by task name..."
                 className="max-w-60 sm:w-80 pl-10 pr-4 py-2 border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={filters.keyword}
-                onChange={(e) => handleFilterChange('keyword', e.target.value)}
+                onChange={(e) => handleFilterChange("keyword", e.target.value)}
               />
               <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                <svg className="h-4 w-4 fill-current text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                <svg
+                  className="h-4 w-4 fill-current text-gray-400"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </div>
             </div>
@@ -352,10 +381,13 @@ const UserTasksContent = () => {
 
           {/* Task Table */}
           {filterLoading ? (
-            <div className="text-center text-gray-500 py-10">Loading tasks...</div>
+            <div className="text-center text-gray-500 py-10">
+              Loading tasks...
+            </div>
           ) : displayTasks.length > 0 ? (
             <div className="bg-white rounded-lg shadow overflow-x-auto">
-              <table className="min-w-full table-fixed"> {/* Thêm table-fixed để kiểm soát chiều rộng cột */}
+              <table className="min-w-full table-fixed">
+                {/* Thêm table-fixed để kiểm soát chiều rộng cột */}
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="w-12 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
@@ -382,7 +414,9 @@ const UserTasksContent = () => {
               </table>
             </div>
           ) : (
-            <div className="text-center text-gray-500 py-10">No active tasks found.</div>
+            <div className="text-center text-gray-500 py-10">
+              No active tasks found.
+            </div>
           )}
 
           {totalPages > 1 && (
@@ -391,10 +425,11 @@ const UserTasksContent = () => {
                 <button
                   onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
-                  className={`px-3 py-1 rounded ${currentPage === 1
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-[#00155c] text-white hover:bg-[#172c70]'
-                    }`}
+                  className={`px-3 py-1 rounded ${
+                    currentPage === 1
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-[#00155c] text-white hover:bg-[#172c70]"
+                  }`}
                 >
                   Previous
                 </button>
@@ -413,23 +448,28 @@ const UserTasksContent = () => {
                       ))}
                     </select>
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2">
-                      <svg className="h-4 w-4 fill-current text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                      <svg
+                        className="h-4 w-4 fill-current text-gray-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                      >
                         <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                       </svg>
                     </div>
                   </div>
-                  <span className="text-gray-600">
-                    of {totalPages}
-                  </span>
+                  <span className="text-gray-600">of {totalPages}</span>
                 </div>
 
                 <button
-                  onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                  onClick={() =>
+                    handlePageChange(Math.min(totalPages, currentPage + 1))
+                  }
                   disabled={currentPage === totalPages}
-                  className={`px-3 py-1 rounded ${currentPage === totalPages
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-[#00155c] text-white hover:bg-[#172c70]'
-                    }`}
+                  className={`px-3 py-1 rounded ${
+                    currentPage === totalPages
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-[#00155c] text-white hover:bg-[#172c70]"
+                  }`}
                 >
                   Next
                 </button>

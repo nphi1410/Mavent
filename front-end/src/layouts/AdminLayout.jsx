@@ -150,23 +150,22 @@ const Layout = () => {
       displayName: "Tasks",
       icon: <FontAwesomeIcon icon={faFileAlt} />,
       link: `tasks`,
-      requiredRole: 'MEMBER' // Visible to all roles
+      requiredRole: "MEMBER", // Visible to all roles
     },
     {
-      name: 'income',
-      displayName: 'Income',
+      name: "income",
+      displayName: "Income",
       icon: <FontAwesomeIcon icon={faMoneyBill1Wave} />,
       link: `income`,
-      requiredRole: 'ADMIN'
+      requiredRole: "ADMIN",
     },
     {
-      name: 'expenses',
-      displayName: 'Expenses',
+      name: "expenses",
+      displayName: "Expenses",
       icon: <FontAwesomeIcon icon={faMoneyBill1Wave} />,
       link: `expenses`,
-      requiredRole: 'ADMIN'
-    }
-
+      requiredRole: "ADMIN",
+    },
   ];
 
   // Filter items based on user role
