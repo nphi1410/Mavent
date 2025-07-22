@@ -16,10 +16,13 @@ export default function EventApproval({ eventData }) {
     const [status, setStatus] = useState("");
     const token = sessionStorage.getItem("token");
     const assignedBy = jwtDecode(token).accountId;
+    // console.log("decoded token:", jwtDecode(token));
 
     const [adminAssigned, setAdminAssigned] = useState({
         eventRole: "ADMIN",
-        assignedByAccountId: assignedBy
+        assignedByAccountId: assignedBy,
+        eventName: eventData.name,
+        assignedByAccountUsername: jwtDecode(token).sub
     });
     const [note, setNote] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -62,7 +65,9 @@ export default function EventApproval({ eventData }) {
                 status: status,
                 note: note,
                 accountId: eventData.creator.id,
-                assignedByAccountId: assignedBy
+                assignedByAccountId: assignedBy,
+                eventName: eventData.name,
+                assignedByAccountUsername: jwtDecode(token).sub,
             });
             if (updateStatusRes) {
                 console.log("Event status updated successfully:", updateStatusRes);
@@ -151,9 +156,9 @@ export default function EventApproval({ eventData }) {
                         Accept
                     </button>
                     <button
-                        onClick={() => setStatus("REJECTED")}
+                        onClick={() => setStatus("CANCELLED")}
                         className={`inline-flex items-center cursor-pointer px-4 py-2 border rounded-md shadow-sm text-sm font-medium
-                            ${status.toUpperCase().includes("REJECTED") ? `text-white bg-red-700` : `border-red-300 text-red-500`}
+                            ${status.toUpperCase().includes("CANCELLED") ? `text-white bg-red-700` : `border-red-300 text-red-500`}
                             hover:bg-red-700 hover:text-white 
                         `}
                     >

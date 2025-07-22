@@ -14,4 +14,5 @@ public class AddEventAccountRoleDTO {
     private Integer accountId;
     private String eventRole;
     private Integer assignedByAccountId;
+    private String eventName;
 }
