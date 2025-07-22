@@ -46,17 +46,13 @@ const memberService = {
       // Map status to backend format - ensure consistent casing
       if (params.status) {
         // Normalize status to either 'active' or 'inactive' (lowercase)
-        const normalizedStatus =
-          params.status.toLowerCase().trim() === "active"
-            ? "active"
-            : "inactive";
+        const normalizedStatus = params.status.toLowerCase().trim();
         queryParams.append("status", normalizedStatus);
       }
 
       if (params.page !== undefined) queryParams.append("page", params.page);
       if (params.size !== undefined) queryParams.append("size", params.size);
 
-   
       const url = `/events/${eventId}/members?${queryParams.toString()}`;
 
       const response = await Api.get(url, { signal });
@@ -178,10 +174,11 @@ const memberService = {
       // Cấu trúc lại request theo đúng định dạng của BanMemberRequestDTO
       const banRequest = {
         isBanned: banData.isBanned,
-        reason: banData.reason || (banData.isBanned ? "Banned by admin" : "Unbanned by admin"),
+        reason:
+          banData.reason ||
+          (banData.isBanned ? "Banned by admin" : "Unbanned by admin"),
         assignedByAccountId: banData.assignedByAccountId || currentUserId,
       };
-
 
       const eventId = banData.eventId;
       const accountId = banData.accountId;
@@ -234,7 +231,6 @@ const memberService = {
           message: "No event ID provided",
         };
       }
-
 
       try {
         try {

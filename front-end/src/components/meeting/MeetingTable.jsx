@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { deleteMeeting } from "../services/meetingService";
-import { vietnameseDate } from "../utils/DateConvert";
+import { deleteMeeting } from "../../services/meetingService";
+import { vietnameseDate } from "../../utils/DateConvert";
 import { faEllipsis } from "@fortawesome/free-solid-svg-icons";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

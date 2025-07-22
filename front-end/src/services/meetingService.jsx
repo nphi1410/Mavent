@@ -14,6 +14,11 @@ export const getMeetingById = async (id) => {
   return response.data;
 };
 
+export const getMeetingAttendees = async (id) => {
+  const response = await Api.get(`${MEETING_URL}/attendee/${id}`);
+  return response.data;
+};
+
 export const getMeetingByAccountId = async (accountId, filters) => {
   const params = new URLSearchParams();
 
@@ -25,8 +30,6 @@ export const getMeetingByAccountId = async (accountId, filters) => {
   const response = await Api.get(
     `${MEETING_URL}/account/${accountId}?${params.toString()}`
   );
-  console.log("alo", response.data);
-  
   return response.data;
 };
 

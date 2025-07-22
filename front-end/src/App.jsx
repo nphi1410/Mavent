@@ -57,6 +57,7 @@ import SponsorshipPackagesPage from "./pages/SponsorshipPackagesPage.jsx";
 import SponsorshipPage from "./pages/SponsorshipPage.jsx";
 import SubmitSponsorshipPage from "./pages/SubmitSponsorshipPage.jsx";
 import EventMemberPage from "./pages/Members/EventMemberPage.jsx";
+import SponsorPage from "./pages/SponsorPage.jsx";
 
 // Higher Order Components for Route Protection
 // const Protect = (Component) => <ProtectedRoute children={Component} />;
@@ -102,8 +103,11 @@ function App() {
                 <Route path="members" element={<EventMemberPage />} />
                 <Route path="documents" element={<DocumentsPage />} />
                 <Route path="feedback" element={<ViewEventFeedback />} />
-                <Route path="requests" element={(<RequestHistory />)} />
-                <Route path="create-feedback" element={<ParticipantFeedbackEvent />} />
+                <Route path="requests" element={<RequestHistory />} />
+                <Route
+                  path="create-feedback"
+                  element={<ParticipantFeedbackEvent />}
+                />
                 <Route path="income" element={<AdminViewIncome />} />
                 <Route
                   path="sponsorship-packages"
@@ -160,6 +164,7 @@ function App() {
             path="user-detail/:id"
             element={<SuperAdminViewUserDetails />}
           />
+          <Route path="sponsors" element={<SponsorPage />} />
         </Route>
       </Routes>
     </Router>

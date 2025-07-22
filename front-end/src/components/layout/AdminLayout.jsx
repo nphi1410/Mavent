@@ -11,9 +11,14 @@ import {
   faInbox,
   faHouse,
   faComments,
-  faMoneyBill1Wave
+  faMoneyBill1Wave,
+  faCrown,
+  faHandHoldingDollar,
 } from "@fortawesome/free-solid-svg-icons";
-import { EventRoleProvider, useEventRole } from "../../context/EventRoleContext";
+import {
+  EventRoleProvider,
+  useEventRole,
+} from "../../context/EventRoleContext";
 
 // Add CSS for animations
 const fadeInKeyframes = `
@@ -148,23 +153,22 @@ const Layout = () => {
       displayName: "Tasks",
       icon: <FontAwesomeIcon icon={faFileAlt} />,
       link: `tasks`,
-      requiredRole: 'MEMBER' // Visible to all roles
+      requiredRole: "MEMBER", // Visible to all roles
     },
     {
-      name: 'income',
-      displayName: 'Income',
+      name: "income",
+      displayName: "Income",
       icon: <FontAwesomeIcon icon={faMoneyBill1Wave} />,
       link: `income`,
-      requiredRole: 'ADMIN'
+      requiredRole: "ADMIN",
     },
     {
-      name: 'expenses',
-      displayName: 'Expenses',
+      name: "expenses",
+      displayName: "Expenses",
       icon: <FontAwesomeIcon icon={faMoneyBill1Wave} />,
       link: `expenses`,
-      requiredRole: 'ADMIN'
-    }
-
+      requiredRole: "ADMIN",
+    },
   ];
 
   // Filter items based on user role

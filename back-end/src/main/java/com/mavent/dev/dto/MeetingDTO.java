@@ -3,7 +3,7 @@ package com.mavent.dev.dto;
 import com.mavent.dev.entity.Meeting;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-
+import java.util.List;
 
 public interface MeetingDTO {
 
@@ -40,5 +40,6 @@ public interface MeetingDTO {
     Timestamp getCreatedAt();
 
     Timestamp getUpdatedAt();
+
 }
 
