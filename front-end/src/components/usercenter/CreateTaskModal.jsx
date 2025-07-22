@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getUserEvents, getUserRoleInEvent, createTask, getEventDepartments } from '../../services/profileService';
+import { getDocumentsByEvent, uploadDocument } from '../../services/documentService';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { getEventMembers } from '../../services/profileService';
@@ -18,6 +19,18 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
   const [departments, setDepartments] = useState([]);
   const [loadingDepartments, setLoadingDepartments] = useState(false);
 
+  // Thêm state cho documents
+  const [documents, setDocuments] = useState([]);
+  const [selectedDocuments, setSelectedDocuments] = useState([]);
+  const [loadingDocuments, setLoadingDocuments] = useState(false);
+  const [uploadingDocument, setUploadingDocument] = useState(false);
+  const [showUploadForm, setShowUploadForm] = useState(false);
+  const [newDocument, setNewDocument] = useState({
+    file: null,
+    title: '',
+    description: ''
+  });
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -25,7 +38,8 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
     priority: 'MEDIUM',
     assignedToAccountId: '',
     attendees: [],
-    departmentId: '' // Thêm departmentId vào formData
+    departmentId: '',
+    documentIds: [] // Thêm documentIds
   });
   const [formErrors, setFormErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -107,8 +121,25 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
       }
     };
 
+    // Thêm lấy danh sách documents
+    const fetchDocuments = async () => {
+      if (!selectedEvent) return;
+
+      try {
+        setLoadingDocuments(true);
+        const documentsData = await getDocumentsByEvent(selectedEvent.eventId);
+        setDocuments(documentsData || []);
+      } catch (err) {
+        setError('Không thể tải danh sách documents');
+        console.error(err);
+      } finally {
+        setLoadingDocuments(false);
+      }
+    };
+
     fetchMembers();
     fetchDepartments();
+    fetchDocuments();
   }, [selectedEvent]);
 
   const handleEventSelect = (event) => {
@@ -175,6 +206,65 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
     }
   };
 
+  // Thêm hàm xử lý documents
+  const handleDocumentToggle = (documentId) => {
+    setSelectedDocuments(prev => 
+      prev.includes(documentId)
+        ? prev.filter(id => id !== documentId)
+        : [...prev, documentId]
+    );
+  };
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setNewDocument(prev => ({
+        ...prev,
+        file,
+        title: file.name
+      }));
+    }
+  };
+
+  const handleUploadDocument = async () => {
+    if (!newDocument.file) {
+      setError('Vui lòng chọn file');
+      return;
+    }
+
+    try {
+      setUploadingDocument(true);
+      const documentData = {
+        eventId: selectedEvent.eventId,
+        departmentId: formData.departmentId || null,
+        title: newDocument.title || newDocument.file.name,
+        description: newDocument.description
+      };
+
+      // Lấy user profile để có accountId
+      const response = await uploadDocument(newDocument.file, documentData, null);
+      
+      // Thêm document mới vào danh sách và tự động chọn
+      const newDoc = response;
+      setDocuments(prev => [...prev, newDoc]);
+      setSelectedDocuments(prev => [...prev, newDoc.documentId]);
+      
+      // Reset form upload
+      setNewDocument({ file: null, title: '', description: '' });
+      setShowUploadForm(false);
+      
+      // Reset file input
+      const fileInput = document.querySelector('input[type="file"]');
+      if (fileInput) fileInput.value = '';
+      
+    } catch (err) {
+      setError('Không thể upload document: ' + err.message);
+      console.error(err);
+    } finally {
+      setUploadingDocument(false);
+    }
+  };
+
   //validateForm để kiểm tra department
   const validateForm = () => {
     const errors = {};
@@ -207,7 +297,8 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
       eventId: selectedEvent.eventId,
       assignedToAccountId: parseInt(assignedId),
       taskAttendees: attendees.map(id => parseInt(id)),
-      departmentId: formData.departmentId ? parseInt(formData.departmentId) : null
+      departmentId: formData.departmentId ? parseInt(formData.departmentId) : null,
+      documentIds: selectedDocuments // Thêm documentIds
     };
 
     console.log("Submitting task with data:", taskData);
@@ -227,8 +318,57 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
       setSubmitting(false);
     }
   };
-  console.log(members);
-  
+
+  // Reset form khi mở modal
+  useEffect(() => {
+    if (isOpen) {
+      // Reset documents
+      setSelectedDocuments([]);
+      setDocuments([]);
+      setShowUploadForm(false);
+      setNewDocument({ file: null, title: '', description: '' });
+      
+      const fetchEvents = async () => {
+        try {
+          setLoading(true);
+          const eventsData = await getUserEvents();
+          setEvents(eventsData || []);
+
+          // Lọc chỉ các event có role là ADMIN hoặc DEPARTMENT_MANAGER
+          const authorizedEvents = (eventsData || []).filter(event =>
+            event.role === 'ADMIN' || event.role === 'DEPARTMENT_MANAGER'
+          );
+          setFilteredEvents(authorizedEvents);
+
+          // Log để debug
+          console.log('All events:', eventsData);
+          console.log('Authorized events:', authorizedEvents);
+
+        } catch (err) {
+          setError('Unable to load the list of events');
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchEvents();
+      // Reset form khi mở modal
+      setStep(1);
+      setSelectedEvent(null);
+      setFormData({
+        title: '',
+        description: '',
+        dueDate: new Date(new Date().setDate(new Date().getDate() + 7)),
+        priority: 'MEDIUM',
+        assignedToAccountId: '',
+        attendees: [],
+        departmentId: '' // Reset departmentId
+      });
+      setFormErrors({});
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
@@ -255,7 +395,7 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
             </div>
           )}
 
-          {loading || loadingDepartments ? (
+          {loading || loadingDepartments || loadingDocuments ? (
             <div className="flex justify-center py-10">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
             </div>
@@ -412,6 +552,110 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
                         ))}
                       </select>
                       {formErrors.assignedToAccountId && <p className="text-red-500 text-xs mt-1">{formErrors.assignedToAccountId}</p>}
+                    </div>
+
+                    {/* Thêm section Documents */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Documents (optional)
+                      </label>
+                      
+                      {/* Danh sách documents có sẵn */}
+                      <div className="border border-gray-300 rounded-lg p-4 max-h-48 overflow-y-auto mb-3">
+                        <div className="flex justify-between items-center mb-3">
+                          <span className="text-sm font-medium">Available Documents ({documents.length})</span>
+                          <button
+                            type="button"
+                            onClick={() => setShowUploadForm(!showUploadForm)}
+                            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                          >
+                            + Upload New Document
+                          </button>
+                        </div>
+
+                        {documents.length > 0 ? (
+                          <div className="space-y-2">
+                            {documents.map(doc => (
+                              <div key={doc.documentId} className="flex items-center p-2 hover:bg-gray-50 rounded">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedDocuments.includes(doc.documentId)}
+                                  onChange={() => handleDocumentToggle(doc.documentId)}
+                                  className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                />
+                                <div className="flex-grow">
+                                  <p className="font-medium text-sm">{doc.title}</p>
+                                  {doc.description && (
+                                    <p className="text-xs text-gray-600">{doc.description}</p>
+                                  )}
+                                  <p className="text-xs text-gray-500">
+                                    {doc.fileType} • {new Date(doc.createdAt).toLocaleDateString()}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-gray-500 text-sm">No documents available for this event</p>
+                        )}
+                      </div>
+
+                      {/* Form upload document mới */}
+                      {showUploadForm && (
+                        <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                          <h4 className="font-medium mb-3">Upload New Document</h4>
+                          <div className="space-y-3">
+                            <div>
+                              <input
+                                type="file"
+                                onChange={handleFileSelect}
+                                className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                              />
+                            </div>
+                            <div>
+                              <input
+                                type="text"
+                                placeholder="Document title"
+                                value={newDocument.title}
+                                onChange={(e) => setNewDocument(prev => ({ ...prev, title: e.target.value }))}
+                                className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                              />
+                            </div>
+                            <div>
+                              <textarea
+                                placeholder="Description (optional)"
+                                value={newDocument.description}
+                                onChange={(e) => setNewDocument(prev => ({ ...prev, description: e.target.value }))}
+                                rows={2}
+                                className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                              />
+                            </div>
+                            <div className="flex space-x-2">
+                              <button
+                                type="button"
+                                onClick={handleUploadDocument}
+                                disabled={!newDocument.file || uploadingDocument}
+                                className="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:bg-gray-400"
+                              >
+                                {uploadingDocument ? 'Uploading...' : 'Upload'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setShowUploadForm(false)}
+                                className="px-4 py-2 border border-gray-300 rounded text-sm hover:bg-gray-100"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedDocuments.length > 0 && (
+                        <p className="text-sm text-blue-600 mt-2">
+                          {selectedDocuments.length} document(s) selected
+                        </p>
+                      )}
                     </div>
 
                     <div>
