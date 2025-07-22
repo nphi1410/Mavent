@@ -46,7 +46,7 @@ public class Request {
     @Column(name = "response_by_account_id")
     private Integer responseByAccountId;
 
-    @Column(name = "title", nullable = false)
+    @Column(name = "title", nullable = false, columnDefinition = "TEXT")
     private String title;
 
     @Column(name = "response_content", columnDefinition = "TEXT")

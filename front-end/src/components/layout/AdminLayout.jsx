@@ -49,7 +49,7 @@ addKeyframesToDocument();
 
 const Layout = () => {
   const { user } = useEventRole();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const location = useLocation();
   const [loading, setLoading] = useState(true);
 
@@ -149,6 +149,13 @@ const Layout = () => {
       link: `sponsorship`,
       requiredRole: "MEMBER",
     },
+    {
+      name: "tasks",
+      displayName: "Tasks",
+      icon: <FontAwesomeIcon icon={faFileAlt} />,
+      link: `tasks`,
+      requiredRole: "MEMBER", // Visible to all roles
+    },
   ];
 
   // Filter items based on user role
@@ -226,13 +233,16 @@ const Layout = () => {
         {!isSidebarOpen && (
           <button
             onClick={toggleSidebar}
-            className="lg:hidden fixed bottom-4 left-4 z-40 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="fixed bottom-4 left-4 z-40 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             style={{
               animation: isSidebarOpen ? undefined : "pulse 2s infinite",
             }}
             aria-label="Open sidebar menu"
           >
-            <FontAwesomeIcon icon={faBars} className="h-5 w-5" />
+            <FontAwesomeIcon
+              icon={faBars}
+              className="h-5 w-5 transition-transform duration-200"
+            />
           </button>
         )}
       </div>

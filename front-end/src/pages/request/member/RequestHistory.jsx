@@ -201,7 +201,7 @@ export default function RequestHistory() {
         <RequestForm
           eventId={eventId}
           accountId={accountId}
-          departmentId={departmentId}
+          departmentId={user.departmentId}
           onClose={handleCloseForm}
           requestTypes={requestTypes}
         />

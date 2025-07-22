@@ -1,5 +1,6 @@
 package com.mavent.dev.service;
 
+import com.mavent.dev.dto.NotificationDTO;
 import com.mavent.dev.dto.task.TaskAttendeeDTO;
 import com.mavent.dev.dto.task.TaskCreateDTO;
 import com.mavent.dev.dto.task.TaskDTO;
@@ -66,5 +67,13 @@ public interface AccountService extends UserDetailsService {
     Account getAccountByToken(String token);
 
     Boolean isSuperAdmin(Integer accountId);
+
+    List<NotificationDTO> getUserNotifications(Integer accountId);
+
+    void markNotificationAsRead(Integer notificationId, Integer accountId);
+
+    void markAllNotificationsAsRead(Integer accountId);
+
+    Long getUnreadNotificationCount(Integer accountId);
 }
 

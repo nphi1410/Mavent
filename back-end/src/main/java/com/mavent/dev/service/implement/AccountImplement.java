@@ -1,11 +1,13 @@
 package com.mavent.dev.service.implement;
 
+import com.mavent.dev.dto.NotificationDTO;
 import com.mavent.dev.dto.task.TaskAttendeeDTO;
 import com.mavent.dev.dto.task.TaskFeedbackDTO;
 import com.mavent.dev.entity.*;
 import com.mavent.dev.dto.task.TaskCreateDTO;
 import com.mavent.dev.dto.superadmin.AccountDTO;
 import com.mavent.dev.repository.*;
+import com.mavent.dev.service.NotificationService;
 import com.mavent.dev.util.JwtUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -44,6 +46,10 @@ public class AccountImplement implements AccountService, UserDetailsService {
 
     @Autowired
     private MailConfig mailConfig;
+
+    @Autowired
+    private NotificationService notificationService;
+
 
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
@@ -356,19 +362,41 @@ public class AccountImplement implements AccountService, UserDetailsService {
         if (!attendees.contains(assignedUserId)) {
             attendees.add(assignedUserId);
         }
+        Set<Integer> notifiedUsers = new HashSet<>();
 
         for (Integer attendeeId : attendees) {
+            if (notifiedUsers.contains(attendeeId)) {
+                continue;
+            }
+            notifiedUsers.add(attendeeId);
+
             TaskAttendee taskAttendee = new TaskAttendee();
             taskAttendee.setTaskId(savedTask.getTaskId());
             taskAttendee.setAccountId(attendeeId);
-            if (attendeeId.equals(assignedUserId)) {
-                taskAttendee.setStatus(TaskAttendee.Status.ACCEPTED);
-            } else {
-                taskAttendee.setStatus(TaskAttendee.Status.ACCEPTED);
-            }
+            taskAttendee.setStatus(TaskAttendee.Status.ACCEPTED);
 
             taskAttendeeRepository.save(taskAttendee);
+
+            String message;
+            String type;
+            if (attendeeId.equals(assignedUserId)) {
+                message = "You have been assigned as the main assignee for task: " + savedTask.getTitle();
+                type = "TASK ASSIGNMENT";
+            } else {
+                message = "You have been added as an attendee to task: " + savedTask.getTitle();
+                type = "TASK ATTENDEE";
+            }
+
+            notificationService.createNotification(
+                    attendeeId,
+                    savedTask.getEventId(),
+                    null,
+                    savedTask.getTaskId(),
+                    type,
+                    message
+            );
         }
+
         return convertToTaskDTO(savedTask);
     }
 
@@ -639,6 +667,60 @@ public class AccountImplement implements AccountService, UserDetailsService {
     public Boolean isSuperAdmin(Integer accountId) {
         Account account = getAccountById(accountId);
         return account.getSystemRole().name().equals("SUPER_ADMIN");
+    }
+
+    // Add these imports and autowired repository to AccountImplement
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Override
+    public List<NotificationDTO> getUserNotifications(Integer accountId) {
+        List<Notification> notifications = notificationRepository.findByRecipientAccountIdOrderByCreatedAtDesc(accountId);
+
+        return notifications.stream().map(this::mapNotificationToDTO).collect(Collectors.toList());
+    }
+
+    private NotificationDTO mapNotificationToDTO(Notification notification) {
+        NotificationDTO dto = new NotificationDTO();
+        dto.setNotificationId(notification.getNotificationId());
+        dto.setRecipientAccountId(notification.getRecipientAccountId());
+        dto.setEventId(notification.getEventId());
+        dto.setRequestId(notification.getRequestId());
+        dto.setTaskId(notification.getTaskId());
+        dto.setType(notification.getType());
+        dto.setMessage(notification.getMessage());
+        dto.setCreatedAt(notification.getCreatedAt());
+        dto.setIsRead(notification.getIsRead());
+        return dto;
+    }
+
+    @Override
+    @Transactional
+    public void markNotificationAsRead(Integer notificationId, Integer accountId) {
+        Notification notification = notificationRepository.findById(notificationId)
+            .orElseThrow(() -> new IllegalArgumentException("Notification not found"));
+
+        if (!notification.getRecipientAccountId().equals(accountId)) {
+            throw new IllegalArgumentException("Access denied");
+        }
+
+        notification.setIsRead(true);
+        notificationRepository.save(notification);
+    }
+
+    @Override
+    @Transactional
+    public void markAllNotificationsAsRead(Integer accountId) {
+        List<Notification> notifications = notificationRepository
+            .findByRecipientAccountIdAndIsReadFalse(accountId);
+
+        notifications.forEach(n -> n.setIsRead(true));
+        notificationRepository.saveAll(notifications);
+    }
+
+    @Override
+    public Long getUnreadNotificationCount(Integer accountId) {
+        return notificationRepository.countUnreadByRecipientAccountId(accountId);
     }
 }
 
