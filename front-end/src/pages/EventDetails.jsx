@@ -30,7 +30,7 @@ const EventDetails = () => {
         } catch (err) {
           console.error("Failed to fetch event:", err);
           setError("Something went wrong.");
-        } finally {
+        } finally {                                                                     
           setLoading(false);
         }
       };

@@ -17,7 +17,6 @@ const Sidebar = ({ isOpen, onToggle, mainItems }) => {
   const location = useLocation();
   const sidebarRef = useRef(null);
   const pathSegments = location.pathname.split('/').filter(Boolean);
-  // console.log("pathSegments: " + pathSegments);
 
   const activeItem = pathSegments[pathSegments.length - 1] || '';
 

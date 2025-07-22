@@ -38,6 +38,7 @@ import CreateEvent from "./pages/CreateEvent/CreateEvent";
 import CreateTimeline from "./pages/CreateEvent/CreateTimeline";
 import CreateAgenda from "./pages/CreateEvent/CreateAgenda";
 import CreateProposal from "./pages/CreateEvent/CreateProposal";
+import AdminViewIncome from "./pages/financeEvent/AdminViewIncome.jsx";
 
 // Super Admin
 import SuperAdminDashboard from "./pages/superadmin/SuperAdminDashBoard";
@@ -94,6 +95,7 @@ function App() {
                 <Route path="feedback" element={<ViewEventFeedback />} />
                 <Route path="requests" element={(<RequestHistory />)} />
                 <Route path="create-feedback" element={<ParticipantFeedbackEvent />} />
+                <Route path="income" element={<AdminViewIncome />} />
               </Route>
             </Route>
           </Route>

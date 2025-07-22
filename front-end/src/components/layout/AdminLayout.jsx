@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Outlet, useParams, useLocation } from "react-router-dom";
 import Sidebar from "./AdminSidebar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { } from "@fortawesome/free-solid-svg-icons";
 import {
   faBars,
   faUsers,
@@ -11,7 +10,8 @@ import {
   faFileAlt,
   faInbox,
   faHouse,
-  faComments
+  faComments,
+  faMoneyBill1Wave
 } from "@fortawesome/free-solid-svg-icons";
 import { EventRoleProvider, useEventRole } from "../../context/EventRoleContext";
 
@@ -62,7 +62,7 @@ const Layout = () => {
       </div>
     );
   }
-  
+
   // console.log('AdminLayout: ', user)
   const userRole = user.role;
 
@@ -134,6 +134,20 @@ const Layout = () => {
       icon: <FontAwesomeIcon icon={faFileAlt} />,
       link: `tasks`,
       requiredRole: 'MEMBER' // Visible to all roles
+    },
+    {
+      name: 'income',
+      displayName: 'Income',
+      icon: <FontAwesomeIcon icon={faMoneyBill1Wave} />,
+      link: `income`,
+      requiredRole: 'ADMIN'
+    },
+    {
+      name: 'expenses',
+      displayName: 'Expenses',
+      icon: <FontAwesomeIcon icon={faMoneyBill1Wave} />,
+      link: `expenses`,
+      requiredRole: 'ADMIN'
     }
 
 
