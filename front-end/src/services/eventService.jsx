@@ -208,3 +208,13 @@ export const getPendingEventDetailsById = async (eventId) => {
     return null;
   }
 }
+
+export const updatePendingEvent = async (eventId, status) => {
+  try {
+    const response = await Api.patch(`/events/pending/${eventId}`, status);
+    return response.data;
+  } catch (error) {
+    console.error(`Error updating pending event with ID ${eventId}:`, error);
+    return null;
+  }
+}
