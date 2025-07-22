@@ -10,9 +10,9 @@ import java.util.Optional;
 
 public interface MeetingService {
 
-    Meeting createMeeting(Meeting meeting);
+    Meeting createMeeting(Meeting meeting, List<String> attendeeIds);
 
-    Meeting updateMeeting(Integer meetingId, Meeting meeting);
+    Meeting updateMeeting(Meeting meeting);
 
     void deleteMeeting(Integer meetingId);
 

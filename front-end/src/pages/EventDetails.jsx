@@ -11,6 +11,7 @@ import DepartmentList from "../components/department/DepartmentList";
 import { getEventById } from "../services/eventService";
 import { getUserInfoInEvent } from "../services/userEventService"; // Assuming you have this service to fetch user info in the event
 import { useNavigate } from "react-router-dom";
+import EventSponsors from "../components/sponsorship/EventSponsors";
 
 const EventDetails = () => {
   const { id } = useParams(); // <-- Get ID from URL
@@ -30,7 +31,7 @@ const EventDetails = () => {
         } catch (err) {
           console.error("Failed to fetch event:", err);
           setError("Something went wrong.");
-        } finally {
+        } finally {                                                                     
           setLoading(false);
         }
       };
@@ -40,9 +41,7 @@ const EventDetails = () => {
           if (sessionStorage.getItem("isLoggedIn") !== "true") return;
           const userEventInfo = await getUserInfoInEvent(id);
           if (userEventInfo && userEventInfo?.role) {
-            navigate(
-              `/event/${id}/staff/details`
-            );
+            navigate(`/event/${id}/staff/details`);
           } else {
             console.warn("No user info found for this event.");
           }
@@ -59,7 +58,8 @@ const EventDetails = () => {
     }
   }, [id]);
 
-  if (loading) return <p className="text-center mt-10">Loading Event Details...</p>;
+  if (loading)
+    return <p className="text-center mt-10">Loading Event Details...</p>;
   if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
 
   return (
@@ -75,7 +75,9 @@ const EventDetails = () => {
           <MapGuide eventData={eventData} />
         </div>
       </section>
-
+      <section className="w-full px-4 sm:px-6 lg:px-12 py-8">
+        <EventSponsors eventId={id} />
+      </section>
       <section className="flex flex-col lg:flex-row justify-between gap-8 px-4 sm:px-6 lg:px-12 py-8">
         <div className="w-full lg:w-1/2">
           <OrganizerContact contact={eventData?.organizer} />

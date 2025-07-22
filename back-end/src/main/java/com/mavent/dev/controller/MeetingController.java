@@ -10,6 +10,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -21,12 +22,13 @@ public class MeetingController {
 
     @PostMapping
     public ResponseEntity<Meeting> createMeeting(@RequestBody Meeting meeting) {
-        return ResponseEntity.ok(meetingService.createMeeting(meeting));
+        List<String> attendeeIds = new ArrayList<>();
+        return ResponseEntity.ok(meetingService.createMeeting(meeting,attendeeIds));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Meeting> updateMeeting(@PathVariable("id") Integer id, @RequestBody Meeting meeting) {
-        return ResponseEntity.ok(meetingService.updateMeeting(id, meeting));
+        return ResponseEntity.ok(meetingService.updateMeeting(meeting));
     }
 
     @DeleteMapping("/{id}")

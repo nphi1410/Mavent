@@ -4,7 +4,7 @@ import { faSave, faTimes, faUser } from "@fortawesome/free-solid-svg-icons";
 
 const EditMemberModal = ({
   isOpen,
-  user = null,
+  user,
   departments = [],
   onClose,
   onSave,
@@ -12,19 +12,36 @@ const EditMemberModal = ({
   canEdit,
   userRole,
 }) => {
- 
-  
+  // console.log('EditMemberModal render with props:',
+  //    {
+  //   isOpen,
+  //   user: user ? `${user.name} (ID: ${user.id})` : null,
+  //   departmentsCount: departments.length
+  // });
+
+  // Add a rendering flag for debugging
+  React.useEffect(() => {
+    if (isOpen && user) {
+      // console.log(`Edit Modal should be visible now for user: ${user.name}`);
+      console.log(user);
+    }
+  }, [isOpen, user]);
+
+  if (!isOpen || !user) {
+    // console.log('EditMemberModal not rendered: isOpen=', isOpen, 'user=', user ? 'exists' : 'null');
+    // For debugging: return a hidden placeholder to confirm the component is mounting
+    return (
+      <div style={{ display: "none" }}>
+        EditModal would render here if isOpen={String(isOpen)} and user exists=
+        {String(!!user)}
+      </div>
+    );
+  }
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     onChange(name, value, departments);
   };
-  
-  // Nếu modal không được mở, không render gì cả
-  if (!isOpen) {
-
-    return null;
-  }
-  
   return (
     <div
       className="fixed  backdrop-blur-lg bg-black/50 inset-0 flex items-center justify-center z-[9999]"
@@ -34,6 +51,7 @@ const EditMemberModal = ({
         className="absolute inset-0  bg-opacity-50"
         onClick={(e) => {
           e.stopPropagation();
+          // console.log("Edit Modal backdrop clicked - closing modal");
           onClose();
         }}
       ></div>
@@ -58,7 +76,7 @@ const EditMemberModal = ({
         </div>
         <div className="flex items-center px-6 pt-6 pb-3">
           <div className="flex-shrink-0 h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-4 border-white shadow">
-            {user && user.avatarUrl ? (
+            {user.avatarUrl ? (
               <img
                 src={user.avatarUrl}
                 alt={`${user.name}'s avatar`}
@@ -77,8 +95,8 @@ const EditMemberModal = ({
             )}
           </div>
           <div className="ml-4">
-            <h3 className="text-xl font-semibold">{user && user.name ? user.name : 'User'}</h3>
-            <p className="text-gray-500">{user && user.email ? user.email : ''}</p>
+            <h3 className="text-xl font-semibold">{user.name}</h3>
+            <p className="text-gray-500">{user.email}</p>
           </div>
         </div>
         <div className="px-6 py-4 border-t border-b">
@@ -88,13 +106,13 @@ const EditMemberModal = ({
                 Student ID:
               </span>
               <div className="text-sm text-gray-900">
-                {user && user.studentId ? user.studentId : "N/A"}
+                {user.studentId || "N/A"}
               </div>
             </div>
             <div>
               <span className="text-sm font-medium text-gray-700">Gender:</span>
               <div className="text-sm text-gray-900">
-                {user && user.gender ? user.gender : "N/A"}
+                {user.gender || "N/A"}
               </div>
             </div>
             <div>
@@ -102,7 +120,7 @@ const EditMemberModal = ({
                 Date of Birth:
               </span>
               <div className="text-sm text-gray-900">
-                {user && user.dateOfBirth ? user.dateOfBirth : "N/A"}
+                {user.dateOfBirth || "N/A"}
               </div>
             </div>
           </div>
@@ -120,7 +138,7 @@ const EditMemberModal = ({
               <select
                 id="role"
                 name="role"
-                value={(user && user.role) || ""}
+                value={user.role}
                 onChange={handleInputChange}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
@@ -129,7 +147,7 @@ const EditMemberModal = ({
                 <option value="MEMBER">Member</option>
               </select>
               <p className="text-xs text-gray-500 mt-1">
-                Current role: {user && user.role ? user.role : 'N/A'}
+                Current role: {user.role}
               </p>
             </div>
             <div className="mb-2">
@@ -142,14 +160,25 @@ const EditMemberModal = ({
               <select
                 id="status"
                 name="status"
-                value={(user && user.status) || "Active"}
+                value={user.status || "Active"}
                 onChange={(e) => {
                   const newStatus = e.target.value;
+                  // console.log(`EditUserModal: Status changed to ${newStatus} (from ${user.status})`);
+                  // Automatically set isActive based on status
                   const newIsActive = newStatus === "Active";
+                  // console.log(`Setting isActive to: ${newIsActive}`);
+                  // console.log('User data before update:', JSON.stringify(user));
+
+                  // First update status
                   handleInputChange(e);
 
                   // Then explicitly update isActive field
                   onChange("isActive", newIsActive, departments);
+
+                  // Log after update for debugging
+                  setTimeout(() => {
+                    // console.log('User data after update:', JSON.stringify(user));
+                  }, 0);
                 }}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
@@ -157,12 +186,12 @@ const EditMemberModal = ({
                 <option value="Inactive">Inactive</option>
               </select>
               <p className="text-xs text-gray-500 mt-1">
-                Current status: {user && user.status ? user.status : "N/A"}
+                Current status: {user.status}
                 (isActive:{" "}
                 {String(
-                  user && user.isActive !== undefined
+                  user.isActive !== undefined
                     ? user.isActive
-                    : user && user.status === "Active"
+                    : user.status === "Active"
                 )}
                 )
               </p>
@@ -177,7 +206,7 @@ const EditMemberModal = ({
               <select
                 id="department"
                 name="department"
-                value={(user && user.departmentId) || ""}
+                value={user.departmentId || ""}
                 onChange={(e) => {
                   // Find department object by ID
                   const deptId = e.target.value;
@@ -214,7 +243,7 @@ const EditMemberModal = ({
                 )}
               </select>
               <p className="text-xs text-gray-500 mt-1">
-                {user && user.department
+                {user.department
                   ? `Current department: ${user.department}`
                   : "No department assigned"}
               </p>
@@ -227,7 +256,8 @@ const EditMemberModal = ({
             onClick={onSave}
           >
             <FontAwesomeIcon icon={faSave} className="mr-2" />
-            Save Changes
+            {"Save changes"}
+            {/* {!user.assignedByAccountId ? "Approve application" : } */}
           </button>
           <button
             className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors duration-200 flex items-center justify-center"

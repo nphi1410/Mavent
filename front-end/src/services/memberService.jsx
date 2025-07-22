@@ -1,13 +1,24 @@
 import Api from "../config/Api";
 
-
 // Member API service - chỉ quản lý member, không liên quan đến event management
 const memberService = {
-  // Lấy danh sách members của một event
+  getSponsorManageableMembers: async (eventId) => {
+    try {
+      const response = await Api.get(
+        `/events/${eventId}/members/manage-sponsor`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error getting sponsor manageable members:", error);
+      throw error;
+    }
+  },
+
+  // Lấy danh sách members của một event với phân trang và filter
   getMembers: async (eventId, params = {}, signal = undefined) => {
     try {
       const queryParams = new URLSearchParams();
-      
+
       // Only append search parameter if it's not empty after trimming
       if (params.search && params.search.trim()) {
         const trimmedSearch = params.search.trim();
@@ -29,9 +40,7 @@ const memberService = {
             ? Number(params.department)
             : params.department.toString().trim();
         queryParams.append("department", departmentValue);
-      
       } else {
-
       }
 
       // Map status to backend format - ensure consistent casing
@@ -42,7 +51,6 @@ const memberService = {
             ? "active"
             : "inactive";
         queryParams.append("status", normalizedStatus);
-    
       }
 
       if (params.page !== undefined) queryParams.append("page", params.page);
@@ -50,7 +58,7 @@ const memberService = {
 
    
       const url = `/events/${eventId}/members?${queryParams.toString()}`;
-  
+
       const response = await Api.get(url, { signal });
 
       return response.data;
@@ -61,7 +69,6 @@ const memberService = {
         error.code === "ECONNABORTED" ||
         (error.message && error.message.includes("canceled"))
       ) {
-   
         throw { name: "AbortError", message: "Request aborted" };
       }
 
@@ -73,9 +80,12 @@ const memberService = {
   getMemberDetails: async (eventId, accountId, signal = undefined) => {
     try {
       // Cập nhật URL để phù hợp với endpoint trong MemberController
-      const response = await Api.get(`/events/${eventId}/members/${accountId}`, {
-        signal,
-      });
+      const response = await Api.get(
+        `/events/${eventId}/members/${accountId}`,
+        {
+          signal,
+        }
+      );
       return response.data;
     } catch (error) {
       // Handle abort error separately
@@ -84,7 +94,6 @@ const memberService = {
         error.code === "ECONNABORTED" ||
         (error.message && error.message.includes("canceled"))
       ) {
-
         throw { name: "AbortError", message: "Request aborted" };
       }
 
@@ -96,8 +105,6 @@ const memberService = {
   // Cập nhật thông tin member (role, department, status)
   updateMember: async (memberData) => {
     try {
-  
-
       // Transform frontend data to backend DTO format
       const isActive =
         memberData.isActive !== undefined
@@ -106,17 +113,23 @@ const memberService = {
 
       // Lấy accountId hiện tại từ localStorage và đảm bảo đó là số nguyên hợp lệ
       // Kiểm tra nếu không có accountId hoặc = 0 thì lấy ID cứng là 1 (hoặc admin nào đó)
-      let currentUserId = parseInt(localStorage.getItem('accountId') || '0', 10);
+      let currentUserId = parseInt(
+        localStorage.getItem("accountId") || "0",
+        10
+      );
       if (!currentUserId || currentUserId <= 0) {
         currentUserId = 1; // Fallback to a valid ID (Super Admin/Admin ID)
       }
-      
+
       // Tạo DTO phù hợp với API MemberController và các yêu cầu xác thực
       const updateRequest = {
         // EventRole là trường bắt buộc trong UpdateMemberRequestDTO
         eventRole: memberData.role || memberData.eventRole || "MEMBER", // Luôn cung cấp vai trò hợp lệ
         // Chỉ gửi departmentId nếu được cung cấp và không phải null
-        ...(memberData.departmentId !== undefined && memberData.departmentId !== null && { departmentId: memberData.departmentId }),
+        ...(memberData.departmentId !== undefined &&
+          memberData.departmentId !== null && {
+            departmentId: memberData.departmentId,
+          }),
         // Luôn đặt trường isActive để đảm bảo nó được gửi đến backend (ép kiểu boolean)
         isActive: isActive,
         // Lý do cập nhật - đảm bảo không để trống
@@ -125,13 +138,15 @@ const memberService = {
         assignedByAccountId: memberData.assignedByAccountId || currentUserId,
       };
 
-
       const eventId = memberData.eventId;
       const accountId = memberData.accountId;
-      
+
       // Sử dụng POST đúng với định nghĩa @PostMapping trong backend controller
-      const response = await Api.post(`/events/${eventId}/members/${accountId}`, updateRequest);
-     
+      const response = await Api.post(
+        `/events/${eventId}/members/${accountId}`,
+        updateRequest
+      );
+
       return response.data;
     } catch (error) {
       console.error("Error updating member:", error);
@@ -152,7 +167,10 @@ const memberService = {
 
       // Lấy accountId hiện tại từ localStorage và đảm bảo đó là số nguyên hợp lệ
       // Kiểm tra nếu không có accountId hoặc = 0 thì lấy ID cứng là 1 (hoặc admin nào đó)
-      let currentUserId = parseInt(localStorage.getItem('accountId') || '0', 10);
+      let currentUserId = parseInt(
+        localStorage.getItem("accountId") || "0",
+        10
+      );
       if (!currentUserId || currentUserId <= 0) {
         currentUserId = 1; // Fallback to a valid ID (Super Admin/Admin ID)
       }
@@ -168,11 +186,13 @@ const memberService = {
       const eventId = banData.eventId;
       const accountId = banData.accountId;
 
-      const response = await Api.post(`/events/${eventId}/members/${accountId}/ban`, banRequest);
+      const response = await Api.post(
+        `/events/${eventId}/members/${accountId}/ban`,
+        banRequest
+      );
 
       return response.data;
     } catch (error) {
-
       throw error;
     }
   },
@@ -205,7 +225,6 @@ const memberService = {
   // Lấy danh sách departments của một event
   getDepartments: async (eventId, signal = undefined) => {
     try {
-
       // Kiểm tra eventId
       if (!eventId) {
         console.warn("No eventId provided for getDepartments");
@@ -259,9 +278,7 @@ const memberService = {
               message: "Departments fetched successfully",
             };
           }
-        } catch (err) {
- 
-        }
+        } catch (err) {}
 
         // Nếu endpoint đầu tiên thất bại, thử với endpoint thay thế
         const alternativeResponse = await Api.get(
@@ -271,8 +288,6 @@ const memberService = {
             timeout: 8000,
           }
         );
-
-    
 
         let departments = [];
 
@@ -313,7 +328,6 @@ const memberService = {
         throw apiError;
       }
     } catch (error) {
-
       // Trả về đối tượng với dữ liệu rỗng để UI hiển thị trạng thái không có dữ liệu
       return {
         success: false,

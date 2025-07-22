@@ -1,12 +1,11 @@
 package com.mavent.dev.service;
 
-import com.mavent.dev.dto.department.UserEventInfoDTO;
 import com.mavent.dev.dto.EventCountDTO;
+import com.mavent.dev.dto.department.UserEventInfoDTO;
 import com.mavent.dev.dto.event.EventAccountRoleDTO;
 import com.mavent.dev.entity.EventAccountRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -55,6 +54,14 @@ public interface EventAccountRoleService {
                                                  EventAccountRole.EventRole role,
                                                  Integer departmentId,
                                                  String searchTerm,
+                                                 Pageable pageable);
+
+    Page<EventAccountRole> getMembersWithFilters(Integer eventId, Boolean isActive,
+                                                 EventAccountRole.EventRole role,
+                                                 Integer departmentId,
+                                                 String searchTerm,
+                                                 java.util.Date startDate,
+                                                 java.util.Date endDate,
                                                  Pageable pageable);
 
     List<EventCountDTO> getMonthlyStatistic(Integer accountId, String eventRole);
