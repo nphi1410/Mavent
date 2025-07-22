@@ -11,15 +11,16 @@ import {
   faComments
 } from "@fortawesome/free-solid-svg-icons";
 
-
 // Sidebar component for admin dashboard
 const Sidebar = ({ isOpen, onToggle, mainItems }) => {
   const location = useLocation();
   const sidebarRef = useRef(null);
   const pathSegments = location.pathname.split('/').filter(Boolean);
   // console.log("pathSegments: " + pathSegments);
+  const { id } = useParams();
 
-  const activeItem = pathSegments[pathSegments.length - 1] || '';
+  const activeItem = pathSegments[pathSegments.length - 1] || "";
+  const manageUrl = `/event/${id}/staff/`;
 
   return (
     <>
@@ -36,16 +37,17 @@ const Sidebar = ({ isOpen, onToggle, mainItems }) => {
           <ul className="space-y-1">
             {mainItems.map((item) => (
               <li key={item.name}>
-                <Link
-                  to={item.link}
-                  className={`flex items-center p-3 text-sm font-medium rounded-lg transition-colors duration-200 hover:bg-gray-100 ${activeItem === item.name.toLowerCase()
+                <a
+                  href={manageUrl + item.link}
+                  className={`flex items-center p-3 text-sm font-medium rounded-lg transition-colors duration-200 hover:bg-gray-100 ${
+                    activeItem === item.name.toLowerCase()
                       ? "bg-blue-100 text-blue-700 border-r-2 border-blue-700"
                       : "text-gray-900"
                     }`}
                 >
                   <span className="w-5 h-5 text-gray-500">{item.icon}</span>
                   <span className="ml-3">{item.displayName || item.name}</span>
-                </Link>
+                </a>
               </li>
             ))}
           </ul>
@@ -83,8 +85,8 @@ const Sidebar = ({ isOpen, onToggle, mainItems }) => {
           <ul className="space-y-1">
             {mainItems.map((item) => (
               <li key={item.name}>
-                <a
-                  href={item.link}
+                <Link
+                  to={item.link}
                   onClick={onToggle}
                   className={`flex items-center p-3 text-sm font-medium rounded-lg transition-colors duration-200 hover:bg-gray-100 ${activeItem === item.name.toLowerCase()
                       ? "bg-blue-100 text-blue-700"
@@ -93,7 +95,7 @@ const Sidebar = ({ isOpen, onToggle, mainItems }) => {
                 >
                   <span className="w-5 h-5 text-gray-500">{item.icon}</span>
                   <span className="ml-3">{item.displayName || item.name}</span>
-                </a>
+                </Link>
               </li>
             ))}
           </ul>

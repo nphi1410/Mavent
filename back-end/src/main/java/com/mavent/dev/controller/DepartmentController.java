@@ -2,6 +2,7 @@ package com.mavent.dev.controller;
 
 import com.mavent.dev.dto.department.DepartmentRequestDTO;
 import com.mavent.dev.dto.department.DepartmentResponseDTO;
+import com.mavent.dev.entity.Department;
 import com.mavent.dev.service.DepartmentService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -110,6 +111,11 @@ public class DepartmentController {
         response.put("memberCount", memberCount);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/manage-sponsor")
+    public ResponseEntity<List<Department>> getSponsorManageable(@PathVariable Integer eventId) {
+        return ResponseEntity.ok(departmentService.getSponsorManageableDepartment(eventId));
     }
 }
 

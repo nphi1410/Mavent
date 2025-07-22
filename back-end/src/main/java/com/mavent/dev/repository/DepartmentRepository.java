@@ -4,6 +4,7 @@ import com.mavent.dev.entity.Department;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 import java.util.List;
 
@@ -80,5 +81,8 @@ public interface DepartmentRepository extends JpaRepository<Department, Integer>
 //    @Query("SELECT COUNT(t) FROM Task t WHERE t.assignedDepartment.departmentId = :departmentId")
 //    long countTasksByDepartmentId(@Param("departmentId") Integer departmentId);
 
+    @Query("SELECT d FROM Department d WHERE d.sponsorManageable = true " +
+            "AND (:eventId IS NULL OR d.eventId = :eventId)")
+    List<Department> getSponsorManageable(@Param("eventId") Integer eventId);
 
 }

@@ -57,6 +57,9 @@ const MemberTable = (props) => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[150px]">
                 Department
               </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[150px]">
+                Assigned by
+              </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
                 Actions
               </th>
@@ -177,6 +180,13 @@ const MemberTable = (props) => {
                         {member.department}
                       </span>
                     </div>
+                  ) : (
+                    <span className="text-gray-400">N/A</span>
+                  )}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  {member.assignedByName ? (
+                    <span>{member.assignedByName}</span>
                   ) : (
                     <span className="text-gray-400">N/A</span>
                   )}

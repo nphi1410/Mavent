@@ -47,14 +47,15 @@ public class DepartmentImplement implements DepartmentService {
     @Override
     public DepartmentResponseDTO updateDepartment(Integer departmentId, DepartmentRequestDTO departmentRequestDTO) {
 
-        // Convert DTO to entity
+
         Department existingDepartment = departmentRepository.findById(departmentId)
                 .orElseThrow(() -> new EntityNotFoundException("Department not found"));
 
         existingDepartment.setName(departmentRequestDTO.getName());
         existingDepartment.setDescription(departmentRequestDTO.getDescription());
+        existingDepartment.setSponsorManageable(departmentRequestDTO.getSponsorManageable());
 
-        // Update timestamps
+
         Department updatedDepartment = departmentRepository.save(existingDepartment);
 
         return DepartmentMapper.toDTO(updatedDepartment);
@@ -75,5 +76,10 @@ public class DepartmentImplement implements DepartmentService {
         }
         // Use the repository method to get the count
         return departmentRepository.countMembersByDepartmentId(departmentId);
+    }
+
+    @Override
+    public List<Department> getSponsorManageableDepartment(Integer eventId) {
+        return departmentRepository.getSponsorManageable(eventId);
     }
 }

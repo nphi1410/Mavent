@@ -4,7 +4,6 @@ import { getEventFeedbackByEventId } from '../services/eventFeedbackService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStar, faChartColumn, faUser } from '@fortawesome/free-solid-svg-icons';
 import { Bar } from 'react-chartjs-2';
-import Layout from '../components/layout/AdminLayout';
 import 'chart.js/auto';
 
 function getChartData(data) {

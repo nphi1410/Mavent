@@ -1,6 +1,8 @@
 package com.mavent.dev.controller;
 
+import com.mavent.dev.dto.account.AccountDTO;
 import com.mavent.dev.dto.member.*;
+import com.mavent.dev.entity.Account;
 import com.mavent.dev.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +35,11 @@ public class MemberController {
             @PathVariable Integer eventId) {
         List<MemberResponseDTO> members = memberService.getAllMembersByEventId(eventId);
         return ResponseEntity.ok(members);
+    }
+
+    @GetMapping("/manage-sponsor")
+    public ResponseEntity<List<MemberDTO>> getSponsorManageable(@PathVariable Integer eventId){
+        return ResponseEntity.ok(memberService.getSponsorManageable(eventId));
     }
 
     /**
@@ -89,7 +96,7 @@ public class MemberController {
             @PathVariable Integer accountId,
             @RequestBody @Valid BanMemberRequestDTO request) {
 
-        // Phải set ID trước khi validation (đoạn này vẫn giữ lại vì tính nhất quán)
+
         request.setEventId(eventId);
         request.setAccountId(accountId);
         

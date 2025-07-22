@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Outlet, useParams, useLocation } from "react-router-dom";
 import Sidebar from "./AdminSidebar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { } from "@fortawesome/free-solid-svg-icons";
 import {
   faBars,
   faUsers,
@@ -11,7 +10,10 @@ import {
   faFileAlt,
   faInbox,
   faHouse,
-  faComments
+  faComments,
+  faMoneyBill1Wave,
+  faHandHoldingDollar,
+  faCrown
 } from "@fortawesome/free-solid-svg-icons";
 import { EventRoleProvider, useEventRole } from "../../context/EventRoleContext";
 
@@ -62,9 +64,10 @@ const Layout = () => {
       </div>
     );
   }
-  
+
   // console.log('AdminLayout: ', user)
   const userRole = user.role;
+  const sponsorManageable = user.sponsorManageable;
 
   // Kiểm tra xem có phải đang ở trang quản lý (members, departments hoặc documents)
   // const isManagementPage =
@@ -81,7 +84,7 @@ const Layout = () => {
     "departments",
     "documents",
     "requests",
-    "feedback"
+    "feedback",
   ].some((segment) => location.pathname.includes(segment));
 
   const allMenuItems = [
@@ -105,46 +108,86 @@ const Layout = () => {
       displayName: "Departments",
       icon: <FontAwesomeIcon icon={faSitemap} />,
       link: `departments`,
-      requiredRole: 'ADMIN' // Only visible to department managers and admins
+      requiredRole: "ADMIN", // Only visible to department managers and admins
     },
     {
       name: "documents",
       displayName: "Documents",
       icon: <FontAwesomeIcon icon={faFileAlt} />,
       link: `documents`,
-      requiredRole: 'MEMBER' // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
+      requiredRole: "MEMBER", // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
     },
     {
-      name: 'feedback',
-      displayName: 'Feedback',
+      name: "feedback",
+      displayName: "Feedback",
       icon: <FontAwesomeIcon icon={faComments} />,
       link: `feedback`,
-      requiredRole: 'ADMIN' // Visible to admin only (ADMIN)
+      requiredRole: "ADMIN", // Visible to admin only (ADMIN)
     },
     {
-      name: 'requests',
-      displayName: 'Requests',
+      name: "requests",
+      displayName: "Requests",
       icon: <FontAwesomeIcon icon={faInbox} />,
       link: `requests`,
-      requiredRole: 'MEMBER' // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
+      requiredRole: "MEMBER", // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
     },
     {
-      name: 'tasks',
-      displayName: 'Tasks',
+      name: "sponsorship packages",
+      displayName: "Sponsorship Packages",
+      icon: <FontAwesomeIcon icon={faCrown} />,
+      link: `sponsorship-packages`,
+      requiredRole: "MEMBER",
+    },
+    {
+      name: "sponsorship",
+      displayName: "Sponsorship",
+      icon: <FontAwesomeIcon icon={faHandHoldingDollar} />,
+      link: `sponsorship`,
+      requiredRole: "MEMBER",
+    },
+    {
+      name: "tasks",
+      displayName: "Tasks",
       icon: <FontAwesomeIcon icon={faFileAlt} />,
       link: `tasks`,
       requiredRole: 'MEMBER' // Visible to all roles
+    },
+    {
+      name: 'income',
+      displayName: 'Income',
+      icon: <FontAwesomeIcon icon={faMoneyBill1Wave} />,
+      link: `income`,
+      requiredRole: 'ADMIN'
+    },
+    {
+      name: 'expenses',
+      displayName: 'Expenses',
+      icon: <FontAwesomeIcon icon={faMoneyBill1Wave} />,
+      link: `expenses`,
+      requiredRole: 'ADMIN'
     }
-
-
 
   ];
 
   // Filter items based on user role
   const mainItems = allMenuItems.filter((item) => {
     if (item.requiredRole === "ADMIN") return userRole.includes("ADMIN");
-    if (item.requiredRole === "DEPARTMENT_MANAGER") return ["ADMIN", "DEPARTMENT_MANAGER"].some(role => userRole.includes(role));
-    if (item.requiredRole === "MEMBER") return ["ADMIN", "DEPARTMENT_MANAGER", "MEMBER"].some(role => userRole.includes(role));
+    if (item.requiredRole === "DEPARTMENT_MANAGER") {
+      if (item.name === "sponsorship" || item.name === "sponsorship packages") {
+        return sponsorManageable || userRole.includes("ADMIN");
+      }
+      return ["ADMIN", "DEPARTMENT_MANAGER"].some((role) =>
+        userRole.includes(role)
+      );
+    }
+    if (item.requiredRole === "MEMBER") {
+      if (item.name === "sponsorship" || item.name === "sponsorship packages") {
+        return sponsorManageable || userRole.includes("ADMIN");
+      }
+      return ["ADMIN", "DEPARTMENT_MANAGER", "MEMBER"].some((role) =>
+        userRole.includes(role)
+      );
+    }
     return item.requiredRole === "PARTICIPANT";
   });
 
@@ -207,11 +250,13 @@ const Layout = () => {
             }}
             aria-label="Open sidebar menu"
           >
-            <FontAwesomeIcon icon={faBars} className="h-5 w-5 transition-transform duration-200" />
+            <FontAwesomeIcon
+              icon={faBars}
+              className="h-5 w-5 transition-transform duration-200"
+            />
           </button>
         )}
       </div>
-
       {/* Main Content */}
       <div className="flex-1 lg:ml-64 min-w-0 transition-all duration-300">
         <main className="p-3 sm:p-4 lg:p-6">

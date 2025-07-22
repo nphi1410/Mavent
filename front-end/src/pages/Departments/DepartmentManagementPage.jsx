@@ -323,16 +323,7 @@ const DepartmentManagementPage = () => {
     };
   }, []);
 
-  // Mock data cho departments dựa trên mockup
-  const mockDepartments = [
-    { id: 1, deptNo: "MKT-001", name: "Marketing Department" },
-    { id: 2, deptNo: "FIN-002", name: "Finance Department" },
-    { id: 3, deptNo: "HR-003", name: "Human Resources Department" },
-    { id: 4, deptNo: "CUL-004", name: "Culture Department" },
-    { id: 5, deptNo: "OPS-005", name: "Operations Department" },
-    { id: 6, deptNo: "IT-006", name: "IT Department" },
-    { id: 7, deptNo: "RD-007", name: "Research & Development" },
-  ];
+
 
   // Load real data from API
   useEffect(() => {
@@ -340,7 +331,6 @@ const DepartmentManagementPage = () => {
       try {
         setLoading(true);
         const data = await departmentService.getDepartmentsByEventId(eventId);
-  
 
         let departmentsArray = [];
 
@@ -360,6 +350,7 @@ const DepartmentManagementPage = () => {
 
         // Store the departments in state without member counts
         setDepartments(departmentsArray);
+
         setError(null);
 
         // Once departments are loaded, fetch member counts for each
@@ -496,8 +487,6 @@ const DepartmentManagementPage = () => {
       return;
     }
 
-  
-
     // Set the department detail to state and open the modal
     setDepartmentDetail(deptDetail);
     setIsDetailModalOpen(true);
@@ -553,7 +542,7 @@ const DepartmentManagementPage = () => {
       setLoading(true);
 
       // First check: Get the latest member count
-    
+
       const memberCount = await departmentService.getMemberCount(
         numericEventId,
         numericDepartmentId
@@ -569,7 +558,7 @@ const DepartmentManagementPage = () => {
       }
 
       // Second check: Check for tasks (if available)
-    
+
       const tasksCheck = await departmentService.checkDepartmentHasTasks(
         numericEventId,
         numericDepartmentId
@@ -592,7 +581,6 @@ const DepartmentManagementPage = () => {
       ) {
         try {
           setLoading(true);
-      
 
           // Try to delete using our enhanced service method
           await departmentService.deleteDepartment(
@@ -601,7 +589,6 @@ const DepartmentManagementPage = () => {
           );
 
           // If we get here, deletion was successful
-      
 
           // Update local state after successful deletion
           setDepartments(
@@ -669,6 +656,7 @@ const DepartmentManagementPage = () => {
     setIsModalOpen(true);
   };
 
+  const handleAssignSponsorPermission = () => {};
   const handleSubmitDepartment = async (formData) => {
     try {
       setLoading(true);
@@ -716,9 +704,8 @@ const DepartmentManagementPage = () => {
           eventId: parseInt(eventId, 10), // Add eventId to match backend DTO
           name: formData.name,
           description: formData.description,
+          sponsorManageable: formData.sponsorManageable,
         };
-
-     
 
         // Add new department
         const newDepartment = await departmentService.addDepartment(
@@ -1061,6 +1048,7 @@ const DepartmentManagementPage = () => {
               <FontAwesomeIcon icon={faSearch} />
             </div>
           </div>
+
           <div className="flex gap-2">
             <button
               onClick={handleAddDepartment}
@@ -1100,6 +1088,12 @@ const DepartmentManagementPage = () => {
               className="px-3 py-1.5 text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
             >
               Clear selection
+            </button>
+            <button
+              onClick={() => handleAssignSponsorPermission(selectedDepartments)}
+              className="px-3 py-1.5 text-white bg-blue-600 rounded hover:bg-blue-700 flex items-center transition-colors"
+            >
+              Assign Sponsor permission
             </button>
             <button
               onClick={() => setIsConfirmDialogOpen(true)}
@@ -1158,6 +1152,9 @@ const DepartmentManagementPage = () => {
                 </th>
                 <th className="px-3 py-4 text-sm font-medium text-gray-600">
                   Members
+                </th>
+                <th className="px-3 py-4 text-sm font-medium text-gray-600">
+                  Sponsor manageable
                 </th>
                 <th className="px-3 py-4 text-center text-sm font-medium text-gray-600 w-32">
                   Action
@@ -1232,6 +1229,17 @@ const DepartmentManagementPage = () => {
                     ) : (
                       <span className="text-gray-400">Đang tải...</span>
                     )}
+                  </td>
+                  <td className="px-3 py-4">
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        department.sponsorManageable
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {department.sponsorManageable ? "Yes" : "No"}
+                    </span>
                   </td>
                   <td className="px-3 py-4">
                     <div className="flex justify-center space-x-1">
