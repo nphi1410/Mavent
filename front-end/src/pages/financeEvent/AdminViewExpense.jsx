@@ -11,7 +11,7 @@ import {
 import { Bar, Pie } from 'react-chartjs-2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDollarSign, faChartLine } from '@fortawesome/free-solid-svg-icons';
-import { useParams } from 'react-router-dom'; // Import useParams
+import { useParams } from 'react-router-dom';
 
 import {
     fetchTotalExpenseByEventId,
@@ -21,7 +21,7 @@ import {
     fetchExpenseCountByStatusForEvent
 } from '../../services/expenseService';
 
-import { getEventById } from '../../services/eventService'; // Import getEventById
+import { getEventById } from '../../services/eventService';
 
 // Đăng ký các thành phần của Chart.js
 ChartJS.register(
@@ -39,7 +39,12 @@ const formatCurrency = (value) => {
         return '0 VNĐ';
     }
     // Đảm bảo giá trị là số nguyên nếu nó là BigInteger từ backend
-    return `${parseInt(value).toLocaleString('vi-VN')} VNĐ`;
+    // Sử dụng Number() để xử lý BigInt nếu có thể, hoặc đảm bảo backend trả về số thông thường
+    const numericValue = typeof value === 'bigint' ? Number(value) : parseInt(value);
+    if (isNaN(numericValue)) {
+        return '0 VNĐ'; // Xử lý trường hợp không phải số
+    }
+    return `${numericValue.toLocaleString('vi-VN')} VNĐ`;
 };
 
 function StatCard({ title, value, icon, sourceText, subtitle }) {
@@ -89,7 +94,7 @@ function VerticalBarChart({ title, data }) {
     );
 
     const chartData = {
-        labels: data.map(d => d.categoryName || d.departmentName || d.label),
+        labels: data.map(d => String(d.categoryName || d.departmentName || d.label)), // Chuyển đổi thành String
         datasets: [
             {
                 label: 'Tổng số tiền',
@@ -169,7 +174,7 @@ function HorizontalBarChart({ title, data }) {
     );
 
     const chartData = {
-        labels: data.map(d => d.departmentName || d.categoryName || d.label),
+        labels: data.map(d => String(d.departmentName || d.categoryName || d.label)), // Chuyển đổi thành String
         datasets: [
             {
                 label: 'Tổng số tiền',
@@ -248,10 +253,10 @@ function PieChart({ title, data }) {
     );
 
     const chartData = {
-        labels: data.map(d => d.label || d),
+        labels: data.map(d => String(d.label || d.paymentMethod)), // Use d.paymentMethod for labels
         datasets: [
             {
-                data: data.map(d => d.totalAmount || d.value || 1),
+                data: data.map(d => d.totalAmount || d.value || 1), // Use d.totalAmount for data
                 backgroundColor: [
                     'rgba(59, 130, 246, 0.8)',
                     'rgba(34, 197, 94, 0.8)',
@@ -320,7 +325,7 @@ function StatusChart({ title, data }) {
     };
 
     const chartData = {
-        labels: data.map(d => d.status),
+        labels: data.map(d => String(d.status)), // Chuyển đổi thành String
         datasets: [
             {
                 label: 'Số lượng Expense',
@@ -390,15 +395,14 @@ function StatusChart({ title, data }) {
 }
 
 function AdminViewExpense() {
-    const { eventId } = useParams(); // Lấy eventId từ URL
-    const parsedEventId = eventId ? parseInt(eventId) : 4; // Chuyển đổi sang số nguyên, mặc định là 4 nếu không có
+    const { id } = useParams(); // Lấy id từ URL
 
     const [totalSpentData, setTotalSpentData] = useState(null);
     const [categoriesData, setCategoriesData] = useState([]);
     const [departmentsData, setDepartmentsData] = useState([]);
     const [paymentMethodsData, setPaymentMethodsData] = useState([]);
     const [statusesData, setStatusesData] = useState([]);
-    const [eventName, setEventName] = useState('Đang tải...'); // State để lưu tên sự kiện
+    const [eventName, setEventName] = useState('Đang tải...');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -408,17 +412,24 @@ function AdminViewExpense() {
             setError(null);
             try {
                 // Fetch event name
-                const eventDetails = await getEventById(parsedEventId); // Sử dụng parsedEventId
+                // Đảm bảo id có giá trị trước khi gọi API
+                if (!id) {
+                    setError("Event ID không được cung cấp.");
+                    setLoading(false);
+                    return;
+                }
+
+                const eventDetails = await getEventById(id);
                 if (eventDetails) {
                     setEventName(eventDetails.name);
                 } else {
                     setEventName('Không tìm thấy sự kiện');
                 }
 
-                const totalSpent = await fetchTotalExpenseByEventId(parsedEventId); // Sử dụng parsedEventId
+                const totalSpent = await fetchTotalExpenseByEventId(id);
                 setTotalSpentData(totalSpent);
 
-                const categories = await fetchExpensesByCategoryForEvent(parsedEventId); // Sử dụng parsedEventId
+                const categories = await fetchExpensesByCategoryForEvent(id);
                 const mappedCategories = categories.map((cat) => ({
                     categoryId: cat.categoryId,
                     categoryName: cat.categoryName,
@@ -428,7 +439,7 @@ function AdminViewExpense() {
                 }));
                 setCategoriesData(mappedCategories);
 
-                const departments = await fetchExpensesByDepartmentForEvent(parsedEventId); // Sử dụng parsedEventId
+                const departments = await fetchExpensesByDepartmentForEvent(id);
                 const mappedDepartments = departments.map((dep) => ({
                     departmentId: dep.departmentId,
                     departmentName: dep.departmentName,
@@ -438,14 +449,17 @@ function AdminViewExpense() {
                 }));
                 setDepartmentsData(mappedDepartments);
 
-                const paymentMethods = await fetchDistinctPaymentMethodsByEventId(parsedEventId); // Sử dụng parsedEventId
-                const mockPaymentMethodData = paymentMethods.map((method) => ({
-                    label: method,
-                    value: Math.floor(Math.random() * 5000000) + 1000000,
+                // Modified to use real data from fetchDistinctPaymentMethodsByEventId
+                const paymentMethods = await fetchDistinctPaymentMethodsByEventId(id);
+                const mappedPaymentMethods = paymentMethods.map((method) => ({
+                    paymentMethod: method.paymentMethod, // Use the actual paymentMethod from the API
+                    totalAmount: parseInt(method.totalAmount), // Use the actual totalAmount from the API
+                    label: method.paymentMethod, // Ensure label is set for PieChart
+                    value: parseInt(method.totalAmount), // Ensure value is set for PieChart
                 }));
-                setPaymentMethodsData(mockPaymentMethodData);
+                setPaymentMethodsData(mappedPaymentMethods);
 
-                const statuses = await fetchExpenseCountByStatusForEvent(parsedEventId); // Sử dụng parsedEventId
+                const statuses = await fetchExpenseCountByStatusForEvent(id);
                 const mappedStatuses = statuses.map((s) => ({
                     status: s.status,
                     count: s.count,
@@ -463,7 +477,7 @@ function AdminViewExpense() {
         };
 
         fetchData();
-    }, [parsedEventId]);
+    }, [id]);
 
     const currentTotal = totalSpentData ? parseInt(totalSpentData.totalAmount) : 0;
 
@@ -491,7 +505,7 @@ function AdminViewExpense() {
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
                         <div>
                             <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">Dashboard Expense Overview</h1>
-                            <p className="text-gray-600 mt-2">Event: {eventName}</p> 
+                            <p className="text-gray-600 mt-2">Event: {eventName}</p>
                         </div>
                     </div>
                 </div>
