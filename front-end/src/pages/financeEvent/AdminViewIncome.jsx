@@ -2,60 +2,64 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Chart, registerables } from 'chart.js';
-import { useParams } from 'react-router-dom'; // Import useParams
+import { useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDollarSign } from '@fortawesome/free-solid-svg-icons';
-import { getIncomeOverview, getIncomesListByEventId } from '../../services/incomeService'; // Import cả hai hàm API
+import { faDollarSign, faPlus, faEdit } from '@fortawesome/free-solid-svg-icons'; // Import icons for buttons
+import { getIncomeOverview, getIncomesListByEventId } from '../../services/incomeService';
+import CreateIncomeModal from '../components/income/CreateIncomeModal'; // Import Create modal
+import UpdateIncomeModal from '../components/income/UpdateIncomeModal'; // Import Update modal
 
 Chart.register(...registerables);
 
 const AdminViewIncome = () => {
-    // Lấy 'id' từ URL parameters, vì route được định nghĩa là 'event/:id'
-    const { id } = useParams(); // THAY ĐỔI TỪ eventId SANG id
+    const { id } = useParams();
     const [dateRange, setDateRange] = useState('all');
 
     const [incomeOverview, setIncomeOverview] = useState(null);
-    const [detailedIncomeEntries, setDetailedIncomeEntries] = useState([]); // State cho danh sách chi tiết
+    const [detailedIncomeEntries, setDetailedIncomeEntries] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    // State for modals
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showUpdateModal, setShowUpdateModal] = useState(false);
+    const [selectedIncomeToUpdate, setSelectedIncomeToUpdate] = useState(null); // State to hold data for update modal
 
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
 
-    // useEffect để fetch dữ liệu thu nhập khi 'id' (eventId) hoặc dateRange thay đổi
-    useEffect(() => {
-        const fetchData = async () => {
-            // Sử dụng 'id' từ useParams trực tiếp
-            if (id) { // Kiểm tra id thay vì eventId
-                setLoading(true);
-                setError(null);
-                try {
-                    // Fetch overview data, đảm bảo id là số
-                    const overviewData = await getIncomeOverview(Number(id), dateRange);
-                    setIncomeOverview(overviewData);
+    // Function to fetch all data (overview and detailed list)
+    const fetchData = async () => {
+        if (id) {
+            setLoading(true);
+            setError(null);
+            try {
+                const overviewData = await getIncomeOverview(Number(id), dateRange);
+                setIncomeOverview(overviewData);
 
-                    // Fetch detailed income entries for the table
-                    const detailedData = await getIncomesListByEventId(Number(id));
-                    setDetailedIncomeEntries(detailedData);
+                const detailedData = await getIncomesListByEventId(Number(id));
+                setDetailedIncomeEntries(detailedData);
 
-                } catch (err) {
-                    setError('Không thể tải dữ liệu thu nhập. Vui lòng thử lại.');
-                    console.error(err);
-                } finally {
-                    setLoading(false);
-                }
-            } else {
-                // Nếu không có 'id' trong URL, đặt loading thành false và không có lỗi
+            } catch (err) {
+                setError('Không thể tải dữ liệu thu nhập. Vui lòng thử lại.');
+                console.error(err);
+            } finally {
                 setLoading(false);
-                setIncomeOverview(null); // Xóa dữ liệu cũ
-                setDetailedIncomeEntries([]); // Xóa dữ liệu chi tiết
-                setError("Không tìm thấy ID sự kiện trong URL.");
             }
-        };
+        } else {
+            setLoading(false);
+            setIncomeOverview(null);
+            setDetailedIncomeEntries([]);
+            setError("Không tìm thấy ID sự kiện trong URL.");
+        }
+    };
 
+    // useEffect to fetch data when 'id' or dateRange changes
+    useEffect(() => {
         fetchData();
-    }, [id, dateRange]); // Chạy lại khi 'id' hoặc dateRange thay đổi
+    }, [id, dateRange]);
 
+    // Chart data and options
     const totalRevenue = incomeOverview?.totalRevenue || 0;
     const revenueByType = incomeOverview?.revenueByType || {};
     const numberOfSources = incomeOverview?.numberOfSources || 0;
@@ -64,6 +68,7 @@ const AdminViewIncome = () => {
     const chartValues = Object.values(revenueByType);
     const chartBackgroundColors = ['#3B82F6', '#14B8A6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 
+    // Effect for Chart.js
     useEffect(() => {
         if (chartRef.current && incomeOverview) {
             if (chartInstance.current) {
@@ -88,14 +93,14 @@ const AdminViewIncome = () => {
                             display: false
                         },
                         tooltip: {
-                                callbacks: {
+                            callbacks: {
                                 label: function (context) {
                                     let label = context.label || '';
                                     if (label) {
                                         label += ': ';
                                     }
                                     if (context.parsed !== null) {
-                                        label += '$' + context.parsed.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                                        label += context.parsed.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' VNĐ';
                                     }
                                     return label;
                                 }
@@ -105,20 +110,21 @@ const AdminViewIncome = () => {
                 }
             });
         }
-    }, [incomeOverview]);
+    }, [incomeOverview, chartLabels, chartValues]); // Added chartLabels, chartValues to dependencies
 
+    // Helper functions for icons and colors
     const getTypeIcon = (type, size = 'w-4 h-4') => {
         let iconClass = '';
         const lowerCaseType = type ? type.toLowerCase() : '';
 
         switch (lowerCaseType) {
-            case 'ticket_sales': // Đảm bảo khớp với tên enum từ backend
+            case 'ticket_sales':
                 iconClass = 'fa-solid fa-ticket-alt';
                 break;
-            case 'sponsor': // Đảm bảo khớp với tên enum từ backend
+            case 'sponsor':
                 iconClass = 'fa-solid fa-handshake';
                 break;
-            case 'merchandise': // Đảm bảo khớp với tên enum từ backend
+            case 'merchandise':
                 iconClass = 'fa-solid fa-box-open';
                 break;
             case 'donation':
@@ -137,11 +143,11 @@ const AdminViewIncome = () => {
     const getTypeColor = (type) => {
         const lowerCaseType = type ? type.toLowerCase() : '';
         switch (lowerCaseType) {
-            case 'ticket_sales': // Đảm bảo khớp với tên enum từ backend
+            case 'ticket_sales':
                 return 'bg-blue-500';
-            case 'sponsor': // Đảm bảo khớp với tên enum từ backend
+            case 'sponsor':
                 return 'bg-teal-500';
-            case 'merchandise': // Đảm bảo khớp với tên enum từ backend
+            case 'merchandise':
                 return 'bg-green-500';
             case 'donation':
                 return 'bg-purple-500';
@@ -152,12 +158,27 @@ const AdminViewIncome = () => {
         }
     };
 
-    // Hàm để định dạng tên loại nguồn (ví dụ: TICKET_SALES -> Ticket Sales)
     const formatSourceType = (type) => {
         if (!type) return 'N/A';
         return type.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
     };
 
+    // Handlers for modals
+    const handleCreateSuccess = () => {
+        setShowCreateModal(false);
+        fetchData(); // Reload data after successful creation
+    };
+
+    const handleUpdateClick = (incomeEntry) => {
+        setSelectedIncomeToUpdate(incomeEntry);
+        setShowUpdateModal(true);
+    };
+
+    const handleUpdateSuccess = () => {
+        setShowUpdateModal(false);
+        setSelectedIncomeToUpdate(null);
+        fetchData(); // Reload data after successful update
+    };
 
     if (loading && !incomeOverview) {
         return (
@@ -175,7 +196,6 @@ const AdminViewIncome = () => {
         );
     }
 
-    // Sử dụng selectedEventName từ incomeOverview nếu có, nếu không thì dùng placeholder
     const currentEventName = incomeOverview?.selectedEventName || `Event ID: ${id}`;
 
     return (
@@ -200,6 +220,14 @@ const AdminViewIncome = () => {
                                 <option value="7">7 ngày qua</option>
                                 <option value="today">Hôm nay</option>
                             </select>
+                            {/* Create and Update buttons */}
+                            <button
+                                onClick={() => setShowCreateModal(true)}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center gap-2"
+                            >
+                                <FontAwesomeIcon icon={faPlus} />
+                                Tạo Thu nhập
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -223,7 +251,7 @@ const AdminViewIncome = () => {
                         </div>
                         <div className="hidden lg:block text-right">
                             <p className="text-blue-100 mb-2">Sự kiện</p>
-                            <p className="text-xl font-semibold">{currentEventName}</p> {/* Display dynamic event name */}
+                            <p className="text-xl font-semibold">{currentEventName}</p>
                         </div>
                     </div>
                 </div>
@@ -244,6 +272,7 @@ const AdminViewIncome = () => {
                                         <th className="text-left py-3 px-2 text-gray-600">Loại</th>
                                         <th className="text-left py-3 px-2 text-gray-600">Số tiền</th>
                                         <th className="text-left py-3 px-2 text-gray-600">Ngày</th>
+                                        <th className="text-left py-3 px-2 text-gray-600">Hành động</th> {/* New column for actions */}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -271,6 +300,15 @@ const AdminViewIncome = () => {
                                                         year: 'numeric',
                                                     }) : 'N/A'}
                                                 </td>
+                                                <td className="py-4 px-2">
+                                                    <button
+                                                        onClick={() => handleUpdateClick(entry)}
+                                                        className="px-3 py-1 bg-indigo-500 text-white rounded-md shadow hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex items-center justify-center gap-1 text-sm"
+                                                    >
+                                                        <FontAwesomeIcon icon={faEdit} />
+                                                        Sửa
+                                                    </button>
+                                                </td>
                                             </tr>
                                         ))
                                     ) : (
@@ -294,7 +332,7 @@ const AdminViewIncome = () => {
 
                         <div className="space-y-3">
                             {chartLabels.map((type, index) => {
-                                const percentage = (revenueByType[type] / totalRevenue) * 100 || 0;
+                                const percentage = (totalRevenue > 0) ? (revenueByType[type] / totalRevenue) * 100 : 0;
                                 const amount = revenueByType[type] || 0;
                                 const colors = ['bg-blue-500', 'bg-teal-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500'];
                                 return (
@@ -356,6 +394,25 @@ const AdminViewIncome = () => {
                     })}
                 </div>
             </div>
+
+            {/* Create Income Modal */}
+            {showCreateModal && (
+                <CreateIncomeModal
+                    eventId={Number(id)}
+                    eventName={currentEventName} // Truyền tên sự kiện
+                    onClose={() => setShowCreateModal(false)}
+                    onSuccess={handleCreateSuccess}
+                />
+            )}
+
+            {/* Update Income Modal */}
+            {showUpdateModal && selectedIncomeToUpdate && (
+                <UpdateIncomeModal
+                    incomeData={selectedIncomeToUpdate}
+                    onClose={() => setShowUpdateModal(false)}
+                    onSuccess={handleUpdateSuccess}
+                />
+            )}
         </div>
     );
 };
