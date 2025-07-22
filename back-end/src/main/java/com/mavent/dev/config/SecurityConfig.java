@@ -63,7 +63,8 @@ public class SecurityConfig {
                                 "/api/event/*/feedback",
                                 "/api/event/*/create-feedback",
                                 "/api/proposal",
-                                "/api/income/**"
+                                "/api/income/**",
+                                "/api/expenses/**"
                         ).permitAll()
                         .requestMatchers("/api/**").hasAnyRole("USER", "SUPER_ADMIN")
                         .requestMatchers("/api/dashboard").hasRole("SUPER_ADMIN")
