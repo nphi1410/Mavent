@@ -13,34 +13,9 @@ import java.util.Optional;
 
 @Repository
 public interface AccountRepository extends JpaRepository<Account, Integer> {
-
+    Account findByAccountId(int accountId);
     Account findByUsername(String username);
     List<Account> findAllByIsDeletedFalse();
     long countByIsDeletedFalse();
     Account findByEmail(String email);
-    boolean existsByUsername(String username);
-
-    /**
-     * Check if email exists.
-     *
-     * @param email the email to check
-     * @return true if email exists, false otherwise
-     */
-    boolean existsByEmail(String email);
-    List<Account> findBySystemRole(Account.SystemRole systemRole);
-
-    @Query("SELECT a FROM Account a WHERE LOWER(a.fullName) LIKE LOWER(CONCAT('%', :name, '%'))")
-    List<Account> findByFullNameContainingIgnoreCase(@Param("name") String name);
-
-    @Query("SELECT a FROM Account a WHERE a.isDeleted = false")
-    List<Account> findActiveAccounts();
-
-
-    @Query("SELECT COUNT(a) FROM Account a WHERE a.isDeleted = false")
-    long countActiveAccounts();
-
-    @Query("SELECT a FROM Account a WHERE a.isDeleted = false")
-    Page<Account> findActiveAccounts(Pageable pageable);
-
-
 }

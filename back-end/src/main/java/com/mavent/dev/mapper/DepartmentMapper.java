@@ -2,7 +2,7 @@ package com.mavent.dev.mapper;
 
 import com.mavent.dev.dto.department.DepartmentRequestDTO;
 import com.mavent.dev.dto.department.DepartmentResponseDTO;
-import com.mavent.dev.dto.department.UserEventInfoDTO;
+
 import com.mavent.dev.entity.Department;
 
 public class DepartmentMapper {

@@ -60,11 +60,7 @@ public class AccountImplement implements AccountService, UserDetailsService {
         this.jwtUtil = jwtUtil;
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public Page<AccountDTO> getAllActiveAccounts(Pageable pageable) {
-        return accountRepository.findActiveAccounts(pageable).map(this::mapAccountToDTO);
-    }
+
 
     @Override
     public boolean checkLogin(String UsernameOrEmail, String password) {
