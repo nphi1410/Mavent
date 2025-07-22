@@ -2,13 +2,14 @@
 package com.mavent.dev.mapper;
 
 import com.mavent.dev.dto.IncomeResponseDTO;
-import com.mavent.dev.dto.IncomeRequestDTO; // Thêm import này
+import com.mavent.dev.dto.IncomeRequestDTO;
 import com.mavent.dev.entity.Income;
 import com.mavent.dev.entity.Income.SourceType;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.Optional; // Import Optional
 
 public class IncomeMapper {
 
@@ -31,29 +32,27 @@ public class IncomeMapper {
         // Tính tổng doanh thu theo từng loại nguồn
         Map<String, Long> revenueByType = incomes.stream()
                 .collect(Collectors.groupingBy(
-                        income -> income.getSourceType().name(), // Lấy tên String của Enum
+                        income -> income.getSourceType().name(), // Sử dụng tên enum làm key
                         Collectors.summingLong(Income::getAmount)
                 ));
 
-        // Chuyển đổi danh sách Income thành IncomeEntryDTO cho từng mục nhập
-        IncomeResponseDTO.IncomeEntryDTO[] incomeEntries = incomes.stream()
-                .map(IncomeMapper::toIncomeEntryDTO) // Sử dụng phương thức map mới
-                .toArray(IncomeResponseDTO.IncomeEntryDTO[]::new);
+        // Đếm số lượng nguồn thu nhập
+        int numberOfSources = incomes.size();
 
-        // Xây dựng và trả về IncomeResponseDTO
-        return new IncomeResponseDTO(
-                eventId,
-                totalRevenue,
-                incomes.size(), // Số lượng nguồn thu
-                revenueByType,
-                eventName,
-                dateRange,
-                incomeEntries
-        );
+        IncomeResponseDTO responseDTO = new IncomeResponseDTO();
+        responseDTO.setEventId(eventId);
+        responseDTO.setTotalRevenue(totalRevenue);
+        responseDTO.setNumberOfSources(numberOfSources);
+        responseDTO.setRevenueByType(revenueByType);
+        responseDTO.setSelectedEventName(eventName); // Gán tên sự kiện
+        responseDTO.setDateRange(dateRange);
+        responseDTO.setIncomeEntries(new IncomeResponseDTO.IncomeEntryDTO[0]); // Mặc định là mảng rỗng cho overview
+
+        return responseDTO;
     }
 
     /**
-     * Phương thức: Chuyển đổi một đối tượng Income Entity sang IncomeEntryDTO.
+     * Chuyển đổi một đối tượng Income Entity thành IncomeEntryDTO.
      *
      * @param income Đối tượng Income Entity
      * @return IncomeEntryDTO tương ứng

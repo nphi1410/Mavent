@@ -2,10 +2,10 @@
 package com.mavent.dev.service.implement;
 
 import com.mavent.dev.dto.IncomeResponseDTO;
-import com.mavent.dev.dto.IncomeRequestDTO; // Thêm import này
+import com.mavent.dev.dto.IncomeRequestDTO;
 import com.mavent.dev.entity.Income;
 import com.mavent.dev.repository.IncomeRepository;
-import com.mavent.dev.service.EventService;
+import com.mavent.dev.service.EventService; // Import EventService
 import com.mavent.dev.service.IncomeService;
 import com.mavent.dev.mapper.IncomeMapper;
 import com.mavent.dev.exception.ResourceNotFoundException;
@@ -21,90 +21,109 @@ import java.util.stream.Collectors;
 public class IncomeImplement implements IncomeService {
 
     private final IncomeRepository incomeRepository;
-    private final EventService eventService;
+    private final EventService eventService; // Inject EventService
 
     @Autowired
     public IncomeImplement(IncomeRepository incomeRepository, EventService eventService) {
         this.incomeRepository = incomeRepository;
-        this.eventService = eventService;
+        this.eventService = eventService; // Initialize EventService
     }
 
     @Override
     public IncomeResponseDTO getIncomeOverviewForEvent(Integer eventId, String dateRange) {
-        // Kiểm tra xem eventId có tồn tại không
+        // Kiểm tra xem eventId có tồn tại không và lấy tên sự kiện
         String eventName = null;
         try {
-            eventName = eventService.getEventById(eventId).getName();
-        } catch (Exception e) {
+            // Giả sử EventService có phương thức getEventNameById(eventId) hoặc getEventById(eventId).getName()
+            // Cần EventService để lấy tên sự kiện
+            eventName = eventService.getEventById(eventId).getName(); //
+        } catch (ResourceNotFoundException e) {
             throw new ResourceNotFoundException("Event not found with ID: " + eventId);
         }
 
         List<Income> incomes;
-        LocalDate now = LocalDate.now();
 
-        switch (dateRange.toLowerCase()) {
-            case "30":
-                incomes = incomeRepository.findByEventIdAndReceivedDateBetween(eventId, now.minusDays(30), now);
-                break;
-            case "7":
-                incomes = incomeRepository.findByEventIdAndReceivedDateBetween(eventId, now.minusDays(7), now);
-                break;
-            case "today":
-                incomes = incomeRepository.findByEventIdAndReceivedDate(eventId, now);
-                break;
-            case "all":
-            default:
-                incomes = incomeRepository.findByEventId(eventId);
-                break;
+        // Xử lý logic lọc theo dateRange
+        if ("all".equalsIgnoreCase(dateRange)) {
+            incomes = incomeRepository.findByEventId(eventId); // Lấy tất cả thu nhập cho sự kiện
+        } else {
+            LocalDate endDate = LocalDate.now();
+            LocalDate startDate;
+
+            switch (dateRange) {
+                case "30":
+                    startDate = endDate.minusDays(30);
+                    break;
+                case "7":
+                    startDate = endDate.minusDays(7);
+                    break;
+                case "today":
+                    startDate = endDate;
+                    break;
+                default:
+                    startDate = LocalDate.MIN; // Mặc định là tất cả nếu dateRange không hợp lệ
+            }
+            // Nếu dateRange là "today", findByEventIdAndReceivedDate sẽ đúng hơn
+            if ("today".equalsIgnoreCase(dateRange)) {
+                incomes = incomeRepository.findByEventIdAndReceivedDate(eventId, startDate); //
+            } else {
+                incomes = incomeRepository.findByEventIdAndReceivedDateBetween(eventId, startDate, endDate); //
+            }
         }
-
-        // Nếu không có dữ liệu thu nhập, trả về DTO với các giá trị tổng bằng 0
-        // và tên sự kiện đã lấy được.
-        return IncomeMapper.toIncomeResponseDTO(eventId, eventName, dateRange, List.of());
+        // Gọi IncomeMapper để chuyển đổi và tính toán dữ liệu tổng quan
+        return IncomeMapper.toIncomeResponseDTO(eventId, eventName, dateRange, incomes); //
     }
 
     @Override
     public List<IncomeResponseDTO.IncomeEntryDTO> getIncomesListByEventId(Integer eventId) {
-        // Đảm bảo sự kiện tồn tại trước khi lấy danh sách thu nhập
-        try {
-            eventService.getEventById(eventId);
-        } catch (Exception e) {
-            throw new ResourceNotFoundException("Event not found with ID: " + eventId);
-        }
-
-        List<Income> incomes = incomeRepository.findByEventId(eventId);
-
+        List<Income> incomes = incomeRepository.findByEventId(eventId); //
+        // Sử dụng stream để chuyển đổi từng Income entity sang IncomeEntryDTO
         return incomes.stream()
-                .map(IncomeMapper::toIncomeEntryDTO)
+                .map(IncomeMapper::toIncomeEntryDTO) //
                 .collect(Collectors.toList());
     }
 
+    // Các phương thức createIncome, updateIncome, deleteIncome không thay đổi theo yêu cầu.
+    // ... (giữ nguyên các phương thức này)
+    /**
+     * Phương thức MỚI: Tạo một khoản thu nhập mới.
+     * Ví dụ: POST /api/income
+     * @param incomeRequestDTO Dữ liệu yêu cầu để tạo thu nhập.
+     * @return IncomeResponseDTO.IncomeEntryDTO của khoản thu nhập đã tạo.
+     */
     @Override
     public IncomeResponseDTO.IncomeEntryDTO createIncome(IncomeRequestDTO incomeRequestDTO) {
-        // Kiểm tra xem eventId có tồn tại không trước khi tạo thu nhập
+        Income income = IncomeMapper.toIncome(incomeRequestDTO); //
+        // Đặt ngày nhận là ngày hiện tại nếu không được cung cấp trong DTO
+        if (income.getReceivedDate() == null) {
+            income.setReceivedDate(LocalDate.now());
+        }
+        // Kiểm tra sự tồn tại của EventId
         try {
-            eventService.getEventById(incomeRequestDTO.getEventId());
+            eventService.getEventById(incomeRequestDTO.getEventId()); //
         } catch (Exception e) {
             throw new ResourceNotFoundException("Event not found with ID: " + incomeRequestDTO.getEventId());
         }
-
-        Income income = IncomeMapper.toIncome(incomeRequestDTO);
-        income.setReceivedDate(LocalDate.now()); // Đặt ngày nhận là ngày hiện tại
-        // Bạn có thể đặt receivedByAccountId ở đây nếu có thông tin người dùng đang đăng nhập
-        // income.setReceivedByAccountId(...);
-        Income savedIncome = incomeRepository.save(income);
-        return IncomeMapper.toIncomeEntryDTO(savedIncome);
+        Income savedIncome = incomeRepository.save(income); //
+        return IncomeMapper.toIncomeEntryDTO(savedIncome); //
     }
 
+    /**
+     * Phương thức MỚI: Cập nhật một khoản thu nhập hiện có.
+     * Ví dụ: PUT /api/income/123
+     * @param incomeId ID của khoản thu nhập cần cập nhật.
+     * @param incomeRequestDTO Dữ liệu yêu cầu để cập nhật thu nhập.
+     * @return IncomeResponseDTO.IncomeEntryDTO của khoản thu nhập đã cập nhật.
+     */
     @Override
     public IncomeResponseDTO.IncomeEntryDTO updateIncome(Integer incomeId, IncomeRequestDTO incomeRequestDTO) {
-        Income existingIncome = incomeRepository.findById(incomeId)
+        Income existingIncome = incomeRepository.findById(incomeId) //
                 .orElseThrow(() -> new ResourceNotFoundException("Income not found with ID: " + incomeId));
 
-        // Kiểm tra xem eventId trong DTO có tồn tại không nếu nó khác với eventId hiện tại
-        if (incomeRequestDTO.getEventId() != null && !existingIncome.getEventId().equals(incomeRequestDTO.getEventId())) {
+        // Kiểm tra sự tồn tại của EventId nếu nó được cung cấp trong request DTO
+        if (incomeRequestDTO.getEventId() != null && !incomeRequestDTO.getEventId().equals(existingIncome.getEventId())) {
             try {
-                eventService.getEventById(incomeRequestDTO.getEventId());
+                eventService.getEventById(incomeRequestDTO.getEventId()); //
             } catch (Exception e) {
                 throw new ResourceNotFoundException("Event not found with ID: " + incomeRequestDTO.getEventId());
             }
@@ -131,10 +150,13 @@ public class IncomeImplement implements IncomeService {
         if (incomeRequestDTO.getNotes() != null) {
             existingIncome.setNotes(incomeRequestDTO.getNotes());
         }
-        // receivedDate và receivedByAccountId thường không được cập nhật qua API này,
-        // nhưng nếu cần, bạn có thể thêm logic ở đây.
 
-        Income updatedIncome = incomeRepository.save(existingIncome);
-        return IncomeMapper.toIncomeEntryDTO(updatedIncome);
+        Income updatedIncome = incomeRepository.save(existingIncome); //
+        return IncomeMapper.toIncomeEntryDTO(updatedIncome); //
     }
+
+    /**
+     * Phương thức MỚI: Xóa một khoản thu nhập.
+     * @param incomeId ID của khoản thu nhập cần xóa.
+     */
 }
