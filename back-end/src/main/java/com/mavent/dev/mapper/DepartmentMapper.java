@@ -20,6 +20,7 @@ public class DepartmentMapper {
         department.setEventId(dto.getEventId());
         department.setName(dto.getName());
         department.setDescription(dto.getDescription());
+        department.setSponsorManageable(dto.getSponsorManageable());
 
         return department;
     }
@@ -35,6 +36,7 @@ public class DepartmentMapper {
                 .eventId(department.getEventId())
                 .name(department.getName())
                 .description(department.getDescription())
+                .sponsorManageable(department.getSponsorManageable())
                 .createdAt(department.getCreatedAt())
                 .updatedAt(department.getUpdatedAt())
                 .build();

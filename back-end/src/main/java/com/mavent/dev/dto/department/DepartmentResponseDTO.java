@@ -16,6 +16,7 @@ public class DepartmentResponseDTO {
     private Integer eventId;
     private String name;
     private String description;
+    private Boolean sponsorManageable;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

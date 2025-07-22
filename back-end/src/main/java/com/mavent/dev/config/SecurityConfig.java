@@ -57,7 +57,7 @@ public class SecurityConfig {
                                 "/api/tags",
                                 "/api/document",
                                 "/api/documents/**",
-
+                                "/api/event/sponsorship/public/*",
                                 "/api/public/**",
                                 "/api/location/**",
                                 "/api/event/*/feedback",

@@ -1,18 +1,15 @@
 package com.mavent.dev.service.implement;
 
 import com.mavent.dev.dto.MeetingDTO;
-import com.mavent.dev.entity.EventAccountRole;
-import com.mavent.dev.entity.Meeting;
-import com.mavent.dev.entity.MeetingAttendee;
-import com.mavent.dev.repository.EventAccountRoleRepository;
-import com.mavent.dev.repository.MeetingAttendeeRepository;
-import com.mavent.dev.repository.MeetingRepository;
+import com.mavent.dev.entity.*;
+import com.mavent.dev.repository.*;
 import com.mavent.dev.service.MeetingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -26,77 +23,127 @@ public class MeetingImplement implements MeetingService {
     private MeetingAttendeeRepository meetingAttendeeRepository;
     @Autowired
     private EventAccountRoleRepository eventAccountRoleRepository;
+    @Autowired
+    private GoogleCalendarService calendarService;
+    @Autowired
+    private GoogleTokenService tokenService;
+    @Autowired
+    private GoogleTokenRepository tokenRepository;
+    @Autowired
+    private GoogleCalendarEventRepository calendarEventRepository;
 
     @Override
-    public Meeting createMeeting(Meeting meeting) {
+    public Meeting createMeeting(Meeting meeting, List<String> attendeeIds) {
+        // 1. Save the meeting first
         Meeting savedMeeting = meetingRepository.save(meeting);
 
+        // 2. Save meeting attendees from passed list
         List<MeetingAttendee> attendees = new ArrayList<>();
-
-        // Add the organizer
-        attendees.add(new MeetingAttendee(savedMeeting.getMeetingId(), meeting.getOrganizerAccountId()));
-
-        // Add other attendees by department or event
-        List<EventAccountRole> eventAccountRoles;
-        if (meeting.getDepartmentId() == null) {
-            eventAccountRoles = eventAccountRoleRepository.findByEventId(meeting.getEventId());
-        } else {
-            eventAccountRoles = eventAccountRoleRepository.findByDepartmentId(meeting.getDepartmentId());
+        for (String attendeeIdStr : attendeeIds) {
+            Integer attendeeId = Integer.parseInt(attendeeIdStr);
+            attendees.add(new MeetingAttendee(savedMeeting.getMeetingId(), attendeeId));
         }
-
-        for (EventAccountRole acc : eventAccountRoles) {
-            attendees.add(new MeetingAttendee(savedMeeting.getMeetingId(), acc.getAccountId()));
-        }
-
         meetingAttendeeRepository.saveAll(attendees);
+
+        // 3. For each attendee, sync Google Calendar if connected
+        for (MeetingAttendee attendee : attendees) {
+            Integer accountId = attendee.getAccountId();
+
+            Optional<GoogleToken> tokenOpt = tokenRepository.findById(accountId);
+            if (tokenOpt.isEmpty()) continue;
+
+            try {
+                String accessToken = tokenService.getValidAccessToken(accountId);
+
+                // Check if already synced (should not happen on create, but safe check)
+                Optional<GoogleCalendarEvent> existingEvent = calendarEventRepository
+                        .findByIdMeetingIdAndIdAccountId(savedMeeting.getMeetingId(), accountId);
+
+                if (existingEvent.isPresent()) {
+                    calendarService.updateMeetingEvent(accessToken, savedMeeting, existingEvent.get().getGoogleEventId());
+                } else {
+                    String googleEventId = calendarService.addMeetingEvent(accessToken, savedMeeting);
+
+                    // Save event mapping
+                    GoogleCalendarEvent calendarEvent = new GoogleCalendarEvent(
+                            savedMeeting.getMeetingId(), accountId, googleEventId
+                    );
+                    calendarEventRepository.save(calendarEvent);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                // optionally log: failed to sync calendar for accountId
+            }
+        }
 
         return savedMeeting;
     }
 
-
     @Override
-    public Meeting updateMeeting(Integer meetingId, Meeting updatedMeeting) {
-        // Ensure the meeting exists
-        return meetingRepository.findById(meetingId).map(existing -> {
-            // Preserve ID
-            updatedMeeting.setMeetingId(meetingId);
+    public Meeting updateMeeting(Meeting updatedMeeting) {
+        Meeting updated = meetingRepository.save(updatedMeeting);
 
-            // Build attendee list (organizer + all event accounts)
-            List<MeetingAttendee> attendees = new ArrayList<>();
+        // Sync Google Calendar for each attendee
+        List<MeetingAttendee> attendees = meetingAttendeeRepository.findByMeetingId(updated.getMeetingId());
 
-            // Add the organizer as an attendee
-            MeetingAttendee organizerAttendee = new MeetingAttendee(meetingId, updatedMeeting.getOrganizerAccountId());
-            attendees.add(organizerAttendee);
+        for (MeetingAttendee attendee : attendees) {
+            Integer accountId = attendee.getAccountId();
 
-            // Add all related event accounts as attendees
-            List<EventAccountRole> eventAccountRoles;
-            if (updatedMeeting.getDepartmentId() == null) {
-                eventAccountRoles = eventAccountRoleRepository.findByEventId(updatedMeeting.getEventId());
-            } else {
-                eventAccountRoles = eventAccountRoleRepository.findByDepartmentId(updatedMeeting.getDepartmentId());
+            Optional<GoogleToken> tokenOpt = tokenRepository.findById(accountId);
+            if (tokenOpt.isEmpty()) continue;
+
+            try {
+                String accessToken = tokenService.getValidAccessToken(accountId);
+
+                Optional<GoogleCalendarEvent> calEventOpt = calendarEventRepository
+                        .findByIdMeetingIdAndIdAccountId(updated.getMeetingId(), accountId);
+
+                if (calEventOpt.isPresent()) {
+                    calendarService.updateMeetingEvent(accessToken, updated, calEventOpt.get().getGoogleEventId());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+        }
 
-            for (EventAccountRole acc : eventAccountRoles) {
-                MeetingAttendee attendee = new MeetingAttendee(meetingId, acc.getAccountId());
-                attendees.add(attendee);
-            }
-
-            // Save attendees
-            meetingAttendeeRepository.saveAll(attendees);
-
-            // Save updated meeting
-            return meetingRepository.save(updatedMeeting);
-        }).orElseThrow(() -> new RuntimeException("Meeting not found with ID: " + meetingId));
+        return updated;
     }
-
 
     @Override
     public void deleteMeeting(Integer meetingId) {
         if (!meetingRepository.existsById(meetingId)) {
             throw new RuntimeException("Meeting not found with ID: " + meetingId);
         }
+
+        // 1. Delete Google Calendar Events for each attendee
+        List<MeetingAttendee> attendees = meetingAttendeeRepository.findByMeetingId(meetingId);
+
+        for (MeetingAttendee attendee : attendees) {
+            Integer accountId = attendee.getAccountId();
+
+            Optional<GoogleToken> tokenOpt = tokenRepository.findById(accountId);
+            if (tokenOpt.isEmpty()) continue;
+
+            try {
+                String accessToken = tokenService.getValidAccessToken(accountId);
+
+                Optional<GoogleCalendarEvent> calEventOpt = calendarEventRepository
+                        .findByIdMeetingIdAndIdAccountId(meetingId, accountId);
+
+                if (calEventOpt.isPresent()) {
+                    calendarService.deleteMeetingEvent(accessToken, calEventOpt.get().getGoogleEventId());
+                    calendarEventRepository.delete(calEventOpt.get());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        // 2. Delete attendees and meeting
+        meetingAttendeeRepository.deleteByMeetingId(meetingId);
         meetingRepository.deleteById(meetingId);
     }
+
 
     @Override
     public Optional<Meeting> getMeetingById(Integer meetingId) {
