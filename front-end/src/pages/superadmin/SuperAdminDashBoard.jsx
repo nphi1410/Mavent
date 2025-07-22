@@ -149,75 +149,67 @@ const SuperAdminDashboard = () => {
     };
 
     return (
-        <div className="h-screen w-screen flex bg-amber-50">
-            <SuperAdminHeader />
-            <SuperAdminSidebar />
-            <div className="flex flex-col flex-1">
-                <main className="flex-1 overflow-y-auto p-10 bg-gray-100">
-                    <div className="py-10 w-full">
-                        <h1 className="text-3xl font-bold">Dashboard</h1>
-                        <p className="text-gray-500 mb-6">Welcome back, Super Admin!</p>
+        <div className="py-10 w-full">
+            <h1 className="text-3xl font-bold">Dashboard</h1>
+            <p className="text-gray-500 mb-6">Welcome back, Super Admin!</p>
 
-                        {loading && <div className="text-center text-blue-600">Loading...</div>}
-                        {error && <div className="text-center text-red-600">{error}</div>}
+            {loading && <div className="text-center text-blue-600">Loading...</div>}
+            {error && <div className="text-center text-red-600">{error}</div>}
 
-                        {!loading && !error && (
-                            <>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-6">
-                                    {statsConfig.map((stat, i) => (
-                                        <div
-                                            key={stat.key} // Use stat.key for better identification
-                                            onClick={stat.onClick}
-                                            className={`bg-zinc-100 p-6 rounded-xl shadow ${stat.onClick ? 'cursor-pointer' : ''} 
+            {!loading && !error && (
+                <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+                        {statsConfig.map((stat, i) => (
+                            <div
+                                key={stat.key} // Use stat.key for better identification
+                                onClick={stat.onClick}
+                                className={`bg-zinc-100 p-6 rounded-xl shadow ${stat.onClick ? 'cursor-pointer' : ''} 
                                             ${selectedStatIndex === i ? 'border-2 border-blue-500 bg-blue-50' : ''}`}
-                                        >
-                                            <div className="flex justify-between">
-                                                <h2>{stat.title}</h2>
-                                                <FontAwesomeIcon icon={stat.icon} />
-                                            </div>
-                                            <div className="text-3xl font-bold">{stat.value}</div>
-                                        </div>
-                                    ))}
+                            >
+                                <div className="flex justify-between">
+                                    <h2>{stat.title}</h2>
+                                    <FontAwesomeIcon icon={stat.icon} />
                                 </div>
-
-                                {showEventChart && (
-                                    <>
-                                        <div className="mb-4">
-                                            <label className="font-medium mr-2">Select Year:</label>
-                                            <select
-                                                value={selectedYear}
-                                                onChange={handleYearChange}
-                                                className="p-2 border rounded"
-                                            >
-                                                {[...new Set(events.map(ev => new Date(ev.startDatetime).getFullYear()))]
-                                                    .sort((a, b) => b - a)
-                                                    .map(yr => (
-                                                        <option key={yr} value={yr}>{yr}</option>
-                                                    ))}
-                                            </select>
-                                        </div>
-
-                                        <div className="flex flex-col md:flex-row gap-6">
-                                            <div className="w-full md:w-1/2 bg-gray-200 p-6 rounded-xl shadow">
-                                                <Line ref={eventLineRef} data={lineData} options={lineOpts} />
-                                            </div>
-                                            <div className="w-full md:w-1/2 bg-gray-200 p-6 rounded-xl shadow flex items-center justify-center">
-                                                {selectedMonthIndex !== null ? (
-                                                    <Bar data={barData} options={barOpts} />
-                                                ) : (
-                                                    <span className="text-gray-500 italic text-center">
-                                                        Click vào một tháng trên biểu đồ bên trái để xem thống kê theo tuần
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </>
-                                )}
-                            </>
-                        )}
+                                <div className="text-3xl font-bold">{stat.value}</div>
+                            </div>
+                        ))}
                     </div>
-                </main>
-            </div>
+
+                    {showEventChart && (
+                        <>
+                            <div className="mb-4">
+                                <label className="font-medium mr-2">Select Year:</label>
+                                <select
+                                    value={selectedYear}
+                                    onChange={handleYearChange}
+                                    className="p-2 border rounded"
+                                >
+                                    {[...new Set(events.map(ev => new Date(ev.startDatetime).getFullYear()))]
+                                        .sort((a, b) => b - a)
+                                        .map(yr => (
+                                            <option key={yr} value={yr}>{yr}</option>
+                                        ))}
+                                </select>
+                            </div>
+
+                            <div className="flex flex-col md:flex-row gap-6">
+                                <div className="w-full md:w-1/2 bg-gray-200 p-6 rounded-xl shadow">
+                                    <Line ref={eventLineRef} data={lineData} options={lineOpts} />
+                                </div>
+                                <div className="w-full md:w-1/2 bg-gray-200 p-6 rounded-xl shadow flex items-center justify-center">
+                                    {selectedMonthIndex !== null ? (
+                                        <Bar data={barData} options={barOpts} />
+                                    ) : (
+                                        <span className="text-gray-500 italic text-center">
+                                            Click vào một tháng trên biểu đồ bên trái để xem thống kê theo tuần
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </>
+            )}
         </div>
     );
 };

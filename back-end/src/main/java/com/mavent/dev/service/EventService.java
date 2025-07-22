@@ -3,6 +3,7 @@ package com.mavent.dev.service;
 import com.mavent.dev.dto.EventCountDTO;
 import com.mavent.dev.dto.EventMemberDTO;
 import com.mavent.dev.dto.FilterEventDTO;
+import com.mavent.dev.dto.event.PendingEventDTO;
 import com.mavent.dev.dto.superadmin.EventDTO;
 import com.mavent.dev.entity.Event;
 import org.apache.poi.ss.formula.functions.T;
@@ -36,5 +37,7 @@ public interface EventService {
     List<EventCountDTO> getMonthlyStatistic(String status);
 
     boolean checkEventAccess(Integer eventId, Integer accountId);
+
+    PendingEventDTO getPendingEventById(Integer eventId);
 
 }

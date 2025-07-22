@@ -3,14 +3,16 @@ package com.mavent.dev.service.implement;
 import com.mavent.dev.dto.EventCountDTO;
 import com.mavent.dev.dto.EventMemberDTO;
 import com.mavent.dev.dto.FilterEventDTO;
+import com.mavent.dev.dto.event.*;
 import com.mavent.dev.dto.superadmin.EventDTO;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.Event;
 import com.mavent.dev.entity.EventAccountRole;
+import com.mavent.dev.entity.Location;
 import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.repository.EventAccountRoleRepository;
 import com.mavent.dev.repository.EventRepository;
-import com.mavent.dev.service.EventService;
+import com.mavent.dev.service.*;
 import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -34,6 +36,14 @@ public class EventImplement implements EventService {
 
     @Autowired
     private AccountRepository accountRepository;
+    @Autowired
+    private AgendaService agendaService;
+    @Autowired
+    private TimelineService timelineService;
+    @Autowired
+    private ProposalService proposalService;
+    @Autowired
+    private LocationService locationService;
 
     @Override
     public Page<FilterEventDTO> getFilterEvents(String name, String status, List<Integer> tagIds, String sortType, int page, int size, String type, boolean isTrending) {
@@ -180,5 +190,90 @@ public class EventImplement implements EventService {
                     return dto;
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public PendingEventDTO getPendingEventById(Integer eventId) {
+//        return null;
+        Event event = getEventEntityById(eventId);
+        if (event == null) {
+            return null; // Hoặc ném ngoại lệ nếu cần
+        }
+
+        PendingEventDTO pendingEventDTO = new PendingEventDTO();
+        pendingEventDTO.setId(event.getEventId());
+        pendingEventDTO.setName(event.getName());
+        pendingEventDTO.setDescription(event.getDescription());
+        pendingEventDTO.setStatus(event.getStatus() != null ? event.getStatus().name() : null);
+        pendingEventDTO.setStartDate(event.getStartDatetime() != null ? event.getStartDatetime().toString() : null);
+        pendingEventDTO.setEndDate(event.getEndDatetime() != null ? event.getEndDatetime().toString() : null);
+        pendingEventDTO.setCreatedAt(event.getCreatedAt() != null ? event.getCreatedAt().toString() : null);
+        pendingEventDTO.setUpdatedAt(event.getUpdatedAt() != null ? event.getUpdatedAt().toString() : null);
+        pendingEventDTO.setBannerUrl(event.getBannerUrl());
+        pendingEventDTO.setPosterUrl(event.getPosterUrl());
+        pendingEventDTO.setLocation(event.getLocation());
+        pendingEventDTO.setLocationId(event.getLocationId());
+        pendingEventDTO.setDdayInfo(event.getDdayInfo());
+        pendingEventDTO.setMaxMembers(event.getMaxMemberNumber());
+        pendingEventDTO.setMaxParticipants(event.getMaxParticipantNumber());
+
+        // Thêm thông tin người dùng tạo sự kiện
+        try {
+            Account creator = accountRepository.findById(event.getCreatedBy()).orElse(null);
+            if (creator != null) {
+                UserPendingEventDTO userPendingEventDTO = new UserPendingEventDTO();
+                userPendingEventDTO.setId(creator.getAccountId());
+                userPendingEventDTO.setUsername(creator.getUsername());
+                userPendingEventDTO.setAvatarUrl(creator.getAvatarUrl());
+                pendingEventDTO.setCreator(userPendingEventDTO);
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching creator for event ID: " + eventId);
+            System.err.println("Error: " + e.getMessage());
+        }
+
+        // Thêm thông tin đề xuất, agenda, timeline
+        try {
+            List<AgendaDTO> agendas = agendaService.getAgendaItemsByEventId(eventId);
+            System.out.println("Event ID: " + eventId);
+            List<TimelineDTO> timelines = timelineService.getTimelineItemsByEventId(eventId);
+
+            if (timelines != null) {
+                pendingEventDTO.setTimelines(timelines);
+            }
+
+            if (agendas != null) {
+                pendingEventDTO.setAgendas(agendas);
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching agendas or timelines for event ID: " + eventId);
+            System.err.println("Error: " + e.getMessage());
+        }
+
+        try {
+            ProposalDTO proposalDTO = proposalService.getProposalByEventId(eventId);
+            if (proposalDTO != null) {
+                pendingEventDTO.setProposal(proposalDTO);
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching proposal for event ID: " + eventId);
+            System.err.println("Error: " + e.getMessage());
+        }
+
+        try {
+            Location location = locationService.getLocationById(event.getLocationId());
+            if (location != null) {
+                pendingEventDTO.setLocation(location.getLocationName());
+            } else {
+                pendingEventDTO.setLocation("Unknown Location");
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching location for event ID: " + eventId);
+            System.err.println("Error: " + e.getMessage());
+            pendingEventDTO.setLocation("Unknown Location");
+        }
+
+
+        return pendingEventDTO;
     }
 }

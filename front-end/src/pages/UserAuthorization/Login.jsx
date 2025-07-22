@@ -1,4 +1,4 @@
-import { jwtDecode } from 'jwt-decode'; // ✅ Correct for named exports
+import { jwtDecode } from 'jwt-decode'; 
 
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
@@ -38,6 +38,7 @@ function Login() {
 
         // Store token and basic info
         sessionStorage.setItem("token", token);
+        sessionStorage.setItem("systemRole", roles.includes("ROLE_SYSTEM_ADMIN") ? roles[0] : "ROLE_USER");
         sessionStorage.setItem("isLoggedIn", "true");
         sessionStorage.setItem("username", decoded.sub || username);
 

@@ -63,11 +63,6 @@ function SuperAdminManageUsers() {
     );
 
     return (
-        <div className="h-screen w-screen flex bg-amber-50">
-            <SuperAdminHeader />
-            <SuperAdminSidebar />
-            <div className="flex flex-col flex-1">
-                <main className="flex-1 overflow-y-auto p-10 bg-gray-100">
                     <div className="py-10 w-full">
                         <h1 className="text-4xl font-bold text-gray-800 mb-4">Users</h1>
                         <p className="text-gray-500 mb-6">Manage your users and their permissions</p>
@@ -231,9 +226,6 @@ function SuperAdminManageUsers() {
                             )}
                         </div>
                     </div>
-                </main>
-            </div>
-        </div>
     );
 }
 
