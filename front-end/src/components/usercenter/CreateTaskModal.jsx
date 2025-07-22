@@ -227,7 +227,8 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
       setSubmitting(false);
     }
   };
-
+  console.log(members);
+  
   if (!isOpen) return null;
 
   return (

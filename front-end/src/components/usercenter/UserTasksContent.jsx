@@ -5,6 +5,7 @@ import TaskDashboard from './TaskDashboard';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import CreateTaskModal from './CreateTaskModal';
 import TaskDetails from './TaskDetails';
+import { useParams } from 'react-router-dom';
 
 const parseStatus = (status) => {
   if (status === 'active') return ['TODO', 'DOING', 'REVIEW', 'OVERDUE'];
@@ -25,10 +26,10 @@ const UserTasksContent = () => {
     status: '',
     priority: '',
     sortOrder: '',
-    eventName: '',
     role: ''
   });
-
+  const { id: eventId } = useParams();
+  const [eventName, setEventName] = useState('');
   const [loading, setLoading] = useState(true);
   const [filterLoading, setFilterLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -47,14 +48,23 @@ const UserTasksContent = () => {
       setLoading(true);
       try {
         const [tasks, events] = await Promise.all([
-          getUserTasks({}),
+          getUserTasks({}), // Bỏ filter eventName ở đây
           getUserEvents()
         ]);
         const taskList = Array.isArray(tasks) ? tasks : [];
-        const activeTasks = filterActiveTasks(taskList);
-        setAllTasks(taskList);
+        setEvents(events); // Set events để sử dụng cho filter
+
+        const matchedEvent = events.find(e => e.eventId === parseInt(eventId));
+        if (matchedEvent) {
+          setEventName(matchedEvent.eventName);
+        }
+
+        // Lọc task theo eventId
+        const activeTasks = filterActiveTasks(taskList)
+          .filter(task => task.eventId === parseInt(eventId));
+
+        setAllTasks(taskList.filter(task => task.eventId === parseInt(eventId))); // Chỉ lưu tasks của event này
         setDisplayTasks(activeTasks);
-        setEvents(Array.isArray(events) ? events : []);
       } catch (err) {
         if (err.response?.status === 401) {
           navigate('/login');
@@ -66,7 +76,7 @@ const UserTasksContent = () => {
       }
     };
     fetchInitialData();
-  }, [navigate]);
+  }, [navigate, eventId]); // Thêm eventId vào dependency
 
   useEffect(() => {
     const fetchFilteredTasks = async () => {
@@ -81,10 +91,12 @@ const UserTasksContent = () => {
           status: statusString || undefined,
           priority: filters.priority || undefined,
           sortOrder: filters.sortOrder || undefined,
-          eventName: filters.eventName || undefined
+          eventName: eventName || undefined // Sử dụng eventName thay vì filters.eventName
         });
 
         let fetchedTasks = Array.isArray(response) ? response : [];
+        // Lọc theo eventId
+        fetchedTasks = fetchedTasks.filter(task => task.eventId === parseInt(eventId));
 
         // Filter by role (only on frontend)
         if (filters.role && userProfile) {
@@ -119,16 +131,16 @@ const UserTasksContent = () => {
       filters.status ||
       filters.priority ||
       filters.keyword ||
-      filters.eventName ||
       filters.sortOrder ||
       filters.role
     ) {
       const timeoutId = setTimeout(fetchFilteredTasks, 300);
       return () => clearTimeout(timeoutId);
     } else {
+      // Khi không có filter, hiển thị tasks đã được lọc theo eventId
       setDisplayTasks(filterActiveTasks(allTasks));
     }
-  }, [filters, allTasks, userProfile]);
+  }, [filters, allTasks, userProfile, eventName, eventId]); // Thêm eventName và eventId
 
   const indexOfLastTask = currentPage * tasksPerPage;
   const indexOfFirstTask = indexOfLastTask - tasksPerPage;
@@ -159,10 +171,12 @@ const UserTasksContent = () => {
         status: statusString || undefined,
         priority: filters.priority || undefined,
         sortOrder: filters.sortOrder || undefined,
-        eventName: filters.eventName || undefined
+        eventName: eventName || undefined // Sử dụng eventName
       });
 
       let fetchedTasks = Array.isArray(response) ? response : [];
+      // Lọc theo eventId
+      fetchedTasks = fetchedTasks.filter(task => task.eventId === parseInt(eventId));
 
       // Apply role filter again
       if (filters.role && userProfile) {
@@ -221,26 +235,37 @@ const UserTasksContent = () => {
 
   if (loading) return <div className="text-center py-10">Loading...</div>;
   if (error) return <div className="text-center text-red-500 py-10">{error}</div>;
+  console.log('Display Tasks:', displayTasks);
+  console.log('Filtered Tasks:', filteredTasks);
+  console.log('All Tasks:', allTasks);
+
+  console.log(eventId);
+
 
   return (
     <>
       <main className="flex-grow p-10 bg-white">
         <div className="p-6 max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-2xl font-bold">My Active Tasks</h1>
+            <div>
+              <h1 className="text-2xl font-bold">My Active Tasks</h1>
+              {eventName && (
+                <p className="text-gray-600 mt-1">Event: {eventName}</p>
+              )}
+            </div>
             <div className="flex gap-4">
               <button onClick={openCreateModal} className="bg-[#00155c] hover:bg-[#172c70] text-white px-4 py-2 rounded-lg">
                 Create Task
               </button>
-              <Link to="/profile/tasks/history" className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg">
+              <Link to={`/event/${eventId}/staff/tasks/history`} className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg">
                 View Task History
               </Link>
             </div>
           </div>
 
           <TaskDashboard
-            tasks={filters.eventName ? filteredTasks : allTasks}
-            isFiltered={!!filters.eventName}
+            tasks={allTasks} // Sử dụng allTasks vì đã được lọc theo eventId
+            isFiltered={false}
             currentUserId={userProfile?.id}
           />
 
@@ -255,16 +280,6 @@ const UserTasksContent = () => {
                     { value: '', label: 'Sort by' },
                     { value: 'asc', label: 'Due Date (Earliest)' },
                     { value: 'desc', label: 'Due Date (Latest)' }
-                  ]
-                },
-                {
-                  label: 'Event',
-                  name: 'eventName',
-                  options: [
-                    { value: '', label: 'All Events' },
-                    ...events
-                      .filter(e => e.role !== 'PARTICIPANT')
-                      .map(e => ({ value: e.eventId, label: e.eventName }))
                   ]
                 },
                 {
@@ -345,7 +360,7 @@ const UserTasksContent = () => {
                   <tr>
                     <th className="w-12 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
                     <th className="w-48 md:w-64 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th className="w-36 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event</th>
+                    {/* <th className="w-36 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event</th> */}
                     <th className="w-32 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
                     <th className="w-24 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th className="w-24 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
@@ -426,7 +441,10 @@ const UserTasksContent = () => {
             isOpen={isCreateModalOpen}
             onClose={closeCreateModal}
             onTaskCreated={refreshTasks}
+            eventId={eventId}
+            eventName={eventName}
           />
+
         </div>
       </main>
       {openTaskId && (
