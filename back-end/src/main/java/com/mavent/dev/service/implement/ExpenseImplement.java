@@ -4,6 +4,7 @@ import com.mavent.dev.dto.EventTotalExpenseDTO;
 import com.mavent.dev.dto.ExpenseByCategoryDTO;
 import com.mavent.dev.dto.ExpenseByDepartmentDTO;
 import com.mavent.dev.dto.ExpenseSummaryByStatusDTO;
+import com.mavent.dev.dto.PaymentMethodSummaryDTO; // BỔ SUNG DÒNG NÀY
 import com.mavent.dev.entity.Expense;
 import com.mavent.dev.entity.ExpenseCategory;
 import com.mavent.dev.entity.Department;
@@ -19,7 +20,7 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
+import java.util.Set; // Vẫn giữ nếu có các phương thức khác sử dụng Set
 import java.util.stream.Collectors;
 
 @Service
@@ -82,12 +83,13 @@ public class ExpenseImplement implements ExpenseService {
     }
 
     /**
-     * Retrieves all distinct payment methods used in expenses.
-     * @return A set of strings representing distinct payment methods.
+     * Retrieves a summary of total expenses for each distinct payment method for a specific event.
+     * @param eventId The ID of the event.
+     * @return A list of PaymentMethodSummaryDTO, each containing payment method and its total amount.
      */
     @Override
-    public Set<String> getDistinctPaymentMethodsByEventId(Integer eventId) { // <--- Đã sửa đổi tên phương thức
-        return expenseRepository.findDistinctPaymentMethodsByEventId(eventId); // <--- Gọi phương thức repository mới
+    public List<PaymentMethodSummaryDTO> getPaymentMethodSummariesByEventId(Integer eventId) { // THAY ĐỔI Ở ĐÂY
+        return expenseRepository.findTotalAmountByPaymentMethodForEvent(eventId); // THAY ĐỔI Ở ĐÂY
     }
 
 
@@ -96,8 +98,8 @@ public class ExpenseImplement implements ExpenseService {
      * @return A list of ExpenseSummaryByStatusDTO, each containing a status and the count of expenses with that status.
      */
     @Override
-    public List<ExpenseSummaryByStatusDTO> getExpenseCountByStatusForEvent(Integer eventId) { // <--- Đã sửa đổi tên phương thức
-        List<Object[]> results = expenseRepository.countExpensesByStatusForEvent(eventId); // <--- Gọi phương thức repository mới
+    public List<ExpenseSummaryByStatusDTO> getExpenseCountByStatusForEvent(Integer eventId) {
+        List<Object[]> results = expenseRepository.countExpensesByStatusForEvent(eventId);
         return results.stream()
                 .map(row -> new ExpenseSummaryByStatusDTO((Expense.Status) row[0], (Long) row[1]))
                 .collect(Collectors.toList());
