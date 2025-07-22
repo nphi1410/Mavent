@@ -272,8 +272,24 @@ public class EventImplement implements EventService {
             System.err.println("Error: " + e.getMessage());
             pendingEventDTO.setLocation("Unknown Location");
         }
-
-
         return pendingEventDTO;
+    }
+
+    @Override
+    public boolean updatePendingEvent(Integer eventId, String status) {
+        Event event = getEventEntityById(eventId);
+        if (event == null) {
+            return false; // Hoặc ném ngoại lệ nếu cần
+        }
+
+        // Cập nhật trạng thái sự kiện
+        try {
+            event.setStatus(Event.EventStatus.valueOf(status.toUpperCase()));
+            eventRepository.save(event);
+            return true;
+        } catch (IllegalArgumentException e) {
+            System.err.println("Invalid status value: " + status);
+            return false; // Trả về false nếu trạng thái không hợp lệ
+        }
     }
 }

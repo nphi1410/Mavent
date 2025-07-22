@@ -212,9 +212,19 @@ public class EventController {
             if (pendingEventDTO == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Event not found with ID: " + eventId);
             }
-            return ResponseEntity.ok(eventService.getPendingEventById(eventId));
+            return ResponseEntity.ok(pendingEventDTO);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi lấy sự kiện: " + e.getMessage());
+        }
+    }
+
+    @PatchMapping("/pending/{id}")
+    public ResponseEntity<?> updatePendingEvent(@PathVariable("id") Integer eventId, @RequestBody PendingEventDTO pendingEventDTO) {
+        try {
+            eventService.updatePendingEvent(eventId, "upcoming");
+            return ResponseEntity.ok("Cập nhật sự kiện thành công với ID: " + eventId);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi cập nhật sự kiện: " + e.getMessage());
         }
     }
 

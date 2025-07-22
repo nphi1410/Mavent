@@ -22,7 +22,6 @@ public class PendingEventDTO {
     private Integer maxMembers;
     private Integer maxParticipants;
 
-
     private UserPendingEventDTO creator;
 
     private ProposalDTO proposal;

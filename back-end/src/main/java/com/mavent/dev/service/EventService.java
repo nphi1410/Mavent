@@ -8,8 +8,6 @@ import com.mavent.dev.dto.superadmin.EventDTO;
 import com.mavent.dev.entity.Event;
 import org.apache.poi.ss.formula.functions.T;
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -40,4 +38,5 @@ public interface EventService {
 
     PendingEventDTO getPendingEventById(Integer eventId);
 
+    boolean updatePendingEvent(Integer eventId, String status);
 }

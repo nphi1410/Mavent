@@ -1,6 +1,7 @@
 "use client"
 
 import { FileText } from "lucide-react"
+import { vietnameseDate } from "../../utils/DateConvert"
 
 export default function EventProposal({ proposal }) {
   return (
@@ -16,7 +17,7 @@ export default function EventProposal({ proposal }) {
           <h3 className="font-medium text-gray-900 mb-2">{proposal?.title}</h3>
           <div className="flex items-center gap-4 mb-3">
             <a
-              href={proposal?.link}
+              href={proposal?.proposalLink}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 hover:text-blue-800 underline text-sm"
@@ -24,7 +25,12 @@ export default function EventProposal({ proposal }) {
               View Proposal Document
             </a>
           </div>
-          {proposal?.note && <p className="text-gray-600 text-sm">{proposal?.note}</p>}
+          {proposal?.notes && <p className="text-gray-600 text-sm">{proposal?.notes}</p>}
+          <div>
+            <p className="text-sm mt-2">
+              <span className="font-medium">Defense Time:</span> {vietnameseDate(proposal?.defenseDate, false, true)}
+            </p>
+          </div>
         </div>
       </div>
     </div>

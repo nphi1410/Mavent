@@ -1,16 +1,21 @@
 import { useEffect, useState } from "react"
-import EventHeader from "../../components/pendingEventDetail/EventHeader"
-import EventTimeline from "../../components/pendingEventDetail/EventTimeline"
-import EventAgenda from "../../components/pendingEventDetail/EventAgenda"
-import EventProposal from "../../components/pendingEventDetail/EventProposal"
-import EventMedia from "../../components/pendingEventDetail/EventMedia"
-import { getPendingEventDetailsById } from "../../services/eventService"
+import EventHeader from "@/components/pendingEventDetail/EventHeader"
+import EventTimeline from "@/components/pendingEventDetail/EventTimeline"
+import EventAgenda from "@/components/pendingEventDetail/EventAgenda"
+import EventProposal from "@/components/pendingEventDetail/EventProposal"
+import EventMedia from "@/components/pendingEventDetail/EventMedia"
+import { getPendingEventDetailsById } from "@/services/eventService"
+import EventApproval from "@/components/pendingEventDetail/EventApproval"
 import { useParams } from "react-router-dom"
-import EventApproval from "../../components/pendingEventDetail/EventApproval"
 
 export default function PendingEventView() {
     const [eventData, setEventData] = useState({});
     const { eventId } = useParams(); // Assuming you're using react-router for navigation
+
+    // console.log("Admin assigned state:", adminAssigned.accountId);
+
+
+    // const [admin, setAdmin] = useState({});
 
     useEffect(() => {
         // Simulate fetching event data
@@ -31,16 +36,13 @@ export default function PendingEventView() {
         fetchEventData();
     }, [eventId]);
 
-    const handleAssignProposer = () => {
-        console.log("Assigning proposer as event admin")
-        // Implement actual assignment logic
+    if(!eventData || Object.keys(eventData).length === 0) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-gray-500">Loading event details...</div>
+            </div>
+        );
     }
-
-    const handleAssignAdmin = (user) => {
-        console.log("Assigning user as admin:", user)
-        // Implement actual assignment logic
-    }
-
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-6xl mx-auto px-4 py-8">
@@ -65,10 +67,7 @@ export default function PendingEventView() {
 
                 </div>
 
-                <EventApproval
-                    onAssignProposer={handleAssignProposer}
-                    onAssignAdmin={handleAssignAdmin}
-                />
+                <EventApproval eventData={eventData} />
             </div>
         </div>
     )

@@ -43,7 +43,7 @@ export default function EventHeader({ event }) {
       </div>
 
       {/* Event Details Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
           <Calendar className="h-5 w-5 text-gray-500" />
           <div>
@@ -60,7 +60,7 @@ export default function EventHeader({ event }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+        <div className="flex items-center gap-3 p-4 bg-gray-50 col-span-2 rounded-lg">
           <MapPin className="h-5 w-5 text-gray-500" />
           <div>
             <div className="text-sm text-gray-500">Location</div>
