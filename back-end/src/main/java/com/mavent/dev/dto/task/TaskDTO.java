@@ -1,10 +1,12 @@
 package com.mavent.dev.dto.task;
 
+import com.mavent.dev.entity.Document;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -22,6 +24,7 @@ public class TaskDTO {
     private String priority;
     private String eventName;
     private String departmentName;
+    private List<Document> documents;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

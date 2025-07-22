@@ -66,11 +66,11 @@ const TaskCard = ({ task, index, onTaskUpdated, currentUserId }) => {
             {task.title}
           </div>
         </td>
-        <td className="py-3 px-4">
+        {/* <td className="py-3 px-4">
           <div className="truncate w-full max-w-[230px]" title={task.eventName}>
             {task.eventName}
           </div>
-        </td>
+        </td> */}
         <td className="py-3 px-4 whitespace-nowrap">
           {new Date(task.dueDate).toLocaleDateString()}
         </td>

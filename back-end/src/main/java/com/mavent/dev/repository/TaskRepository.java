@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Integer> {
@@ -30,5 +31,17 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
 
     @Query("SELECT t FROM Task t WHERE t.dueDate < :now AND t.status NOT IN ('REVIEW', 'OVERDUE', 'DONE', 'CANCELLED', 'REJECTED')")
     List<Task> findTasksWithDueDateBeforeAndNotOverdue(@Param("now") LocalDateTime now);
-
+    
+    @Query("SELECT t FROM Task t LEFT JOIN FETCH t.documents WHERE t.taskId = :taskId")
+    Optional<Task> findByIdWithDocuments(@Param("taskId") Integer taskId);
+    
+    @Query("""
+        SELECT DISTINCT t FROM Task t 
+        LEFT JOIN FETCH t.documents
+        LEFT JOIN TaskAttendee ta ON ta.taskId = t.taskId
+        WHERE ta.accountId = :accountId
+           OR t.assignedToAccountId = :accountId
+           OR t.assignedByAccountId = :accountId
+    """)
+    List<Task> findTasksWithDocumentsByAccountId(@Param("accountId") Integer accountId);
 }
