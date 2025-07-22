@@ -3,7 +3,6 @@ package com.mavent.dev.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.Timestamp;
 
@@ -18,9 +17,9 @@ public class EventSponsorship {
     private Integer sponsorId;
     private Integer packageId;
     private Long amount;
-    private enum status{
-        INTERESTED,NEGOTIATING,CONFIRMED,PAID,FULFILLED
-    }
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", columnDefinition = "enum('INTERESTED','NEGOTIATING','CONFIRMED','PAID','FULFILLED') default 'INTERESTED'")
+    private Status status;
     private Date startDate;
     private Date endDate;
     private String notes;
@@ -28,5 +27,9 @@ public class EventSponsorship {
     private Integer mainContactAccountId;
     private Timestamp createdAt;
     private Timestamp updatedAt;
+
+    public enum Status {
+        INTERESTED, NEGOTIATING, CONFIRMED, PAID, FULFILLED
+    }
 
 }

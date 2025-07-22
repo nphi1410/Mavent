@@ -23,17 +23,24 @@ const MeetingDetailsModal = ({ meeting, onClose }) => {
         </h2>
         <p className="text-lg font-semibold text-gray-800">{meeting.title}</p>
         <p className="text-sm text-gray-500 mb-4">
-          Status: <span className="font-medium text-black">{meeting.status}</span>
+          Status:{" "}
+          <span className="font-medium text-black">{meeting.status}</span>
         </p>
 
         {/* Grid layout */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Detail label="Event" value={meeting.eventName} />
           <Detail label="Department" value={meeting.departmentName} />
-          <Detail label="Organizer" value={meeting.organizerName || meeting.organizerAccountId} />
+          <Detail
+            label="Organizer"
+            value={meeting.organizerName || meeting.organizerAccountId}
+          />
           <Detail label="Location" value={meeting.location} />
           <Detail label="Meeting Link" value={meeting.meetingLink} />
-          <Detail label="Start Time" value={formatDate(meeting.meetingDatetime)} />
+          <Detail
+            label="Start Time"
+            value={formatDate(meeting.meetingDatetime)}
+          />
           <Detail label="End Time" value={formatDate(meeting.endDatetime)} />
           <Detail label="Created At" value={formatDate(meeting.createdAt)} />
           <Detail label="Updated At" value={formatDate(meeting.updatedAt)} />
@@ -41,8 +48,16 @@ const MeetingDetailsModal = ({ meeting, onClose }) => {
 
         {/* Description & Notes full width */}
         <div className="mt-4 space-y-2">
-          <Detail label="Description" value={meeting.description} style="whitespace-pre-wrap" />
-          <Detail label="Notes" value={meeting.notes} style="whitespace-pre-wrap" />
+          <Detail
+            label="Description"
+            value={meeting.description}
+            style="whitespace-pre-wrap"
+          />
+          <Detail
+            label="Notes"
+            value={meeting.notes}
+            style="whitespace-pre-wrap"
+          />
         </div>
       </div>
     </div>

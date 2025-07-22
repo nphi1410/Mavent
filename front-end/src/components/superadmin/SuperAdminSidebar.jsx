@@ -1,8 +1,19 @@
-import React, { useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendar, faCalendarDays, faBell, faGauge, faUsers, faChevronRight, faChevronDown, faUser, faGear, faPersonShelter } from '@fortawesome/free-solid-svg-icons';
-import { Link } from 'react-router-dom';
-
+import React, { useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faCalendar,
+  faCalendarDays,
+  faBell,
+  faGauge,
+  faUsers,
+  faChevronRight,
+  faChevronDown,
+  faUser,
+  faGear,
+  faPersonShelter,
+  faMoneyBill,
+} from "@fortawesome/free-solid-svg-icons";
+import { Link } from "react-router-dom";
 
 function SuperAdminSidebar() {
   const [eventOpen, setEventOpen] = useState(true);
@@ -12,11 +23,20 @@ function SuperAdminSidebar() {
     <div className="w-64 h-screen py-16 bg-white shadow-md flex flex-col justify-between border-r border-gray-200">
       {/* Top Section */}
       <div>
-
         {/* Dashboard */}
-        <Link to="/superadmin" className="p-4 hover:bg-gray-100 cursor-pointer flex items-center gap-3 text-gray-800">
+        <Link
+          to="/superadmin"
+          className="p-4 hover:bg-gray-100 cursor-pointer flex items-center gap-3 text-gray-800"
+        >
           <FontAwesomeIcon icon={faGauge} />
           Dashboard
+        </Link>
+        <Link
+          to="/superadmin/sponsors"
+          className="p-4 hover:bg-gray-100 cursor-pointer flex items-center gap-3 text-gray-800"
+        >
+          <FontAwesomeIcon icon={faMoneyBill} />
+          Sponsors
         </Link>
 
         {/* Manage Events */}
@@ -29,15 +49,23 @@ function SuperAdminSidebar() {
               <FontAwesomeIcon icon={faCalendarDays} />
               Manage Events
             </div>
-            <FontAwesomeIcon icon={eventOpen ? faChevronDown : faChevronRight} />
+            <FontAwesomeIcon
+              icon={eventOpen ? faChevronDown : faChevronRight}
+            />
           </div>
           {eventOpen && (
             <div className="pl-12">
-              <Link to="/superadmin/events" className="py-2 flex items-center gap-3 hover:text-black cursor-pointer text-gray-600">
+              <Link
+                to="/superadmin/events"
+                className="py-2 flex items-center gap-3 hover:text-black cursor-pointer text-gray-600"
+              >
                 <FontAwesomeIcon icon={faCalendar} />
                 All Events
               </Link>
-              <Link to="/superadmin/events/pending" className="py-2 flex items-center gap-3 hover:text-black cursor-pointer text-gray-600">
+              <Link
+                to="/superadmin/events/pending"
+                className="py-2 flex items-center gap-3 hover:text-black cursor-pointer text-gray-600"
+              >
                 <FontAwesomeIcon icon={faBell} />
                 Pending Events
               </Link>
@@ -59,7 +87,10 @@ function SuperAdminSidebar() {
           </div>
           {userOpen && (
             <div className="pl-12">
-              <Link to="/superadmin/users" className="py-2 flex items-center gap-3 hover:text-black cursor-pointer text-gray-600">
+              <Link
+                to="/superadmin/users"
+                className="py-2 flex items-center gap-3 hover:text-black cursor-pointer text-gray-600"
+              >
                 <FontAwesomeIcon icon={faUsers} />
                 All Users
               </Link>

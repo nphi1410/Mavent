@@ -67,7 +67,10 @@ public class SecurityConfig {
                                 "/api/expenses/**"
                         ).permitAll()
                         .requestMatchers("/api/**").hasAnyRole("USER", "SUPER_ADMIN")
-                        .requestMatchers("/api/dashboard").hasRole("SUPER_ADMIN")
+                        .requestMatchers(
+                                "/api/dashboard",
+                                "/api/events/pending/**"
+                        ).hasRole("SUPER_ADMIN")
                         .anyRequest().authenticated()
                 )
 
@@ -97,7 +100,7 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
         builder.authenticationProvider(customAuthenticationProvider);
-        return builder.build(); // ✅ Only call build() on AuthenticationManagerBuilder
+        return builder.build(); // Only call build() on AuthenticationManagerBuilder
     }
 
 }

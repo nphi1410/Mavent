@@ -8,4 +8,5 @@ import java.util.List;
 public interface SponsorshipPackageRepository extends JpaRepository<SponsorshipPackage, Integer> {
     List<SponsorshipPackage> findByEventId(Integer eventId);
     List<SponsorshipPackage> findByEventIdAndIsActive(Integer eventId,Boolean isActive);
+    SponsorshipPackage findByPackageId(Integer packageId);
 }

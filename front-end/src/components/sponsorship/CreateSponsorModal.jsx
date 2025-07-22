@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 
-const CreateSponsorModal = ({ isOpen, onClose, onSubmit }) => {
+const CreateSponsorModal = ({ isOpen, onClose, onSubmit, sponsor }) => {
   const [formData, setFormData] = useState({
+    sponsorId: "",
     name: "",
     logoUrl: "",
     website: "",
@@ -16,11 +17,30 @@ const CreateSponsorModal = ({ isOpen, onClose, onSubmit }) => {
   const [errors, setErrors] = useState({});
   const modalRef = useRef(null);
 
+  useEffect(() => {
+    if (sponsor) {
+      setFormData(sponsor);
+    } else {
+      setFormData({
+        sponsorId: "",
+        name: "",
+        logoUrl: "",
+        website: "",
+        industry: "",
+        address: "",
+        contactPersonName: "",
+        contactEmail: "",
+        contactPhone: "",
+        notes: "",
+      });
+    }
+  }, [sponsor]);
+
   // Close when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
-        onClose(); // also clears create option externally
+        onClose();
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -47,7 +67,14 @@ const CreateSponsorModal = ({ isOpen, onClose, onSubmit }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const requiredFields = ["name", "industry", "contactPersonName"];
+    const requiredFields = [
+      "name",
+      "industry",
+      "contactPersonName",
+      "contactEmail",
+      "contactPhone",
+      "address",
+    ];
     const newErrors = {};
 
     requiredFields.forEach((field) => {
@@ -73,8 +100,16 @@ const CreateSponsorModal = ({ isOpen, onClose, onSubmit }) => {
         ref={modalRef}
         className="bg-white rounded-xl w-full max-w-2xl p-6 shadow-xl relative mb-10"
       >
-        <h2 className="text-xl font-bold mb-4">Create New Sponsor</h2>
+        <h2 className="text-xl font-bold mb-4">
+          {sponsor ? "Edit Sponsor" : "Create New Sponsor"}
+        </h2>
+
         <form className="space-y-4" onSubmit={handleSubmit}>
+          <input
+            type="hidden"
+            name="createdByAccountId"
+            value={sessionStorage.getItem("accountId")}
+          />
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block font-medium">Name *</label>
@@ -119,13 +154,16 @@ const CreateSponsorModal = ({ isOpen, onClose, onSubmit }) => {
               />
             </div>
             <div className="col-span-2">
-              <label className="block font-medium">Address</label>
+              <label className="block font-medium">Address *</label>
               <input
                 name="address"
                 value={formData.address}
                 onChange={handleChange}
                 className="w-full border px-3 py-2 rounded"
               />
+              {errors.address && (
+                <p className="text-red-500 text-sm">{errors.address}</p>
+              )}
             </div>
             <div>
               <label className="block font-medium">Contact Person *</label>
@@ -142,7 +180,7 @@ const CreateSponsorModal = ({ isOpen, onClose, onSubmit }) => {
               )}
             </div>
             <div>
-              <label className="block font-medium">Contact Email</label>
+              <label className="block font-medium">Contact Email *</label>
               <input
                 type="email"
                 name="contactEmail"
@@ -150,15 +188,21 @@ const CreateSponsorModal = ({ isOpen, onClose, onSubmit }) => {
                 onChange={handleChange}
                 className="w-full border px-3 py-2 rounded"
               />
+              {errors.contactEmail && (
+                <p className="text-red-500 text-sm">{errors.contactEmail}</p>
+              )}
             </div>
             <div>
-              <label className="block font-medium">Contact Phone</label>
+              <label className="block font-medium">Contact Phone *</label>
               <input
                 name="contactPhone"
                 value={formData.contactPhone}
                 onChange={handleChange}
                 className="w-full border px-3 py-2 rounded"
               />
+              {errors.contactPhone && (
+                <p className="text-red-500 text-sm">{errors.contactPhone}</p>
+              )}
             </div>
             <div className="col-span-2">
               <label className="block font-medium">Notes</label>
@@ -184,7 +228,7 @@ const CreateSponsorModal = ({ isOpen, onClose, onSubmit }) => {
               type="submit"
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >
-              Create Sponsor
+              {sponsor ? "Update Sponsor" : "Create Sponsor"}
             </button>
           </div>
         </form>

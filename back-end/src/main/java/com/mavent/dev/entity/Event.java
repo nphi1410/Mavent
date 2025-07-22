@@ -74,6 +74,6 @@ public class Event {
     private String posterUrl;
 
     public enum EventStatus {
-        RECRUITING, UPCOMING, ONGOING, ENDED, CANCELLED, PENDING, REVIEWING
+        RECRUITING, UPCOMING, ONGOING, ENDED, CANCELLED, PENDING, REVIEWING, REJECTED
     }
 }
