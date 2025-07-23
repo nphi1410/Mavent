@@ -253,4 +253,28 @@ public class EventController {
         }
     }
 
+    @GetMapping("/created/{eventId}")
+    public ResponseEntity<?> getCreatedEventById(@PathVariable Integer eventId) {
+        try {
+            EventDTO eventDTO = eventService.getEventById(eventId);
+            if (eventDTO == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy sự kiện với ID: " + eventId);
+            }
+            return ResponseEntity.ok(eventDTO);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi lấy sự kiện: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/created")
+    public ResponseEntity<?> getCreatedEvents(HttpServletRequest request) {
+        try {
+            String token = request.getHeader("Authorization").substring(7);
+            Integer accountId = jwt.extractAccountId(token);
+            List<EventDTO> createdEvents = eventService.getEventByCreatorId(accountId);
+            return ResponseEntity.ok(createdEvents);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi lấy danh sách sự kiện đã tạo: " + e.getMessage());
+        }
+    }
 }

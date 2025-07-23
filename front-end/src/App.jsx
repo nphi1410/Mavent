@@ -109,7 +109,7 @@ function App() {
                 <Route path="details" element={<EventDetailsByRoles />} />
               </Route>
 
-              {/* routes for admin */}
+              {/* routes for event admin */}
               <Route element={<ProtectedRoute isRequiredToHaveRole={true} requiredRoles={["ADMIN"]} />}>
                 <Route
                   path="departments"

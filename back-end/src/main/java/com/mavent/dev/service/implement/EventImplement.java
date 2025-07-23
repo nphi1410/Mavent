@@ -293,4 +293,12 @@ public class EventImplement implements EventService {
             return false; // Trả về false nếu trạng thái không hợp lệ
         }
     }
+
+    @Override
+    public List<EventDTO> getEventByCreatorId(Integer creatorId) {
+        List<Event> events = eventRepository.findByCreatedBy(creatorId);
+        return events.stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
 }

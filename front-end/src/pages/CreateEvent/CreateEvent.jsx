@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { createEvent } from "../../services/eventService";
-import { getAllLocations } from "../../services/eventLocationService";
+import { getAllLocations } from "../../services/EventLocationService";
 import { useNavigate } from "react-router-dom";
-import { jwtDecode } from 'jwt-decode'; 
+import { jwtDecode } from 'jwt-decode';
 
-const CreateEvent = () => {
+const CreateEvent = ({ isUpdatePage = false }) => {
     // get account id from JWT token
     const token = sessionStorage.getItem("token");
     const decoded = jwtDecode(token);
@@ -22,7 +22,7 @@ const CreateEvent = () => {
         status: "PENDING",
         createdBy: decoded.accountId || "",
     });
-    
+
     const [bannerFile, setBannerFile] = useState(null);
     const [posterFile, setPosterFile] = useState(null);
 
@@ -39,6 +39,20 @@ const CreateEvent = () => {
             setLocations(data);
         };
         fetchLocations();
+        if (isUpdatePage) {
+            // Load existing event data if this is an update page
+            const fetchEventData = async () => {
+                try {
+                    const response = await getPendingEventDetailsById(eventId); // Example endpoint
+                    if (response) setFormData(response);
+                    console.log("Fetched event data:", response);
+                } catch (error) {
+                    console.error("Error fetching event data:", error);
+                }
+            }
+            fetchEventData();
+
+        }
     }, []);
 
     const handleChange = (e) => {

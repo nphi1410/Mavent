@@ -70,5 +70,5 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
             """, nativeQuery = true)
     List<EventCountDTO> countByMonthWithoutStatus(@Param("status") String status);
 
-
+    List<Event> findByCreatedBy(Integer createdBy);
 }
