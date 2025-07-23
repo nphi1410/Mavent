@@ -1,6 +1,7 @@
 package com.mavent.dev.dto;
 
-import com.mavent.dev.entity.Expense;
+
+import com.mavent.dev.entity.Expenses;
 import lombok.Data;
 
 import java.math.BigInteger;
@@ -13,11 +14,11 @@ public class ExpenseDTO {
     private Integer budgetId; // ĐÃ SỬA: Chuyển từ Long sang Integer
     private Integer categoryId; // Giữ nguyên Integer
     private Integer departmentId; // Giữ nguyên Integer
-    private BigInteger amount;
+    private Long amount;
     private String note;
     private LocalDate paymentDate;
     private String paymentMethod;
-    private Expense.Status status;
+    private Expenses.Status status;
     private Integer createdByAccountId; // ĐÃ SỬA: Chuyển từ Long sang Integer
-    private Integer approvedByAccountId; // ĐÃ SỬA: Chuyển từ Long sang Integer
+    private Integer approvedByAccountId;
 }

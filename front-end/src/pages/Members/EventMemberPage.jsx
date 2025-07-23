@@ -107,15 +107,8 @@ const EventMemberPage = () => {
         if (statusFilter) {
           // Normalize status to match memberService expectations
           params.status =
-<<<<<<< HEAD
-            statusFilter.toLowerCase().trim() === "active"
-              ? "active"
-              : "inactive";
-        } 
-=======
             statusFilter.toLowerCase().trim();
         } // Add role filter if available - follow memberService.js format
->>>>>>> 7003508feccd10d3e3ef684edaca1c4740eee6c6
         if (roleFilter) {
         
           params.role = roleFilter.trim().toUpperCase();

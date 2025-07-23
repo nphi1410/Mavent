@@ -21,7 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/event/{eventId}/expenses")
-public class ExpensesController {
+public class ExpenseRequestController {
 
     @Autowired
     private BudgetService budgetService;

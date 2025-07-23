@@ -119,13 +119,10 @@ function App() {
                 <Route path="members" element={<EventMemberPage />} />
                 <Route path="departments" element={<DepartmentManagementPage />} />
                 <Route path="feedback" element={<ViewEventFeedback />} />
-<<<<<<< HEAD
                 <Route path="requests" element={(<RequestHistory />)} />
                 <Route path="create-feedback" element={<ParticipantFeedbackEvent />} />
                 {/* <Route path="expenses" element={<EventExpense />} /> */}
-                <Route path="expenses" element={<ExpenseRequestHistory />} />
-=======
->>>>>>> 7003508feccd10d3e3ef684edaca1c4740eee6c6
+                <Route path="expenses-requests" element={<ExpenseRequestHistory />} />
                 <Route path="income" element={<AdminViewIncome />} />
                 <Route path="expenses" element={<AdminViewExpense />} />
                 <Route

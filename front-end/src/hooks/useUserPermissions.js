@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { getUserRoleInEvent, canPerformAction, hasMinimumRole } from '../services/roleService';
+import { getUserRoleInEvent, canPerformAction, hasMinimumRole } from '../services/roleService.jsx';
 
 const getEventIdFromUrl = () => {
   const path = window.location.pathname;

@@ -1,13 +1,14 @@
 package com.mavent.dev.mapper;
 
 import com.mavent.dev.dto.ExpenseDTO;
-import com.mavent.dev.entity.Expense;
+
+import com.mavent.dev.entity.Expenses;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ExpenseMapper {
 
-    public ExpenseDTO toDto(Expense expense) {
+    public ExpenseDTO toDto(Expenses expense) {
         if (expense == null) {
             return null;
         }
@@ -29,12 +30,12 @@ public class ExpenseMapper {
         return expenseDTO;
     }
 
-    public Expense toEntity(ExpenseDTO expenseDTO) {
+    public Expenses toEntity(ExpenseDTO expenseDTO) {
         if (expenseDTO == null) {
             return null;
         }
 
-        Expense expense = new Expense();
+        Expenses expense = new Expenses();
         expense.setExpenseId(expenseDTO.getExpenseId());
         expense.setEventId(expenseDTO.getEventId());
         expense.setBudgetId(expenseDTO.getBudgetId());

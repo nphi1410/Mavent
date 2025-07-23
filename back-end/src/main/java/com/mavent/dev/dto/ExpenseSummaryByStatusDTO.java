@@ -1,6 +1,7 @@
 package com.mavent.dev.dto;
 
-import com.mavent.dev.entity.Expense;
+
+import com.mavent.dev.entity.Expenses;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,6 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExpenseSummaryByStatusDTO {
-    private Expense.Status status;
+    private Expenses.Status status;
     private Long count;
 }

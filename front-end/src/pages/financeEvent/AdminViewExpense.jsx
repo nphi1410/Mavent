@@ -19,7 +19,7 @@ import {
     fetchExpensesByDepartmentForEvent,
     fetchDistinctPaymentMethodsByEventId,
     fetchExpenseCountByStatusForEvent
-} from '../../services/expenseService';
+} from '../../services/expenseAdminService';
 
 import { getEventById } from '../../services/eventService';
 import ExpenseExportButton from '../../components/export/ExpenseExportButton';

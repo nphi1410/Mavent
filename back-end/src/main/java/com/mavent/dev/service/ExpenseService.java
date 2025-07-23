@@ -6,6 +6,15 @@ import com.mavent.dev.dto.expenses.ExpenseUpdateDTO;
 import com.mavent.dev.entity.ExpenseAttachments;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.mavent.dev.dto.EventTotalExpenseDTO;
+import com.mavent.dev.dto.ExpenseByCategoryDTO;
+import com.mavent.dev.dto.ExpenseByDepartmentDTO;
+import com.mavent.dev.dto.ExpenseSummaryByStatusDTO;
+import com.mavent.dev.dto.PaymentMethodSummaryDTO; // BỔ SUNG DÒNG NÀY
+
+import java.util.List;
+import java.util.Set;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -25,19 +34,10 @@ public interface ExpenseService {
 
     ExpenseResponseDTO getExpenseById(int expenseId);
 
-}
-package com.mavent.dev.service;
 
-import com.mavent.dev.dto.EventTotalExpenseDTO;
-import com.mavent.dev.dto.ExpenseByCategoryDTO;
-import com.mavent.dev.dto.ExpenseByDepartmentDTO;
-import com.mavent.dev.dto.ExpenseSummaryByStatusDTO;
-import com.mavent.dev.dto.PaymentMethodSummaryDTO; // BỔ SUNG DÒNG NÀY
 
-import java.util.List;
-import java.util.Set; // Vẫn giữ nếu bạn có các phương thức khác sử dụng Set
 
-public interface ExpenseService {
+
 
     /**
      * Retrieves the total expense for a specific event.
