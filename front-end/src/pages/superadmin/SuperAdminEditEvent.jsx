@@ -275,7 +275,17 @@ function SuperAdminEditEvent() {
                         </div>
                     </div>
                 </section>
+
+                <section className='bg-white p-6 shadow rounded-xl space-y-4 mb-4'>
+                    <h2 className='text-2xl font-semibold text-black mb-4'>
+                                    
+                    </h2>
+                    <div className='space-y-4'>
+
+                    </div>
+                </section>
             </div>
+
 
             {/* BUTTONS */}
             <div className='flex justify-end gap-4 mt-6'>
