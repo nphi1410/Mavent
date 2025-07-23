@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getEventById } from '../../services/eventService';
-import { createProposalItem } from '../../services/proposalService';
+import { createProposalItem, getProposalByEventId } from '../../services/proposalService';
+import { vietnameseDate } from '../../utils/DateConvert';
 
-const CreateProposal = () => {
+const CreateProposal = ({ isUpdatePage = true }) => {
     const { eventId } = useParams();
     const navigate = useNavigate();
 
@@ -25,7 +26,28 @@ const CreateProposal = () => {
             setEvent(data);
         };
         fetchEvent();
+        if (isUpdatePage) {
+            const fetchProposal = async () => {
+                try {
+                    const proposalData = await getProposalByEventId(eventId);
+                    if (proposalData) {
+                        setProposals({
+                            proposalTitle: proposalData.title || '',
+                            proposalDescription: proposalData.notes || '',
+                            proposalLink: proposalData.proposalLink || '',
+                            defenseDate: proposalData.defenseDate ? vietnameseDate(proposalData.defenseDate, false, true) : '',
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error fetching proposal:", error);
+                }
+            }
+            fetchProposal();
+        };
+
     }, [eventId]);
+
+    console.log("Proposals state:", proposals);
 
     const isValidURL = (url) => {
         const pattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w\-._~:/?#[\]@!$&'()*+,;=.]*?)?$/i;
@@ -147,26 +169,40 @@ const CreateProposal = () => {
                         />
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Defense Date *</label>
-                        <input
-                            type="datetime-local"
-                            className="w-full border border-gray-300 rounded-lg p-2"
-                            value={proposals.defenseDate}
-                            onChange={(e) => handleChange("defenseDate", e.target.value)}
-                        />
-                    </div>
+                    {proposals.defenseDate !== '' ? (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Defense Date *
+                            </label>
+                            {proposals.defenseDate}
+                        </div>
+                    ) : (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Defense Date *</label>
+                            <input
+                                type="datetime-local"
+                                className="w-full border border-gray-300 rounded-lg p-2"
+                                value={proposals.defenseDate}
+                                onChange={(e) => handleChange("defenseDate", e.target.value)}
+                            />
+                        </div>
+                    )}
                 </div>
 
                 {/* Save Button */}
-                <div className="text-center mt-8">
-                    <button
-                        className="bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition"
-                        onClick={handleSaveProposal}
-                    >
-                        Submit Proposal
-                    </button>
-                </div>
+                {
+                    !isUpdatePage && (
+                        <div className="text-center mt-8">
+                            <button
+                                className="bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition"
+                                onClick={handleSaveProposal}
+                            >
+                                Submit Proposal
+                            </button>
+                        </div>
+                    )
+                }
+
             </div>
         </div>
     );

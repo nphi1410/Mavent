@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { createEvent } from "../../services/eventService";
+import { createEvent, getEventById } from "../../services/eventService";
 import { getAllLocations } from "../../services/EventLocationService";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from 'jwt-decode';
 
-const CreateEvent = () => {
+const CreateEvent = ({ isUpdatePage = false }) => {
     // get account id from JWT token
     const token = sessionStorage.getItem("token");
     const decoded = jwtDecode(token);
@@ -21,6 +21,8 @@ const CreateEvent = () => {
         maxParticipantNumber: 0,
         status: "PENDING",
         createdBy: decoded.accountId || "",
+        bannerUrl: "",
+        posterUrl: ""
     });
 
     const [bannerFile, setBannerFile] = useState(null);
@@ -39,6 +41,35 @@ const CreateEvent = () => {
             setLocations(data);
         };
         fetchLocations();
+        if (isUpdatePage) {
+            const eventId = window.location.pathname.split("/").pop();
+            const fetchCreatedEvent = async () => {
+                try {
+                    const response = await getEventById(eventId);
+                    if (response) {
+                        setFormData({
+                            ...formData,
+                            name: response.name,
+                            description: response.description,
+                            startDatetime: response.startDatetime,
+                            endDatetime: response.endDatetime,
+                            locationId: response.locationId,
+                            ddayInfo: response.ddayInfo || "",
+                            maxMemberNumber: response.maxMemberNumber || 0,
+                            maxParticipantNumber: response.maxParticipantNumber || 0,
+                            status: response.status || "PENDING",
+                            bannerUrl: response.bannerUrl || "",
+                            posterUrl: response.posterUrl || "",
+                        });
+                    }
+                    console.log("Fetched event data:", response);
+                } catch (error) {
+                    console.error("Error fetching event data:", error);
+                    setErrorMessage("Failed to load event data.");
+                }
+            }
+            fetchCreatedEvent();
+        }
     }, []);
 
     const handleChange = (e) => {
@@ -310,50 +341,73 @@ const CreateEvent = () => {
                     </div>
 
                     {/* Banner Image Upload */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Banner</label>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => setBannerFile(e.target.files[0])}
-                        />
-                        {bannerFile && (
-                            <p className="text-sm text-gray-500 mt-1">{bannerFile.name}</p>
-                        )}
-                    </div>
+                    {
+                        isUpdatePage ? (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Banner</label>
+                                <img src={formData.bannerUrl || "/placeholder.svg"} alt={formData.name} className="w-full h-full object-cover" />
+                            </div>
+                        ) : (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Banner</label>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => setBannerFile(e.target.files[0])}
+                                />
+                                {bannerFile && (
+                                    <p className="text-sm text-gray-500 mt-1">{bannerFile.name}</p>
+                                )}
+                            </div>
+                        )
+                    }
 
                     {/* Poster Image Upload */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Poster</label>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => setPosterFile(e.target.files[0])}
-                        />
-                        {posterFile && (
-                            <p className="text-sm text-gray-500 mt-1">{posterFile.name}</p>
-                        )}
-                    </div>
-                </div>
+                    {isUpdatePage ? (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Poster</label>
+                            <img src={formData.posterUrl || "/placeholder.svg"} alt={formData.name} className="w-full h-full object-cover" />
+                        </div>
+                    ) : (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Poster</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => setPosterFile(e.target.files[0])}
+                            />
+                            {posterFile && (
+                                <p className="text-sm text-gray-500 mt-1">{posterFile.name}</p>
+                            )}
+                        </div>
+                    )}
+                </div >
 
                 {errorMessage && (
                     <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-md">{errorMessage}</div>
                 )}
-                {successMessage && (
-                    <div className="mt-4 p-3 bg-green-100 text-green-700 rounded-md">{successMessage}</div>
-                )}
+                {
+                    successMessage && (
+                        <div className="mt-4 p-3 bg-green-100 text-green-700 rounded-md">{successMessage}</div>
+                    )
+                }
 
-                <div className="text-center mt-8">
-                    <button
-                        type="submit"
-                        className="cursor-pointer bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={loading}
-                    >
-                        {loading ? "Đang tạo..." : "Create Event & Next to Proposal"}
-                    </button>
-                </div>
-            </form>
-        </div>
+                {
+                    !isUpdatePage && (
+                        <div className="text-center mt-8">
+                            <button
+                                type="submit"
+                                className="cursor-pointer bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={loading}
+                            >
+                                {loading ? "Đang tạo..." : "Create Event & Next to Proposal"}
+                            </button>
+                        </div>
+
+                    )
+                }
+            </form >
+        </div >
     );
 };
 

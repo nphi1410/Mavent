@@ -63,6 +63,7 @@ import PendingEventView from "./pages/superadmin/PendingEventDetails.jsx";
 import RejectTaskRequest from "./components/usercenter/RejectTaskRequest.jsx";
 import RedirectPage from "./pages/UserAuthorization/UnauthorizedAccess.jsx";
 import CreatedEventsPage from "./pages/events/AllCreatedEvents.jsx";
+import CreatedEventLayout from "./layouts/CreatedEventLayout.jsx";
 
 // Higher Order Components for Route Protection
 // const Protect = (Component) => <ProtectedRoute children={Component} />;
@@ -159,10 +160,13 @@ function App() {
               <Route path=":taskId" element={<TaskDetails />} />
               <Route path="history" element={<TaskHistory />} />
             </Route>
-            <Route path="created-events">
+            <Route path="created-events" element={<CreatedEventLayout />}>
               <Route index element={<CreatedEventsPage />} />
               <Route path=":eventId" >
                 <Route index element={<CreateEvent isUpdatePage={true} />} />
+                <Route path="proposal" element={<CreateProposal />} />
+                <Route path="timeline" element={<CreateTimeline />} />
+                <Route path="agenda" element={<CreateAgenda />} />
               </Route>
             </Route>
 

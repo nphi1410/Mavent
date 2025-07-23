@@ -3,10 +3,11 @@
 import { useState } from "react"
 import { Outlet } from "react-router-dom"
 import { Menu } from "lucide-react"
-import Sidebar from "./Sidebar"
+import CreatedEventsSidebar from "./CreatedEventSidebar"
 
-const Layout = () => {
+const CreatedEventLayout = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false)
+    console.log("CreatedEventLayout rendered")
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -21,17 +22,17 @@ const Layout = () => {
             </div>
 
             {/* Desktop Sidebar Toggle */}
-            <div className="hidden md:block fixed top-4 left-4 z-30">
+            <div className="hidden md:block fixed z-30 border-gray-700 m-4">
                 <button
                     onClick={() => setSidebarOpen(!sidebarOpen)}
-                    className="p-2 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
+                    className="p-2 bg-white rounded-lg shadow-lg hover:shadow-lg transition-shadow"
                 >
                     <Menu className="w-6 h-6" />
                 </button>
             </div>
 
             {/* Sidebar */}
-            <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
+            <CreatedEventsSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
 
             {/* Main Content */}
             <div
@@ -48,4 +49,4 @@ const Layout = () => {
     )
 }
 
-export default Layout
+export default CreatedEventLayout

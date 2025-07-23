@@ -8,7 +8,7 @@ const EventCard = ({ event }) => {
     const navigate = useNavigate()
 
     const handleViewEvent = () => {
-        navigate(`/events/created-event/${event.eventId}`)
+        navigate(`${event.eventId}`)
     }
 
     const getStatusColor = (status) => {
