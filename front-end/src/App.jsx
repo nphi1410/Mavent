@@ -119,6 +119,7 @@ function App() {
                 <Route path="feedback" element={<ViewEventFeedback />} />
                 <Route path="income" element={<AdminViewIncome />} />
                 <Route path="expenses" element={<AdminViewExpense />} />
+                <Route path="sponsorship" element={<SponsorshipPage />} />
                 <Route
                   path="sponsorship-packages"
                   element={<SponsorshipPackagesPage />}
