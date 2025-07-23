@@ -13,7 +13,8 @@ import {
   faComments,
   faMoneyBill1Wave,
   faHandHoldingDollar,
-  faCrown
+  faCrown,
+  faMoneyBillTrendUp
 } from "@fortawesome/free-solid-svg-icons";
 import { EventRoleProvider, useEventRole } from "../context/EventRoleContext";
 import { set } from "react-hook-form";
@@ -158,7 +159,7 @@ const Layout = () => {
     {
       name: "income",
       displayName: "Income",
-      icon: <FontAwesomeIcon icon={faMoneyBill1Wave} />,
+      icon: <FontAwesomeIcon icon={faMoneyBillTrendUp} />,
       link: `income`,
       requiredRole: "ADMIN",
     },
