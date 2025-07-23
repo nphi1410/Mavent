@@ -783,6 +783,52 @@ public ResponseEntity<?> updateTaskDocuments(
     }
 }
 
+    @PatchMapping("/user/tasks/{taskId}/attendees/{accountId}/status")
+    public ResponseEntity<?> updateAttendeeStatus(
+            @PathVariable Integer taskId,
+            @PathVariable Integer accountId,
+            @RequestBody Map<String, String> request,
+            HttpServletRequest httpRequest) {
+        
+        Account account = getAuthenticatedAccount(httpRequest);
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
+        // Chỉ cho phép user cập nhật status của chính mình
+        if (!account.getAccountId().equals(accountId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body("Bạn chỉ có thể cập nhật trạng thái tham gia của chính mình");
+        }
+        
+        String newStatus = request.get("status");
+        if (!"ACCEPTED".equals(newStatus) && !"DECLINED".equals(newStatus)) {
+            return ResponseEntity.badRequest()
+                .body("Trạng thái không hợp lệ. Chỉ cho phép ACCEPTED hoặc DECLINED");
+        }
+        
+        try {
+            if ("DECLINED".equals(newStatus)) {
+                // Tạo request cancel task
+                String reason = request.get("reason");
+                if (reason == null || reason.trim().isEmpty()) {
+                    return ResponseEntity.badRequest()
+                        .body("Vui lòng cung cấp lý do từ chối task");
+                }
+                
+                accountService.createCancelTaskRequest(taskId, accountId, reason);
+            } else {
+                // Cập nhật status thành ACCEPTED
+                accountService.updateAttendeeStatus(taskId, accountId, newStatus);
+            }
+            
+            return ResponseEntity.ok("Cập nhật trạng thái thành công");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Lỗi khi cập nhật trạng thái: " + e.getMessage());
+        }
+    }
+
     private Account getAuthenticatedAccount(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {

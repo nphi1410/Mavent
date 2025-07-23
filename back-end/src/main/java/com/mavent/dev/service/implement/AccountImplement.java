@@ -1,5 +1,6 @@
 package com.mavent.dev.service.implement;
 
+import com.mavent.dev.dto.request.CreateRequestDTO;
 import com.mavent.dev.entity.Document;
 import com.mavent.dev.dto.NotificationDTO;
 import com.mavent.dev.dto.task.TaskAttendeeDTO;
@@ -9,6 +10,7 @@ import com.mavent.dev.dto.task.TaskCreateDTO;
 import com.mavent.dev.dto.superadmin.AccountDTO;
 import com.mavent.dev.repository.*;
 import com.mavent.dev.service.NotificationService;
+import com.mavent.dev.service.RequestService;
 import com.mavent.dev.util.JwtUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -19,6 +21,7 @@ import com.mavent.dev.dto.UserProfileDTO;
 import com.mavent.dev.service.AccountService;
 import com.mavent.dev.config.MailConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.GrantedAuthority;
@@ -392,7 +395,11 @@ public class AccountImplement implements AccountService, UserDetailsService {
             TaskAttendee taskAttendee = new TaskAttendee();
             taskAttendee.setTaskId(savedTask.getTaskId());
             taskAttendee.setAccountId(attendeeId);
-            taskAttendee.setStatus(TaskAttendee.Status.ACCEPTED);
+            if (attendeeId.equals(assignedUserId)) {
+                taskAttendee.setStatus(TaskAttendee.Status.ACCEPTED);
+            } else {
+                taskAttendee.setStatus(TaskAttendee.Status.INVITED);
+            }
 
             taskAttendeeRepository.save(taskAttendee);
 
@@ -665,45 +672,33 @@ public class AccountImplement implements AccountService, UserDetailsService {
     @Override
     @Transactional
     public void updateTaskAttendees(Integer taskId, Integer assignedToAccountId, List<Integer> attendeeIds) {
-
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new IllegalArgumentException("Task không tồn tại"));
         System.out.println("Updating attendees for task ID: " + taskId);
 
+        // Xóa tất cả attendees hiện tại
+        taskAttendeeRepository.deleteByTaskId(taskId);
+
+        // Thêm lại attendees với status INVITED (trừ người được assign)
         List<Integer> newAttendees = new ArrayList<>(attendeeIds);
         if (!newAttendees.contains(assignedToAccountId)) {
             newAttendees.add(assignedToAccountId);
         }
 
-        List<TaskAttendee> currentAttendees = taskAttendeeRepository.findByTaskId(taskId);
-
-        for (TaskAttendee attendee : currentAttendees) {
-            if (!newAttendees.contains(attendee.getAccountId()) &&
-                !attendee.getAccountId().equals(assignedToAccountId)) {
-                taskAttendeeRepository.delete(attendee);
+        for (Integer accountId : newAttendees) {
+            TaskAttendee attendee = new TaskAttendee();
+            attendee.setTaskId(taskId);
+            attendee.setAccountId(accountId);
+            
+            // Người được assign task sẽ có status ACCEPTED, những người khác là INVITED
+            if (accountId.equals(assignedToAccountId)) {
+                attendee.setStatus(TaskAttendee.Status.ACCEPTED);
+            } else {
+                attendee.setStatus(TaskAttendee.Status.INVITED);
             }
+            
+            taskAttendeeRepository.save(attendee);
         }
-
-        for (Integer attendeeId : newAttendees) {
-            boolean exists = currentAttendees.stream()
-                    .anyMatch(a -> a.getAccountId().equals(attendeeId));
-
-            if (!exists) {
-                TaskAttendee newAttendee = new TaskAttendee();
-                newAttendee.setTaskId(taskId);
-                newAttendee.setAccountId(attendeeId);
-                if (attendeeId.equals(assignedToAccountId)) {
-                    newAttendee.setStatus(TaskAttendee.Status.ACCEPTED);
-                } else {
-                    newAttendee.setStatus(TaskAttendee.Status.ACCEPTED);
-                }
-
-                taskAttendeeRepository.save(newAttendee);
-            }
-        }
-
-        task.setUpdatedAt(LocalDateTime.now());
-        taskRepository.save(task);
     }
 
     @Override
@@ -814,6 +809,48 @@ public class AccountImplement implements AccountService, UserDetailsService {
         }
         
         taskRepository.save(task);
+    }
+
+    @Autowired
+    @Lazy
+    private RequestService requestService;
+
+    @Override
+    @Transactional
+    public void updateAttendeeStatus(Integer taskId, Integer accountId, String status) {
+        TaskAttendee attendee = taskAttendeeRepository.findByTaskIdAndAccountId(taskId, accountId)
+            .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy thông tin tham gia task"));
+        
+        attendee.setStatus(TaskAttendee.Status.valueOf(status));
+        taskAttendeeRepository.save(attendee);
+    }
+
+    @Override
+    @Transactional
+    public void createCancelTaskRequest(Integer taskId, Integer accountId, String reason) {
+        // Lấy thông tin task để có eventId
+        Task task = taskRepository.findById(taskId)
+            .orElseThrow(() -> new IllegalArgumentException("Task không tồn tại"));
+        
+        // Tạo request cancel task với request_type_id = 4
+        CreateRequestDTO requestDTO = CreateRequestDTO.builder()
+            .accountId(accountId)
+            .eventId(task.getEventId())
+            .taskId(taskId)
+            .departmentId(task.getDepartmentId())
+            .requestTypeId(4) // Cancel Task request type
+            .title("Xin từ chối tham gia task: " + task.getTitle())
+            .content(reason)
+//            .status("PENDING")
+            .build();
+        
+        boolean success = requestService.addRequest(requestDTO);
+        if (!success) {
+            throw new RuntimeException("Không thể tạo request cancel task");
+        }
+        
+        // Cập nhật status của attendee thành DECLINED tạm thời (pending approval)
+        updateAttendeeStatus(taskId, accountId, "DECLINED");
     }
 }
 

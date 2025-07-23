@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getTaskDetails, updateTaskStatus, getUserProfile, getTaskAttendees, getTaskDocuments } from '../../services/profileService';
+import { getTaskDetails, updateTaskStatus, getUserProfile, getTaskAttendees, getTaskDocuments, updateAttendeeStatus } from '../../services/profileService';
 import AttendeesModal from './AttendeesModal';
 import UpdateTaskModal from './UpdateTaskModal';
 import TaskFeedbackModal from './TaskFeedbackModal';
@@ -28,6 +28,10 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
   // state cho feedback modal
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
+  // State cho attendee actions
+  const [showDeclineModal, setShowDeclineModal] = useState(false);
+  const [declineReason, setDeclineReason] = useState('');
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -54,6 +58,8 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
       if (data) {
         setTask(data);
         await fetchDocuments();
+        // Fetch attendees ngay để kiểm tra status
+        await fetchAttendees();
       } else {
         setError('Failed to load task details');
       }
@@ -315,6 +321,74 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
     }
   };
 
+  // Thêm functions xử lý accept/decline
+  const handleAcceptTask = async () => {
+    try {
+      await updateAttendeeStatus(taskId, currentUser.id, 'ACCEPTED');
+      setUpdateMessage({ type: 'success', text: 'Đã xác nhận tham gia task' });
+      // Refresh attendees để cập nhật status
+      await fetchAttendees();
+    } catch (err) {
+      setUpdateMessage({ type: 'error', text: 'Không thể xác nhận tham gia task' });
+    }
+  };
+
+  const handleDeclineTask = async () => {
+    if (!declineReason.trim()) {
+      alert('Vui lòng nhập lý do từ chối');
+      return;
+    }
+    
+    try {
+      await updateAttendeeStatus(taskId, currentUser.id, 'DECLINED', declineReason);
+      setUpdateMessage({ type: 'success', text: 'Đã gửi yêu cầu từ chối task' });
+      setShowDeclineModal(false);
+      setDeclineReason('');
+      // Refresh attendees để cập nhật status
+      await fetchAttendees();
+    } catch (err) {
+      setUpdateMessage({ type: 'error', text: 'Không thể gửi yêu cầu từ chối task' });
+    }
+  };
+
+  const renderAttendeeActions = () => {
+    // Kiểm tra xem user có phải là attendee không và có status INVITED
+    if (!currentUser || !attendees || attendees.length === 0) {
+      return null;
+    }
+
+    const currentAttendee = attendees.find(a => a.accountId === currentUser.id);
+    
+    // Chỉ hiển thị khi user có status INVITED
+    if (!currentAttendee || currentAttendee.status !== 'INVITED') {
+      return null;
+    }
+    
+    return (
+      <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <p className="text-sm text-yellow-800 mb-3">
+          Bạn được mời tham gia task này. Vui lòng xác nhận:
+        </p>
+        <div className="flex gap-2">
+          <button
+            onClick={handleAcceptTask}
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            disabled={updating}
+          >
+            Accept Task
+          </button>
+          <button
+            onClick={() => setShowDeclineModal(true)}
+            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+            disabled={updating}
+          >
+            Reject Task
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -433,6 +507,9 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
                     </div>
                   ) : renderActionButton()}
                 </div>
+
+                {/* Hiển thị attendee actions khi có status INVITED */}
+                {renderAttendeeActions()}
               </>
             ) : (
               <div className="p-4 text-center">Can not find detail</div>
@@ -524,6 +601,38 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
           currentUser: currentUser
         }}
       />
+
+      {/* Modal từ chối task */}
+      {showDeclineModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000]">
+          <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Từ chối tham gia task</h3>
+            <textarea
+              value={declineReason}
+              onChange={(e) => setDeclineReason(e.target.value)}
+              placeholder="Nhập lý do từ chối..."
+              className="w-full h-24 p-3 border border-gray-300 rounded resize-none"
+            />
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={handleDeclineTask}
+                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+              >
+                Gửi yêu cầu từ chối
+              </button>
+              <button
+                onClick={() => {
+                  setShowDeclineModal(false);
+                  setDeclineReason('');
+                }}
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+              >
+                Hủy
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
