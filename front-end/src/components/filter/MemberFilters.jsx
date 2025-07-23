@@ -50,7 +50,7 @@ const MemberFilters = ({
               <option value="">All Status</option>
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
-              <option value="Pending">Apply Pending</option>
+              {/* <option value="Pending">Apply Pending</option> */}
             </select>
             <FontAwesomeIcon
               icon={faChevronDown}
