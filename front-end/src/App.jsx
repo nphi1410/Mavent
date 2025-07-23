@@ -160,13 +160,14 @@ function App() {
               <Route path=":taskId" element={<TaskDetails />} />
               <Route path="history" element={<TaskHistory />} />
             </Route>
+
             <Route path="created-events" element={<CreatedEventLayout />}>
               <Route index element={<CreatedEventsPage />} />
               <Route path=":eventId" >
                 <Route index element={<CreateEvent isUpdatePage={true} />} />
-                <Route path="proposal" element={<CreateProposal />} />
-                <Route path="timeline" element={<CreateTimeline />} />
-                <Route path="agenda" element={<CreateAgenda />} />
+                <Route path="proposal" element={<CreateProposal isUpdatePage={true} />} />
+                <Route path="timeline" element={<CreateTimeline isUpdatePage={true} />} />
+                <Route path="agenda" element={<CreateAgenda isUpdatePage={true} />} />
               </Route>
             </Route>
 

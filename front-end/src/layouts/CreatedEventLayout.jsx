@@ -7,7 +7,7 @@ import CreatedEventsSidebar from "./CreatedEventSidebar"
 
 const CreatedEventLayout = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false)
-    console.log("CreatedEventLayout rendered")
+    // console.log("CreatedEventLayout rendered")
 
     return (
         <div className="min-h-screen bg-gray-50">

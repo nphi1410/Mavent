@@ -4,7 +4,7 @@ import { getEventById } from '../../services/eventService';
 import { createProposalItem, getProposalByEventId } from '../../services/proposalService';
 import { vietnameseDate } from '../../utils/DateConvert';
 
-const CreateProposal = ({ isUpdatePage = true }) => {
+const CreateProposal = ({ isUpdatePage = false }) => {
     const { eventId } = useParams();
     const navigate = useNavigate();
 

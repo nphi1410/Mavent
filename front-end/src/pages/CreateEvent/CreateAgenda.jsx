@@ -1,15 +1,35 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClock, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { createAgendaItem } from '../../services/agendaService'; // giả định bạn đã có service này
+import { createAgendaItem, getAgendaItemsByEventId } from '../../services/agendaService'; // giả định bạn đã có service này
+import { set } from 'react-hook-form';
 
-const CreateAgenda = () => {
+const CreateAgenda = ({isUpdatePage = false}) => {
     const navigate = useNavigate();
     const { eventId } = useParams();
     const [agendas, setAgendas] = useState([
         { title: '', description: '', startTime: '', endTime: '' },
     ]);
+
+    useEffect(() => {
+        if (!isUpdatePage) return;
+        const fetchAgendas = async () => {
+            try {
+                const response = await getAgendaItemsByEventId(eventId);
+                if (response) setAgendas(response.map(item => ({
+                    title: item.agendaTitle || '',
+                    description: item.agendaDescription || '',
+                    startTime: item.agendaStartTime || '',
+                    endTime: item.agendaEndTime || '',
+                })));
+                // console.log("Fetched agendas:", response);
+            } catch (error) {
+                console.error("Error fetching agendas:", error);
+            }
+        }
+        fetchAgendas();
+    }, [eventId]);
 
     const handleChange = (index, field, value) => {
         const updated = [...agendas];
@@ -144,23 +164,27 @@ const CreateAgenda = () => {
                 ))}
 
                 {/* Add Agenda Button */}
-                <div
-                    className="border-2 border-dashed border-gray-300 rounded-lg text-center py-6 cursor-pointer hover:bg-gray-50 transition"
-                    onClick={addAgenda}
-                >
-                    <FontAwesomeIcon icon={faPlus} className="text-gray-500" />{' '}
-                    <span className="text-gray-700 font-medium">Add Another Agenda</span>
-                </div>
+                {!isUpdatePage && (
+                    <div>
+                        <div
+                            className="border-2 border-dashed border-gray-300 rounded-lg text-center py-6 cursor-pointer hover:bg-gray-50 transition"
+                            onClick={addAgenda}
+                        >
+                            <FontAwesomeIcon icon={faPlus} className="text-gray-500" />{' '}
+                            <span className="text-gray-700 font-medium">Add Another Agenda</span>
+                        </div>
 
-                {/* Save Button */}
-                <div className="text-center mt-8">
-                    <button
-                        className="cursor-pointer bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition"
-                        onClick={handleSaveAgenda}
-                    >
-                        Save Agenda & Send Request
-                    </button>
-                </div>
+                        {/* Save Button */}
+                        <div className="text-center mt-8">
+                            <button
+                                className="cursor-pointer bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition"
+                                onClick={handleSaveAgenda}
+                            >
+                                Save Agenda & Send Request
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

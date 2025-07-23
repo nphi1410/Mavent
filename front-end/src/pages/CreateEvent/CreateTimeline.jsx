@@ -2,13 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClock, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useParams, useNavigate } from 'react-router-dom';
-import { createTimelineItem } from '../../services/timelineService';
+import { createTimelineItem, getTimelinesByEventId } from '../../services/timelineService';
 import { getEventById } from '../../services/eventService';
 
-const CreateTimeline = () => {
+const CreateTimeline = ({ isUpdatePage = false }) => {
     const { eventId } = useParams();
     const [event, setEvent] = useState('null');
     const navigate = useNavigate();
+
+    const [stages, setStages] = useState([
+        { title: '', description: '', startDate: '' },
+    ]);
 
     useEffect(() => {
         const fetchEvent = async () => {
@@ -16,11 +20,27 @@ const CreateTimeline = () => {
             setEvent(data);
         };
         fetchEvent();
+
+        if (isUpdatePage) {
+            const fetchTimeline = async () => {
+                try {
+                    const timelineData = await getTimelinesByEventId(eventId);
+                    // console.log("Fetched timeline data:", timelineData);
+                    if (timelineData) {
+                        setStages(timelineData.map(stage => ({
+                            title: stage.timelineTitle || '',
+                            description: stage.timelineDescription || '',
+                            startDate: stage.timelineDatetime || '',
+                        })));
+                    }
+                } catch (error) {
+                    console.error("Error fetching timeline:", error);
+                }
+            }
+            fetchTimeline();
+        }
     }, [eventId]);
 
-    const [stages, setStages] = useState([
-        { title: '', description: '', startDate: '' },
-    ]);
 
     const handleChange = (index, field, value) => {
         const updatedStages = [...stages];
@@ -149,23 +169,30 @@ const CreateTimeline = () => {
                 ))}
 
                 {/* Add Another Stage */}
-                <div
-                    className="border-2 border-dashed border-gray-300 rounded-lg text-center py-6 cursor-pointer hover:bg-gray-50 transition"
-                    onClick={addStage}
-                >
-                    <FontAwesomeIcon icon={faPlus} className="text-gray-500" />{' '}
-                    <span className="text-gray-700 font-medium">Add Another Stage</span>
-                </div>
+
 
                 {/* Save Button */}
-                <div className="text-center mt-8">
-                    <button
-                        className="cursor-pointer bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition"
-                        onClick={handleSaveTimeline}
-                    >
-                        Save Timeline & Create Agenda
-                    </button>
-                </div>
+                {
+                    !isUpdatePage && (
+                        <div>
+                            <div
+                                className="border-2 border-dashed border-gray-300 rounded-lg text-center py-6 cursor-pointer hover:bg-gray-50 transition"
+                                onClick={addStage}
+                            >
+                                <FontAwesomeIcon icon={faPlus} className="text-gray-500" />{' '}
+                                <span className="text-gray-700 font-medium">Add Another Stage</span>
+                            </div>
+                            <div className="text-center mt-8">
+                                <button
+                                    className="cursor-pointer bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition"
+                                    onClick={handleSaveTimeline}
+                                >
+                                    Save Timeline & Create Agenda
+                                </button>
+                            </div>
+                        </div>
+                    )
+                }
             </div>
         </div>
     );
