@@ -1,12 +1,11 @@
 import AgendaList from "../../components/event/AgendaList";
 import { getEventById } from "../../services/eventService";
-import { useEffect, useState } from "react"
-import { Calendar, MessageSquare, MapPin, User } from "lucide-react"
+import { useEffect, useState } from "react";
+import { Calendar, MessageSquare, MapPin, User } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getAgendaItemsByEventId } from "../../services/agendaService";
 import TagsList from "../../components/TagsList";
 import MapGuide from "../../components/MapGuide";
-import Layout from '../../components/layout/AdminLayout';
+import EventSponsors from "../../components/sponsorship/EventSponsors";
 
 export default function EventDetailsByRoles() {
   // const [activeDropdown, setActiveDropdown] = useState("eventInfo");
@@ -16,9 +15,7 @@ export default function EventDetailsByRoles() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-
   useEffect(() => {
-
     if (id) {
       const fetchData = async () => {
         try {
@@ -37,15 +34,16 @@ export default function EventDetailsByRoles() {
     }
   }, []);
   if (loading) {
-    return <div className="flex items-center justify-center h-screen text-gray-500">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen text-gray-500">
+        Loading...
+      </div>
+    );
   }
 
   return (
     <div>
-
       <div className="min-h-screen bg-gray-50">
-
-
         {/* Main Content */}
 
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
@@ -53,35 +51,44 @@ export default function EventDetailsByRoles() {
             {/* Event Header */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">{eventData?.name}</h1>
+                <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                  {eventData?.name}
+                </h1>
 
                 <div className="flex items-center mb-3">
                   <Calendar className="w-5 h-5 text-gray-500 mr-2" />
                   <span className="text-gray-700">
-                    {
-                      eventData?.startDatetime ?
-                        new Date(eventData.startDatetime).toLocaleTimeString() + ' ' + new Date(eventData.startDatetime).toDateString() :
-                        "No start date"
-                    }
+                    {eventData?.startDatetime
+                      ? new Date(eventData.startDatetime).toLocaleTimeString() +
+                        " " +
+                        new Date(eventData.startDatetime).toDateString()
+                      : "No start date"}
                   </span>
                 </div>
                 <div className="flex items-center mb-3">
                   <Calendar className="w-5 h-5 text-gray-500 mr-2" />
                   <span className="text-gray-700">
-                    {
-                      eventData?.endDatetime ?
-                        new Date(eventData.endDatetime).toLocaleTimeString() + ' ' + new Date(eventData.endDatetime).toDateString() :
-                        "No end date"
-                    }
+                    {eventData?.endDatetime
+                      ? new Date(eventData.endDatetime).toLocaleTimeString() +
+                        " " +
+                        new Date(eventData.endDatetime).toDateString()
+                      : "No end date"}
                   </span>
                 </div>
                 <div className="flex items-center mb-4">
                   <MessageSquare className="w-5 h-5 text-gray-500 mr-2" />
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium
-                      ${eventData?.status === 'ONGOING' ? 'bg-green-100 text-green-800' :
-                      eventData?.status === 'UPCOMING' ? 'bg-blue-100 text-blue-800' :
-                        eventData?.status === 'ENDED' ? 'bg-gray-300 text-black' :
-                          'bg-gray-100 text-gray-800'}`}>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium
+                      ${
+                        eventData?.status === "ONGOING"
+                          ? "bg-green-100 text-green-800"
+                          : eventData?.status === "UPCOMING"
+                          ? "bg-blue-100 text-blue-800"
+                          : eventData?.status === "ENDED"
+                          ? "bg-gray-300 text-black"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                  >
                     {eventData?.status}
                   </span>
                 </div>
@@ -103,7 +110,9 @@ export default function EventDetailsByRoles() {
                   </div>
                 </div> */}
                 <div className="mb-6">
-                  <h3 className="font-semibold text-gray-900 mb-2">Description:</h3>
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    Description:
+                  </h3>
                   <p className="text-gray-700 leading-relaxed">
                     {eventData?.description || "No description available."}
                     {/* <button className="text-blue-500 hover:text-blue-600 ml-1 transition-colors duration-200">
@@ -115,10 +124,7 @@ export default function EventDetailsByRoles() {
 
               {/* {console.log("eventLocationID:", eventData?.locationId)} */}
               <MapGuide eventData={eventData} />
-
-
             </div>
-
 
             {/* Agenda and Sponsors */}
             {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-8"> */}
@@ -146,6 +152,7 @@ export default function EventDetailsByRoles() {
                 </div>
               </div> */}
             {/* </div> */}
+            <EventSponsors eventId={id} />
           </div>
           {/* 
           {activeDropdown === "participants" && role.toUpperCase() === "ADMIN"(
@@ -160,5 +167,5 @@ export default function EventDetailsByRoles() {
         </div>
       </div>
     </div>
-  )
+  );
 }

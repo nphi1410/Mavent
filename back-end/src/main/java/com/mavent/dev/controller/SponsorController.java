@@ -3,6 +3,9 @@ package com.mavent.dev.controller;
 import com.mavent.dev.entity.Sponsor;
 import com.mavent.dev.service.SponsorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,8 +16,16 @@ public class SponsorController {
     @Autowired
     private SponsorService service;
 
+    @GetMapping
+    public Page<Sponsor> getAll(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String industry,
+            @PageableDefault(size = 20) Pageable pageable) {
+        return service.filterSponsor(name, industry, pageable);
+    }
+
     @GetMapping("/{eventId}")
-    public List<Sponsor> getAll(@PathVariable Integer eventId) {
+    public List<Sponsor> getAllByEventId(@PathVariable Integer eventId) {
         return service.getAll(eventId);
     }
 

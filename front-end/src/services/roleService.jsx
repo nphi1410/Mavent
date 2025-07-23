@@ -141,6 +141,17 @@ export const hasMinimumRole = (userRole, minimumRole) => {
   return result;
 };
 
+export const addNewRole = async (eventId, roleData) => {
+  try {
+    const response = await Api.post(`/role/${eventId}`, roleData);
+    return response.data;
+  } catch (error) {
+    console.error(`Error adding new role for event ${eventId}:`, error);
+    handleAuthError(error);
+    throw error;
+  }
+}
+
 export default {
   getUserRoleInEvent,
   canPerformAction,

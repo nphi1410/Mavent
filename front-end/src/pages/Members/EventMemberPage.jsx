@@ -107,10 +107,15 @@ const EventMemberPage = () => {
         if (statusFilter) {
           // Normalize status to match memberService expectations
           params.status =
+<<<<<<< HEAD
             statusFilter.toLowerCase().trim() === "active"
               ? "active"
               : "inactive";
         } 
+=======
+            statusFilter.toLowerCase().trim();
+        } // Add role filter if available - follow memberService.js format
+>>>>>>> 7003508feccd10d3e3ef684edaca1c4740eee6c6
         if (roleFilter) {
         
           params.role = roleFilter.trim().toUpperCase();
@@ -201,7 +206,7 @@ const EventMemberPage = () => {
             id: member.accountId || member.id, // Add id field for UI compatibility
             name: member.fullName || member.name, // Transform fullName to name
             role: member.eventRole || member.role, // Handle both eventRole and role fields
-            status: isActive ? "Active" : "Inactive", // Transform isActive to status
+            status: member.status, // Transform isActive to status
             department: member.departmentName || member.department || "N/A", // Transform departmentName to department
             isBanned: !isActive, // Map inactive to banned for UI logic
             isActive: isActive, // Store explicit isActive value

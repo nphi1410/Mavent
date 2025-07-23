@@ -3,12 +3,15 @@ package com.mavent.dev.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.mavent.dev.config.MailConfig;
 import com.mavent.dev.dto.EventCountDTO;
 import com.mavent.dev.dto.EventRegisterDTO;
 import com.mavent.dev.dto.FilterEventDTO;
 import com.mavent.dev.dto.FilterRequestDTO;
 import com.mavent.dev.dto.department.UserEventInfoDTO;
 import com.mavent.dev.dto.event.EventAccountRoleDTO;
+import com.mavent.dev.dto.event.PendingEventDTO;
+import com.mavent.dev.dto.event.UpdatePendingEventDTO;
 import com.mavent.dev.dto.superadmin.EventDTO;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.Event;
@@ -53,6 +56,11 @@ public class EventController {
 
     @Autowired
     private JwtUtil jwt;
+
+    @Autowired
+    private MailConfig mailConfig;
+    @Autowired
+    private UpdatePendingEventDTO updatePendingEventDTO;
 
     // Tạo sự kiện kèm ảnh banner và poster (fix multipart + JSON)
     @PostMapping(value = "/create-event", consumes = "multipart/form-data")
@@ -203,5 +211,71 @@ public class EventController {
         }
     }
 
+    @GetMapping("pending/{id}")
+    public ResponseEntity<?> getPendingEventById(@PathVariable("id") Integer eventId) {
+        System.out.println("Fetching pending event with ID: " + eventId);
+        try {
+            PendingEventDTO pendingEventDTO = eventService.getPendingEventById(eventId);
+            if (pendingEventDTO == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Event not found with ID: " + eventId);
+            }
+            return ResponseEntity.ok(pendingEventDTO);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi lấy sự kiện: " + e.getMessage());
+        }
+    }
 
+    @PatchMapping("/pending/{id}")
+    public ResponseEntity<?> updatePendingEvent(@PathVariable("id") Integer eventId, @RequestBody UpdatePendingEventDTO updatePendingEventDTO) {
+        try {
+            System.out.println("Updating pending event with ID: " + eventId + " to status: " + updatePendingEventDTO.getStatus());
+            boolean updated = eventService.updatePendingEvent(eventId, updatePendingEventDTO.getStatus());
+            String message = "Your request to Creat Event " + updatePendingEventDTO.getEventName() + " has been Updated with Status: " + updatePendingEventDTO.getStatus() + ".\n";
+            if (updatePendingEventDTO.getAssignedByAccountName() != null)
+                message += "This request was udpated by " + updatePendingEventDTO.getAssignedByAccountName() + ".\n";
+            if (updatePendingEventDTO.getNote() != null)
+                message += "Note: " + updatePendingEventDTO.getNote() + ".\n";
+            message += "If you have any questions, please contact the admin.";
+
+            if (updated) {
+                Account account = accountService.getAccountById(updatePendingEventDTO.getAccountId());
+                mailConfig.sendMail(
+                        account.getEmail(),
+                        "[MAVENT] Your Event-Creation Request has been Updated!",
+                        message
+                );
+                return ResponseEntity.ok("Cập nhật sự kiện thành công với ID: " + eventId);
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy sự kiện với ID: " + eventId);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi cập nhật sự kiện: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/created/{eventId}")
+    public ResponseEntity<?> getCreatedEventById(@PathVariable Integer eventId) {
+        try {
+            EventDTO eventDTO = eventService.getEventById(eventId);
+            if (eventDTO == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy sự kiện với ID: " + eventId);
+            }
+            return ResponseEntity.ok(eventDTO);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi lấy sự kiện: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/created")
+    public ResponseEntity<?> getCreatedEvents(HttpServletRequest request) {
+        try {
+            String token = request.getHeader("Authorization").substring(7);
+            Integer accountId = jwt.extractAccountId(token);
+            System.out.println("accountId: " + accountId);
+            List<EventDTO> createdEvents = eventService.getEventByCreatorId(accountId);
+            return ResponseEntity.ok(createdEvents);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi lấy danh sách sự kiện đã tạo: " + e.getMessage());
+        }
+    }
 }

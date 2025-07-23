@@ -3,12 +3,11 @@ package com.mavent.dev.service;
 import com.mavent.dev.dto.EventCountDTO;
 import com.mavent.dev.dto.EventMemberDTO;
 import com.mavent.dev.dto.FilterEventDTO;
+import com.mavent.dev.dto.event.PendingEventDTO;
 import com.mavent.dev.dto.superadmin.EventDTO;
 import com.mavent.dev.entity.Event;
 import org.apache.poi.ss.formula.functions.T;
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -37,4 +36,9 @@ public interface EventService {
 
     boolean checkEventAccess(Integer eventId, Integer accountId);
 
+    PendingEventDTO getPendingEventById(Integer eventId);
+
+    boolean updatePendingEvent(Integer eventId, String status);
+
+    List<EventDTO> getEventByCreatorId(Integer creatorId);
 }

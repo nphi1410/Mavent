@@ -199,3 +199,32 @@ export const getEventRolesByAccount = async (accountId, page = 0, size = 1, sort
   return response.data;
 };
 
+export const getPendingEventDetailsById = async (eventId) => {
+  try {
+    const response = await Api.get(`/events/pending/${eventId}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching pending event details for ID ${eventId}:`, error);
+    return null;
+  }
+}
+
+export const updatePendingEvent = async (eventId, status) => {
+  try {
+    const response = await Api.patch(`/events/pending/${eventId}`, status);
+    return response.data;
+  } catch (error) {
+    console.error(`Error updating pending event with ID ${eventId}:`, error);
+    return null;
+  }
+}
+
+export const getEventsByCreator = async () => {
+  try {
+    const response = await Api.get(`/events/created`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching events for creator`, error);
+    return [];
+  }
+}

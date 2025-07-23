@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import DocumentManagement from '../components/document/DocumentManagement';
-import Layout from '../components/layout/AdminLayout';
+import Layout from '../layouts/AdminLayout';
 
 const DocumentsPage = () => {
   // Get event ID from the URL parameters

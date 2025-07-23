@@ -296,3 +296,22 @@ export const updateTaskDocuments = async (taskId, documentIds) => {
     throw error;
   }
 };
+
+export const updateAttendeeStatus = async (taskId, accountId, status, reason = null) => {
+  try {
+    const requestBody = { status };
+    if (reason) {
+      requestBody.reason = reason;
+    }
+    
+    const response = await Api.patch(
+      `/user/tasks/${taskId}/attendees/${accountId}/status`, 
+      requestBody
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating attendee status:", error);
+    handleAuthError(error);
+    throw error;
+  }
+};

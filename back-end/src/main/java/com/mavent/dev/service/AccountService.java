@@ -80,5 +80,8 @@ public interface AccountService extends UserDetailsService {
     List<Document> getTaskDocuments(Integer taskId);
     
     void updateTaskDocuments(Integer taskId, List<Integer> documentIds);
+
+    void updateAttendeeStatus(Integer taskId, Integer accountId, String status);
+    void createCancelTaskRequest(Integer taskId, Integer accountId, String reason);
 }
 

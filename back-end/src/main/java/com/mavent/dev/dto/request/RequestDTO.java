@@ -17,7 +17,7 @@ public interface RequestDTO {
     Integer getRequestByAccountId();
     String getRequestByUsername();
     String getTitle();
-    String getRequestContent();
+    String getContent();
     String getStatus();
     String getResponseContent();
     Integer getResponseByAccountId();

@@ -13,9 +13,11 @@ import {
   faComments,
   faMoneyBill1Wave,
   faHandHoldingDollar,
-  faCrown
+  faCrown,
+  faMoneyBillTrendUp
 } from "@fortawesome/free-solid-svg-icons";
-import { EventRoleProvider, useEventRole } from "../../context/EventRoleContext";
+import { EventRoleProvider, useEventRole } from "../context/EventRoleContext";
+import { set } from "react-hook-form";
 
 // Add CSS for animations
 const fadeInKeyframes = `
@@ -44,20 +46,22 @@ const addKeyframesToDocument = () => {
 addKeyframesToDocument();
 
 const Layout = () => {
-  const { user } = useEventRole();
+  const { roleLoading, user } = useEventRole();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const location = useLocation();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     if (user) {
-      // console.log("✅ User is loaded:", user);
+      console.log("✅ User is loaded:", user);
       setLoading(false);
     }
-  }, [user]);
+    setLoading(false);
+  }, [ user]);
 
   // While loading, show a spinner or nothing
-  if (!user) {
+  if (roleLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-gray-500">Loading user info...</div>
@@ -150,23 +154,28 @@ const Layout = () => {
       displayName: "Tasks",
       icon: <FontAwesomeIcon icon={faFileAlt} />,
       link: `tasks`,
-      requiredRole: 'MEMBER' // Visible to all roles
+      requiredRole: "MEMBER", // Visible to all roles
     },
     {
-      name: 'income',
-      displayName: 'Income',
-      icon: <FontAwesomeIcon icon={faMoneyBill1Wave} />,
+      name: "income",
+      displayName: "Income",
+      icon: <FontAwesomeIcon icon={faMoneyBillTrendUp} />,
       link: `income`,
-      requiredRole: 'ADMIN'
+      requiredRole: "ADMIN",
     },
     {
-      name: 'expenses',
-      displayName: 'Expenses',
+      name: "expenses",
+      displayName: "Expenses",
       icon: <FontAwesomeIcon icon={faMoneyBill1Wave} />,
       link: `expenses`,
+<<<<<<< HEAD:front-end/src/components/layout/AdminLayout.jsx
       requiredRole: 'MEMBER'
     }
 
+=======
+      requiredRole: "ADMIN",
+    },
+>>>>>>> 7003508feccd10d3e3ef684edaca1c4740eee6c6:front-end/src/layouts/AdminLayout.jsx
   ];
 
   // Filter items based on user role
