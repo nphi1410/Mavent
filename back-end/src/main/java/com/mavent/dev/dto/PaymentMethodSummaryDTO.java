@@ -11,5 +11,5 @@ import java.math.BigInteger;
 @AllArgsConstructor
 public class PaymentMethodSummaryDTO {
     private String paymentMethod;
-    private Long totalAmount;
+    private BigInteger totalAmount;
 }

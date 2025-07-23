@@ -14,7 +14,7 @@ public class ExpenseDTO {
     private Integer budgetId; // ĐÃ SỬA: Chuyển từ Long sang Integer
     private Integer categoryId; // Giữ nguyên Integer
     private Integer departmentId; // Giữ nguyên Integer
-    private Long amount;
+    private BigInteger amount;
     private String note;
     private LocalDate paymentDate;
     private String paymentMethod;

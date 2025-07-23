@@ -233,10 +233,8 @@ public class ExpenseImplement implements ExpenseService {
     @Override
     public EventTotalExpenseDTO getTotalExpenseByEventId(Integer eventId) {
         BigInteger totalAmount = expensesRepository.findTotalAmountByEventId(eventId);
-        Long total = (totalAmount != null ? totalAmount : BigInteger.ZERO).longValue();
-        return new EventTotalExpenseDTO(eventId, total);
+        return new EventTotalExpenseDTO(eventId, totalAmount != null ? totalAmount : BigInteger.ZERO);
     }
-
 
     /**
      * Retrieves expenses categorized by category for a specific event.

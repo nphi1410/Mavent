@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigInteger;
 import java.util.List;
 
 @Data
@@ -18,7 +19,7 @@ public class ExpenseResponseDTO {
     private String categoryName;
     private int departmentId;
     private String departmentName;
-    private Long amount;
+    private BigInteger amount;
     private String title;
     private String note;
     private String status;

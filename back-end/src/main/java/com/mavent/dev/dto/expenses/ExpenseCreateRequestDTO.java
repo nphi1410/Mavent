@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigInteger;
 import java.time.LocalDate;
 
 import java.util.List;
@@ -22,7 +23,7 @@ public class ExpenseCreateRequestDTO {
 
     private int categoryId;
     private int departmentId;
-    private Long amount;
+    private BigInteger amount;
     private String title;
     private String note;
 

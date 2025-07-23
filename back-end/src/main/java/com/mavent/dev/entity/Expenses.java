@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -37,7 +38,7 @@ public class Expenses {
     private int departmentId;
 
     @Column(name = "amount", nullable = false, columnDefinition = "BIGINT")
-    private Long amount;
+    private BigInteger amount;
 
     @Column(name = "note", columnDefinition = "TEXT")
     private String note;
