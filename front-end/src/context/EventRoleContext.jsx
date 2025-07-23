@@ -56,7 +56,7 @@ export const EventRoleProvider = ({ children }) => {
 export const useEventRole = () => {
   const context = useContext(EventRoleContext);
   if (!context) {
-    console.log("no context found");
+    // console.log("no context found");
     return {
       user: null,
       roleLoading: true,

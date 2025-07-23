@@ -271,6 +271,7 @@ public class EventController {
         try {
             String token = request.getHeader("Authorization").substring(7);
             Integer accountId = jwt.extractAccountId(token);
+            System.out.println("accountId: " + accountId);
             List<EventDTO> createdEvents = eventService.getEventByCreatorId(accountId);
             return ResponseEntity.ok(createdEvents);
         } catch (Exception e) {

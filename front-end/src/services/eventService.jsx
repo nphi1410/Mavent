@@ -218,3 +218,13 @@ export const updatePendingEvent = async (eventId, status) => {
     return null;
   }
 }
+
+export const getEventsByCreator = async () => {
+  try {
+    const response = await Api.get(`/events/created`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching events for creator`, error);
+    return [];
+  }
+}

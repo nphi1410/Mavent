@@ -20,4 +20,15 @@ public class ProposalController {
         ProposalDTO proposalItem = proposalService.createProposalItem(eventId, dto);
         return ResponseEntity.ok(proposalItem);
     }
+
+    @GetMapping("/{eventId}/get-proposal")
+    public ResponseEntity<?> getProposal(@PathVariable Integer eventId) {
+        try {
+            ProposalDTO proposal = proposalService.getProposalByEventId(eventId);
+            return ResponseEntity.ok(proposal);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error fetching proposal: " + e.getMessage());
+        }
+    }
+
 }
