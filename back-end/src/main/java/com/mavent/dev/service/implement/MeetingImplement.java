@@ -1,7 +1,12 @@
 package com.mavent.dev.service.implement;
 
+import com.mavent.dev.dto.MeetingAttendeeDTO;
 import com.mavent.dev.dto.MeetingDTO;
-import com.mavent.dev.entity.*;
+import com.mavent.dev.dto.MeetingRequest;
+import com.mavent.dev.entity.GoogleCalendarEvent;
+import com.mavent.dev.entity.GoogleToken;
+import com.mavent.dev.entity.Meeting;
+import com.mavent.dev.entity.MeetingAttendee;
 import com.mavent.dev.repository.*;
 import com.mavent.dev.service.MeetingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,17 +37,18 @@ public class MeetingImplement implements MeetingService {
     private GoogleCalendarEventRepository calendarEventRepository;
 
     @Override
-    public Meeting createMeeting(Meeting meeting, List<String> attendeeIds) {
+    public Meeting createMeeting(MeetingRequest meeting, List<Integer> attendeeIds) {
+        Meeting meetingObject = createMeetingFromDTO(meeting);
         // 1. Save the meeting first
-        Meeting savedMeeting = meetingRepository.save(meeting);
+        Meeting savedMeeting = meetingRepository.save(meetingObject);
 
         // 2. Save meeting attendees from passed list
         List<MeetingAttendee> attendees = new ArrayList<>();
-        for (String attendeeIdStr : attendeeIds) {
-            Integer attendeeId = Integer.parseInt(attendeeIdStr);
+        for (Integer attendeeId : attendeeIds) {
             attendees.add(new MeetingAttendee(savedMeeting.getMeetingId(), attendeeId));
         }
         meetingAttendeeRepository.saveAll(attendees);
+        meetingAttendeeRepository.deleteOld(meeting.getMeetingId(), attendeeIds);
 
         // 3. For each attendee, sync Google Calendar if connected
         for (MeetingAttendee attendee : attendees) {
@@ -77,6 +82,28 @@ public class MeetingImplement implements MeetingService {
         }
 
         return savedMeeting;
+    }
+
+    private Meeting createMeetingFromDTO(MeetingRequest dto) {
+        Meeting meeting = new Meeting();
+
+        if (dto.getMeetingId() != null) {
+            meeting.setMeetingId(dto.getMeetingId());
+        }
+
+        meeting.setTitle(dto.getTitle());
+        meeting.setStatus(dto.getStatus() != null ? dto.getStatus() : Meeting.Status.SCHEDULED);
+        meeting.setOrganizerAccountId(dto.getOrganizerAccountId());
+        meeting.setNotes(dto.getNotes());
+        meeting.setMeetingLink(dto.getMeetingLink());
+        meeting.setMeetingDatetime(dto.getMeetingDatetime());
+        meeting.setLocation(dto.getLocation());
+        meeting.setEventId(dto.getEventId());
+        meeting.setEndDatetime(dto.getEndDatetime());
+        meeting.setDescription(dto.getDescription());
+        meeting.setDepartmentId(dto.getDepartmentId());
+
+        return meeting;
     }
 
     @Override
@@ -179,6 +206,11 @@ public class MeetingImplement implements MeetingService {
     @Override
     public List<Meeting> getMeetingsByStatus(Meeting.Status status) {
         return meetingRepository.findByStatus(status);
+    }
+
+    @Override
+    public List<MeetingAttendeeDTO> getMeetingAttendees(Integer meetingId) {
+        return meetingAttendeeRepository.findMeetingAttendees(meetingId);
     }
 }
 

@@ -50,7 +50,7 @@ const SubmitSponsorshipPage = () => {
       try {
         const [packagesData, sponsorsData, contactsData] = await Promise.all([
           getSponsorshipPackages(id, true),
-          getSponsors(id, true),
+          getSponsors(id),
           memberService.getSponsorManageableMembers(id),
         ]);
         setPackages(packagesData);
@@ -128,15 +128,15 @@ const SubmitSponsorshipPage = () => {
 
   const onSubmit = (data) => {
     const hasUrl = data.agreementDocumentUrl?.trim();
-    const hasFile = data.agreementDocumentFile?.length > 0;
+    // const hasFile = data.agreementDocumentFile?.length > 0;
 
-    if (!hasUrl && !hasFile) {
-      methods.setError("agreementDocument", {
-        type: "manual",
-        message: "You must provide a URL or upload a file",
-      });
-      return;
-    }
+    // if (!hasUrl) {
+    //   methods.setError("agreementDocument", {
+    //     type: "manual",
+    //     message: "You must provide a URL",
+    //   });
+    //   return;
+    // }
 
     try {
       setIsSubmitting(true);
@@ -302,10 +302,9 @@ const SubmitSponsorshipPage = () => {
             )}
           </div>
 
-          {/* Optional fields */}
           <div className="space-y-2">
             <label className="block font-medium">
-              Agreement Document <span className="text-red-500">*</span>
+              Agreement Link <span className="text-red-500">*</span>
             </label>
             <AgreementInput />
           </div>

@@ -44,7 +44,7 @@ const addKeyframesToDocument = () => {
 addKeyframesToDocument();
 
 const Layout = () => {
-  const { user } = useEventRole();
+  const { user, roleLoading } = useEventRole();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const location = useLocation();
   const [loading, setLoading] = useState(true);
@@ -54,10 +54,10 @@ const Layout = () => {
       // console.log("✅ User is loaded:", user);
       setLoading(false);
     }
-  }, [user]);
+  }, [loading, roleLoading]);
 
   // While loading, show a spinner or nothing
-  if (!user) {
+  if (roleLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-gray-500">Loading user info...</div>
@@ -150,23 +150,22 @@ const Layout = () => {
       displayName: "Tasks",
       icon: <FontAwesomeIcon icon={faFileAlt} />,
       link: `tasks`,
-      requiredRole: 'MEMBER' // Visible to all roles
+      requiredRole: "MEMBER", // Visible to all roles
     },
     {
-      name: 'income',
-      displayName: 'Income',
+      name: "income",
+      displayName: "Income",
       icon: <FontAwesomeIcon icon={faMoneyBill1Wave} />,
       link: `income`,
-      requiredRole: 'ADMIN'
+      requiredRole: "ADMIN",
     },
     {
-      name: 'expenses',
-      displayName: 'Expenses',
+      name: "expenses",
+      displayName: "Expenses",
       icon: <FontAwesomeIcon icon={faMoneyBill1Wave} />,
       link: `expenses`,
-      requiredRole: 'ADMIN'
-    }
-
+      requiredRole: "ADMIN",
+    },
   ];
 
   // Filter items based on user role

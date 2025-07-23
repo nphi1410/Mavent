@@ -1,5 +1,23 @@
 import Api from "../config/Api";
 
+export const filterSponsors = async (filter) => {
+  try {
+    const response = await Api.get(`/sponsors`, {
+      params: {
+        name: filter.name || null,
+        industry: filter.industry || null,
+        page: filter.page || 0,
+        size: filter.size || 20,
+        sort: filter.sort || "name,asc",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching sponsors:", error);
+    return { content: [], totalElements: 0 };
+  }
+};
+
 export const getSponsors = async (id) => {
   try {
     const response = await Api.get(`/sponsors/${id}`);

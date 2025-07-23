@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { EventRoleContext, useEventRole } from "../context/EventRoleContext";
 import { useNavigate, Navigate, Outlet, useLocation, useParams } from "react-router-dom";
 import { getUserInfoInEvent } from "../services/userEventService";
+import RedirectPage from "../pages/UserAuthorization/UnauthorizedAccess";
 
 // Utility function to check login status
 const isLoggedIn = () => {
@@ -9,44 +10,64 @@ const isLoggedIn = () => {
   return !!token;
 };
 
-const ProtectedRoute = ({ isRequiredToHaveRole }) => {
-  const location = useLocation();
+const ProtectedRoute = ({ isRequiredToHaveRole, requiredRoles, children }) => {
   const { id: eventId } = useParams();
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  const navigate = useNavigate();
+  const { user, roleLoading } = useEventRole();
 
   useEffect(() => {
     // console.log('useEffect in PR');
     // console.log('user role in PR' ,user?.role)
+    console.log("user in PR:", roleLoading);
+    if (roleLoading) return;
 
     if (!isLoggedIn()) {
-      setLoading(false); // stop loading, let fallback handle it
+      console.log("User not logged in, redirecting");
       return;
     }
+
     if (isRequiredToHaveRole) {
-      const { user, roleLoading } = useEventRole();
-      setLoading(roleLoading);
-      if (user?.role) {
-        // switch()
+      if (requiredRoles && requiredRoles.includes(user?.role)) {
+        console.log("User does have required role, redirecting");
+        setIsAuthorized(true);
+      }
+      else if(!requiredRoles) {
+        console.log("No specific roles required, user is authorized");
         setIsAuthorized(true);
       }
     }
 
-    setLoading(false);
-  }, [eventId]);
 
-  if (!isLoggedIn()) {
-    console.log("User not logged in, redirecting");
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
+    console.log("useEffect completed for eventId in PR:", eventId);
+  }, [eventId, roleLoading]);
+  console.log("authorization status in PR:", isAuthorized);
+  console.log("isrequiredToHaveRole in PR:", isRequiredToHaveRole);
 
-  if (loading) {
+  if (roleLoading) {
     return <div>Loading...</div>;
   }
 
+  if (!isLoggedIn()) {
+    console.log("User not logged in, redirecting");
+    return <RedirectPage
+      message={`You must be logged in first!`}
+      pageName="Login Page"
+      redirectUrl="/login"
+    />
+  }
+
+  if (!isAuthorized && isRequiredToHaveRole) {
+    console.log("User not authorized, redirecting");
+    return <RedirectPage
+      message={`You must have ${requiredRoles} privileges to access this content`}
+      pageName="Home Page"
+      redirectUrl="/"
+    />
+  }
+
   if (isRequiredToHaveRole && isAuthorized) {
+    if (children) return children;
+    // If no children, render Outlet for nested routes
     return (
       <Outlet />
     );

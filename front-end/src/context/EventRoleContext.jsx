@@ -27,16 +27,18 @@ export const EventRoleProvider = ({ children }) => {
           // console.log("context: response data: ", response);
           setUser(response);
         } else {
-          // console.log("No user found, redirecting.");
-          navigate("/");
+          // console.log("No user data found for eventId:", eventId);
+          setUser(null);
         }
+        setLoading(false);
       } catch (err) {
+        setLoading(false);
         console.error("Error fetching user role:", err);
       }
     };
 
     fetchUserInfoInEvent();
-    setLoading(false);
+    console.log("useEffect completed for eventId:", eventId);
   }, [eventId]);
 
   return (
