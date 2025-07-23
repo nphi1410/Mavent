@@ -58,6 +58,7 @@ import SponsorshipPage from "./pages/SponsorshipPage.jsx";
 import SubmitSponsorshipPage from "./pages/SubmitSponsorshipPage.jsx";
 import EventMemberPage from "./pages/Members/EventMemberPage.jsx";
 import PendingEventView from "./pages/superadmin/PendingEventDetails.jsx";
+import RejectTaskRequest from "./components/usercenter/RejectTaskRequest.jsx";
 
 // Higher Order Components for Route Protection
 // const Protect = (Component) => <ProtectedRoute children={Component} />;
@@ -99,6 +100,7 @@ function App() {
                 <Route path="departments" element={<DepartmentManagementPage />} />
                 <Route path="tasks" element={<UserTasksPage />} />
                 <Route path="tasks/history" element={<TaskHistory />} />
+                <Route path="tasks/requests" element={<RejectTaskRequest />} />
                 <Route path="members" element={(<EventMemberPage />)} />
                 <Route path="documents" element={(<DocumentsPage />)} />
                 <Route path="feedback" element={<ViewEventFeedback />} />

@@ -1,6 +1,7 @@
 package com.mavent.dev.service;
 
 import com.mavent.dev.dto.request.CreateRequestDTO;
+import com.mavent.dev.dto.request.ProcessRequestDTO;
 import com.mavent.dev.dto.request.RequestDTO;
 import com.mavent.dev.dto.request.UpdateRequestDTO;
 import com.mavent.dev.entity.Request;
@@ -14,5 +15,6 @@ public interface RequestService {
     Request getRequestByRequestId(Integer requestId);
     boolean addRequest(CreateRequestDTO request);
     boolean updateRequest(UpdateRequestDTO request, Integer requestId);
+    boolean processRequest(Integer requestId, ProcessRequestDTO processRequestDTO);
 
 }
