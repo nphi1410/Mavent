@@ -147,7 +147,7 @@ export default function RequestDetailsPopup({ isOpen, onClose, requestData, requ
                                 {/* Answered By */}
                                 <div>
                                     <label className="block text-sm font-medium mb-2">Answered By:</label>
-                                    {console.log("requestData:", requestData)}
+                                    {/* {console.log("requestData:", requestData)} */}
                                     <div className="bg-white rounded-lg px-4 py-3 shadow-sm">
                                         <span className="text-gray-800">{data.responseByUsername ? data.responseByUsername : "Not yet"}</span>
                                     </div>

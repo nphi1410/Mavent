@@ -1,5 +1,11 @@
 package com.mavent.dev.service;
 
+import com.mavent.dev.dto.expenses.ExpenseCreateRequestDTO;
+import com.mavent.dev.dto.expenses.ExpenseResponseDTO;
+import com.mavent.dev.dto.expenses.ExpenseUpdateDTO;
+import com.mavent.dev.entity.ExpenseAttachments;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.mavent.dev.dto.EventTotalExpenseDTO;
 import com.mavent.dev.dto.ExpenseByCategoryDTO;
 import com.mavent.dev.dto.ExpenseByDepartmentDTO;
@@ -7,9 +13,31 @@ import com.mavent.dev.dto.ExpenseSummaryByStatusDTO;
 import com.mavent.dev.dto.PaymentMethodSummaryDTO; // BỔ SUNG DÒNG NÀY
 
 import java.util.List;
-import java.util.Set; // Vẫn giữ nếu bạn có các phương thức khác sử dụng Set
+import java.util.Set;
+
+import java.io.IOException;
+import java.util.List;
 
 public interface ExpenseService {
+
+    ExpenseResponseDTO createExpenseRequest(ExpenseCreateRequestDTO dto);
+    
+    ExpenseResponseDTO createExpenseRequestWithAttachments(ExpenseCreateRequestDTO dto, List<MultipartFile> files) throws IOException;
+
+    List<ExpenseAttachments> uploadAttachments(int expenseId, List<MultipartFile> files) throws IOException;
+
+    ExpenseResponseDTO updateExpenseStatus(ExpenseUpdateDTO dto);
+
+    List<ExpenseResponseDTO> getExpensesByEventId(int eventId);
+
+    List<ExpenseResponseDTO> getExpensesByEventIdAndAccountId(int eventId, int accountId);
+
+    ExpenseResponseDTO getExpenseById(int expenseId);
+
+
+
+
+
 
     /**
      * Retrieves the total expense for a specific event.

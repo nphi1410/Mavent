@@ -17,7 +17,7 @@ import java.util.List;
 
 public interface AccountService extends UserDetailsService {
 
-    Page<AccountDTO> getAllActiveAccounts(Pageable pageable);
+
 
     void save(Account accountInfo);
 

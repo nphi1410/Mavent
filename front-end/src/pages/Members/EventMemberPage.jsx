@@ -110,13 +110,13 @@ const EventMemberPage = () => {
             statusFilter.toLowerCase().trim();
         } // Add role filter if available - follow memberService.js format
         if (roleFilter) {
-          // Đảm bảo role format đúng theo backend (uppercase)
+        
           params.role = roleFilter.trim().toUpperCase();
         }
 
-        // Add department filter if available - follow memberService.js format
+      
         if (departmentFilter !== undefined && departmentFilter !== "") {
-          // Sử dụng logic giống như trong memberService.js
+      
           const departmentValue =
             Number.isInteger(Number(departmentFilter)) &&
             Number(departmentFilter) > 0

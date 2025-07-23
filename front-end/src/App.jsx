@@ -16,10 +16,11 @@ import AllEvents from "./pages/AllEvents";
 import EventDetails from "./pages/EventDetails";
 import MeetingListPage from "./pages/meetingPages/MeetingListPage";
 
-// Department, Documents, and Members
+// Department, Documents, Members...
 import DepartmentManagementPage from "./pages/Departments/DepartmentManagementPage";
 import DocumentsPage from "./pages/DocumentsPage";
 import EventDetailsByRoles from "./pages/events/eventDetailsByRoles.jsx";
+
 
 // Auth
 import ProtectedRoute from "./auth/ProtectedRoute";
@@ -52,6 +53,7 @@ import MeetingEditPage from "./pages/meetingPages/EditMeetingPage";
 import ViewEventFeedback from "./pages/ViewEventFeedback.jsx";
 import ParticipantFeedbackEvent from "./pages/ParticipantFeedbackEvent.jsx";
 import RequestHistory from "./pages/request/member/RequestHistory.jsx";
+import ExpenseRequestHistory from "./pages/expense/ExpenseRequestHistory.jsx";
 // import { EventRoleContext, EventRoleProvider } from "./context/EventRoleContext.jsx";
 import EventWrapper from "./wrapper/EventWrapper.jsx";
 import SponsorshipPackagesPage from "./pages/SponsorshipPackagesPage.jsx";
@@ -117,6 +119,10 @@ function App() {
                 <Route path="members" element={<EventMemberPage />} />
                 <Route path="departments" element={<DepartmentManagementPage />} />
                 <Route path="feedback" element={<ViewEventFeedback />} />
+                <Route path="requests" element={(<RequestHistory />)} />
+                <Route path="create-feedback" element={<ParticipantFeedbackEvent />} />
+                {/* <Route path="expenses" element={<EventExpense />} /> */}
+                <Route path="expenses-requests" element={<ExpenseRequestHistory />} />
                 <Route path="income" element={<AdminViewIncome />} />
                 <Route path="expenses" element={<AdminViewExpense />} />
                 <Route path="sponsorship" element={<SponsorshipPage />} />

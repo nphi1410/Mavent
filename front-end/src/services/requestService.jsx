@@ -16,7 +16,7 @@ export const getRequestsByEventIdAndAccountId = async (eventId, accountId) => {
     );
     return response.data;
   } catch (err) {
-    console.log("requestService.getRequestsByEventIdAndAccountId:" + err);
+    console.errorr("requestService.getRequestsByEventIdAndAccountId:" + err);
     throw err;
   }
 };

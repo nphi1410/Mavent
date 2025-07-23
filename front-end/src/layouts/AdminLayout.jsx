@@ -89,6 +89,7 @@ const Layout = () => {
     "documents",
     "requests",
     "feedback",
+    
   ].some((segment) => location.pathname.includes(segment));
 
   const allMenuItems = [
@@ -165,11 +166,19 @@ const Layout = () => {
     },
     {
       name: "expenses",
-      displayName: "Expenses",
+      displayName: "Expenses Reports",
       icon: <FontAwesomeIcon icon={faMoneyBill1Wave} />,
       link: `expenses`,
-      requiredRole: "ADMIN",
+      requiredRole: 'ADMIN'
     },
+    {
+      name: "expenses requests",
+      displayName: "Expense Requests",
+      icon: <FontAwesomeIcon icon={faMoneyBill1Wave} />,
+      link: `expenses-requests`,
+      requiredRole: 'MEMBER'
+    }
+
   ];
 
   // Filter items based on user role

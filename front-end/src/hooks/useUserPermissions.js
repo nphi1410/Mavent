@@ -1,10 +1,9 @@
 import { useState, useEffect, useContext } from 'react';
-import { getUserRoleInEvent, canPerformAction, hasMinimumRole } from '../services/roleService';
+import { getUserRoleInEvent, canPerformAction, hasMinimumRole } from '../services/roleService.jsx';
 
-// Get event ID from URL path
 const getEventIdFromUrl = () => {
   const path = window.location.pathname;
-  // Check both URL patterns: /event/:id and /events/:id
+  
   const eventMatch = path.match(/\/event\/(\d+)/) || path.match(/\/events\/(\d+)/);
   return eventMatch ? parseInt(eventMatch[1]) : null;
 };
@@ -60,12 +59,8 @@ export const useUserPermissions = (eventId = null) => {
           const username = sessionStorage.getItem('username');
           // console.log('Checking username from session:', username);
           
-          // Biện pháp khắc phục: nếu username chứa "admin", giả định họ là admin
-          if (username && username.toLowerCase().includes('admin')) {
-            // console.log('Username contains "admin", setting as ADMIN');
-            setUserRole('ADMIN');
-            // sessionStorage.setItem('userRole', 'ADMIN');
-          }
+        
+      
         }
       } catch (err) {
         console.error('Failed to fetch user role:', err);

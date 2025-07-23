@@ -84,7 +84,7 @@ const DocumentManagement = ({ eventId }) => {
     { id: "other", name: "Other File Types" },
   ];
 
-  // Sample date ranges
+
   const dateRanges = [
     { id: "all", name: "All Dates" },
     { id: "today", name: "Today" },
@@ -93,7 +93,7 @@ const DocumentManagement = ({ eventId }) => {
     { id: "lastMonth", name: "Last Month" },
   ];
 
-  // Sample sort options
+
   const sortOptions = [
     { id: "dateNewest", name: "Date (Newest)" },
     { id: "dateOldest", name: "Date (Oldest)" },
