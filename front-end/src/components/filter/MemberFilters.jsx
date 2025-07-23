@@ -70,7 +70,7 @@ const MemberFilters = ({
               <option value="DEPARTMENT_MANAGER">Department Manager</option>
               <option value="MEMBER">Member</option>
               <option value="PARTICIPANT">Participant</option>
-              <option value="GUEST">Guest</option>
+              <option value="GUEST">Apply pending</option>
             </select>
             <FontAwesomeIcon
               icon={faChevronDown}
