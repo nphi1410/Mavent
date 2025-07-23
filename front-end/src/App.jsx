@@ -161,9 +161,9 @@ function App() {
               <Route path="history" element={<TaskHistory />} />
             </Route>
 
-            <Route path="created-events" element={<CreatedEventLayout />}>
+            <Route path="created-events">
               <Route index element={<CreatedEventsPage />} />
-              <Route path=":eventId" >
+              <Route path=":eventId" element={<CreatedEventLayout />} >
                 <Route index element={<CreateEvent isUpdatePage={true} />} />
                 <Route path="proposal" element={<CreateProposal isUpdatePage={true} />} />
                 <Route path="timeline" element={<CreateTimeline isUpdatePage={true} />} />

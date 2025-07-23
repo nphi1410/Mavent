@@ -44,7 +44,7 @@ const CreatedEventsPage = () => {
     }, [events, searchTerm, statusFilter])
 
     const handleCreateEvent = () => {
-        navigate("/events/create")
+        navigate("/create-event")
     }
 
     const isFiltered = searchTerm !== "" || statusFilter !== "ALL"
