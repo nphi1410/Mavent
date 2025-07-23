@@ -311,9 +311,9 @@ export default function ExpenseRequestHistory() {
                         <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
                           Category
                         </th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                        {/* <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
                           Date
-                        </th>
+                        </th> */}
                         <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
                           Status
                         </th>
@@ -340,9 +340,9 @@ export default function ExpenseRequestHistory() {
                           <td className="px-6 py-4 text-sm text-gray-500">
                             {expense.categoryName || "Unknown"}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-500">
+                          {/* <td className="px-6 py-4 text-sm text-gray-500">
                             {new Date(expense.paymentDate).toLocaleDateString()}
-                          </td>
+                          </td> */}
                           <td className="px-6 py-4 text-sm text-gray-500">
                             {getStatusBadge(expense.status)}
                           </td>
