@@ -16,6 +16,7 @@ import {
   faCrown
 } from "@fortawesome/free-solid-svg-icons";
 import { EventRoleProvider, useEventRole } from "../context/EventRoleContext";
+import { set } from "react-hook-form";
 
 // Add CSS for animations
 const fadeInKeyframes = `
@@ -44,17 +45,19 @@ const addKeyframesToDocument = () => {
 addKeyframesToDocument();
 
 const Layout = () => {
-  const { user, roleLoading } = useEventRole();
+  const { roleLoading, user } = useEventRole();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const location = useLocation();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     if (user) {
-      // console.log("✅ User is loaded:", user);
+      console.log("✅ User is loaded:", user);
       setLoading(false);
     }
-  }, [loading, roleLoading]);
+    setLoading(false);
+  }, [ user]);
 
   // While loading, show a spinner or nothing
   if (roleLoading || loading) {

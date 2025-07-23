@@ -104,16 +104,16 @@ function App() {
     <Route element={<ProtectedRoute isRequiredToHaveRole={true} />}>
       <Route index element={<EventDetailsByRoles />} />
       <Route path="details" element={<EventDetailsByRoles />} />
-      <Route path="departments" element={<DepartmentManagementPage />} />
       <Route path="tasks" element={<UserTasksPage />} />
       <Route path="tasks/history" element={<TaskHistory />} />
       <Route path="tasks/requests" element={<RejectTaskRequest />} />
-      <Route path="members" element={<EventMemberPage />} />
       <Route path="documents" element={<DocumentsPage />} />
     </Route>
 
-    {/* Routes for admin only */}
+    {/* Routes for event admin only */}
     <Route element={<ProtectedRoute isRequiredToHaveRole={true} requiredRoles={["ADMIN"]} />}>
+      <Route path="members" element={<EventMemberPage />} />
+      <Route path="departments" element={<DepartmentManagementPage />} />
       <Route path="feedback" element={<ViewEventFeedback />} />
       <Route path="income" element={<AdminViewIncome />} />
       <Route path="expenses" element={<AdminViewExpense />} />

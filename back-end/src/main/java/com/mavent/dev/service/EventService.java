@@ -39,4 +39,6 @@ public interface EventService {
     PendingEventDTO getPendingEventById(Integer eventId);
 
     boolean updatePendingEvent(Integer eventId, String status);
+
+    List<EventDTO> getEventByCreatorId(Integer creatorId);
 }

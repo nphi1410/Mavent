@@ -23,7 +23,7 @@ export default function PendingEventView() {
             console.error("No event ID provided");
             return;
         }
-        console.log("Fetching event data for ID:", eventId);
+        // console.log("Fetching event data for ID:", eventId);
         const fetchEventData = async () => {
             try {
                 const response = await getPendingEventDetailsById(eventId); // Example endpoint

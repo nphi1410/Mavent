@@ -65,6 +65,19 @@ public class JwtUtil {
         return Collections.emptyList();
     }
 
+    public Integer extractAccountId(String token) {
+        Claims claims = extractAllClaims(token);
+        Object accountIdObj = claims.get("accountId");
+        if (accountIdObj instanceof Integer) {
+            return (Integer) accountIdObj;
+        } else if (accountIdObj instanceof Long) {
+            return ((Long) accountIdObj).intValue();
+        } else if (accountIdObj != null) {
+            return Integer.valueOf(accountIdObj.toString());
+        }
+        return null;
+    }
+
     // Validate token
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);

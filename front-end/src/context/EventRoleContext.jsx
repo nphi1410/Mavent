@@ -10,10 +10,10 @@ export const EventRoleProvider = ({ children }) => {
   const { id: eventId } = useParams();
   const navigate = useNavigate();
 
-  // console.log("EventRoleProvider mounted. eventId:", eventId);
+  console.log("EventRoleProvider mounted. eventId:", eventId);
 
   useEffect(() => {
-    // console.log("Running useEffect with eventId:", eventId);
+    console.log("Running useEffect with eventId:", eventId);
     setLoading(true);
     if (!eventId) {
       console.log("No eventId found.");
@@ -22,7 +22,7 @@ export const EventRoleProvider = ({ children }) => {
     const fetchUserInfoInEvent = async () => {
       try {
         const response = await getUserInfoInEvent(eventId);
-        // console.log("Fetched user:", response);
+        console.log("Fetched user:", response);
         if (response) {
           // console.log("context: response data: ", response);
           setUser(response);
@@ -41,6 +41,11 @@ export const EventRoleProvider = ({ children }) => {
     console.log("useEffect completed for eventId:", eventId);
   }, [eventId]);
 
+  if (loading) {
+    console.log("Loading user role...");
+    return <div>Loading...</div>;
+  }
+
   return (
     <EventRoleContext.Provider value={{ user, roleLoading: loading }}>
       {children}
@@ -48,4 +53,14 @@ export const EventRoleProvider = ({ children }) => {
   );
 };
 
-export const useEventRole = () => useContext(EventRoleContext);
+export const useEventRole = () => {
+  const context = useContext(EventRoleContext);
+  if (!context) {
+    console.log("no context found");
+    return {
+      user: null,
+      roleLoading: true,
+    }
+  }
+  return context;
+}
