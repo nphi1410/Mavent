@@ -25,7 +25,7 @@ const SponsorTable = ({ sponsors, handleSort, handleDelete, handleEdit }) => {
             <th className="px-4 py-3 text-left">Address</th>
             <th className="px-4 py-3 text-left">Email</th>
             <th className="px-4 py-3 text-left">Phone</th>
-            <th className="px-4 py-3 text-left">Created By</th>
+            <th className="px-4 py-3 text-left">Created Account</th>
             <th
               className="px-4 py-3 text-left font-semibold cursor-pointer hover:text-blue-600"
               onClick={() => handleSort("created_at")}
@@ -38,6 +38,7 @@ const SponsorTable = ({ sponsors, handleSort, handleDelete, handleEdit }) => {
             >
               Updated At
             </th>
+            <th className="px-4 py-3 text-left">Deleted</th>
             <th className="px-4 py-3 text-left">Action</th>
           </tr>
         </thead>
@@ -69,6 +70,7 @@ const SponsorTable = ({ sponsors, handleSort, handleDelete, handleEdit }) => {
               <td className="px-4 py-2 text-gray-500">
                 {vietnameseDate(sponsor.updatedAt)}
               </td>
+              <td className="px-4 py-2">{sponsor.isDeleted ? "Yes" : "No"}</td>
               <td className="px-4 py-2">
                 <div className="flex gap-3">
                   <button

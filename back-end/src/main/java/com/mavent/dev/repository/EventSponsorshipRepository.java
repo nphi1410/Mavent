@@ -32,5 +32,6 @@ public interface EventSponsorshipRepository extends JpaRepository<EventSponsorsh
     """, nativeQuery = true)
     List<SponsorshipDTO> findSponsorshipByEventId(@Param("eventId") Integer eventId);
 
+    EventSponsorship findTopBySponsorId(Integer sponsorId);
 
 }
