@@ -4,7 +4,7 @@ import { getAllLocations } from "../../services/EventLocationService";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from 'jwt-decode';
 
-const CreateEvent = ({ isUpdatePage = false }) => {
+const CreateEvent = () => {
     // get account id from JWT token
     const token = sessionStorage.getItem("token");
     const decoded = jwtDecode(token);
@@ -39,20 +39,6 @@ const CreateEvent = ({ isUpdatePage = false }) => {
             setLocations(data);
         };
         fetchLocations();
-        if (isUpdatePage) {
-            // Load existing event data if this is an update page
-            const fetchEventData = async () => {
-                try {
-                    const response = await getPendingEventDetailsById(eventId); // Example endpoint
-                    if (response) setFormData(response);
-                    console.log("Fetched event data:", response);
-                } catch (error) {
-                    console.error("Error fetching event data:", error);
-                }
-            }
-            fetchEventData();
-
-        }
     }, []);
 
     const handleChange = (e) => {

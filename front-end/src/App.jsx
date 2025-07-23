@@ -19,7 +19,7 @@ import MeetingListPage from "./pages/meetingPages/MeetingListPage";
 // Department, Documents, and Members
 import DepartmentManagementPage from "./pages/Departments/DepartmentManagementPage";
 import DocumentsPage from "./pages/DocumentsPage";
-import EventDetailsByRoles from "./pages/eventDetailsByRoles/eventDetailsByRoles.jsx";
+import EventDetailsByRoles from "./pages/events/eventDetailsByRoles.jsx";
 
 // Auth
 import ProtectedRoute from "./auth/ProtectedRoute";
@@ -62,6 +62,7 @@ import SponsorPage from "./pages/SponsorPage.jsx";
 import PendingEventView from "./pages/superadmin/PendingEventDetails.jsx";
 import RejectTaskRequest from "./components/usercenter/RejectTaskRequest.jsx";
 import RedirectPage from "./pages/UserAuthorization/UnauthorizedAccess.jsx";
+import CreatedEventsPage from "./pages/events/AllCreatedEvents.jsx";
 
 // Higher Order Components for Route Protection
 // const Protect = (Component) => <ProtectedRoute children={Component} />;
@@ -94,44 +95,44 @@ function App() {
           {/* <Route path="event/:eventId/feedback" element={<ViewEventFeedback />} /> */}
 
           {/* Routes that requires user to have ROLE in event */}
-<Route path="event/:id" element={<EventWrapper />}>
-  <Route path="staff"
-    element={
-      <Layout />
-    }
-  >
-    {/* Route for all roles (MEMBER, DEPARTMENT_MANAGER, ADMIN) */}
-    <Route element={<ProtectedRoute isRequiredToHaveRole={true} />}>
-      <Route index element={<EventDetailsByRoles />} />
-      <Route path="details" element={<EventDetailsByRoles />} />
-      <Route path="tasks" element={<UserTasksPage />} />
-      <Route path="tasks/history" element={<TaskHistory />} />
-      <Route path="tasks/requests" element={<RejectTaskRequest />} />
-      <Route path="documents" element={<DocumentsPage />} />
-    </Route>
+          <Route path="event/:id" element={<EventWrapper />}>
+            <Route path="staff"
+              element={
+                <Layout />
+              }
+            >
+              {/* Route for all roles (MEMBER, DEPARTMENT_MANAGER, ADMIN) */}
+              <Route element={<ProtectedRoute isRequiredToHaveRole={true} />}>
+                <Route index element={<EventDetailsByRoles />} />
+                <Route path="details" element={<EventDetailsByRoles />} />
+                <Route path="tasks" element={<UserTasksPage />} />
+                <Route path="tasks/history" element={<TaskHistory />} />
+                <Route path="tasks/requests" element={<RejectTaskRequest />} />
+                <Route path="documents" element={<DocumentsPage />} />
+              </Route>
 
-    {/* Routes for event admin only */}
-    <Route element={<ProtectedRoute isRequiredToHaveRole={true} requiredRoles={["ADMIN"]} />}>
-      <Route path="members" element={<EventMemberPage />} />
-      <Route path="departments" element={<DepartmentManagementPage />} />
-      <Route path="feedback" element={<ViewEventFeedback />} />
-      <Route path="income" element={<AdminViewIncome />} />
-      <Route path="expenses" element={<AdminViewExpense />} />
-      <Route
-        path="sponsorship-packages"
-        element={<SponsorshipPackagesPage />}
-      />
-    </Route>
+              {/* Routes for event admin only */}
+              <Route element={<ProtectedRoute isRequiredToHaveRole={true} requiredRoles={["ADMIN"]} />}>
+                <Route path="members" element={<EventMemberPage />} />
+                <Route path="departments" element={<DepartmentManagementPage />} />
+                <Route path="feedback" element={<ViewEventFeedback />} />
+                <Route path="income" element={<AdminViewIncome />} />
+                <Route path="expenses" element={<AdminViewExpense />} />
+                <Route
+                  path="sponsorship-packages"
+                  element={<SponsorshipPackagesPage />}
+                />
+              </Route>
 
-    {/* Routes for participant only */}
-    <Route element={<ProtectedRoute isRequiredToHaveRole={true} requiredRoles={["PARTICIPANT"]} />}>
-      <Route
-        path="create-feedback"
-        element={<ParticipantFeedbackEvent />}
-      />
-    </Route>
-  </Route>
-</Route>
+              {/* Routes for participant only */}
+              <Route element={<ProtectedRoute isRequiredToHaveRole={true} requiredRoles={["PARTICIPANT"]} />}>
+                <Route
+                  path="create-feedback"
+                  element={<ParticipantFeedbackEvent />}
+                />
+              </Route>
+            </Route>
+          </Route>
 
 
           {/* Create Event-Protected Routes */}
@@ -158,7 +159,15 @@ function App() {
               <Route path=":taskId" element={<TaskDetails />} />
               <Route path="history" element={<TaskHistory />} />
             </Route>
+            <Route path="created-events">
+              <Route index element={<CreatedEventsPage />} />
+              <Route path=":eventId" >
+                <Route index element={<CreateEvent isUpdatePage={true} />} />
+              </Route>
+            </Route>
+
           </Route>
+
         </Route>
 
         {/* Super Admin Routes */}
