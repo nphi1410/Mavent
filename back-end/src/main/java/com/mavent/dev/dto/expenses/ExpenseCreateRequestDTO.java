@@ -19,7 +19,7 @@ import java.util.List;
 public class ExpenseCreateRequestDTO {
     private int eventId;
     private Integer budgetId;
-    private int accountId;
+
     private int categoryId;
     private int departmentId;
     private Long amount;

@@ -165,7 +165,7 @@ public class ExpenseServiceImplement implements ExpenseService {
         }
         
         // Update the expense status
-        expense.setStatus(Expenses.Status.valueOf(dto.getStatus()));
+        expense.setStatus(Expenses.Status.valueOf(dto.getStatus().name()));
         expense.setApprovedByAccountId(dto.getApprovedByAccountId());
         expense.setResponseContent(dto.getResponseContent());
         expense.setUpdatedAt(LocalDateTime.now());

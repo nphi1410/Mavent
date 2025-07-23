@@ -3,8 +3,10 @@ package com.mavent.dev.controller;
 import com.mavent.dev.dto.expenses.ExpenseCreateRequestDTO;
 import com.mavent.dev.dto.expenses.ExpenseResponseDTO;
 import com.mavent.dev.dto.expenses.ExpenseUpdateDTO;
+import com.mavent.dev.entity.Budgets;
 import com.mavent.dev.entity.ExpenseAttachments;
 import com.mavent.dev.entity.ExpenseCategories;
+import com.mavent.dev.service.BudgetService;
 import com.mavent.dev.service.ExpenseCategoryService;
 import com.mavent.dev.service.ExpenseService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +20,11 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/{eventId}/expenses")
+@RequestMapping("/api/event/{eventId}/expenses")
 public class ExpensesController {
+
+    @Autowired
+    private BudgetService budgetService;
 
     @Autowired
     private ExpenseService expenseService;
@@ -31,6 +36,12 @@ public class ExpensesController {
     public ResponseEntity<List<ExpenseCategories>> getAllCategories() {
         List<ExpenseCategories> categories = categoryService.getAllExpenseCategories();
         return ResponseEntity.ok(categories);
+    }
+
+    @GetMapping(value = "/budget")
+    public ResponseEntity<Budgets> getBudgetByEventId(@PathVariable int eventId) {
+        Budgets budget = budgetService.findByEventId(eventId);
+        return ResponseEntity.ok(budget);
     }
 
     @PostMapping
@@ -48,20 +59,8 @@ public class ExpensesController {
     public ResponseEntity<ExpenseResponseDTO> createExpenseRequestWithAttachments(
             @PathVariable int eventId,
             @RequestPart("data") ExpenseCreateRequestDTO requestDTO,
-            @RequestParam(value = "files", required = false) List<MultipartFile> files) throws IOException {
+            @RequestPart(value = "files", required = false) List<MultipartFile> files) throws IOException {
 
-        System.out.println("ExpensesController: createExpenseRequestWithAttachments called");
-        System.out.println("Files parameter is null? " + (files == null));
-        if (files != null) {
-            System.out.println("Files size: " + files.size());
-            for (int i = 0; i < files.size(); i++) {
-                System.out.println("File " + i + " name: " + files.get(i).getOriginalFilename());
-                System.out.println("File " + i + " size: " + files.get(i).getSize());
-                System.out.println("File " + i + " content type: " + files.get(i).getContentType());
-            }
-        } else {
-            System.out.println("WARNING: Files list is null - check Postman form setup");
-        }
 
         requestDTO.setEventId(eventId);
         

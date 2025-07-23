@@ -50,7 +50,7 @@ public class ExpensesMapper {
                 .budgetId(dto.getBudgetId())
                 .note(dto.getNote())
                 .status(Status.PENDING)
-                .createdByAccountId(dto.getAccountId())
+                .createdByAccountId(dto.getCreatedByAccountId())
                 .build();
     }
     
@@ -61,7 +61,7 @@ public class ExpensesMapper {
         
         Expenses expenses = new Expenses();
         expenses.setExpenseId(dto.getExpenseId());
-        expenses.setStatus(Status.valueOf(dto.getStatus()));
+        expenses.setStatus(Status.valueOf(dto.getStatus().name()));
         expenses.setApprovedByAccountId(dto.getApprovedByAccountId());
         expenses.setResponseContent(dto.getResponseContent());
         

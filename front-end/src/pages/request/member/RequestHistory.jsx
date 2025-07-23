@@ -86,11 +86,7 @@ export default function RequestHistory() {
   useEffect(() => {
     const filterRequests = () => {
       let filtered = requests;
-      // console.log("Filtering requests with current filters:", {
-      //   typeFilter,
-      //   statusFilter,
-      //   searchTitle,
-      // });
+
       // If no filters are applied, return all requests
       if (!typeFilter && !statusFilter && !searchTitle) {
         // console.log("No filters applied, returning all requests");

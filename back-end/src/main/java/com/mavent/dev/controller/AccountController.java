@@ -582,8 +582,6 @@ public class AccountController {
         }
     }
 
-    // Đã loại bỏ phương thức trùng lặp getEventMembers, sử dụng MemberController ở /api/events/{eventId}/members thay thế
-    // hoặc sử dụng EventController nếu muốn xem thông tin không cần xác thực
 
     @GetMapping("/user/events")
     public ResponseEntity<?> getUserEvents(HttpServletRequest request) {

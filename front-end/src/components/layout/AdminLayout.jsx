@@ -164,7 +164,7 @@ const Layout = () => {
       displayName: 'Expenses',
       icon: <FontAwesomeIcon icon={faMoneyBill1Wave} />,
       link: `expenses`,
-      requiredRole: 'ADMIN'
+      requiredRole: 'MEMBER'
     }
 
   ];
