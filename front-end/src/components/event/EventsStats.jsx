@@ -5,7 +5,9 @@ const EventsStats = ({ events }) => {
         total: events.length,
         upcoming: events.filter((e) => e.status === "UPCOMING").length,
         ongoing: events.filter((e) => e.status === "ONGOING").length,
-        completed: events.filter((e) => e.status === "COMPLETED").length,
+        ended: events.filter((e) => e.status === "ENDED").length,
+        pending: events.filter((e) => e.status === "PENDING").length,
+        cancelled: events.filter((e) => e.status === "CANCELLED").length,
     }
 
     const statCards = [
@@ -16,27 +18,44 @@ const EventsStats = ({ events }) => {
             color: "bg-blue-500",
             bgColor: "bg-blue-50",
         },
+        // {
+        //     title: "Upcoming",
+        //     value: stats.upcoming,
+        //     icon: Clock,
+        //     color: "bg-orange-500",
+        //     bgColor: "bg-orange-50",
+        // },
         {
-            title: "Upcoming",
-            value: stats.upcoming,
+            title: "Ongoing",
+            value: stats.ongoing,
+            icon: Users,
+            color: "bg-gray-500",
+            bgColor: "bg-gray-50",
+        },
+
+        {
+            title: "Pending",
+            value: stats.pending,
             icon: Clock,
             color: "bg-yellow-500",
             bgColor: "bg-yellow-50",
         },
         {
-            title: "Ongoing",
-            value: stats.ongoing,
-            icon: Users,
+            title: "Cancelled",
+            value: stats.cancelled,
+            icon: CheckCircle,
+            color: "bg-red-500",
+            bgColor: "bg-red-50",
+        },
+        {
+            title: "Ended",
+            value: stats.ended,
+            icon: CheckCircle,
             color: "bg-green-500",
             bgColor: "bg-green-50",
         },
-        {
-            title: "Completed",
-            value: stats.completed,
-            icon: CheckCircle,
-            color: "bg-gray-500",
-            bgColor: "bg-gray-50",
-        },
+
+
     ]
 
     return (
