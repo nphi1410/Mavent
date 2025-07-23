@@ -123,10 +123,26 @@ const NotificationModal = ({ isOpen, onClose, onUnreadCountUpdate }) => {
             case 'UPDATE TASK DONE':
             case 'TASK ASSIGNMENT':
             case 'FEEDBACK TASK':
-                navigate('/profile/tasks', { state: { openTaskId: taskId } });
+                if (taskId) {
+                    console.log(`Navigating to task with ID: ${taskId}`);
+                    
+                    getTaskById(taskId).then((task) => {
+                        if (task && task.eventId) {
+                            navigate(`/event/${task.eventId}/staff/tasks`, {
+                                state: { openTaskId: taskId }
+                            });
+                        } else {
+                            console.error("Không tìm thấy eventId trong task");
+                        }
+                    }).catch((err) => {
+                        console.error("Error fetching task details:", err);
+                    });
+                }
                 break;
+
+
             case 'MEETING INVITATION':
-                navigate('/user-center?tab=meetings');
+                navigate(`/events/${eventId}/meetings`);
                 break;
             case 'EVENT FEEDBACK':
                 navigate(`/events/${eventId}/feedback`);
@@ -160,11 +176,12 @@ const NotificationModal = ({ isOpen, onClose, onUnreadCountUpdate }) => {
         const notificationDate = new Date(dateString);
         const diffInMinutes = Math.floor((now - notificationDate) / (1000 * 60));
         if (diffInMinutes < 1) return 'Vừa xong';
-        if (diffInMinutes < 60) return `${diffInMinutes} phút trước`;
-        if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} giờ trước`;
-        return `${Math.floor(diffInMinutes / 1440)} ngày trước`;
+        if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
+        if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} hours ago`;
+        return `${Math.floor(diffInMinutes / 1440)} days ago`;
     };
-
+    console.log('NotificationModal rendered with notifications:', notifications);
+    
     if (!isOpen) return null;
 
     return (

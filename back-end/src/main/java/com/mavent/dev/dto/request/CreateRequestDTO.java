@@ -11,7 +11,7 @@ public class CreateRequestDTO {
     private int accountId;
     private int eventId;
     private Integer taskId;
-    private int departmentId;
+    private Integer departmentId;
     private int requestTypeId;
     private String title;
     private String content;

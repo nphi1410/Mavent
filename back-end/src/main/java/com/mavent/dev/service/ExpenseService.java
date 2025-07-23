@@ -4,9 +4,10 @@ import com.mavent.dev.dto.EventTotalExpenseDTO;
 import com.mavent.dev.dto.ExpenseByCategoryDTO;
 import com.mavent.dev.dto.ExpenseByDepartmentDTO;
 import com.mavent.dev.dto.ExpenseSummaryByStatusDTO;
+import com.mavent.dev.dto.PaymentMethodSummaryDTO; // BỔ SUNG DÒNG NÀY
 
 import java.util.List;
-import java.util.Set;
+import java.util.Set; // Vẫn giữ nếu bạn có các phương thức khác sử dụng Set
 
 public interface ExpenseService {
 
@@ -32,10 +33,12 @@ public interface ExpenseService {
     List<ExpenseByDepartmentDTO> getExpensesByDepartmentForEvent(Integer eventId);
 
     /**
-     * Retrieves all distinct payment methods used in expenses.
-     * @return A set of strings representing distinct payment methods.
+     * Retrieves a summary of total expenses for each distinct payment method for a specific event.
+     * @param eventId The ID of the event.
+     * @return A list of PaymentMethodSummaryDTO, each containing payment method and its total amount.
      */
-    Set<String> getDistinctPaymentMethodsByEventId(Integer eventId);
+    // THAY THẾ PHƯƠNG THỨC CŨ BẰNG PHƯƠNG THỨC NÀY
+    List<PaymentMethodSummaryDTO> getPaymentMethodSummariesByEventId(Integer eventId);
 
     /**
      * Retrieves the count of expenses grouped by their status.

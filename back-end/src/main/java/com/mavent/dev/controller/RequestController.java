@@ -1,14 +1,17 @@
 package com.mavent.dev.controller;
 
 import com.mavent.dev.dto.request.CreateRequestDTO;
+import com.mavent.dev.dto.request.ProcessRequestDTO;
 import com.mavent.dev.dto.request.UpdateRequestDTO;
 import com.mavent.dev.entity.Request;
 import com.mavent.dev.service.AccountService;
 import com.mavent.dev.service.RequestService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -74,6 +77,33 @@ public class RequestController {
         return requestService.updateRequest(updateRequestDTO, requestId)
                 ? ResponseEntity.ok("Request updated successfully")
                 : ResponseEntity.status(400).body("Failed to update request");
+    }
+
+    @PutMapping("/{requestId}/process")
+    public ResponseEntity<?> processRequest(
+            @PathVariable Integer requestId,
+            @RequestBody ProcessRequestDTO processRequestDTO,
+            HttpServletRequest request
+    ) {
+        try {
+            // Lấy thông tin người xử lý từ token
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Token không hợp lệ");
+            }
+            
+            // Extract user info from token và kiểm tra quyền xử lý request
+            
+            boolean success = requestService.processRequest(requestId, processRequestDTO);
+            
+            return success 
+                ? ResponseEntity.ok("Xử lý request thành công")
+                : ResponseEntity.status(400).body("Không thể xử lý request");
+                
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Lỗi khi xử lý request: " + e.getMessage());
+        }
     }
 
 }

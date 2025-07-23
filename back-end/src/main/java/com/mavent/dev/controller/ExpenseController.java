@@ -5,6 +5,7 @@ import com.mavent.dev.dto.ExpenseByCategoryDTO;
 import com.mavent.dev.dto.ExpenseByDepartmentDTO;
 import com.mavent.dev.dto.ExpenseDTO;
 import com.mavent.dev.dto.ExpenseSummaryByStatusDTO;
+import com.mavent.dev.dto.PaymentMethodSummaryDTO; // BỔ SUNG DÒNG NÀY
 import com.mavent.dev.service.ExpenseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Set; // Vẫn giữ nếu có các API khác sử dụng Set
 
 @RestController
 @RequestMapping("/api/expenses")
@@ -57,12 +58,13 @@ public class ExpenseController {
     }
 
     /**
-     * @apiNote Hiển thị ra Các payment method trong bảng expense
-     * @return A ResponseEntity containing a set of distinct payment methods and HTTP status.
+     * @apiNote Hiển thị ra các phương thức thanh toán và tổng số tiền ứng với mỗi phương thức cho một sự kiện.
+     * @param eventId The ID of the event.
+     * @return A ResponseEntity containing a list of PaymentMethodSummaryDTO and HTTP status.
      */
     @GetMapping("/payment-methods/event/{eventId}")
-    public ResponseEntity<Set<String>> getDistinctPaymentMethodsByEventId(@PathVariable Integer eventId) { // <--- Đã sửa đổi tên phương thức và tham số
-        Set<String> paymentMethods = expenseService.getDistinctPaymentMethodsByEventId(eventId); // <--- Gọi phương thức service mới
+    public ResponseEntity<List<PaymentMethodSummaryDTO>> getPaymentMethodSummariesByEventId(@PathVariable Integer eventId) { // THAY ĐỔI Ở ĐÂY
+        List<PaymentMethodSummaryDTO> paymentMethods = expenseService.getPaymentMethodSummariesByEventId(eventId); // THAY ĐỔI Ở ĐÂY
         return ResponseEntity.ok(paymentMethods);
     }
 
@@ -71,8 +73,8 @@ public class ExpenseController {
      * @return A ResponseEntity containing a list of ExpenseSummaryByStatusDTO and HTTP status.
      */
     @GetMapping("/count-by-status/event/{eventId}")
-    public ResponseEntity<List<ExpenseSummaryByStatusDTO>> getExpenseCountByStatusForEvent(@PathVariable Integer eventId) { // <--- Đã sửa đổi tên phương thức và tham số
-        List<ExpenseSummaryByStatusDTO> expenseCount = expenseService.getExpenseCountByStatusForEvent(eventId); // <--- Gọi phương thức service mới
+    public ResponseEntity<List<ExpenseSummaryByStatusDTO>> getExpenseCountByStatusForEvent(@PathVariable Integer eventId) {
+        List<ExpenseSummaryByStatusDTO> expenseCount = expenseService.getExpenseCountByStatusForEvent(eventId);
         return ResponseEntity.ok(expenseCount);
     }
 }

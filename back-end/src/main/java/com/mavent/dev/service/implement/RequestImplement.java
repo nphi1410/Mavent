@@ -1,16 +1,21 @@
 package com.mavent.dev.service.implement;
 
 import com.mavent.dev.dto.request.CreateRequestDTO;
+import com.mavent.dev.dto.request.ProcessRequestDTO;
 import com.mavent.dev.dto.request.RequestDTO;
 import com.mavent.dev.dto.request.UpdateRequestDTO;
 import com.mavent.dev.entity.Request;
+import com.mavent.dev.entity.TaskAttendee;
 import com.mavent.dev.mapper.RequestMapper;
 import com.mavent.dev.repository.RequestRepository;
+import com.mavent.dev.repository.TaskAttendeeRepository;
 import com.mavent.dev.service.AccountService;
 import com.mavent.dev.service.RequestService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,7 +25,10 @@ public class RequestImplement implements RequestService {
     @Autowired
     RequestRepository requestRepository;
     @Autowired
+    @Lazy
     private AccountService accountService;
+    @Autowired
+    private TaskAttendeeRepository taskAttendeeRepository;
 
     @Override
     public List<RequestDTO> getRequestByAccountAndEventId(Integer accountId, Integer eventId) {
@@ -69,6 +77,7 @@ public class RequestImplement implements RequestService {
         try {
             Request request = RequestMapper.toEntity(requestDTO);
             request.setCreatedAt(LocalDateTime.now());
+            request.setStatus(Request.Status.PENDING);
             requestRepository.save(request);
             return true;
         } catch (Exception e) {
@@ -93,6 +102,52 @@ public class RequestImplement implements RequestService {
 //            System.out.println("Request updated successfully: " + requestDTO.getRequestId());
 //            Request newRequest = requestRepository.findByRequestId(requestId);
 //            System.out.println("New Request Details: " + newRequest.getStatus());
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    @Transactional
+    public boolean processRequest(Integer requestId, ProcessRequestDTO processRequestDTO) {
+        try {
+            Request request = requestRepository.findByRequestId(requestId);
+            if (request == null || !request.getStatus().equals(Request.Status.PENDING)) {
+                return false;
+            }
+
+            // Cập nhật request
+            request.setStatus(Request.Status.valueOf(processRequestDTO.getStatus()));
+            request.setResponseByAccountId(processRequestDTO.getResponseByAccountId());
+            request.setResponseContent(processRequestDTO.getResponseContent());
+            request.setUpdatedAt(LocalDateTime.now());
+            requestRepository.save(request);
+
+            // Nếu là cancel task request và được approve
+            if (request.getRequestTypeId() == 4 && "APPROVED".equals(processRequestDTO.getStatus())) {
+                // Cập nhật status của attendee thành DECLINED
+                TaskAttendee attendee = taskAttendeeRepository
+                        .findByTaskIdAndAccountId(request.getTaskId(), request.getRequestByAccountId())
+                        .orElse(null);
+
+                if (attendee != null) {
+                    attendee.setStatus(TaskAttendee.Status.DECLINED);
+                    taskAttendeeRepository.save(attendee);
+                }
+            } else if (request.getRequestTypeId() == 4 && "REJECTED".equals(processRequestDTO.getStatus())) {
+                // Nếu request bị reject, đưa attendee về trạng thái INVITED
+                TaskAttendee attendee = taskAttendeeRepository
+                        .findByTaskIdAndAccountId(request.getTaskId(), request.getRequestByAccountId())
+                        .orElse(null);
+
+                if (attendee != null) {
+                    attendee.setStatus(TaskAttendee.Status.INVITED);
+                    taskAttendeeRepository.save(attendee);
+                }
+            }
+
             return true;
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getUserTasks, getUserEvents, getUserProfile } from '../../services/profileService';
+import { getUserTasks, getUserEvents, getUserProfile, getUserRoleInEvent } from '../../services/profileService';
 import TaskCard from './TaskCard';
 import TaskDashboard from './TaskDashboard';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
@@ -30,6 +30,7 @@ const UserTasksContent = () => {
   });
   const { id: eventId } = useParams();
   const [eventName, setEventName] = useState('');
+  const [userRole, setUserRole] = useState(null); // Thêm state cho user role
   const [loading, setLoading] = useState(true);
   const [filterLoading, setFilterLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -50,22 +51,23 @@ const UserTasksContent = () => {
       setLoading(true);
       try {
         const [tasks, events] = await Promise.all([
-          getUserTasks({}), // Bỏ filter eventName ở đây
+          getUserTasks({}),
           getUserEvents()
         ]);
         const taskList = Array.isArray(tasks) ? tasks : [];
-        setEvents(events); // Set events để sử dụng cho filter
+        setEvents(events);
 
         const matchedEvent = events.find(e => e.eventId === parseInt(eventId));
         if (matchedEvent) {
           setEventName(matchedEvent.eventName);
+          setUserRole(matchedEvent.role); // Lưu role của user trong event này
         }
 
         // Lọc task theo eventId
         const activeTasks = filterActiveTasks(taskList)
           .filter(task => task.eventId === parseInt(eventId));
 
-        setAllTasks(taskList.filter(task => task.eventId === parseInt(eventId))); // Chỉ lưu tasks của event này
+        setAllTasks(taskList.filter(task => task.eventId === parseInt(eventId)));
         setDisplayTasks(activeTasks);
       } catch (err) {
         if (err.response?.status === 401) {
@@ -78,7 +80,8 @@ const UserTasksContent = () => {
       }
     };
     fetchInitialData();
-  }, [navigate, eventId]); // Thêm eventId vào dependency
+  }, [navigate, eventId]);
+  console.log(userRole);
 
   useEffect(() => {
     const fetchFilteredTasks = async () => {
@@ -93,14 +96,12 @@ const UserTasksContent = () => {
           status: statusString || undefined,
           priority: filters.priority || undefined,
           sortOrder: filters.sortOrder || undefined,
-          eventName: eventName || undefined // Sử dụng eventName thay vì filters.eventName
+          eventName: eventName || undefined
         });
 
         let fetchedTasks = Array.isArray(response) ? response : [];
-        // Lọc theo eventId
         fetchedTasks = fetchedTasks.filter(task => task.eventId === parseInt(eventId));
 
-        // Filter by role (only on frontend)
         if (filters.role && userProfile) {
           const userId = userProfile.id;
           if (filters.role === "CREATOR") {
@@ -144,10 +145,9 @@ const UserTasksContent = () => {
       const timeoutId = setTimeout(fetchFilteredTasks, 300);
       return () => clearTimeout(timeoutId);
     } else {
-      // Khi không có filter, hiển thị tasks đã được lọc theo eventId
       setDisplayTasks(filterActiveTasks(allTasks));
     }
-  }, [filters, allTasks, userProfile, eventName, eventId]); // Thêm eventName và eventId
+  }, [filters, allTasks, userProfile, eventName, eventId]);
 
   const indexOfLastTask = currentPage * tasksPerPage;
   const indexOfFirstTask = indexOfLastTask - tasksPerPage;
@@ -178,14 +178,12 @@ const UserTasksContent = () => {
         status: statusString || undefined,
         priority: filters.priority || undefined,
         sortOrder: filters.sortOrder || undefined,
-        eventName: eventName || undefined // Sử dụng eventName
+        eventName: eventName || undefined
       });
 
       let fetchedTasks = Array.isArray(response) ? response : [];
-      // Lọc theo eventId
       fetchedTasks = fetchedTasks.filter(task => task.eventId === parseInt(eventId));
 
-      // Apply role filter again
       if (filters.role && userProfile) {
         const userId = userProfile.id;
         if (filters.role === "CREATOR") {
@@ -245,14 +243,11 @@ const UserTasksContent = () => {
     setOpenTaskId(null);
   };
 
+  // Kiểm tra quyền tạo task
+  const canCreateTask = userRole === 'ADMIN' || userRole === 'DEPARTMENT_MANAGER';
+
   if (loading) return <div className="text-center py-10">Loading...</div>;
   if (error) return <div className="text-center text-red-500 py-10">{error}</div>;
-  console.log('Display Tasks:', displayTasks);
-  console.log('Filtered Tasks:', filteredTasks);
-  console.log('All Tasks:', allTasks);
-
-  console.log(eventId);
-
 
   return (
     <>
@@ -266,20 +261,36 @@ const UserTasksContent = () => {
               )}
             </div>
             <div className="flex gap-4">
-              <button
-                onClick={openCreateModal}
-                className="bg-[#00155c] hover:bg-[#172c70] text-white px-4 py-2 rounded-lg"
+              {/* Chỉ hiển thị nút Create Task cho ADMIN và DEPARTMENT_MANAGER */}
+              {canCreateTask && (
+                <button
+                  onClick={openCreateModal}
+                  className="bg-[#00155c] hover:bg-[#172c70] text-white px-4 py-2 rounded-lg"
+                >
+                  Create Task
+                </button>
+              )}
+              {/* Thêm link đến trang Task Cancel Requests */}
+              <Link
+                to={`/event/${eventId}/staff/tasks/requests`}
+                className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
               >
-                Create Task
-              </button>
-              <Link to={`/event/${eventId}/staff/tasks/history`} className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Task Requests
+              </Link>
+              <Link
+                to={`/event/${eventId}/staff/tasks/history`}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg"
+              >
                 View Task History
               </Link>
             </div>
           </div>
 
           <TaskDashboard
-            tasks={allTasks} // Sử dụng allTasks vì đã được lọc theo eventId
+            tasks={allTasks}
             isFiltered={false}
             currentUserId={userProfile?.id}
           />
@@ -334,7 +345,7 @@ const UserTasksContent = () => {
                   <select
                     value={filters[name]}
                     onChange={(e) => handleFilterChange(name, e.target.value)}
-                    className="max-w-40 appearance-none px-4 py-2 border rounded-lg bg-white pr-8"
+                    className="focus:outline-none focus:ring-0 shadow-sm hover:shadow-lg transition-all duration-300 max-w-40 appearance-none px-4 py-2 rounded-lg pr-8"
                   >
                     {options.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -359,7 +370,7 @@ const UserTasksContent = () => {
               <input
                 type="text"
                 placeholder="Search by task name..."
-                className="max-w-60 sm:w-80 pl-10 pr-4 py-2 border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="focus:outline-none focus:ring-0 max-w-60 sm:w-80 pl-10 pr-4 py-2 shadow-sm hover:shadow-lg transition-all duration-300 rounded-lg bg-white"
                 value={filters.keyword}
                 onChange={(e) => handleFilterChange("keyword", e.target.value)}
               />
@@ -387,12 +398,10 @@ const UserTasksContent = () => {
           ) : displayTasks.length > 0 ? (
             <div className="bg-white rounded-lg shadow overflow-x-auto">
               <table className="min-w-full table-fixed">
-                {/* Thêm table-fixed để kiểm soát chiều rộng cột */}
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="w-12 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
                     <th className="w-48 md:w-64 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    {/* <th className="w-36 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event</th> */}
                     <th className="w-32 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
                     <th className="w-24 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th className="w-24 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
@@ -477,13 +486,16 @@ const UserTasksContent = () => {
             </div>
           )}
 
-          <CreateTaskModal
-            isOpen={isCreateModalOpen}
-            onClose={closeCreateModal}
-            onTaskCreated={refreshTasks}
-            eventId={eventId}
-            eventName={eventName}
-          />
+          {/* Chỉ render CreateTaskModal nếu user có quyền */}
+          {canCreateTask && (
+            <CreateTaskModal
+              isOpen={isCreateModalOpen}
+              onClose={closeCreateModal}
+              onTaskCreated={refreshTasks}
+              eventId={eventId}
+              eventName={eventName}
+            />
+          )}
 
         </div>
       </main>
