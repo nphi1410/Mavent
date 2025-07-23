@@ -22,8 +22,8 @@ import {
 } from '../../services/expenseService';
 
 import { getEventById } from '../../services/eventService';
+import ExpenseExportButton from '../../components/export/ExpenseExportButton';
 
-// Đăng ký các thành phần của Chart.js
 ChartJS.register(
     CategoryScale,
     LinearScale,
@@ -507,6 +507,8 @@ function AdminViewExpense() {
                             <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">Dashboard Expense Overview</h1>
                             <p className="text-gray-600 mt-2">Event: {eventName}</p>
                         </div>
+                        {/* BỔ SUNG DÒNG NÀY */}
+                        <ExpenseExportButton eventId={id} fileName={`expense_report_event_${id}`} />
                     </div>
                 </div>
 
