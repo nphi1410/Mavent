@@ -1,6 +1,8 @@
 package com.mavent.dev.service.implement;
 
+import com.mavent.dev.entity.EventSponsorship;
 import com.mavent.dev.entity.Sponsor;
+import com.mavent.dev.repository.EventSponsorshipRepository;
 import com.mavent.dev.repository.SponsorRepository;
 import com.mavent.dev.service.SponsorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,8 @@ import java.util.List;
 public class SponsorImplement implements SponsorService {
     @Autowired
     private SponsorRepository repository;
+    @Autowired
+    private EventSponsorshipRepository eventSponsorshipRepository;
 
     @Override
     public Page<Sponsor> filterSponsor(String name, String industry, Pageable pageable) {
@@ -43,6 +47,13 @@ public class SponsorImplement implements SponsorService {
 
     @Override
     public void delete(Integer id) {
+        EventSponsorship eventSponsorship = eventSponsorshipRepository.findTopBySponsorId(id);
+        if(eventSponsorship != null){
+            Sponsor existed = repository.findBySponsorId(id);
+            existed.setIsDeleted(true);
+            repository.save(existed);
+            return;
+        }
         repository.deleteById(id);
     }
 }
