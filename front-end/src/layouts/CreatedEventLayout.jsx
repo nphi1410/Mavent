@@ -6,7 +6,7 @@ import { Menu } from "lucide-react"
 import CreatedEventsSidebar from "./CreatedEventSidebar"
 
 const CreatedEventLayout = () => {
-    const [sidebarOpen, setSidebarOpen] = useState(false)
+    const [sidebarOpen, setSidebarOpen] = useState(true)
     // console.log("CreatedEventLayout rendered")
 
     return (

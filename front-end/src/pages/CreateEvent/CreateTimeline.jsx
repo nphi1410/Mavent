@@ -9,6 +9,7 @@ const CreateTimeline = ({ isUpdatePage = false }) => {
     const { eventId } = useParams();
     const [event, setEvent] = useState('null');
     const navigate = useNavigate();
+    const [hasSavedTimeline, setHasSavedTimeline] = useState(false);
 
     const [stages, setStages] = useState([
         { title: '', description: '', startDate: '' },
@@ -25,13 +26,14 @@ const CreateTimeline = ({ isUpdatePage = false }) => {
             const fetchTimeline = async () => {
                 try {
                     const timelineData = await getTimelinesByEventId(eventId);
-                    // console.log("Fetched timeline data:", timelineData);
-                    if (timelineData) {
+                    console.log("Fetched timeline data:", timelineData);
+                    if (timelineData?.length > 0) {
                         setStages(timelineData.map(stage => ({
                             title: stage.timelineTitle || '',
                             description: stage.timelineDescription || '',
                             startDate: stage.timelineDatetime || '',
                         })));
+                        setHasSavedTimeline(true);
                     }
                 } catch (error) {
                     console.error("Error fetching timeline:", error);
@@ -40,6 +42,7 @@ const CreateTimeline = ({ isUpdatePage = false }) => {
             fetchTimeline();
         }
     }, [eventId]);
+    console.log("Stages state:", stages);   
 
 
     const handleChange = (index, field, value) => {
@@ -173,7 +176,7 @@ const CreateTimeline = ({ isUpdatePage = false }) => {
 
                 {/* Save Button */}
                 {
-                    !isUpdatePage && (
+                    !isUpdatePage && hasSavedTimeline && (
                         <div>
                             <div
                                 className="border-2 border-dashed border-gray-300 rounded-lg text-center py-6 cursor-pointer hover:bg-gray-50 transition"

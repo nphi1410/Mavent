@@ -9,12 +9,12 @@ const CreatedEventsSidebar = ({ isOpen, setIsOpen }) => {
     const route = `/profile/created-events/${eventId}`
 
     const menuItems = [
-        // {
-        //     title: "Dashboard",
-        //     icon: Home,
-        //     path: "/profile/created-events",
-        //     description: "View all events",
-        // },
+        {
+            title: "Dashboard",
+            icon: Home,
+            path: "/profile/created-events",
+            description: "View all events",
+        },
         // {
         //     title: "Create Event",
         //     icon: Plus,
@@ -75,7 +75,7 @@ const CreatedEventsSidebar = ({ isOpen, setIsOpen }) => {
             >
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                    <h2 className="text-xl font-bold text-gray-800">Event Manager</h2>
+                    <h2 className="text-xl font-bold text-gray-800">Event Fields</h2>
                     <button onClick={() => setIsOpen(false)} className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
                         <X className="w-5 h-5" />
                     </button>
@@ -90,7 +90,11 @@ const CreatedEventsSidebar = ({ isOpen, setIsOpen }) => {
                         return (
                             <button
                                 key={index}
-                                onClick={() => handleNavigation(route + item.path)}
+                                onClick={() => {
+                                    item.title.toLowerCase().includes("dashboard") ?
+                                        handleNavigation(item.path) :
+                                        handleNavigation(route + item.path)
+                                }}
                                 className={`
                   w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors
                   ${active ? "bg-green-100 text-green-700 border border-green-200" : "hover:bg-gray-100 text-gray-700"}

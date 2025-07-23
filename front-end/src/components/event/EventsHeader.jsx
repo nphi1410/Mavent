@@ -5,6 +5,7 @@ import { Plus, Search, Filter } from "lucide-react"
 const EventsHeader = ({ searchTerm, setSearchTerm, statusFilter, setStatusFilter, onCreateEvent }) => {
   const statusOptions = [
     { value: "ALL", label: "All Events" },
+    { value: "PENDING", label: "Pending" },
     { value: "UPCOMING", label: "Upcoming" },
     { value: "ONGOING", label: "Ongoing" },
     { value: "COMPLETED", label: "Completed" },
