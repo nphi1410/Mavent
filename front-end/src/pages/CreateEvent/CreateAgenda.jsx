@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClock, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { createAgendaItem, getAgendaItemsByEventId } from '../../services/agendaService'; // giả định bạn đã có service này
-import { set } from 'react-hook-form';
 
 const CreateAgenda = ({isUpdatePage = false}) => {
     const navigate = useNavigate();
@@ -17,7 +16,7 @@ const CreateAgenda = ({isUpdatePage = false}) => {
         const fetchAgendas = async () => {
             try {
                 const response = await getAgendaItemsByEventId(eventId);
-                if (response) setAgendas(response.map(item => ({
+                if (response?.length > 0) setAgendas(response.map(item => ({
                     title: item.agendaTitle || '',
                     description: item.agendaDescription || '',
                     startTime: item.agendaStartTime || '',
