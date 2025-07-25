@@ -176,7 +176,7 @@ const CreateTimeline = ({ isUpdatePage = false }) => {
 
                 {/* Save Button */}
                 {
-                    !isUpdatePage && hasSavedTimeline && (
+                    !isUpdatePage && (
                         <div>
                             <div
                                 className="border-2 border-dashed border-gray-300 rounded-lg text-center py-6 cursor-pointer hover:bg-gray-50 transition"
