@@ -34,7 +34,7 @@ export const getFilterEvents = async ({
 export const getEvents = async () => {
   try {
     const response = await Api.get("/events");
-    
+
     return response.data;
   } catch (error) {
     console.error("Error fetching events:", error);
@@ -54,34 +54,60 @@ export const getEventById = async (id) => {
 };
 
 // Tạo sự kiện (gửi multipart/form-data)
-export const createEvent = async (eventData, bannerFile, posterFile) => {
+export const createEvent = async (eventData, bannerFile, posterFile, selectedTags = []) => {
   try {
     const formData = new FormData();
-    formData.append("event", JSON.stringify(eventData)); // Dữ liệu JSON
-    formData.append("banner", bannerFile);               // File banner
-    formData.append("poster", posterFile);               // File poster
 
-    const response = await Api.post("/events/create-event", formData, {
+    // Thêm event data dưới dạng JSON string
+    formData.append('event', JSON.stringify(eventData));
+
+    // Thêm files
+    formData.append('banner', bannerFile);
+    formData.append('poster', posterFile);
+
+    // Thêm tags dưới dạng JSON string nếu có
+    if (selectedTags && selectedTags.length > 0) {
+      formData.append('tags', JSON.stringify(selectedTags));
+    }
+
+    // SỬA: Xóa Content-Type header để browser tự set cho multipart/form-data
+    const response = await Api.post('/events/create-event', formData, {
       headers: {
-        "Content-Type": "multipart/form-data",
+        'Content-Type': undefined, // Force remove Content-Type
       },
     });
 
-    const createdEvent = response.data;
-    const eventId = createdEvent?.eventId;
-
     return {
       success: true,
-      eventId: eventId,
-      data: createdEvent,
+      eventId: response.data.eventId,
+      data: response.data,
     };
+
   } catch (error) {
-    console.error("Error creating event:", error);
-    const errorMessage =
-      error.response?.data?.message ||
-      error.message ||
-      "Đã có lỗi không mong muốn xảy ra.";
-    return { success: false, message: errorMessage };
+    console.error('Error creating event:', error);
+    let errorMessage = 'Tạo sự kiện thất bại';
+    
+    if (error.response && error.response.data) {
+      // Nếu response.data là string, dùng trực tiếp
+      if (typeof error.response.data === 'string') {
+        errorMessage = error.response.data;
+      } 
+      // Nếu response.data là object có message
+      else if (error.response.data.message) {
+        errorMessage = error.response.data.message;
+      }
+      // Nếu response.data là object khác, convert to string
+      else {
+        errorMessage = JSON.stringify(error.response.data);
+      }
+    } else if (error.message) {
+      errorMessage = 'Lỗi kết nối: ' + error.message;
+    }
+
+    return {
+      success: false,
+      message: errorMessage,
+    };
   }
 };
 

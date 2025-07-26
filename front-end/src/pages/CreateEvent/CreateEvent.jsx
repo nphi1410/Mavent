@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createEvent, getEventById } from "../../services/eventService";
 import { getAllLocations } from "../../services/EventLocationService";
+import { getAllTags } from "../../services/eventTagService"; // Thêm import cho tag service
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from 'jwt-decode';
 
@@ -28,6 +29,10 @@ const CreateEvent = ({ isUpdatePage = false }) => {
     const [bannerFile, setBannerFile] = useState(null);
     const [posterFile, setPosterFile] = useState(null);
 
+    // Thêm state cho tags
+    const [availableTags, setAvailableTags] = useState([]);
+    const [selectedTags, setSelectedTags] = useState([]);
+
     const navigate = useNavigate();
 
     const [loading, setLoading] = useState(false);
@@ -40,7 +45,21 @@ const CreateEvent = ({ isUpdatePage = false }) => {
             const data = await getAllLocations();
             setLocations(data);
         };
+        
+        // Thêm fetch tags
+        const fetchTags = async () => {
+            try {
+                const tags = await getAllTags();
+                setAvailableTags(tags);
+                console.log("Fetched tags:", tags);
+            } catch (error) {
+                console.error("Error fetching tags:", error);
+            }
+        };
+
         fetchLocations();
+        fetchTags(); // Gọi fetch tags
+
         if (isUpdatePage) {
             const eventId = window.location.pathname.split("/").pop();
             const fetchCreatedEvent = async () => {
@@ -96,6 +115,19 @@ const CreateEvent = ({ isUpdatePage = false }) => {
         setSuccessMessage("");
     };
 
+    // Thêm function xử lý chọn/bỏ chọn tags
+    const handleTagToggle = (tagId) => {
+        setSelectedTags(prev => {
+            if (prev.includes(tagId)) {
+                return prev.filter(id => id !== tagId);
+            } else {
+                return [...prev, tagId];
+            }
+        });
+        setErrorMessage("");
+        setSuccessMessage("");
+    };
+
     const validateForm = () => {
         const {
             name,
@@ -124,8 +156,11 @@ const CreateEvent = ({ isUpdatePage = false }) => {
         if (maxParticipantNumber < maxMemberNumber)
             return setError("Số người tham gia không được nhỏ hơn số thành viên.");
 
-        if (!bannerFile) return setError("Vui lòng chọn ảnh banner.");
-        if (!posterFile) return setError("Vui lòng chọn ảnh poster.");
+        // SỬA: Chỉ validate file khi không phải update mode
+        if (!isUpdatePage) {
+            if (!bannerFile) return setError("Vui lòng chọn ảnh banner.");
+            if (!posterFile) return setError("Vui lòng chọn ảnh poster.");
+        }
 
         return true;
     };
@@ -146,7 +181,16 @@ const CreateEvent = ({ isUpdatePage = false }) => {
             return;
         }
 
-        const result = await createEvent(formData, bannerFile, posterFile);
+        // Debug: Log tất cả data trước khi gửi
+        console.log("=== DEBUG CREATE EVENT ===");
+        console.log("Selected Tags:", selectedTags);
+        console.log("Form Data:", formData);
+        console.log("Banner File:", bannerFile);
+        console.log("Poster File:", posterFile);
+        console.log("========================");
+
+        // Cập nhật call createEvent với selectedTags
+        const result = await createEvent(formData, bannerFile, posterFile, selectedTags);
 
         if (result.success) {
             setSuccessMessage("Tạo sự kiện thành công!");
@@ -276,6 +320,33 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                         </select>
                     </div>
 
+                    {/* Thêm phần chọn Tags - SỬA LẠI PROPERTY NAME */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Tags sự kiện
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                            {availableTags.map((tag) => (
+                                <button
+                                    key={tag.tagId}
+                                    type="button"
+                                    onClick={() => handleTagToggle(tag.tagId)}
+                                    className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+                                        selectedTags.includes(tag.tagId)
+                                            ? 'bg-green-600 text-white border-green-600'
+                                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    {tag.name}
+                                </button>
+                            ))}
+                        </div>
+                        {selectedTags.length > 0 && (
+                            <p className="text-sm text-gray-500 mt-2">
+                                Đã chọn {selectedTags.length} tag(s)
+                            </p>
+                        )}
+                    </div>
 
                     {/* D-Day Info */}
                     <div>
