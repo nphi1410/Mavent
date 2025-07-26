@@ -5,12 +5,6 @@ import { getUserInfoInEvent } from "../services/userEventService";
 import RedirectPage from "../pages/UserAuthorization/UnauthorizedAccess";
 import { set } from "react-hook-form";
 
-// Utility function to check login status
-const isLoggedIn = () => {
-  const token = sessionStorage.getItem("token");
-  return !!token;
-};
-
 function parseJwt(token) {
   const base64Url = token.split('.')[1];
   const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -24,6 +18,7 @@ function parseJwt(token) {
 }
 
 const ProtectedRoute = ({ isRequiredToHaveRole, requiredRoles, children }) => {
+  const token = sessionStorage.getItem("token");
   const { id: eventId } = useParams();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -40,12 +35,10 @@ const ProtectedRoute = ({ isRequiredToHaveRole, requiredRoles, children }) => {
     const payload = parseJwt(token);
     if (Date.now() > new Date(payload.exp * 1000)) {
       logout();
-    } else {
-      setIsTokenExpired(false);
     }
     setLoading(true);
 
-    if (!isLoggedIn()) {
+    if (!token) {
       // console.log("User not logged in, redirecting");
       return;
     }
@@ -73,7 +66,7 @@ const ProtectedRoute = ({ isRequiredToHaveRole, requiredRoles, children }) => {
     return <div>Loading...</div>;
   }
 
-  if (!isLoggedIn()) {
+  if (!token) {
     // console.log("User not logged in, redirecting");
     return <RedirectPage
       message={`You must be logged in first!`}
