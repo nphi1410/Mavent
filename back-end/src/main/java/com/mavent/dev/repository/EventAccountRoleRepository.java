@@ -362,4 +362,6 @@ public interface EventAccountRoleRepository extends JpaRepository<EventAccountRo
             """, nativeQuery = true)
     List<MemberDTO> findSponsorManageable(@Param("eventId") Integer eventId);
 
+    void deleteByEventIdAndAccountId(Integer eventId, Integer accountId);
+
 }

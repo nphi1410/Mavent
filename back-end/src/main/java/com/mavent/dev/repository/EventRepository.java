@@ -14,18 +14,41 @@ import java.util.List;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Integer> {
+
+
     Event findByEventId(Integer eventId);
+    @Query(value = """
+            SELECT 
+            e.*,
+            a.full_name as CreatedByName,
+            a.avatar_url as CreatedByAvatar,
+            l.location_name as locationName,
+            AVG(f.rating) AS avgRating,
+            COUNT(DISTINCT er.account_id) AS totalParticipants
+        FROM events e
+        LEFT JOIN event_feedback f ON e.event_id = f.event_id
+        LEFT JOIN event_account_role er ON e.event_id = er.event_id
+        LEFT JOIN accounts a ON e.created_by_account_id = a.account_id
+        LEFT JOIN locations l ON l.location_id = e.location_id
+        WHERE e.event_id = :eventId
+            """, nativeQuery = true)
+    FilterEventDTO findDetailsByEventId(@Param("eventId") Integer eventId);
     long countByIsDeletedFalse(); //Dem tong so event dang hoat dong
     long countByStatusAndIsDeletedFalse(Event.EventStatus status);
     @Query(value = """
         SELECT 
             e.*,
+            a.full_name as CreatedByName,
+            a.avatar_url as CreatedByAvatar,
+            l.location_name as locationName,
             AVG(f.rating) AS avgRating,
-            COUNT(DISTINCT er.account_id) AS total_participants
+            COUNT(DISTINCT er.account_id) AS totalParticipants
         FROM events e
         LEFT JOIN event_tags et ON e.event_id = et.event_id
         LEFT JOIN event_feedback f ON e.event_id = f.event_id
         LEFT JOIN event_account_role er ON e.event_id = er.event_id
+        LEFT JOIN accounts a ON e.created_by_account_id = a.account_id
+        LEFT JOIN locations l ON l.location_id = e.location_id
         WHERE (:name IS NULL OR e.name LIKE CONCAT('%', :name, '%'))
           AND (:status IS NULL OR e.status = :status)
           AND (:type IS NULL OR (
@@ -36,7 +59,7 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
           AND (:tagCheck = FALSE OR et.tag_id IN (:tagIds))
         GROUP BY e.event_id
         ORDER BY
-         CASE WHEN :isTrending = TRUE THEN total_participants ELSE NULL END DESC,
+         CASE WHEN :isTrending = TRUE THEN totalParticipants ELSE NULL END DESC,
          CASE WHEN :sortType = 'START_DATE_ASC' THEN e.start_datetime END ASC,
          CASE WHEN :sortType = 'START_DATE_DESC' THEN e.start_datetime END DESC,
          CASE WHEN :sortType = 'END_DATE_ASC' THEN e.end_datetime END ASC,

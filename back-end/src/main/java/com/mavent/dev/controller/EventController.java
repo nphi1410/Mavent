@@ -188,8 +188,8 @@ public class EventController {
 
     //Get Event By ID
     @GetMapping("/{id}")
-    public Event getEventById(@PathVariable("id") Integer eventId) {
-        return eventService.getEventEntityById(eventId);
+    public FilterEventDTO getEventById(@PathVariable("id") Integer eventId) {
+        return eventService.getEventDetailsById(eventId);
     }
 
     @GetMapping("/{eventId}/user")
