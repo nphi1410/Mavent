@@ -6,7 +6,7 @@ import {
   faClock,
 } from "@fortawesome/free-solid-svg-icons";
 import { getDashboardMetrics } from "../../services/superadmin/DashboardService";
-import { getEvents } from "../../services/eventService";
+import { getEvents } from "../../services/EventService";
 import { Line, Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
