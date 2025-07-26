@@ -104,32 +104,39 @@ function App() {
                 <Layout />
               }
             >
-              {/* Route for all roles (MEMBER, DEPARTMENT_MANAGER, ADMIN) */}
-              <Route element={<ProtectedRoute isRequiredToHaveRole={true} />}>
+              {/* Route for all roles (PARTICIPANT, MEMBER, DEPARTMENT_MANAGER, ADMIN) */}
+              <Route element={<ProtectedRoute isRequiredToHaveRole={true} requiredRoles={["PARTICIPANT", "MEMBER", "DEPARTMENT_MANAGER", "ADMIN"]} />}>
                 <Route index element={<EventDetailsByRoles />} />
                 <Route path="details" element={<EventDetailsByRoles />} />
+              </Route>
+
+              {/* Routes for event staff only */}
+              <Route element={<ProtectedRoute isRequiredToHaveRole={true} requiredRoles={["MEMBER", "DEPARTMENT_MANAGER", "ADMIN"]} />}>
                 <Route path="tasks" element={<UserTasksPage />} />
                 <Route path="tasks/history" element={<TaskHistory />} />
                 <Route path="tasks/requests" element={<RejectTaskRequest />} />
                 <Route path="documents" element={<DocumentsPage />} />
-              </Route>
-
-              {/* Routes for event admin only */}
-              <Route element={<ProtectedRoute isRequiredToHaveRole={true} requiredRoles={["ADMIN"]} />}>
-                <Route path="members" element={<EventMemberPage />} />
-                <Route path="departments" element={<DepartmentManagementPage />} />
-                <Route path="feedback" element={<ViewEventFeedback />} />
-                <Route path="requests" element={(<RequestHistory />)} />
-                <Route path="create-feedback" element={<ParticipantFeedbackEvent />} />
-                {/* <Route path="expenses" element={<EventExpense />} /> */}
                 <Route path="expenses-requests" element={<ExpenseRequestHistory />} />
-                <Route path="income" element={<AdminViewIncome />} />
-                <Route path="expenses" element={<AdminViewExpense />} />
+                <Route path="requests" element={(<RequestHistory />)} />
                 <Route path="sponsorship" element={<SponsorshipPage />} />
                 <Route
                   path="sponsorship-packages"
                   element={<SponsorshipPackagesPage />}
                 />
+              </Route>
+
+              {/* Routes for event admin and department manager only */}
+              <Route element={<ProtectedRoute isRequiredToHaveRole={true} requiredRoles={["ADMIN", "DEPARTMENT_MANAGER"]} />}>
+                <Route path="members" element={<EventMemberPage />} />
+                {/* <Route path="expenses" element={<EventExpense />} /> */}
+
+              </Route>
+
+              <Route element={<ProtectedRoute isRequiredToHaveRole={true} requiredRoles={["ADMIN"]} />}>
+                <Route path="feedback" element={<ViewEventFeedback />} />
+                <Route path="departments" element={<DepartmentManagementPage />} />
+                <Route path="income" element={<AdminViewIncome />} />
+                <Route path="expenses" element={<AdminViewExpense />} />
               </Route>
 
               {/* Routes for participant only */}
