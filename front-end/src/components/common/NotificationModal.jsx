@@ -124,7 +124,7 @@ const NotificationModal = ({ isOpen, onClose, onUnreadCountUpdate }) => {
             case 'TASK ASSIGNMENT':
             case 'FEEDBACK TASK':
                 if (taskId) {
-                    console.log(`Navigating to task with ID: ${taskId}`);
+                    // console.log(`Navigating to task with ID: ${taskId}`);
                     
                     getTaskById(taskId).then((task) => {
                         if (task && task.eventId) {
@@ -180,7 +180,7 @@ const NotificationModal = ({ isOpen, onClose, onUnreadCountUpdate }) => {
         if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} hours ago`;
         return `${Math.floor(diffInMinutes / 1440)} days ago`;
     };
-    console.log('NotificationModal rendered with notifications:', notifications);
+    // console.log('NotificationModal rendered with notifications:', notifications);
     
     if (!isOpen) return null;
 

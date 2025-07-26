@@ -45,10 +45,6 @@ export const getExpensesByAccount = async (eventId, accountId) => {
 
 export const createExpenseRequest = async (eventId, expenseData, files) => {
     try{
-        if (!eventId || isNaN(eventId)) {
-            throw new Error(`Invalid eventId: ${eventId}`);
-        }
-        
    
         const formData = new FormData();
         
@@ -57,7 +53,7 @@ export const createExpenseRequest = async (eventId, expenseData, files) => {
             type: 'application/json'
         });
         formData.append('data', dataBlob);
-        console.log('Added data part with JSON blob:', JSON.stringify(expenseData));
+        // console.log('Added data part with JSON blob:', JSON.stringify(expenseData));
         
        
         if (files && files.length > 0) {
@@ -66,24 +62,23 @@ export const createExpenseRequest = async (eventId, expenseData, files) => {
                 const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
                 if (validImageTypes.includes(file.type) && file.size <= 10 * 1024 * 1024) {
                     formData.append('files', file);
-                    console.log(`Added file: ${file.name}, size: ${file.size}, type: ${file.type}`);
+                    // console.log(`Added file: ${file.name}, size: ${file.size}, type: ${file.type}`);
                 } else {
                     console.warn(`Skipping invalid file: ${file.name}, size: ${file.size}, type: ${file.type}`);
                 }
             });
         }
-        
+
         // Tạo URL endpoint
         const endpoint = `/event/${eventId}/expenses/with-attachments`;
-        console.log(`Sending request to: ${endpoint}`);
+        // console.log(`Sending request to: ${endpoint}`);
         
-
         const config = {
             headers: {
                 'Content-Type': 'multipart/form-data'
             },
             // Thời gian chờ dài hơn cho việc upload file
-            timeout: 60000 // 60 seconds
+            timeout: 60000 
         };
         
         const response = await Api.post(endpoint, formData, config);
@@ -108,7 +103,7 @@ export const createExpenseRequest = async (eventId, expenseData, files) => {
 
 export const updateExpenseStatus = async (eventId, expenseId, updateStatus) => {
     try {
-        const response = await Api.put(`/event/${eventId}/expenses/${expenseId}/status`, updateStatus);
+        const response = await Api.put(`/event/${eventId}/expenses/${expenseId}`, updateStatus);
         return response.data;
     } catch (error) {
         console.error("Error updating expense status:", error);

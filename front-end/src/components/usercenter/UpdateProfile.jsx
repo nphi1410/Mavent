@@ -79,7 +79,7 @@ const UpdateProfile = ({ userData, onClose, onUpdate }) => {
         dateOfBirth: formData.dateOfBirth ? formData.dateOfBirth.toISOString().split('T')[0] : null
       };
 
-      console.log('UpdateProfile.jsx: Đang gửi dữ liệu lên service:', dataToSubmit);
+      // console.log('UpdateProfile.jsx: Đang gửi dữ liệu lên service:', dataToSubmit);
       onUpdate(dataToSubmit);
     } catch (err) {
       console.error('UpdateProfile.jsx: Lỗi khi chuẩn bị dữ liệu hoặc gọi onUpdate:', err);

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -28,7 +29,7 @@ public class ExpenseResponseDTO {
     private Integer approvedByAccountId;
 
     private String responseContent;
-    private String createdAt;
-    private String updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private List<ExpenseAttachmentsDTO> attachments;
 }

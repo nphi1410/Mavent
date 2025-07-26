@@ -153,7 +153,7 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
     const isAssignee = currentUserId === task.assignedToAccountId;
     const isCreator = currentUserId === task.assignedByAccountId;
     const canCancelTask = isCreator && !['DONE', 'REJECTED', 'CANCELLED'].includes(task.status);
-    console.log(canCancelTask, task.status, isCreator);
+    // console.log(canCancelTask, task.status, isCreator);
 
     // Helper: Nút Cancel (tránh lặp code)
     const renderCancelButton = () => (
