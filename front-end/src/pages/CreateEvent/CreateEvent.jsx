@@ -239,7 +239,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                     {/* Event Name */}
                     <div>
                         <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                            Tên sự kiện <span className="text-red-500">*</span>
+                            Event Name <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
@@ -255,7 +255,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                     {/* Description */}
                     <div>
                         <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                            Mô tả <span className="text-red-500">*</span>
+                            Event Description <span className="text-red-500">*</span>
                         </label>
                         <textarea
                             id="description"
@@ -272,7 +272,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label htmlFor="startDatetime" className="block text-sm font-medium text-gray-700 mb-1">
-                                Thời gian bắt đầu <span className="text-red-500">*</span>
+                                Start time <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="datetime-local"
@@ -285,7 +285,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                         </div>
                         <div>
                             <label htmlFor="endDatetime" className="block text-sm font-medium text-gray-700 mb-1">
-                                Thời gian kết thúc <span className="text-red-500">*</span>
+                                End time <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="datetime-local"
@@ -301,7 +301,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                     {/* Location */}
                     <div>
                         <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
-                            Địa điểm <span className="text-red-500">*</span>
+                            Location <span className="text-red-500">*</span>
                         </label>
                         <select
                             id="locationId"
@@ -323,7 +323,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                     {/* Thêm phần chọn Tags - SỬA LẠI PROPERTY NAME */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Tags sự kiện
+                            Event Tags
                         </label>
                         <div className="flex flex-wrap gap-2">
                             {availableTags.map((tag) => (
@@ -343,7 +343,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                         </div>
                         {selectedTags.length > 0 && (
                             <p className="text-sm text-gray-500 mt-2">
-                                Đã chọn {selectedTags.length} tag(s)
+                                Selected {selectedTags.length} tag(s)
                             </p>
                         )}
                     </div>
@@ -351,7 +351,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                     {/* D-Day Info */}
                     <div>
                         <label htmlFor="ddayInfo" className="block text-sm font-medium text-gray-700 mb-1">
-                            Thông tin D-Day
+                            D-Day Information
                         </label>
                         <input
                             type="text"
@@ -367,7 +367,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label htmlFor="maxMemberNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                                Số thành viên tối đa
+                                Maximum number of members
                             </label>
                             <input
                                 type="number"
@@ -381,7 +381,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                         </div>
                         <div>
                             <label htmlFor="maxParticipantNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                                Số người tham gia tối đa
+                                Maximum number of participants
                             </label>
                             <input
                                 type="number"
@@ -398,7 +398,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                     {/* Status */}
                     <div>
                         <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                            Trạng thái
+                            Status
                         </label>
                         <input
                             type="text"
@@ -471,7 +471,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                                 className="cursor-pointer bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={loading}
                             >
-                                {loading ? "Đang tạo..." : "Create Event & Next to Proposal"}
+                                {loading ? "Creating..." : "Create Event & Next to Proposal"}
                             </button>
                         </div>
 

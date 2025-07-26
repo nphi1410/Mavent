@@ -201,7 +201,7 @@ const SuperAdminDashboard = () => {
                                         <Bar data={barData} options={barOpts} />
                                     ) : (
                                         <span className="text-gray-500 italic text-center">
-                                            Click vào một tháng trên biểu đồ bên trái để xem thống kê theo tuần
+                                            Click on a month on the chart on the left to see weekly statistics
                                         </span>
                                     )}
                                 </div>

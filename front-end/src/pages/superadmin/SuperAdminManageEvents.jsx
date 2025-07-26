@@ -1,16 +1,14 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { faChevronDown, faEye, faPen } from "@fortawesome/free-solid-svg-icons";
 import { getEvents } from '../../services/eventService';
 import SuperAdminSidebar from '../../components/superadmin/SuperAdminSidebar';
-import SuperAdminActionDropdown from '../../components/superadmin/SuperAdminActionDropdown';
 import { useNavigate } from 'react-router-dom';
 import { exportEventsToExcel } from '../../services/export/eventExportService';
 import { getAllLocations } from '../../services/EventLocationService';
 import SuperAdminHeader from '../../components/superadmin/SuperAdminHeader';
 
 function SuperAdminManageEvents() {
-    const [openId, setOpenId] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("All Statuses");
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -165,19 +163,23 @@ function SuperAdminManageEvents() {
                                             {event.status}
                                         </span>
                                     </td>
-                                    <td className="p-2 whitespace-nowrap text-left">
-                                        <SuperAdminActionDropdown
-                                            isOpen={openId === event.eventId}
-                                            onToggle={() => setOpenId(openId === event.eventId ? null : event.eventId)}
-                                            onView={() => {
-                                                navigate(`/superadmin/event-detail/${event.eventId}`);
-                                                setOpenId(null);
-                                            }}
-                                            onEdit={() => {
-                                                navigate(`/superadmin/edit-event/${event.eventId}`);
-                                                setOpenId(null);
-                                            }}
-                                        />
+                                    <td className="p-2 whitespace-nowrap">
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => navigate(`/superadmin/event-detail/${event.eventId}`)}
+                                                className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors duration-200"
+                                                title="View Event"
+                                            >
+                                                <FontAwesomeIcon icon={faEye} className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => navigate(`/superadmin/edit-event/${event.eventId}`)}
+                                                className="p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors duration-200"
+                                                title="Edit Event"
+                                            >
+                                                <FontAwesomeIcon icon={faPen} className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
