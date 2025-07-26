@@ -25,7 +25,6 @@ function SuperAdminManageEvents() {
     "ENDED",
     "CANCELLED",
     "PENDING",
-    "REVIEWING",
   ];
 
   const navigate = useNavigate();
@@ -39,12 +38,12 @@ function SuperAdminManageEvents() {
         if (loc.locationId && loc.locationName) {
           locationMap.set(loc.locationId, loc.locationName);
         } else {
-          console.warn("Dữ liệu địa điểm không đúng định dạng:", loc);
+          console.warn("Wrong location data format:", loc);
         }
       });
       setLocations(locationMap);
     } catch (error) {
-      console.error("Lỗi khi lấy danh sách địa điểm:", error);
+      console.error("Error fetching Location list:", error);
       // Có thể đặt popup thông báo lỗi cho người dùng ở đây
     }
   };

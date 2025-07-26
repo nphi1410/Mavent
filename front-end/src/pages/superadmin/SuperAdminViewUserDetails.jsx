@@ -9,9 +9,7 @@ import {
   faBirthdayCake,
   faHashtag,
 } from "@fortawesome/free-solid-svg-icons";
-import SuperAdminSidebar from "../../components/superadmin/SuperAdminSidebar";
 import { getAccountById } from "../../services/AccountService";
-import SuperAdminHeader from "../../components/superadmin/SuperAdminHeader";
 
 const SuperAdminViewUserDetails = () => {
   const { id } = useParams();

@@ -6,7 +6,7 @@ import {
   faClock,
 } from "@fortawesome/free-solid-svg-icons";
 import { getDashboardMetrics } from "../../services/superadmin/DashboardService";
-import { getEvents } from "../../services/EventService";
+import { getEvents } from "../../services/eventService";
 import { Line, Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -20,8 +20,6 @@ import {
   Legend,
   Filler,
 } from "chart.js";
-import SuperAdminSidebar from "../../components/superadmin/SuperAdminSidebar";
-import SuperAdminHeader from "../../components/superadmin/SuperAdminHeader";
 
 ChartJS.register(
   CategoryScale,

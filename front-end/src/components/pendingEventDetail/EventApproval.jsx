@@ -38,7 +38,7 @@ export default function EventApproval({ eventData }) {
     // HANDLERS
 
     const handleAssignProposer = () => {
-        console.log("Assigning proposer as event admin")
+        // console.log("Assigning proposer as event admin")
         const adminData = {
             accountId: eventData.creator.id,
             avatarUrl: eventData.creator.avatarUrl,
@@ -52,7 +52,7 @@ export default function EventApproval({ eventData }) {
     }
 
     const handleAssignAdmin = (user) => {
-        console.log("Assigning user as admin:", user)
+        // console.log("Assigning user as admin:", user)
         const adminData = {
             ...adminAssigned,
             accountId: user.accountId,
@@ -80,7 +80,7 @@ export default function EventApproval({ eventData }) {
                 assignedByAccountUsername: jwtDecode(token).sub,
             });
             if (updateStatusRes) {
-                console.log("Event status updated successfully:", updateStatusRes);
+                // console.log("Event status updated successfully:", updateStatusRes);
                 if (status.toUpperCase().includes("UPCOMING")) {
                     const addRoleRes = await addNewRole(eventData.id, adminAssigned);
                 }

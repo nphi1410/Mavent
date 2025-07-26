@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import SuperAdminSidebar from "../../components/superadmin/SuperAdminSidebar";
-import SuperAdminHeader from "../../components/superadmin/SuperAdminHeader";
 import { Avatar } from "../../components/ui/avatar";
 import { getAssignedAdmin, updateRole } from "../../services/RoleService";
-import { getEventById, updateEvent } from "../../services/EventService";
+import { getEventById, updateEvent } from "../../services/eventService";
 import { getAllLocations } from "../../services/EventLocationService";
 import { Badge } from "../../components/ui/Badge";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -39,13 +37,13 @@ function SuperAdminEditEvent() {
   const [posterFile, setPosterFile] = useState(null);
 
   const handleAssignAdmin = (user) => {
-    console.log("Assigning user as admin:", user);
+    // console.log("Assigning user as admin:", user);
     const adminData = {
       ...adminAssigned,
       accountId: user.accountId,
     };
     setAdminAssigned(adminData);
-    console.log("Admin assigned data by choosing:", adminData);
+    // console.log("Admin assigned data by choosing:", adminData);
     // Implement actual assignment logic
   };
 
@@ -90,7 +88,7 @@ function SuperAdminEditEvent() {
           setAdminAssigned(response);
           setOldAdmin(response);
         }
-        console.log("Assigned admin:", response);
+        // console.log("Assigned admin:", response);
       } catch (error) {
         console.error("Error fetching assigned admin:", error);
       }
@@ -114,12 +112,12 @@ function SuperAdminEditEvent() {
       bannerFile,
       posterFile
     );
-    if (!oldAdmin) {
+    if (oldAdmin && oldAdmin.accountId !== undefined) {
       const oldAdminUpdate = {
         assignedByAccountId: assigner,
         newRole: "MEMBER",
         eventId: eventId,
-        accountId: oldAdmin.accountId,
+        accountId: oldAdmin?.accountId,
       };
       console.log("Old Admin Update:", oldAdminUpdate);
       const updateOldAdminRes = await updateRole(oldAdminUpdate);
@@ -129,10 +127,11 @@ function SuperAdminEditEvent() {
       assignedByAccountId: assigner,
       newRole: "ADMIN",
       eventId: eventId,
-      accountId: adminAssigned.accountId,
+      accountId: adminAssigned?.accountId,
     };
 
     console.log("New Admin Update:", newAdminUpdate);
+    if (oldAdmin && oldAdmin.accountId !== undefined) console.log("no")
     const updateRoleRes = await Promise.all([updateRole(newAdminUpdate)]);
 
     if (updateRoleRes.some((res) => !res)) {
@@ -382,10 +381,7 @@ function SuperAdminEditEvent() {
       {isModalOpen && (
         <AccountList
           setIsModalOpen={setIsModalOpen}
-          handleAssignAdmin={(user) => {
-            setAdminAssigned(user);
-            // console.log("Assigned admin:", user.accountId);
-          }}
+          handleAssignAdmin={handleAssignAdmin}
         />
       )}
 
