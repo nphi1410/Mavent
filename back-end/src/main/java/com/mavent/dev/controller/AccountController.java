@@ -155,6 +155,7 @@ public class AccountController {
 //        System.out.println("Encoded Password: " + passwordEncoder.encode(request.getPassword()));
         session.setAttribute("register_otp", otp);
         session.setAttribute("register_time", System.currentTimeMillis());
+//        System.out.println("otp created at: " + System.currentTimeMillis());
 
         return ResponseEntity.ok("OTP was sent to email " + request.getEmail());
     }
@@ -169,6 +170,7 @@ public class AccountController {
 //        System.out.println("Email from session: " + email);
 //        System.out.println("Encoded Password from session: " + encodedPassword);
         Long time = (Long) session.getAttribute("register_time");
+//        if (time != null) System.out.println("time from session: " + time);
         if (accountService.isOtpTrue(otpSession, time, request.getOtp()) != null) {
             return ResponseEntity.badRequest().body(accountService.isOtpTrue(otpSession, time, request.getOtp()));
         }

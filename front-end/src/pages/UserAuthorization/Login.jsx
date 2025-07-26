@@ -1,4 +1,4 @@
-import { jwtDecode } from 'jwt-decode'; 
+import { jwtDecode } from 'jwt-decode';
 
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
@@ -113,6 +113,12 @@ function Login() {
           <p className="text-[0.9rem]">
             Don’t have an account? Click{' '}
             <Link to="/register" className="font-bold hover:underline hover:text-blue-900 text-xs">HERE</Link>
+          </p>
+
+          <p className="text-center text-sm text-gray-600">
+            <Link to="/" className="inline-text font-bold hover:underline hover:text-blue-900">
+              Back To Home
+            </Link>
           </p>
         </div>
       </div>
