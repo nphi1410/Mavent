@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faEye, faPen } from "@fortawesome/free-solid-svg-icons";
 import { getEvents } from '../../services/EventService';
 import { useNavigate } from 'react-router-dom';
-import { exportEventsToExcel } from '../../services/export/eventExportService';
+import { exportEventsToExcel } from '../../services/export/EventExportService';
 import { getAllLocations } from '../../services/EventLocationService';
 
 function SuperAdminManageEvents() {
