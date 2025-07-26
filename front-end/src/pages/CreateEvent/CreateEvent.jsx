@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createEvent, getEventById } from "../../services/eventService";
 import { getAllLocations } from "../../services/EventLocationService";
-import { getAllTags } from "../../services/eventTagService";
+import { getAllTags } from "../../services/EventTagService"; // Thêm import cho tag service
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from 'jwt-decode';
 
