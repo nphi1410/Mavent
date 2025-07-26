@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { UserPlus, Search, X } from "lucide-react"
-import { Avatar } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
+import { Avatar } from "@/components/ui/Avatar"
+import { Badge } from "@/components/ui/Badge"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate, useParams } from "react-router-dom"

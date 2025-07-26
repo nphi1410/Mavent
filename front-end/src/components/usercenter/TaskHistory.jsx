@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { getUserTasks, getUserEvents } from "../../services/ProfileService";
-import TaskCard from "./TaskCard";
-import { useNavigate, Link, useParams } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { getUserTasks, getUserEvents } from '../../services/ProfileService';
+import TaskCard from './TaskCard';
+import { useNavigate, Link, useParams } from 'react-router-dom';
 
 const TaskHistory = () => {
   const [displayTasks, setDisplayTasks] = useState([]);
