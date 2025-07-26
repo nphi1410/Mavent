@@ -1,22 +1,10 @@
-import React, { useEffect, useState } from "react";
-import {
-  getTaskDetails,
-  updateTaskStatus,
-  getUserProfile,
-  getTaskAttendees,
-  getTaskDocuments,
-  updateAttendeeStatus,
-} from "../../services/ProfileService";
-import AttendeesModal from "./AttendeesModal";
-import UpdateTaskModal from "./UpdateTaskModal";
-import TaskFeedbackModal from "./TaskFeedbackModal";
-import { useNavigate, useParams } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { getTaskDetails, updateTaskStatus, getUserProfile, getTaskAttendees, getTaskDocuments, updateAttendeeStatus } from '../../services/ProfileService';
+import AttendeesModal from './AttendeesModal';
+import UpdateTaskModal from './UpdateTaskModal';
+import TaskFeedbackModal from './TaskFeedbackModal';
 
 const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
-  const navigate = useNavigate();
-  const { id: eventId } = useParams(); // Get eventId from URL params
-
-  // State hiện tại
   const [task, setTask] = useState(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -69,7 +57,6 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
       if (data) {
         setTask(data);
         await fetchDocuments();
-        // Fetch attendees ngay để kiểm tra status
         await fetchAttendees();
       } else {
         setError("Failed to load task details");
@@ -85,7 +72,6 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
     fetchTaskDetails();
   }, [taskId, isOpen]);
 
-  // fetch attendees
   const fetchAttendees = async () => {
     if (!taskId) return;
 
@@ -136,7 +122,6 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
     }
   };
 
-  // Cập nhật hàm canUpdateStatus để cho phép người tạo hủy task
   const canUpdateStatus = (status, newStatus) => {
     if (!currentUser || !task) return false;
 
@@ -172,7 +157,6 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
     const isTaskDoing = task.status === "DOING";
     // console.log(canCancelTask, task.status, isCreator);
 
-    // Helper: Nút Cancel (tránh lặp code)
     const renderCancelButton = () => (
       <button
         onClick={() => handleStatusUpdate("CANCELLED")}
@@ -281,15 +265,11 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
     setShowFeedbackModal(false);
   };
 
-  // Cập nhật hàm handleStatusUpdate để thêm xác nhận khi hủy task
   const handleStatusUpdate = async (newStatus) => {
     if (!task) return;
 
-    // Hiện hộp thoại xác nhận khi hủy task
-    if (newStatus === "CANCELLED") {
-      const confirmed = window.confirm(
-        "Are you sure you want to cancel this task? This action cannot be undone."
-      );
+    if (newStatus === 'CANCELLED') {
+      const confirmed = window.confirm("Are you sure you want to cancel this task? This action cannot be undone.");
       if (!confirmed) return;
     }
 
@@ -307,12 +287,8 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
     try {
       await updateTaskStatus(taskId, newStatus);
 
-      // Hiển thị thông báo thành công với nội dung phù hợp
-      if (newStatus === "CANCELLED") {
-        setUpdateMessage({
-          type: "success",
-          text: "Task has been cancelled successfully",
-        });
+      if (newStatus === 'CANCELLED') {
+        setUpdateMessage({ type: 'success', text: 'Task has been cancelled successfully' });
       } else {
         setUpdateMessage({
           type: "success",
@@ -343,12 +319,10 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
     }
   };
 
-  // Thêm functions xử lý accept/decline
   const handleAcceptTask = async () => {
     try {
-      await updateAttendeeStatus(taskId, currentUser.id, "ACCEPTED");
-      setUpdateMessage({ type: "success", text: "Đã xác nhận tham gia task" });
-      // Refresh attendees để cập nhật status
+      await updateAttendeeStatus(taskId, currentUser.id, 'ACCEPTED');
+      setUpdateMessage({ type: 'success', text: 'Đã xác nhận tham gia task' });
       await fetchAttendees();
     } catch (err) {
       setUpdateMessage({
@@ -376,8 +350,7 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
         text: "Đã gửi yêu cầu từ chối task",
       });
       setShowDeclineModal(false);
-      setDeclineReason("");
-      // Refresh attendees để cập nhật status
+      setDeclineReason('');
       await fetchAttendees();
     } catch (err) {
       setUpdateMessage({
@@ -405,24 +378,20 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
   };
 
   const renderAttendeeActions = () => {
-    // Kiểm tra xem user có phải là attendee không và có status INVITED
     if (!currentUser || !attendees || attendees.length === 0) {
       return null;
     }
 
-    const currentAttendee = attendees.find(
-      (a) => a.accountId === currentUser.id
-    );
-
-    // Chỉ hiển thị khi user có status INVITED
-    if (!currentAttendee || currentAttendee.status !== "INVITED") {
+    const currentAttendee = attendees.find(a => a.accountId === currentUser.id);
+    
+    if (!currentAttendee || currentAttendee.status !== 'INVITED') {
       return null;
     }
 
     return (
       <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
         <p className="text-sm text-yellow-800 mb-3">
-          Bạn được mời tham gia task này. Vui lòng xác nhận:
+          You are invited to join this task. Please confirm your participation.
         </p>
         <div className="flex gap-2">
           <button
@@ -445,7 +414,8 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
   };
 
   if (!isOpen) return null;
-
+  console.log(task, currentUser);
+  
   return (
     <>
       <div className="fixed inset-0 backdrop-blur-[0px] bg-gray-900/40 z-[9999] flex justify-center items-center p-4 overflow-y-auto">
@@ -552,7 +522,7 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
                     <strong>Status:</strong> {task.status}
                   </div>
 
-                  {/* Thêm hiển thị department */}
+                  {/* hiển thị department */}
                   <div>
                     <strong>Department:</strong>{" "}
                     {task.departmentName || "All departments"}
@@ -593,7 +563,7 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
             ) : (
               <div className="p-4 text-center">Can not find detail</div>
             )}
-            {/* Thêm section Documents */}
+            {/* section Documents */}
             <div className="mb-6">
               <h3 className="text-lg font-semibold mb-2">Documents:</h3>
               {loadingDocuments ? (
@@ -678,7 +648,7 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
         onTaskUpdated={handleTaskUpdated}
       />
 
-      {/* Thêm TaskFeedbackModal */}
+      {/* TaskFeedbackModal */}
       <TaskFeedbackModal
         taskId={taskId}
         isOpen={showFeedbackModal}
@@ -693,13 +663,11 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
       {showDeclineModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000]">
           <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4">
-              Từ chối tham gia task
-            </h3>
+            <h3 className="text-lg font-semibold mb-4">Decline Task Invitation</h3>
             <textarea
               value={declineReason}
               onChange={(e) => setDeclineReason(e.target.value)}
-              placeholder="Nhập lý do từ chối..."
+              placeholder="Enter your reason for declining..."
               className="w-full h-24 p-3 border border-gray-300 rounded resize-none"
             />
             <div className="flex gap-2 mt-4">
@@ -707,7 +675,7 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
                 onClick={handleDeclineTask}
                 className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
               >
-                Gửi yêu cầu từ chối
+                Send Decline Request
               </button>
               <button
                 onClick={() => {
@@ -716,7 +684,7 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
                 }}
                 className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
               >
-                Hủy
+                Cancel
               </button>
             </div>
           </div>

@@ -437,22 +437,16 @@ public class AccountImplement implements AccountService, UserDetailsService {
 
         // Cập nhật documents nếu có trong updateDto
         if (updateDto.getDocumentIds() != null) {
-            // Clear existing documents
             if (task.getDocuments() != null) {
                 task.getDocuments().clear();
             }
-            
-            // Add new documents if provided
             if (!updateDto.getDocumentIds().isEmpty()) {
                 List<Document> documents = documentRepository.findAllById(updateDto.getDocumentIds());
-                
-                // Validate documents belong to same event
                 for (Document doc : documents) {
                     if (!task.getEventId().equals(doc.getEventId())) {
                         throw new IllegalArgumentException("Document must belong to the same event as task");
                     }
                 }
-                
                 if (task.getDocuments() == null) {
                     task.setDocuments(new ArrayList<>());
                 }
@@ -461,10 +455,24 @@ public class AccountImplement implements AccountService, UserDetailsService {
         }
 
         task.setUpdatedAt(LocalDateTime.now());
-
         Task saved = taskRepository.save(task);
+
+        // ===== GỬI NOTIFICATION CHO ATTENDEE ===== //
+        List<Integer> attendeeIds = taskAttendeeRepository.findByTaskId(taskId).stream()
+                .map(TaskAttendee::getAccountId)
+                .collect(Collectors.toList());
+
+        String message = "Task '" + task.getTitle() + "' has been updated.";
+        String type = "TASK UPDATED";
+        Integer eventId = task.getEventId();
+
+        for (Integer attendeeId : attendeeIds) {
+            notificationService.createNotification(attendeeId, eventId, null, taskId, type, message);
+        }
+
         return convertToTaskDTO(saved);
     }
+
 
 
     private TaskDTO convertToTaskDTO(Task task) {
@@ -518,15 +526,72 @@ public class AccountImplement implements AccountService, UserDetailsService {
         return dto;
     }
 
+    @Override
     public TaskDTO updateTaskStatus(Integer taskId, String newStatus) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new IllegalArgumentException("Task không tồn tại"));
 
+        Task.Status oldStatus = task.getStatus();
+
+        // Nếu trạng thái cũ là DONE hoặc CANCELLED thì không gửi noti
+        if (oldStatus == Task.Status.DONE || oldStatus == Task.Status.CANCELLED) {
+            task.setStatus(Task.Status.valueOf(newStatus));
+            task.setUpdatedAt(LocalDateTime.now());
+            return convertToTaskDTO(taskRepository.save(task));
+        }
+
         task.setStatus(Task.Status.valueOf(newStatus));
-
         task.setUpdatedAt(LocalDateTime.now());
-
         Task updatedTask = taskRepository.save(task);
+
+        String title = task.getTitle();
+        Integer eventId = task.getEventId();
+        Integer taskIdVal = task.getTaskId();
+        Integer assignerId = task.getAssignedByAccountId();
+
+        String type = "TASK STATUS UPDATE";
+        String message;
+
+        List<Integer> attendeeIds = taskAttendeeRepository.findByTaskId(taskIdVal).stream()
+                .map(TaskAttendee::getAccountId)
+                .collect(Collectors.toList());
+
+        switch (newStatus.toUpperCase()) {
+            case "DOING" -> {
+                message = "Task '" + title + "' has been started.";
+                if (assignerId != null) {
+                    notificationService.createNotification(assignerId, eventId, null, taskIdVal, type, message);
+                }
+                for (Integer attendeeId : attendeeIds) {
+                    if (!attendeeId.equals(assignerId)) {
+                        notificationService.createNotification(attendeeId, eventId, null, taskIdVal, type, message);
+                    }
+                }
+            }
+            case "REVIEW" -> {
+                message = "Task '" + title + "' is ready for review.";
+                if (assignerId != null) {
+                    notificationService.createNotification(assignerId, eventId, null, taskIdVal, type, message);
+                }
+            }
+            case "DONE" -> {
+                message = "Task '" + title + "' has been marked as done.";
+                for (Integer attendeeId : attendeeIds) {
+                    notificationService.createNotification(attendeeId, eventId, null, taskIdVal, type, message);
+                }
+            }
+            case "CANCELLED" -> {
+                message = "Task '" + title + "' has been cancelled.";
+                if (assignerId != null) {
+                    notificationService.createNotification(assignerId, eventId, null, taskIdVal, type, message);
+                }
+                for (Integer attendeeId : attendeeIds) {
+                    if (!attendeeId.equals(assignerId)) {
+                        notificationService.createNotification(attendeeId, eventId, null, taskIdVal, type, message);
+                    }
+                }
+            }
+        }
 
         return convertToTaskDTO(updatedTask);
     }
@@ -553,7 +618,7 @@ public class AccountImplement implements AccountService, UserDetailsService {
     @Override
     public TaskFeedbackDTO createTaskFeedback(Integer taskId, Integer feedbackById, String comment) {
         Task task = taskRepository.findById(taskId)
-            .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
+                .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
 
         Integer creator = task.getAssignedByAccountId();
         Integer assignee = task.getAssignedToAccountId();
@@ -569,6 +634,27 @@ public class AccountImplement implements AccountService, UserDetailsService {
 
         TaskFeedback saved = taskFeedbackRepository.save(fb);
 
+        String message = "New feedback added to task " + task.getTitle() + ".";
+        if (feedbackById.equals(creator)) {
+            notificationService.createNotification(
+                    assignee, task.getEventId(), null, taskId, "TASK FEEDBACK", message
+            );
+        } else if (feedbackById.equals(assignee)) {
+            notificationService.createNotification(
+                    creator, task.getEventId(), null, taskId, "TASK FEEDBACK", message
+            );
+        }
+
+        List<TaskAttendee> attendees = taskAttendeeRepository.findByTaskId(taskId);
+        for (TaskAttendee attendee : attendees) {
+            Integer id = attendee.getAccountId();
+            if (!id.equals(feedbackById) && !id.equals(creator) && !id.equals(assignee)) {
+                notificationService.createNotification(
+                        id, task.getEventId(), null, taskId, "TASK FEEDBACK", message
+                );
+            }
+        }
+
         TaskFeedbackDTO dto = new TaskFeedbackDTO();
         dto.setId(saved.getId());
         dto.setTaskId(saved.getTaskId());
@@ -577,6 +663,7 @@ public class AccountImplement implements AccountService, UserDetailsService {
         dto.setCreatedAt(saved.getCreatedAt());
         return dto;
     }
+
 
     @Override
     public List<TaskFeedbackDTO> getTaskFeedback(Integer taskId, Integer accountId) {
@@ -673,30 +760,68 @@ public class AccountImplement implements AccountService, UserDetailsService {
                 .orElseThrow(() -> new IllegalArgumentException("Task không tồn tại"));
         System.out.println("Updating attendees for task ID: " + taskId);
 
-        // Xóa tất cả attendees hiện tại
-        taskAttendeeRepository.deleteByTaskId(taskId);
+        List<TaskAttendee> oldAttendees = taskAttendeeRepository.findByTaskId(taskId);
+        Set<Integer> oldAttendeeIds = oldAttendees.stream()
+                .map(TaskAttendee::getAccountId)
+                .collect(Collectors.toSet());
 
-        // Thêm lại attendees với status INVITED (trừ người được assign)
         List<Integer> newAttendees = new ArrayList<>(attendeeIds);
         if (!newAttendees.contains(assignedToAccountId)) {
             newAttendees.add(assignedToAccountId);
         }
 
+        Set<Integer> newAttendeeSet = new HashSet<>(newAttendees);
+
+        Set<Integer> removedAttendees = new HashSet<>(oldAttendeeIds);
+        removedAttendees.removeAll(newAttendeeSet);
+
+        Set<Integer> addedAttendees = new HashSet<>(newAttendeeSet);
+        addedAttendees.removeAll(oldAttendeeIds);
+
+        taskAttendeeRepository.deleteByTaskId(taskId);
+
         for (Integer accountId : newAttendees) {
             TaskAttendee attendee = new TaskAttendee();
             attendee.setTaskId(taskId);
             attendee.setAccountId(accountId);
-            
-            // Người được assign task sẽ có status ACCEPTED, những người khác là INVITED
-            if (accountId.equals(assignedToAccountId)) {
-                attendee.setStatus(TaskAttendee.Status.ACCEPTED);
-            } else {
-                attendee.setStatus(TaskAttendee.Status.INVITED);
-            }
-            
+            attendee.setStatus(accountId.equals(assignedToAccountId) ?
+                    TaskAttendee.Status.ACCEPTED : TaskAttendee.Status.INVITED);
             taskAttendeeRepository.save(attendee);
         }
+
+        for (Integer removedId : removedAttendees) {
+            notificationService.createNotification(
+                    removedId,
+                    task.getEventId(),
+                    null,
+                    taskId,
+                    "TASK ATTENDEE REMOVED",
+                    "You have been removed from task: " + task.getTitle()
+            );
+        }
+
+        for (Integer addedId : addedAttendees) {
+            String message;
+            String type;
+            if (addedId.equals(assignedToAccountId)) {
+                message = "You are assigned as the main assignee for updated task: " + task.getTitle();
+                type = "TASK ASSIGNMENT";
+            } else {
+                message = "You have been added as an attendee to task: " + task.getTitle();
+                type = "TASK ATTENDEE";
+            }
+
+            notificationService.createNotification(
+                    addedId,
+                    task.getEventId(),
+                    null,
+                    taskId,
+                    type,
+                    message
+            );
+        }
     }
+
 
     @Override
     public Account getAccountByToken(String token) {
@@ -804,7 +929,27 @@ public class AccountImplement implements AccountService, UserDetailsService {
             }
             task.getDocuments().addAll(documents);
         }
-        
+        List<TaskAttendee> attendees = taskAttendeeRepository.findByTaskId(taskId);
+        for (TaskAttendee attendee : attendees) {
+            notificationService.createNotification(
+                    attendee.getAccountId(),
+                    task.getEventId(),
+                    null,
+                    taskId,
+                    "TASK DOCUMENT UPDATE",
+                    "Task documents for " + task.getTitle() + " have been updated."
+            );
+        }
+
+        notificationService.createNotification(
+                task.getAssignedByAccountId(),
+                task.getEventId(),
+                null,
+                taskId,
+                "TASK DOCUMENT UPDATE",
+                "Task documents for " + task.getTitle() + " have been updated."
+        );
+
         taskRepository.save(task);
     }
 
@@ -827,7 +972,7 @@ public class AccountImplement implements AccountService, UserDetailsService {
     public void createCancelTaskRequest(Integer taskId, Integer accountId, String reason) {
         // Lấy thông tin task để có eventId
         Task task = taskRepository.findById(taskId)
-            .orElseThrow(() -> new IllegalArgumentException("Task không tồn tại"));
+            .orElseThrow(() -> new IllegalArgumentException("Task do not exist"));
         
         // Tạo request cancel task với request_type_id = 4
         CreateRequestDTO requestDTO = CreateRequestDTO.builder()
@@ -836,18 +981,26 @@ public class AccountImplement implements AccountService, UserDetailsService {
             .taskId(taskId)
             .departmentId(task.getDepartmentId())
             .requestTypeId(4) // Cancel Task request type
-            .title("Xin từ chối tham gia task: " + task.getTitle())
+            .title("Reject task: " + task.getTitle())
             .content(reason)
-//            .status("PENDING")
             .build();
         
         boolean success = requestService.addRequest(requestDTO);
         if (!success) {
-            throw new RuntimeException("Không thể tạo request cancel task");
+            throw new RuntimeException("Can not create request cancel task");
         }
-        
-        // Cập nhật status của attendee thành DECLINED tạm thời (pending approval)
+
         updateAttendeeStatus(taskId, accountId, "DECLINED");
+        String message = "A task cancel request has been submitted for task: " + task.getTitle();
+        notificationService.createNotification(
+                task.getAssignedByAccountId(),
+                task.getEventId(),
+                null,
+                task.getTaskId(),
+                "REJECT TASK REQUEST",
+                message
+        );
+
     }
 }
 
