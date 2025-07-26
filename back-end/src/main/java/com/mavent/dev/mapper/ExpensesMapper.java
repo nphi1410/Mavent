@@ -108,7 +108,7 @@ public class ExpensesMapper {
                 .createdByAccountId(expense.getCreatedByAccountId())
                 .createdByFullName(createdBy!=null ? createdBy.getUsername() : "Unknown")
                 .approvedByAccountId(expense.getApprovedByAccountId())
-
+                .paymentDate(expense.getPaymentDate() != null ? expense.getPaymentDate() : null)
                 .responseContent(expense.getResponseContent())
                 .createdAt(expense.getCreatedAt() != null ? expense.getCreatedAt() : null)
                 .updatedAt(expense.getUpdatedAt() != null ? expense.getUpdatedAt() : null)

@@ -27,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -214,6 +215,9 @@ public class ExpenseImplement implements ExpenseService {
             }
         }
 
+
+
+
         // Update the expense status
         expense.setStatus(Expenses.Status.valueOf(dto.getStatus().name()));
         expense.setApprovedByAccountId(dto.getApprovedByAccountId());
@@ -222,11 +226,12 @@ public class ExpenseImplement implements ExpenseService {
 
         Expenses updatedExpense = expensesRepository.save(expense);
         
-        // If status changed to APPROVED, update the budget's spent amount
-        if (dto.getStatus() == Expenses.Status.APPROVED && 
-            expense.getStatus() != Expenses.Status.APPROVED && 
+        // If status changed to PAID, update the budget's spent amount
+        if (dto.getStatus() == Status.PAID &&
+            expense.getStatus() != Status.PAID &&
             expense.getAmount() != null && 
             expense.getAmount().compareTo(BigInteger.ZERO) > 0) {
+            expense.setPaymentDate(LocalDate.now());
             
             budgetService.updateSpentAmount(expense.getEventId(), expense.getAmount());
         }
