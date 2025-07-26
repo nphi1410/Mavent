@@ -91,7 +91,8 @@ public class AccountImplement implements AccountService, UserDetailsService {
 
     @Override
     public String isOtpTrue(String originOTP, long otpCreatedTime, String requestOtp) {
-        if (originOTP == null || System.currentTimeMillis() - otpCreatedTime > 60 * 1000) {
+        // set OTP time out to 2 seconds
+        if (originOTP == null || System.currentTimeMillis() - otpCreatedTime > 60 * 2000) {
             return "This OTP has expired.";
         }
         if (!originOTP.equals(requestOtp)) {

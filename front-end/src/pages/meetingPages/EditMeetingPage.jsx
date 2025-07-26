@@ -6,9 +6,9 @@ import {
   createMeeting,
   updateMeeting,
   getMeetingAttendees,
-} from "../../services/meetingService";
-import { getDepartmentsByEventId } from "../../services/departmentService";
-import memberService from "../../services/memberService";
+} from "../../services/MeetingService";
+import { getDepartmentsByEventId } from "../../services/DepartmentService";
+import memberService from "../../services/MemberService";
 import MeetingAttendeeSelect from "../../components/meeting/MeetingAttendeeSelect";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 

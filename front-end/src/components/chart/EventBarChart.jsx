@@ -9,7 +9,7 @@ import {
   CartesianGrid,
   ResponsiveContainer,
 } from "recharts";
-import { getAttendingSummary, getSummary } from "../../services/eventService";
+import { getAttendingSummary, getSummary } from "../../services/EventService";
 
 // Get last 6 months as 'YYYY-MM'
 const getLastSixMonths = () => {
@@ -90,7 +90,9 @@ const EventBarChart = ({ accountId }) => {
 
       <div className="h-72">
         {loading ? (
-          <div className="text-gray-400 text-center py-10">Loading chart...</div>
+          <div className="text-gray-400 text-center py-10">
+            Loading chart...
+          </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
@@ -108,12 +110,7 @@ const EventBarChart = ({ accountId }) => {
                 fill="#34d399"
                 name="Attended"
               />
-              <Bar
-                dataKey="missed"
-                stackId="a"
-                fill="#fca5a5"
-                name="Missed"
-              />
+              <Bar dataKey="missed" stackId="a" fill="#fca5a5" name="Missed" />
             </BarChart>
           </ResponsiveContainer>
         )}

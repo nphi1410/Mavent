@@ -28,6 +28,9 @@ public class Expenses {
     @Column(name = "event_id", nullable = false)
     private int eventId;
 
+    @Column(name = "task_id", nullable = false)
+    private int taskId;
+
     @Column(name = "budget_id")
     private int budgetId;
 

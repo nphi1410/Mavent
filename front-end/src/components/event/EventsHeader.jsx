@@ -8,7 +8,7 @@ const EventsHeader = ({ searchTerm, setSearchTerm, statusFilter, setStatusFilter
     { value: "PENDING", label: "Pending" },
     { value: "UPCOMING", label: "Upcoming" },
     { value: "ONGOING", label: "Ongoing" },
-    { value: "COMPLETED", label: "Completed" },
+    { value: "ENDED", label: "Ended" },
     { value: "CANCELLED", label: "Cancelled" },
   ]
 

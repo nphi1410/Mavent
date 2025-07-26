@@ -5,7 +5,7 @@ import SelectTags from "./SelectTags";
 import Search from "./Search";
 import Pagination from "./Pagination";
 import { useSearchParams } from "react-router-dom";
-import { getTags } from "../../services/tagService";
+import { getTags } from "../../services/TagService";
 
 const EventFilter = ({
   onFilter,
@@ -43,7 +43,9 @@ const EventFilter = ({
     const tagFromUrl = searchParams.get("tagId");
     const type = searchParams.get("type");
 
-    const matchingTag = tags.find((t) => String(t.tagId) === String(tagFromUrl));
+    const matchingTag = tags.find(
+      (t) => String(t.tagId) === String(tagFromUrl)
+    );
     if (matchingTag) {
       setSelectedTags([matchingTag]);
     }

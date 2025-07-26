@@ -5,7 +5,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { useEffect, useRef, useState } from "react";
-import { getFilterEvents } from "../services/eventService";
+import { getFilterEvents } from "../services/EventService";
 
 const Banner = ({ bannerUrls }) => {
   const swiperRef = useRef(null);

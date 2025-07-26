@@ -4,7 +4,7 @@ import {
   getExpenseCategories,
   createExpenseRequest,
 } from "../../services/expense/ExpenseService.jsx";
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 
 const ExpenseRequestForm = ({ accountId, departmentId, budgetId, onSubmitSuccess }) => {
  
@@ -43,7 +43,7 @@ const ExpenseRequestForm = ({ accountId, departmentId, budgetId, onSubmitSuccess
         }
       } catch (error) {
         console.error("Error fetching categories:", error);
-        toast.error("Failed to load categories");
+        // toast.error("Failed to load categories");
       } finally {
         setLoading(false);
       }
@@ -67,33 +67,33 @@ const ExpenseRequestForm = ({ accountId, departmentId, budgetId, onSubmitSuccess
   
   const handleSubmit = async () => {
     
-    if (!formData.title?.trim()) {
-      toast.error("Please enter a title");
-      return;
-    }
+    // if (!formData.title?.trim()) {
+    //   toast.error("Please enter a title");
+    //   return;
+    // }
     
     if (!formData.amount || isNaN(Number(formData.amount)) || Number(formData.amount) <= 0) {
-      toast.error("Please enter a valid amount");
+    //   toast.error("Please enter a valid amount");
       return;
     }
     
     if (!formData.category) {
-      toast.error("Please select a category");
+    //   toast.error("Please select a category");
       return;
     }
     
     if (!formData.date) {
-      toast.error("Please select a date");
+    //   toast.error("Please select a date");
       return;
     }
     
     if (!formData.note?.trim()) {
-      toast.error("Please enter a note");
+    //   toast.error("Please enter a note");
       return;
     }
     
     if (selectedFiles.length === 0) {
-      toast.error("Please upload at least one evidence file");
+    //   toast.error("Please upload at least one evidence file");
       return;
     }
     
@@ -117,11 +117,10 @@ const ExpenseRequestForm = ({ accountId, departmentId, budgetId, onSubmitSuccess
       };
       
  
-  
       const response = await createExpenseRequest(eventId, expenseData, selectedFiles);
-      console.log("Expense request submitted:", response);
+    //   console.log("Expense request submitted:", response);
     
-      toast.success("Expense request submitted successfully!");
+    //   toast.success("Expense request submitted successfully!");
       
       // Reset form
       setFormData({
@@ -141,7 +140,7 @@ const ExpenseRequestForm = ({ accountId, departmentId, budgetId, onSubmitSuccess
       }
     } catch (error) {
       console.error("Error submitting expense request:", error);
-      toast.error("Failed to submit expense request");
+    //   toast.error("Failed to submit expense request");
     } finally {
       setLoading(false);
     }
@@ -322,14 +321,6 @@ const ExpenseRequestForm = ({ accountId, departmentId, budgetId, onSubmitSuccess
         </button>
       </div>
       
-      {/* Debug info - sẽ xóa sau */}
-      <div className="mt-4 p-4 bg-gray-100 rounded-md">
-        <h3 className="font-medium text-gray-700">Debug Info:</h3>
-        <p>EventId: {eventId}</p>
-        <p>Categories loaded: {categories.length}</p>
-        <p>Selected category: {formData.category}</p>
-        <p>Selected files: {selectedFiles.length}</p>
-      </div>
     </div>
   );
 };

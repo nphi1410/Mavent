@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faEye, faPencil } from "@fortawesome/free-solid-svg-icons";
-import { getEvents, updateEvent } from '../../services/eventService';
+import { getEvents, updateEvent } from '../../services/EventService';
 import { getAllLocations } from '../../services/EventLocationService';
 import SuperAdminSidebar from '../../components/superadmin/SuperAdminSidebar';
 import SuperAdminHeader from '../../components/superadmin/SuperAdminHeader';
@@ -185,7 +185,7 @@ function SuperAdminPendingEvents() {
                                                     )} */}
                                     </td>
                                     <td className="p-2 whitespace-nowrap text-gray-600 relative">
-                                        <button className='m-1 rounded hover:bg-gray-100 mr-2'
+                                        <button className='m-1 ml-4 rounded hover:bg-gray-100'
                                             onClick={() => navigate(`${event.eventId}`)}
                                         >
                                             <FontAwesomeIcon icon={faEye} color='blue' />
@@ -193,7 +193,7 @@ function SuperAdminPendingEvents() {
                                         <button
 
                                         >
-                                            <FontAwesomeIcon icon={faPencil} color='red' />
+                                            {/* <FontAwesomeIcon icon={faPencil} color='red' /> */}
                                         </button>
                                     </td>
                                 </tr>

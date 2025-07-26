@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { getUserProfile, uploadAvatar, updateProfile as updateProfileService } from "../../services/ProfileService"; // Đổi tên updateProfile để tránh trùng
+import { getUserProfile, uploadAvatar, updateProfile as updateProfileService } from "../../services/ProfileService"; // Đổi tên updateProfile để tránh trùng
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload, faUser } from '@fortawesome/free-solid-svg-icons';
-import UpdateProfile from "./UpdateProfile"; 
+import UpdateProfile from "./UpdateProfile";
+import { useNavigate } from "react-router-dom";
 
 const ProfileContent = () => {
   const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false); 
   const [updateLoading, setUpdateLoading] = useState(false); 
@@ -18,8 +20,12 @@ const ProfileContent = () => {
       const profileData = await getUserProfile(); 
       setUserData(profileData);
     } catch (err) {
-      console.error('ProfileContent: Error fetching profile:', err);
-      setError(err.message || err.response?.data?.message || 'Failed to load user profile');
+      console.error("ProfileContent: Error fetching profile:", err);
+      setError(
+        err.message ||
+          err.response?.data?.message ||
+          "Failed to load user profile"
+      );
     } finally {
       setLoading(false); 
     }
@@ -27,12 +33,12 @@ const ProfileContent = () => {
 
   useEffect(() => {
     fetchUserProfile();
-  }, []); 
+  }, []);
 
   const handleAvatarUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
-      console.log('ProfileContent: Uploading avatar file:', file.name);
+      // console.log('ProfileContent: Uploading avatar file:', file.name);
       const formData = new FormData();
       formData.append('file', file);
       try {        const response = await uploadAvatar(formData);
@@ -40,15 +46,19 @@ const ProfileContent = () => {
         if (response && response.avatarUrl) { 
           setUserData(prev => ({
             ...prev,
-            avatarUrl: response.avatarUrl
+            avatarUrl: response.avatarUrl,
           }));
-           alert('Avatar updated successfully!');
+          alert('Avatar updated successfully!');
         } else {
-            throw new Error("Invalid response from avatar upload");
+          throw new Error("Invalid response from avatar upload");
         }
       } catch (err) {
-        console.error('ProfileContent: Avatar upload error:', err);
-        alert(err.response?.data?.message || err.message || 'Failed to upload avatar');
+        console.error("ProfileContent: Avatar upload error:", err);
+        alert(
+          err.response?.data?.message ||
+            err.message ||
+            "Failed to upload avatar"
+        );
       }
     }
   };
@@ -74,7 +84,7 @@ const ProfileContent = () => {
       console.log('ProfileContent: Starting update with data from child form:', dataFromChildForm);
       
       const updatedUserProfile = await updateProfileService(dataFromChildForm);
-      console.log('ProfileContent: Response from updateProfileService:', updatedUserProfile);
+      // console.log('ProfileContent: Response from updateProfileService:', updatedUserProfile);
 
       if (updatedUserProfile && typeof updatedUserProfile === 'object') {
         setUserData(updatedUserProfile); 
@@ -102,10 +112,11 @@ const ProfileContent = () => {
     }
   };
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-    </div>
+  if (loading)
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
   );
 
   if (error && !isUpdating) return ( 
@@ -132,7 +143,7 @@ const ProfileContent = () => {
           <div className="relative group w-32 h-32 sm:w-40 sm:h-40">
             {userData?.avatarUrl ? (
               <img
-                src={userData.avatarUrl} 
+                src={userData.avatarUrl}
                 alt="Profile"
                 className="w-full h-full rounded-full object-cover border-4 border-white shadow-lg"
               />
@@ -142,7 +153,10 @@ const ProfileContent = () => {
               </div>
             )}
             <label className="absolute bottom-0 right-0 bg-[#00155c] p-2 rounded-full cursor-pointer hover:bg-[#172c70] transition-colors shadow-md">
-              <FontAwesomeIcon icon={faUpload} className="text-white w-4 h-4 sm:w-5 sm:h-5" />
+              <FontAwesomeIcon
+                icon={faUpload}
+                className="text-white w-4 h-4 sm:w-5 sm:h-5"
+              />
               <input
                 type="file"
                 className="hidden"
@@ -152,8 +166,8 @@ const ProfileContent = () => {
             </label>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold mt-4 text-gray-800 truncate max-w-[250px]">
-            @{userData?.username?.length > 15 
-              ? `${userData.username.substring(0, 15)}...` 
+            @{userData?.username?.length > 15
+              ? `${userData.username.substring(0, 15)}...`
               : userData?.username || "User Profile"}
           </h1>
           {/* <p className="text-sm text-gray-500">@{userData?.username}</p> */}
@@ -161,42 +175,42 @@ const ProfileContent = () => {
 
         <div className="mb-8 sm:mb-10 bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
           <div className="divide-y divide-gray-200">
-          {
-            [
-              ["Full Name", "fullName"],
-              ["Student ID", "studentId"],
-              ["Email", "email"], // Email vẫn hiển thị dù không sửa được
-              ["Phone", "phoneNumber"],
-              ["Date of Birth", "dateOfBirth"], 
-              ["Gender", "gender"]
-            ].map(([label, field]) => {
-              let displayValue = userData?.[field];
+            {
+              [
+                ["Full Name", "fullName"],
+                ["Student ID", "studentId"],
+                ["Email", "email"], // Email vẫn hiển thị dù không sửa được
+                ["Phone", "phoneNumber"],
+                ["Date of Birth", "dateOfBirth"],
+                ["Gender", "gender"]
+              ].map(([label, field]) => {
+                let displayValue = userData?.[field];
 
-              if (field === "dateOfBirth") {
-                displayValue = formatDate(displayValue);
-              }
-              if (field === "gender" && displayValue) {
-                displayValue = displayValue.charAt(0).toUpperCase() + displayValue.slice(1).toLowerCase();
-              }
+                if (field === "dateOfBirth") {
+                  displayValue = formatDate(displayValue);
+                }
+                if (field === "gender" && displayValue) {
+                  displayValue = displayValue.charAt(0).toUpperCase() + displayValue.slice(1).toLowerCase();
+                }
 
 
-              const valueToRender = (displayValue === null || displayValue === undefined || displayValue === "") ? (
-                <span className="text-gray-400 italic">Not provided</span>
-              ) : (
-                displayValue
-              );
+                const valueToRender = (displayValue === null || displayValue === undefined || displayValue === "") ? (
+                  <span className="text-gray-400 italic">Not provided</span>
+                ) : (
+                  displayValue
+                );
 
-              return (
-                <div
-                  key={field}
-                  className="py-3 sm:py-4 px-4 sm:px-6 grid grid-cols-3 gap-4 items-center hover:bg-gray-50 transition-colors"
-                >
-                  <span className="text-sm font-medium text-gray-600 col-span-1">{label}:</span>
-                  <span className="text-sm text-gray-800 col-span-2 break-words">{valueToRender}</span>
-                </div>
-              );
-            })
-          }
+                return (
+                  <div
+                    key={field}
+                    className="py-3 sm:py-4 px-4 sm:px-6 grid grid-cols-3 gap-4 items-center hover:bg-gray-50 transition-colors"
+                  >
+                    <span className="text-sm font-medium text-gray-600 col-span-1">{label}:</span>
+                    <span className="text-sm text-gray-800 col-span-2 break-words">{valueToRender}</span>
+                  </div>
+                );
+              })
+            }
           </div>
         </div>
 
@@ -210,10 +224,11 @@ const ProfileContent = () => {
           >
             Update Profile
           </button>
+
         </div>
 
         {isUpdating && (
-          <UpdateProfile 
+          <UpdateProfile
             userData={userData}
             onClose={() => setIsUpdating(false)}
             onUpdate={handleProfileUpdate} 

@@ -15,11 +15,11 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName })
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [newDocument, setNewDocument] = useState({ file: null, title: '', description: '' });
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
+    title: "",
+    description: "",
     dueDate: new Date(new Date().setDate(new Date().getDate() + 7)),
-    priority: 'MEDIUM',
-    assignedToAccountId: '',
+    priority: "MEDIUM",
+    assignedToAccountId: "",
     attendees: [],
     departmentId: '',
   });
@@ -43,7 +43,7 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName })
           setDepartments(departmentsData || []);
           setDocuments(documentsData || []);
         } catch (err) {
-          setError('Unable to load event data');
+          setError("Unable to load event data");
           console.error(err);
         } finally {
           setLoading(false);
@@ -53,18 +53,18 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName })
       fetchEventData();
 
       setFormData({
-        title: '',
-        description: '',
+        title: "",
+        description: "",
         dueDate: new Date(new Date().setDate(new Date().getDate() + 7)),
-        priority: 'MEDIUM',
-        assignedToAccountId: '',
+        priority: "MEDIUM",
+        assignedToAccountId: "",
         attendees: [],
-        departmentId: ''
+        departmentId: "",
       });
       setFormErrors({});
       setSelectedDocuments([]);
       setShowUploadForm(false);
-      setNewDocument({ file: null, title: '', description: '' });
+      setNewDocument({ file: null, title: "", description: "" });
     }
   }, [isOpen, eventId]);
 
@@ -82,24 +82,24 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName })
 
   const handleInputChange = useCallback((e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (formErrors[name]) {
-      setFormErrors(prev => ({ ...prev, [name]: null }));
+      setFormErrors((prev) => ({ ...prev, [name]: null }));
     }
   }, [formErrors]);
 
   const handleDateChange = useCallback((date) => {
     setFormData(prev => ({ ...prev, dueDate: date }));
     if (formErrors.dueDate) {
-      setFormErrors(prev => ({ ...prev, dueDate: null }));
+      setFormErrors((prev) => ({ ...prev, dueDate: null }));
     }
   }, [formErrors]);
 
   const handleAssigneeChange = useCallback((e) => {
     const assigneeId = e.target.value;
-    setFormData(prev => ({ ...prev, assignedToAccountId: assigneeId }));
+    setFormData((prev) => ({ ...prev, assignedToAccountId: assigneeId }));
     if (formErrors.assignedToAccountId) {
-      setFormErrors(prev => ({ ...prev, assignedToAccountId: null }));
+      setFormErrors((prev) => ({ ...prev, assignedToAccountId: null }));
     }
   }, [formErrors]);
 
@@ -107,7 +107,7 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName })
     setFormData(prev => {
       if (accountId === prev.assignedToAccountId) return prev;
       const attendees = prev.attendees.includes(accountId)
-        ? prev.attendees.filter(id => id !== accountId)
+        ? prev.attendees.filter((id) => id !== accountId)
         : [...prev.attendees, accountId];
       return { ...prev, attendees };
     });
@@ -129,14 +129,14 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName })
     }
     
     if (formErrors.departmentId) {
-      setFormErrors(prev => ({ ...prev, departmentId: null }));
+      setFormErrors((prev) => ({ ...prev, departmentId: null }));
     }
   }, [members, formErrors]);
 
   const handleDocumentToggle = useCallback((documentId) => {
     setSelectedDocuments(prev =>
       prev.includes(documentId)
-        ? prev.filter(id => id !== documentId)
+        ? prev.filter((id) => id !== documentId)
         : [...prev, documentId]
     );
   }, []);
@@ -159,7 +159,7 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName })
         eventId: eventId,
         departmentId: formData.departmentId || null,
         title: newDocument.title || newDocument.file.name,
-        description: newDocument.description
+        description: newDocument.description,
       };
       const newDoc = await uploadDocument(newDocument.file, documentData, null);
       
@@ -179,10 +179,12 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName })
   
   const validateForm = useCallback(() => {
     const errors = {};
-    if (!formData.title.trim()) errors.title = 'Title must not be empty';
-    if (!formData.description.trim()) errors.description = 'Description must not be empty';
-    if (!formData.dueDate) errors.dueDate = 'Due date is required';
-    if (!formData.assignedToAccountId) errors.assignedToAccountId = 'Please select a task assignee';
+    if (!formData.title.trim()) errors.title = "Title must not be empty";
+    if (!formData.description.trim())
+      errors.description = "Description must not be empty";
+    if (!formData.dueDate) errors.dueDate = "Due date is required";
+    if (!formData.assignedToAccountId)
+      errors.assignedToAccountId = "Please select a task assignee";
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   }, [formData]);
@@ -212,7 +214,7 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName })
       onClose();
     } catch (err) {
       console.error("Error creating task:", err);
-      setError(err.message || 'Can not create task');
+      setError(err.message || "Can not create task");
     } finally {
       setSubmitting(false);
     }
@@ -227,14 +229,29 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName })
           <div className="flex justify-between items-center pb-4 mb-2">
             <h2 className="text-2xl font-bold">
               Create New Task
-              {eventName && <span className="text-lg text-gray-600 ml-2">for {eventName}</span>}
+              {eventName && (
+                <span className="text-lg text-gray-600 ml-2">
+                  for {eventName}
+                </span>
+              )}
             </h2>
             <button
               onClick={onClose}
               className="text-gray-500 hover:text-gray-700"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -261,10 +278,16 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName })
                     name="title"
                     value={formData.title}
                     onChange={handleInputChange}
-                    className={`w-full border ${formErrors.title ? 'border-red-500' : 'border-gray-300'} rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    className={`w-full border ${
+                      formErrors.title ? "border-red-500" : "border-gray-300"
+                    } rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                     placeholder="Enter task title"
                   />
-                  {formErrors.title && <p className="text-red-500 text-xs mt-1">{formErrors.title}</p>}
+                  {formErrors.title && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {formErrors.title}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -276,10 +299,18 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName })
                     value={formData.description}
                     onChange={handleInputChange}
                     rows={4}
-                    className={`w-full border ${formErrors.description ? 'border-red-500' : 'border-gray-300'} rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    className={`w-full border ${
+                      formErrors.description
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    } rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                     placeholder="Enter task description"
                   />
-                  {formErrors.description && <p className="text-red-500 text-xs mt-1">{formErrors.description}</p>}
+                  {formErrors.description && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {formErrors.description}
+                    </p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -290,11 +321,19 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName })
                     <DatePicker
                       selected={formData.dueDate}
                       onChange={handleDateChange}
-                      className={`w-full border ${formErrors.dueDate ? 'border-red-500' : 'border-gray-300'} rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                      className={`w-full border ${
+                        formErrors.dueDate
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      } rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                       dateFormat="dd/MM/yyyy"
                       minDate={new Date()}
                     />
-                    {formErrors.dueDate && <p className="text-red-500 text-xs mt-1">{formErrors.dueDate}</p>}
+                    {formErrors.dueDate && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {formErrors.dueDate}
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -317,7 +356,7 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName })
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Department 
+                    Department
                   </label>
                   <select
                     value={formData.departmentId}
@@ -325,8 +364,11 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName })
                     className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">-- Department --</option>
-                    {departments.map(department => (
-                      <option key={department.departmentId} value={department.departmentId}>
+                    {departments.map((department) => (
+                      <option
+                        key={department.departmentId}
+                        value={department.departmentId}
+                      >
                         {department.name}
                       </option>
                     ))}
@@ -340,7 +382,11 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName })
                   <select
                     value={formData.assignedToAccountId}
                     onChange={handleAssigneeChange}
-                    className={`w-full border ${formErrors.assignedToAccountId ? 'border-red-500' : 'border-gray-300'} rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    className={`w-full border ${
+                      formErrors.assignedToAccountId
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    } rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   >
                     <option value="">-- Assign to: --</option>
                     {activeMembers.map(member => (
@@ -349,17 +395,23 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName })
                       </option>
                     ))}
                   </select>
-                  {formErrors.assignedToAccountId && <p className="text-red-500 text-xs mt-1">{formErrors.assignedToAccountId}</p>}
+                  {formErrors.assignedToAccountId && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {formErrors.assignedToAccountId}
+                    </p>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Documents (optional)
                   </label>
-                  
+
                   <div className="border border-gray-300 rounded-lg p-4 max-h-48 overflow-y-auto mb-3">
                     <div className="flex justify-between items-center mb-3">
-                      <span className="text-sm font-medium">Available Documents ({documents.length})</span>
+                      <span className="text-sm font-medium">
+                        Available Documents ({documents.length})
+                      </span>
                       <button
                         type="button"
                         onClick={() => setShowUploadForm(!showUploadForm)}
@@ -371,21 +423,31 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName })
 
                     {documents.length > 0 ? (
                       <div className="space-y-2">
-                        {documents.map(doc => (
-                          <div key={doc.documentId} className="flex items-center p-2 hover:bg-gray-50 rounded">
+                        {documents.map((doc) => (
+                          <div
+                            key={doc.documentId}
+                            className="flex items-center p-2 hover:bg-gray-50 rounded"
+                          >
                             <input
                               type="checkbox"
-                              checked={selectedDocuments.includes(doc.documentId)}
-                              onChange={() => handleDocumentToggle(doc.documentId)}
+                              checked={selectedDocuments.includes(
+                                doc.documentId
+                              )}
+                              onChange={() =>
+                                handleDocumentToggle(doc.documentId)
+                              }
                               className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                             />
                             <div className="flex-grow">
                               <p className="font-medium text-sm">{doc.title}</p>
                               {doc.description && (
-                                <p className="text-xs text-gray-600">{doc.description}</p>
+                                <p className="text-xs text-gray-600">
+                                  {doc.description}
+                                </p>
                               )}
                               <p className="text-xs text-gray-500">
-                                {doc.fileType} • {new Date(doc.createdAt).toLocaleDateString()}
+                                {doc.fileType} •{" "}
+                                {new Date(doc.createdAt).toLocaleDateString()}
                               </p>
                             </div>
                           </div>
@@ -412,7 +474,12 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName })
                             type="text"
                             placeholder="Document title"
                             value={newDocument.title}
-                            onChange={(e) => setNewDocument(prev => ({ ...prev, title: e.target.value }))}
+                            onChange={(e) =>
+                              setNewDocument((prev) => ({
+                                ...prev,
+                                title: e.target.value,
+                              }))
+                            }
                             className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
                           />
                         </div>
@@ -420,7 +487,12 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName })
                           <textarea
                             placeholder="Description (optional)"
                             value={newDocument.description}
-                            onChange={(e) => setNewDocument(prev => ({ ...prev, description: e.target.value }))}
+                            onChange={(e) =>
+                              setNewDocument((prev) => ({
+                                ...prev,
+                                description: e.target.value,
+                              }))
+                            }
                             rows={2}
                             className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
                           />
@@ -432,7 +504,7 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName })
                             disabled={!newDocument.file || uploadingDocument}
                             className="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:bg-gray-400"
                           >
-                            {uploadingDocument ? 'Uploading...' : 'Upload'}
+                            {uploadingDocument ? "Uploading..." : "Upload"}
                           </button>
                           <button
                             type="button"
@@ -474,11 +546,17 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName })
                             <input
                               type="checkbox"
                               checked={
-                                member.accountId === formData.assignedToAccountId ||
+                                member.accountId ===
+                                  formData.assignedToAccountId ||
                                 formData.attendees.includes(member.accountId)
                               }
-                              onChange={() => handleAttendeeToggle(member.accountId)}
-                              disabled={member.accountId === formData.assignedToAccountId}
+                              onChange={() =>
+                                handleAttendeeToggle(member.accountId)
+                              }
+                              disabled={
+                                member.accountId ===
+                                formData.assignedToAccountId
+                              }
                               className="h-4 w-4 rounded text-blue-600 focus:ring-blue-500"
                             />
                             <div className="flex-grow">
@@ -514,12 +592,13 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName })
                 <button
                   type="submit"
                   disabled={submitting}
-                  className={`px-4 py-2 rounded-lg ${submitting
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-[#00155c] hover:bg-[#172c70] text-white'
-                    }`}
+                  className={`px-4 py-2 rounded-lg ${
+                    submitting
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-[#00155c] hover:bg-[#172c70] text-white"
+                  }`}
                 >
-                  {submitting ? 'Creating...' : 'Create Task'}
+                  {submitting ? "Creating..." : "Create Task"}
                 </button>
               </div>
             </form>

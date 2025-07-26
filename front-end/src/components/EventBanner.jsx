@@ -1,34 +1,18 @@
 import { faCalendar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useState } from "react";
-import { getAccountById } from "../services/accountService";
-import { registerEvent } from "../services/eventService";
+import { getAccountById } from "../services/AccountService";
+import { registerEvent } from "../services/EventService";
 import { useNavigate } from "react-router-dom";
 import DepartmentChooseForm from "./department/DepartmentChooseForm";
 
 const EventBanner = ({ eventData }) => {
-  const [createAccount, setCreateAccount] = useState(null);
   const [showDepartmentForm, setShowDepartmentForm] = useState(false);
   const navigate = useNavigate();
 
   const PARTICIPANT_ROLE = "PARTICIPANT";
   const MEMBER_ROLE = "MEMBER";
   const RECRUITING_STATUS = "RECRUITING";
-
-  useEffect(() => {
-    const getAccount = async () => {
-      if (!eventData?.createBy) return;
-
-      try {
-        const data = await getAccountById(eventData.createBy);
-        setCreateAccount(data);
-      } catch (err) {
-        console.error("Failed to fetch creator info:", err);
-      }
-    };
-
-    getAccount();
-  }, [eventData?.createBy]);
 
   const handleRegister = async (role) => {
     if (!sessionStorage.getItem("isLoggedIn")) {
@@ -60,7 +44,7 @@ const EventBanner = ({ eventData }) => {
     const registerDTO = {
       eventId: eventData.eventId,
       accountId: sessionStorage.getItem("accountId"),
-      role: 'GUEST',
+      role: "GUEST",
       departmentId: department.departmentId,
     };
 
@@ -73,7 +57,7 @@ const EventBanner = ({ eventData }) => {
 
   return (
     <div className="relative w-full">
-      <iframe
+      <img
         src={eventData.bannerUrl}
         title="codefest banner"
         className="w-full h-64 sm:h-128 md:h-[500px] lg:h-[650px] object-cover"
@@ -84,11 +68,17 @@ const EventBanner = ({ eventData }) => {
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2">
             {eventData.name}
           </h1>
-          {createAccount && (
-            <span className="block text-base sm:text-lg font-semibold mb-2">
-              By {createAccount.username}
-            </span>
-          )}
+          <div className="flex items-center gap-3 my-1 md:mt-0 font-semibold">
+            By
+            {eventData.createdByAvatar && (
+              <img
+                src={eventData.createdByAvatar}
+                alt="Avatar"
+                className="w-10 h-10 rounded-full object-cover border-2 border-white"
+              />
+            )}
+            <span>{eventData.createdByName ?? "Unknown"}</span>
+          </div>
           <p className="text-sm sm:text-base leading-relaxed line-clamp-2">
             {eventData.description}
           </p>
@@ -101,22 +91,26 @@ const EventBanner = ({ eventData }) => {
             <FontAwesomeIcon icon={faCalendar} />
             {eventData.startDatetime.split("T")[0]}
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 mt-4">
-            <button
-              onClick={() => handleRegister(PARTICIPANT_ROLE)}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-2 px-4 rounded text-sm sm:text-base"
-            >
-              Participate Now
-            </button>
-            {eventData.status === RECRUITING_STATUS && (
+          {Date.now() > eventData.endDatetime ? (
+            <div className="flex flex-col sm:flex-row gap-4 mt-4">
               <button
-                onClick={() => handleRegister(MEMBER_ROLE)}
-                className="bg-gray-200 hover:bg-gray-300 transition text-gray-800 font-semibold py-2 px-4 rounded text-sm sm:text-base"
+                onClick={() => handleRegister(PARTICIPANT_ROLE)}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-2 px-4 rounded text-sm sm:text-base"
               >
-                Become a Member
+                Participate Now
               </button>
-            )}
-          </div>
+              {eventData.status === RECRUITING_STATUS && (
+                <button
+                  onClick={() => handleRegister(MEMBER_ROLE)}
+                  className="bg-gray-200 hover:bg-gray-300 transition text-gray-800 font-semibold py-2 px-4 rounded text-sm sm:text-base"
+                >
+                  Become a Member
+                </button>
+              )}
+            </div>
+          ) : (
+            <span>Event has ended</span>
+          )}
 
           {/* Department Choose Form */}
           {showDepartmentForm && (

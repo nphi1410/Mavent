@@ -3,6 +3,7 @@ package com.mavent.dev.service;
 import com.mavent.dev.dto.EventCountDTO;
 import com.mavent.dev.dto.department.UserEventInfoDTO;
 import com.mavent.dev.dto.event.EventAccountRoleDTO;
+import com.mavent.dev.dto.role.UserRoleDTO;
 import com.mavent.dev.entity.EventAccountRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +28,10 @@ public interface EventAccountRoleService {
     List<EventAccountRole> getMembersByEventIdAndRole(Integer eventId, EventAccountRole.EventRole role);
 
     List<EventAccountRole> getActiveMembersByEventId(Integer eventId);
+
+    EventAccountRole getMemberByEventIdAndAccountId(Integer eventId, Integer accountId);
+
+    UserRoleDTO getAdminAccount(Integer eventId);
 
     // Quản lý thành viên
     EventAccountRole addMemberToEvent(EventAccountRole eventAccountRole);

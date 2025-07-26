@@ -3,7 +3,7 @@ import { Mousewheel, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
-import { getTags } from "./../services/tagService";
+import { getTags } from "../services/TagService";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 const NavBar = () => {
@@ -32,25 +32,24 @@ const NavBar = () => {
   };
 
   return (
-    <div className="flex items-center border border-gray-300 rounded-lg m-3 px-10 py-2 max-w-full">
-      <div className="flex-1 overflow-hidden">
+    <div className="flex items-center border border-gray-300 rounded-lg m-3 px-8 py-2 max-w-full">
+      <div className="flex-1 overflow-hidden border-x-2 border-gray-300">
         <Swiper
           modules={[Mousewheel, Navigation]}
-          spaceBetween={30}
+          spaceBetween={20}
           slidesPerView="auto"
           slidesPerGroup={3}
           mousewheel
           onSwiper={(swiper) => (swiperRef.current = swiper)}
-          className="!overflow-visible"
         >
           {tags.map((tag) => (
             <SwiperSlide
               key={tag.tagId}
-              className="!w-auto cursor-pointer select-none rounded-md px-4 py-2 hover:bg-blue-100 transition"
+              className="!w-auto cursor-pointer select-none "
               onClick={() => handleNavigate(tag.tagId)}
             >
-              <span className="text-base font-semibold whitespace-nowrap">
-                {tag.name}
+              <span className="inline-block px-4 py-2 text-sm sm:text-base font-medium text-gray-700 bg-gray-100 rounded-full hover:bg-blue-100 hover:text-blue-600 cursor-pointer transition">
+                {tag.name[0].toUpperCase() + tag.name.slice(1)}
               </span>
             </SwiperSlide>
           ))}

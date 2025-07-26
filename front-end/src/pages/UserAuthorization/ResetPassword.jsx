@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -8,9 +8,11 @@ function ResetPassword() {
     const [otp, setOtp] = useState("");
     const [error, setError] = useState("");
     const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleSendOtp = async (e) => {
         e.preventDefault();
+        setIsLoading(true);
 
         try {
             setError(""); // Reset error message
@@ -37,7 +39,12 @@ function ResetPassword() {
 
             // setOtpSent("Failed to send OTP. Email may not be registered.");
         }
+        setIsLoading(false);
     };
+
+    // useEffect(() => {
+
+    // }, [isLoading])
 
     const resetPassword = async (e) => {
         e.preventDefault();
@@ -52,7 +59,7 @@ function ResetPassword() {
             );
             if (response.status === 200) {
                 setOtpSent(true);
-                console.log("OTP verified successfully. You can now reset your password.");
+                // console.log("OTP verified successfully. You can now reset your password.");
                 setTimeout(() => {
                     navigate("/login");
                 }, 2000); // Redirect after 2 seconds
@@ -103,6 +110,7 @@ function ResetPassword() {
                                     type="button"
                                     className=" py-2 px-5 rounded-full bg-[#f1f900] text-blue-900 font-semibold hover:bg-[#dde428] transition self-end"
                                     onClick={handleSendOtp}
+                                    disabled={isLoading}
                                 >
                                     Resend OTP
                                 </button>
@@ -111,12 +119,20 @@ function ResetPassword() {
                         </div>
                     )}
 
-                    <button
-                        type="submit"
-                        className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full transition"
-                    >
-                        {otpSent ? 'Reset password' : 'Send OTP'}
-                    </button>
+                    {isLoading ? (
+                        <div className="flex justify-center items-center">
+                            <div className="w-8 h-8 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+                        </div>
+
+                    ) : (
+                        <button
+                            type="submit"
+                            className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full transition"
+                        >
+                            {otpSent ? 'Reset password' : 'Send OTP'}
+                        </button>
+
+                    )}
                 </form>
                 {error && (<p className="mt-4 text-sm text-red-500">{error}</p>)}
             </div>

@@ -10,9 +10,9 @@ import {
   faFilter,
   faSort,
 } from "@fortawesome/free-solid-svg-icons";
-import { getDocumentsByEvent } from "../../services/documentService.jsx";
-import { getUserProfile } from "../../services/profileService.jsx";
-import { getDepartmentsByEventId } from "../../services/departmentService.jsx";
+import { getDocumentsByEvent } from "../../services/DocumentService.jsx";
+import { getUserProfile } from "../../services/ProfileService.jsx";
+import { getDepartmentsByEventId } from "../../services/DepartmentService.jsx";
 import DocumentList from "./DocumentList";
 import DocumentUpload from "./DocumentUpload";
 
@@ -84,7 +84,6 @@ const DocumentManagement = ({ eventId }) => {
     { id: "other", name: "Other File Types" },
   ];
 
-
   const dateRanges = [
     { id: "all", name: "All Dates" },
     { id: "today", name: "Today" },
@@ -92,7 +91,6 @@ const DocumentManagement = ({ eventId }) => {
     { id: "thisMonth", name: "This Month" },
     { id: "lastMonth", name: "Last Month" },
   ];
-
 
   const sortOptions = [
     { id: "dateNewest", name: "Date (Newest)" },

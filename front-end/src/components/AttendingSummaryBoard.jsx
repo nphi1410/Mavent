@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   countAttendanceByAccountId,
   getEventRolesByAccount,
-} from "../services/eventService";
+} from "../services/EventService";
 
 const AttendingSummaryBoard = ({ accountId }) => {
   const [summary, setSummary] = useState({

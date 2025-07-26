@@ -20,7 +20,7 @@ import java.util.Optional;
  * Provides data access methods for event-account role relationships.
  */
 @Repository
-public interface EventAccountRoleRepository extends JpaRepository<EventAccountRole, Integer> {
+public interface EventAccountRoleRepository extends JpaRepository<EventAccountRole, EventAccountRole.PK> {
 
     /**
      * Find all roles for a specific event using composite key.
@@ -122,7 +122,7 @@ public interface EventAccountRoleRepository extends JpaRepository<EventAccountRo
      * @param eventRole the event role
      * @return list of accounts with the specified role in the event
      */
-    List<EventAccountRole> findByEventIdAndEventRole(Integer eventId, EventAccountRole.EventRole eventRole);
+    Optional<List<EventAccountRole>> findByEventIdAndEventRole(Integer eventId, EventAccountRole.EventRole eventRole);
 
     /**
      * Find roles by department ID.
@@ -361,5 +361,19 @@ public interface EventAccountRoleRepository extends JpaRepository<EventAccountRo
                   AND ear.event_id = :eventId
             """, nativeQuery = true)
     List<MemberDTO> findSponsorManageable(@Param("eventId") Integer eventId);
+
+    /**
+     * Find the admin role for a specific event.
+     *
+     * @param eventId the event ID
+     * @return the EventAccountRole entity with ADMIN role for the event
+     */
+    @Query(value = "SELECT * FROM event_account_role WHERE event_id = :eventId AND event_role = 'ADMIN' AND is_active = true", nativeQuery = true)
+    EventAccountRole findAdminByEventId(@Param("eventId") Integer eventId);
+
+    @Query(value = "SELECT * FROM event_account_role WHERE event_id = :eventId AND event_role != 'PARTICIPANT' AND is_active = true", nativeQuery = true)
+    List<EventAccountRole> findStaffsByEventId(Integer eventId);
+
+    void deleteByEventIdAndAccountId(Integer eventId, Integer accountId);
 
 }

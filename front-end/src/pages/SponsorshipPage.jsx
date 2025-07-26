@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getSponsorships } from "../services/sponsorshipService";
+import { getSponsorships } from "../services/SponsorshipService";
 import SponsorshipCard from "../components/sponsorship/SponsorshipCard";
 import { useNavigate, useParams } from "react-router-dom";
 

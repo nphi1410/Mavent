@@ -34,7 +34,7 @@ export const getFilterEvents = async ({
 export const getEvents = async () => {
   try {
     const response = await Api.get("/events");
-    
+
     return response.data;
   } catch (error) {
     console.error("Error fetching events:", error);
@@ -54,34 +54,64 @@ export const getEventById = async (id) => {
 };
 
 // Tạo sự kiện (gửi multipart/form-data)
-export const createEvent = async (eventData, bannerFile, posterFile) => {
+export const createEvent = async (
+  eventData,
+  bannerFile,
+  posterFile,
+  selectedTags = []
+) => {
   try {
     const formData = new FormData();
-    formData.append("event", JSON.stringify(eventData)); // Dữ liệu JSON
-    formData.append("banner", bannerFile);               // File banner
-    formData.append("poster", posterFile);               // File poster
 
+    // Thêm event data dưới dạng JSON string
+    formData.append("event", JSON.stringify(eventData));
+
+    // Thêm files
+    formData.append("banner", bannerFile);
+    formData.append("poster", posterFile);
+
+    // Thêm tags dưới dạng JSON string nếu có
+    if (selectedTags && selectedTags.length > 0) {
+      formData.append("tags", JSON.stringify(selectedTags));
+    }
+
+    // SỬA: Xóa Content-Type header để browser tự set cho multipart/form-data
     const response = await Api.post("/events/create-event", formData, {
       headers: {
-        "Content-Type": "multipart/form-data",
+        "Content-Type": undefined, // Force remove Content-Type
       },
     });
 
-    const createdEvent = response.data;
-    const eventId = createdEvent?.eventId;
-
     return {
       success: true,
-      eventId: eventId,
-      data: createdEvent,
+      eventId: response.data.eventId,
+      data: response.data,
     };
   } catch (error) {
     console.error("Error creating event:", error);
-    const errorMessage =
-      error.response?.data?.message ||
-      error.message ||
-      "Đã có lỗi không mong muốn xảy ra.";
-    return { success: false, message: errorMessage };
+    let errorMessage = "Tạo sự kiện thất bại";
+
+    if (error.response && error.response.data) {
+      // Nếu response.data là string, dùng trực tiếp
+      if (typeof error.response.data === "string") {
+        errorMessage = error.response.data;
+      }
+      // Nếu response.data là object có message
+      else if (error.response.data.message) {
+        errorMessage = error.response.data.message;
+      }
+      // Nếu response.data là object khác, convert to string
+      else {
+        errorMessage = JSON.stringify(error.response.data);
+      }
+    } else if (error.message) {
+      errorMessage = "Lỗi kết nối: " + error.message;
+    }
+
+    return {
+      success: false,
+      message: errorMessage,
+    };
   }
 };
 
@@ -105,13 +135,11 @@ export const updateEvent = async (id, eventData, bannerFile, posterFile) => {
     });
 
     return response.data;
-
   } catch (error) {
     console.error(`Error updating event with ID ${id}:`, error);
     return null;
   }
 };
-
 
 // Lấy trending events
 export const getTrendingEvents = async (type) => {
@@ -185,14 +213,23 @@ export const getSummary = async (status) => {
   }
 };
 
-export const countAttendanceByAccountId = async (accountId, eventRole, countCurrentMonth) => {
+export const countAttendanceByAccountId = async (
+  accountId,
+  eventRole,
+  countCurrentMonth
+) => {
   const response = await Api.get("/events/count", {
     params: { accountId, eventRole, countCurrentMonth },
   });
   return response.data;
 };
 
-export const getEventRolesByAccount = async (accountId, page = 0, size = 1, sort = "createdAt,desc") => {
+export const getEventRolesByAccount = async (
+  accountId,
+  page = 0,
+  size = 1,
+  sort = "createdAt,desc"
+) => {
   const response = await Api.get("/events/account", {
     params: { accountId, page, size, sort },
   });
@@ -204,10 +241,13 @@ export const getPendingEventDetailsById = async (eventId) => {
     const response = await Api.get(`/events/pending/${eventId}`);
     return response.data;
   } catch (error) {
-    console.error(`Error fetching pending event details for ID ${eventId}:`, error);
+    console.error(
+      `Error fetching pending event details for ID ${eventId}:`,
+      error
+    );
     return null;
   }
-}
+};
 
 export const updatePendingEvent = async (eventId, status) => {
   try {
@@ -217,7 +257,7 @@ export const updatePendingEvent = async (eventId, status) => {
     console.error(`Error updating pending event with ID ${eventId}:`, error);
     return null;
   }
-}
+};
 
 export const getEventsByCreator = async () => {
   try {
@@ -227,4 +267,4 @@ export const getEventsByCreator = async () => {
     console.error(`Error fetching events for creator`, error);
     return [];
   }
-}
+};

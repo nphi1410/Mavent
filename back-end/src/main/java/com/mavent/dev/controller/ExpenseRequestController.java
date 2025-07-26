@@ -28,7 +28,7 @@ public class ExpenseRequestController {
 
     @Autowired
     private ExpenseService expenseService;
-    
+
     @Autowired
     private ExpenseCategoryService categoryService;
 
@@ -50,32 +50,31 @@ public class ExpenseRequestController {
             @RequestBody ExpenseCreateRequestDTO requestDTO) {
 
         requestDTO.setEventId(eventId);
-        
+
         ExpenseResponseDTO response = expenseService.createExpenseRequest(requestDTO);
         return ResponseEntity.ok(response);
     }
-    
+
     @PostMapping(value = "/with-attachments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ExpenseResponseDTO> createExpenseRequestWithAttachments(
             @PathVariable int eventId,
             @RequestPart("data") ExpenseCreateRequestDTO requestDTO,
             @RequestPart(value = "files", required = false) List<MultipartFile> files) throws IOException {
 
-
         requestDTO.setEventId(eventId);
-        
+
         ExpenseResponseDTO response = expenseService.createExpenseRequestWithAttachments(requestDTO, files);
         return ResponseEntity.ok(response);
     }
-    
+
     @PostMapping(value = "/{expenseId}/attachments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<List<ExpenseAttachments>> addAttachmentsToExpense(
             @PathVariable int eventId,
             @PathVariable int expenseId,
             @RequestParam("files") List<MultipartFile> files) throws IOException {
-        
-        System.out.println("addAttachmentsToExpense: Files count = " + (files != null ? files.size() : "null"));
-        
+
+//        System.out.println("addAttachmentsToExpense: Files count = " + (files != null ? files.size() : "null"));
+
         List<ExpenseAttachments> attachments = expenseService.uploadAttachments(expenseId, files);
         return ResponseEntity.ok(attachments);
     }
@@ -92,32 +91,29 @@ public class ExpenseRequestController {
         ExpenseResponseDTO response = expenseService.updateExpenseStatus(updateDTO);
         return ResponseEntity.ok(response);
     }
-    
 
     @GetMapping
     public ResponseEntity<List<ExpenseResponseDTO>> getExpensesByEventId(@PathVariable int eventId) {
         List<ExpenseResponseDTO> expenses = expenseService.getExpensesByEventId(eventId);
         return ResponseEntity.ok(expenses);
     }
-    
 
     @GetMapping("/account/{accountId}")
     public ResponseEntity<List<ExpenseResponseDTO>> getExpensesByEventIdAndAccountId(
             @PathVariable int eventId,
             @PathVariable int accountId) {
-        
+
         List<ExpenseResponseDTO> expenses = expenseService.getExpensesByEventIdAndAccountId(eventId, accountId);
         return ResponseEntity.ok(expenses);
     }
-    
 
     @GetMapping("/{expenseId}")
     public ResponseEntity<ExpenseResponseDTO> getExpenseById(
             @PathVariable int eventId,
             @PathVariable int expenseId) {
-        
+
         ExpenseResponseDTO expense = expenseService.getExpenseById(expenseId);
         return ResponseEntity.ok(expense);
     }
-    
+
 }

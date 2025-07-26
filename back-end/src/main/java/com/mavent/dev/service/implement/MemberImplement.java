@@ -4,8 +4,6 @@ import com.mavent.dev.dto.member.BanMemberRequestDTO;
 import com.mavent.dev.dto.member.MemberDTO;
 import com.mavent.dev.dto.member.MemberResponseDTO;
 import com.mavent.dev.dto.member.UpdateMemberRequestDTO;
-import com.mavent.dev.entity.Account;
-import com.mavent.dev.entity.Department;
 import com.mavent.dev.entity.EventAccountRole;
 import com.mavent.dev.exception.MemberNotFoundException;
 import com.mavent.dev.repository.AccountRepository;
@@ -53,33 +51,41 @@ public class MemberImplement implements MemberService {
     public List<MemberResponseDTO> getAllMembersByEventId(Integer eventId) {
         // Lấy danh sách EventAccountRole cho event
         List<EventAccountRole> members = eventAccountRoleRepository.findByEventId(eventId);
-        
+
         // Optimization: Batch load accounts and departments to prevent N+1 queries
-        Set<Integer> accountIds = new HashSet<>();
-        Set<Integer> departmentIds = new HashSet<>();
-        
-        // Collect all needed IDs
-        for (EventAccountRole member : members) {
-            accountIds.add(member.getAccountId());
-            if (member.getAssignedByAccountId() != null) {
-                accountIds.add(member.getAssignedByAccountId());
-            }
-            if (member.getDepartmentId() != null) {
-                departmentIds.add(member.getDepartmentId());
-            }
-        }
-        
-        // Batch load accounts and departments
-        Map<Integer, Account> accountMap = accountRepository.findAllById(accountIds).stream()
-                .collect(Collectors.toMap(Account::getAccountId, account -> account));
-        
-        Map<Integer, Department> departmentMap = departmentRepository.findAllById(departmentIds).stream()
-                .collect(Collectors.toMap(Department::getDepartmentId, department -> department));
-        
-        // Map to DTOs with preloaded data
-        return members.stream()
-                .map(member -> memberMapper.toMemberResponseWithPreloadedData(member, accountMap, departmentMap))
-                .collect(Collectors.toList());
+//        Set<Integer> accountIds = new HashSet<>();
+//        Set<Integer> departmentIds = new HashSet<>();
+//
+//        // Collect all needed IDs
+//        for (EventAccountRole member : members) {
+//            accountIds.add(member.getAccountId());
+//            if (member.getAssignedByAccountId() != null) {
+//                accountIds.add(member.getAssignedByAccountId());
+//            }
+//            if (member.getDepartmentId() != null) {
+//                departmentIds.add(member.getDepartmentId());
+//            }
+//        }
+//
+//        // Batch load accounts and departments
+//        Map<Integer, Account> accountMap = accountRepository.findAllById(accountIds).stream()
+//                .collect(Collectors.toMap(Account::getAccountId, account -> account));
+//
+//        Map<Integer, Department> departmentMap = departmentRepository.findAllById(departmentIds).stream()
+//                .collect(Collectors.toMap(Department::getDepartmentId, department -> department));
+//
+//        // Map to DTOs with preloaded data
+//        return members.stream()
+//                .map(member -> memberMapper.toMemberResponseWithPreloadedData(member, accountMap, departmentMap))
+//                .collect(Collectors.toList());
+        return memberMapper.toListMemberResponseWithPreloadedData(members);
+    }
+
+    @Override
+    public List<MemberResponseDTO> getAllStaffsByEventId(Integer eventId) {
+        List<EventAccountRole> staffs = eventAccountRoleRepository.findStaffsByEventId(eventId);
+        // Optimization: Batch load accounts and departments to prevent N+1 queries
+        return memberMapper.toListMemberResponseWithPreloadedData(staffs);
     }
     
 
@@ -144,14 +150,20 @@ public class MemberImplement implements MemberService {
     public MemberResponseDTO banMember(BanMemberRequestDTO request) {
         // Find existing member role
         EventAccountRole memberRole = findEventAccountRole(request.getEventId(), request.getAccountId());
-        
+
+        if (memberRole.getEventRole().equals(EventAccountRole.EventRole.GUEST)){
+
+            eventAccountRoleRepository.deleteByEventIdAndAccountId(memberRole.getEventId(), memberRole.getAccountId());
+            return memberMapper.toMemberResponseDTO(memberRole);
+        }
+
         // Validate ban permissions using roleValidator
         roleValidator.validateBanPermission(
-            request.getEventId(), 
-            request.getAccountId(), 
-            request.getAssignedByAccountId(),
-            memberRole.getEventRole(),
-            request.getIsBanned()
+                request.getEventId(),
+                request.getAccountId(),
+                request.getAssignedByAccountId(),
+                memberRole.getEventRole(),
+                request.getIsBanned()
         );
 
         // Update active status

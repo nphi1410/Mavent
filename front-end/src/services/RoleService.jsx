@@ -152,6 +152,33 @@ export const addNewRole = async (eventId, roleData) => {
   }
 }
 
+export const getAssignedAdmin = async (eventId) => {
+  try {
+    const response = await Api.get(`/role/admin/${eventId}`);
+    console.log(`Fetched assigned admins for event ${eventId}:`, response.data);
+    // if (!response.ok) {
+    //   console.log(`Failed to fetch assigned admins for event ${eventId}:`);
+    //   return null;
+    // }
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching assigned admins for event ${eventId}:`, error);
+    handleAuthError(error);
+    throw error;
+  }
+}
+
+export const updateRole = async (data) => {
+  try {
+    const response = await Api.patch(`/role`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating role:', error);
+    handleAuthError(error);
+    throw error;
+  }
+}
+
 export default {
   getUserRoleInEvent,
   canPerformAction,

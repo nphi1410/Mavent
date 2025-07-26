@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
+import Api from "../../config/Api";
 
 function ChangePassword() {
   const [oldPassword, setOldPassword] = useState("");
@@ -12,14 +13,12 @@ function ChangePassword() {
 
   const verifyOldPassword = async (e) => {
     e?.preventDefault();
+    setStatus("")
     try {
       console.log("Verifying old password:", oldPassword);
-      const response = await axios.post("http://localhost:8080/api/verify-password",
-        { oldPassword },
-        {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true
-        });
+      const response = await Api.post("/verify-password",
+        { oldPassword }
+      );
       if (response.status === 200) {
         setIsCorrectPassword(true);
         setStatus("Old password verified successfully.");
@@ -27,7 +26,7 @@ function ChangePassword() {
       }
     } catch (error) {
       setIsCorrectPassword(false);
-      setStatus("Old password is incorrect. Please try again.");
+      setStatus("Incorrect password. Please try again.");
       console.error("Error verifying old password:", error);
     }
   };
@@ -40,7 +39,7 @@ function ChangePassword() {
     }
 
     try {
-      const response = await axios.post("http://localhost:8080/api/change-password",
+      const response = await Api.post("/change-password",
         {
           oldPassword,
           newPassword
@@ -56,7 +55,7 @@ function ChangePassword() {
         }, 2000);
       }
     } catch (err) {
-      setStatus("Failed to update password. Check old password.");
+      setStatus("Failed to update password.");
     }
   };
 
@@ -102,13 +101,13 @@ function ChangePassword() {
 
           <button
             type="submit"
-            className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full transition"
+            className="bg-green-600 hover:bg-green-800 text-white px-6 py-2 rounded-full transition"
           >
             {isCorrectPassword ? "Change Password" : "Verify Old Password"}
           </button>
         </form>
 
-        {status && <p className="mt-4 text-sm text-gray-600">{status}</p>}
+        {status && <p className={`mt-4 text-sm ${ status.includes("success") ? `text-green-600` : `text-red-600`}`}>{status}</p>}
       </div>
     </div>
   );

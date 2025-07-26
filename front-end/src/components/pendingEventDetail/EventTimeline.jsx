@@ -1,5 +1,5 @@
 import { Clock } from "lucide-react"
-import { vietnameseDate } from "@/utils/dateConvert"
+import { vietnameseDate } from "@/utils/DateConvert"
 
 export default function EventTimeline({ timeline }) {
     return (

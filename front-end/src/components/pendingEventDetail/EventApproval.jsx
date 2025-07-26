@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react"
 import { UserPlus, Search, X } from "lucide-react"
-import { Avatar } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { getAllAccounts } from "@/services/accountService"
+import { Avatar } from "@/components/ui/Avatar"
+import { Badge } from "@/components/ui/Badge"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { set } from "react-hook-form"
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate, useParams } from "react-router-dom"
-import { updatePendingEvent } from "../../services/eventService"
-import { addNewRole } from "../../services/roleService"
+import { updatePendingEvent } from "../../services/EventService"
+import { addNewRole } from "../../services/RoleService"
+import AccountList from "./AccountList"
+import Alert from "../ui/Alert"
 
 
 export default function EventApproval({ eventData }) {
@@ -16,6 +16,12 @@ export default function EventApproval({ eventData }) {
     const [status, setStatus] = useState("");
     const token = sessionStorage.getItem("token");
     const assignedBy = jwtDecode(token).accountId;
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Alert
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertVariant, setAlertVariant] = useState('');
+    const [message, setMessage] = useState('');
     // console.log("decoded token:", jwtDecode(token));
 
     const [adminAssigned, setAdminAssigned] = useState({
@@ -26,21 +32,21 @@ export default function EventApproval({ eventData }) {
     });
     const [note, setNote] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const [searchQuery, setSearchQuery] = useState("")
-    const [searchResults, setSearchResults] = useState([])
-    const [isSearching, setIsSearching] = useState(false)
-    const [users, setUsers] = useState([]) // Assuming you have a list of users to search from
-
     const navigate = useNavigate();
+
+
+    // HANDLERS
 
     const handleAssignProposer = () => {
         console.log("Assigning proposer as event admin")
         const adminData = {
             accountId: eventData.creator.id,
+            avatarUrl: eventData.creator.avatarUrl,
+            username: eventData.creator.username,
             ...adminAssigned
         }
         setAdminAssigned(adminData)
-        console.log("Admin assigned data:", adminData)
+        // console.log("Admin assigned data:", adminData)
 
         // Implement actual assignment logic
     }
@@ -49,17 +55,21 @@ export default function EventApproval({ eventData }) {
         console.log("Assigning user as admin:", user)
         const adminData = {
             ...adminAssigned,
-            accountId: user.accountId
+            accountId: user.accountId,
+            avatarUrl: user.avatarUrl,
+            username: user.username
         }
         setAdminAssigned(adminData)
-        console.log("Admin assigned data by choosing:", adminData)
+        // console.log("Admin assigned data by choosing:", adminData)
         // Implement actual assignment logic
     }
 
     const handleSubmit = async () => {
         // console.log("Submitting event approval with status:", status, "and note:", note);
         // Implement actual submission logic
-
+        setIsSubmitting(true);
+        setShowAlert(false);
+        setMessage('');
         try {
             const updateStatusRes = await updatePendingEvent(eventData.id, {
                 status: status,
@@ -71,61 +81,32 @@ export default function EventApproval({ eventData }) {
             });
             if (updateStatusRes) {
                 console.log("Event status updated successfully:", updateStatusRes);
-                if( status.toUpperCase().includes("UPCOMING")) {
+                if (status.toUpperCase().includes("UPCOMING")) {
                     const addRoleRes = await addNewRole(eventData.id, adminAssigned);
                 }
+                setStatus("");
+                setAlertVariant("success");
+                setMessage("Event Updated Successfully!")
+                setShowAlert(true);
+                setNote("");
                 setTimeout(() => {
-                    navigate("/superadmin/events/pending");
-
                     // Reset state after submission
-                    setStatus("");
-                    setNote("");
-                }, 2000);
+
+                    navigate("/superadmin/events/pending");
+                }, 3000);
             }
 
         } catch (error) {
+            setAlertVariant("danger");
+            setMessage("Fail to update event!")
+            setShowAlert(true);
             console.error("Error submitting event approval:", error);
         }
+        setIsSubmitting(false);
     }
 
     // Mock search function - replace with actual API call
-    useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                const response = await getAllAccounts();
-                setUsers(response || []);
-                setSearchResults(response || []);
-                console.log("Fetched users:", response);
-            } catch (error) {
-                console.error("Error fetching users:", error);
-            }
-        }
-        fetchUsers();
 
-    }, []);
-
-    const searchUsers = async (query) => {
-        if (query.length <= 0) {
-            setSearchResults(users)
-            return
-        }
-
-        setIsSearching(true)
-        // Simulate API call
-        // setTimeout(() => {
-        // const mockUsers = [
-        //   { id: 1, username: "john_doe", avatar: "/placeholder.svg?height=32&width=32" },
-        //   { id: 2, username: "jane_smith", avatar: "/placeholder.svg?height=32&width=32" },
-        //   { id: 3, username: "mike_wilson", avatar: "/placeholder.svg?height=32&width=32" },
-        // ].filter((user) => user.username.toLowerCase().includes(query.toLowerCase()))
-
-
-        setSearchResults(users.filter((user) =>
-            user.username.toLowerCase().includes(query.toLowerCase())
-        ))
-        setIsSearching(false)
-        // }, 300)
-    }
 
     return (
         <div className="bg-white mt-8 border border-gray-200 rounded-lg p-6">
@@ -149,7 +130,7 @@ export default function EventApproval({ eventData }) {
                     <button
                         onClick={() => setStatus("UPCOMING")}
                         className={`inline-flex mr-5 items-center cursor-pointer px-4 py-2 border rounded-md shadow-sm text-sm font-medium 
-                            ${status.toUpperCase().includes("UPCOMING") ? `text-white bg-green-700` : `border-green-300 text-green-500`}
+                            ${status.toUpperCase().includes("UPCOMING") ? `text-white bg-green-700` : `border-green-600 text-green-700`}
                             hover:bg-green-700 hover:text-white 
                         `}
                     >
@@ -194,19 +175,17 @@ export default function EventApproval({ eventData }) {
                                 {adminAssigned && (
                                     <Badge className="h-full" variant="primary">
                                         <Avatar
-                                            src={users.find(user => user.accountId === adminAssigned.accountId)?.avatarUrl || "/placeholder.svg"}
-                                            alt={users.find(user => user.accountId === adminAssigned.accountId)?.username}
+                                            src={adminAssigned?.avatarUrl || "/placeholder.svg"}
+                                            alt={adminAssigned?.username}
                                             className="h-8 w-8"
                                         />
-                                        <hr />@{users.find(user => user.accountId === adminAssigned.accountId)?.username}
+                                        <hr />@{adminAssigned?.username}
                                     </Badge>
                                 )}
                                 <button
                                     className="inline-flex items-center cursor-pointer px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-blue-800 bg-white  hover:bg-blue-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                                     onClick={() => {
-                                        setSearchResults(users)
                                         setIsModalOpen(true)
-                                        console.log(searchResults)
                                     }}
                                 >
                                     <FontAwesomeIcon icon="fa-solid fa-pen-to-square" className="h-4 w-4" />
@@ -216,103 +195,43 @@ export default function EventApproval({ eventData }) {
                         </div>
                     ))}
 
-                {status && (
-                    <div className="pl-5 col-span-1">
-                        <h2 className="font-bold my-4">Confirm Submit</h2>
-                        <button
-                            onClick={() => handleSubmit()}
-                            className="inline-flex items-center px-4 py-2 cursor-pointer border border-blue-300 rounded-md shadow-sm text-sm font-medium text-blue-700 bg-white hover:bg-blue-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                        >
-                            SUBMIT
-                        </button>
-                    </div>
-                )}
-            </div>
+                {
+                    isSubmitting ?
+                        <div className="flex justify-center items-center">
+                            <div className="w-8 h-8 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+                        </div>
+                        :
+                        (status && (adminAssigned.accountId != null || status.includes("CANCELLED")) && (
+                            <div className="pl-5 col-span-1">
+                                <h2 className="font-bold my-4">Confirm Submit</h2>
+                                <button
+                                    onClick={() => handleSubmit()}
+                                    className="inline-flex items-center px-4 py-2 cursor-pointer border border-blue-300 rounded-md shadow-sm text-sm font-medium text-blue-700 bg-white hover:bg-blue-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                >
+                                    SUBMIT
+                                </button>
 
+                            </div>
+                        ))
+                }
+
+
+
+            </div>
+            {
+                showAlert && (
+                    <Alert variant={alertVariant} message={message} />
+                )
+            }
 
             {/* Search and Assign Other Admins */}
             {/* Modal */}
-            {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-100 backdrop-blur-sm">
-                    <div className="bg-white rounded-lg w-full h-2/3 max-w-md p-6 relative shadow-lg">
-                        {/* Close button */}
-                        <button
-                            onClick={() => setIsModalOpen(false)}
-                            className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
-                        >
-                            <X className="w-5 h-5" />
-                        </button>
-
-                        {/* Modal Content */}
-                        <div className="space-y-6">
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                <input
-                                    type="text"
-                                    placeholder="Search users to assign as admin..."
-                                    value={searchQuery}
-                                    onChange={(e) => {
-                                        setSearchQuery(e.target.value);
-                                        searchUsers(e.target.value);
-                                    }}
-                                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                />
-                            </div>
-
-                            {searchResults.length > 0 && (
-                                <div className="border border-gray-200 rounded-lg max-h-90 overflow-y-auto">
-                                    {searchResults.map((user) => (
-                                        <div
-                                            key={user.accountId}
-                                            onClick={() => {
-                                                handleAssignAdmin(user)
-                                                // console.log("Assigned admin:", user.accountId)
-                                                setIsModalOpen(false)
-                                                setSearchQuery("")
-                                            }}
-                                            className="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
-                                        >
-                                            <Avatar
-                                                src={user.avatarUrl || "/placeholder.svg"}
-                                                alt={user.username}
-                                                // fallback={user.username.charAt(0).toUpperCase()}
-                                                size="md"
-                                            />
-                                            <span className="text-sm font-medium">{user.username}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            {/* {adminAssigned && (
-                                <div>
-                                    <h4 className="text-sm font-medium text-gray-700 mb-2">Assigned Admins:</h4>
-                                    <div className="flex flex-wrap gap-2">
-                                        <Badge
-                                            key={adminAssigned.accountId}
-                                            variant="secondary"
-                                            className="flex items-center gap-2"
-                                        >
-                                            <Avatar
-                                                src={adminAssigned.avatarUrl || "/placeholder.svg"}
-                                                alt={adminAssigned.username}
-                                                size="sm"
-                                            />
-                                            @{adminAssigned.username}
-                                            <button
-                                                onClick={() => handleRemoveAdmin(admin.id)}
-                                                className="ml-1 hover:text-red-600"
-                                            >
-                                                <X className="h-3 w-3" />
-                                            </button>
-                                        </Badge>
-                                    </div>
-                                </div>
-                            )} */}
-                        </div>
-                    </div>
-                </div >
-            )}
+            {isModalOpen &&
+                <AccountList
+                    setIsModalOpen={setIsModalOpen}
+                    handleAssignAdmin={handleAssignAdmin}
+                />
+            }
         </div>
     )
 }

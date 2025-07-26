@@ -74,7 +74,7 @@ function SuperAdminHeader() {
                   handleLogout(); // Gọi hàm xử lý đăng xuất
                 }}
               >
-                Đăng xuất
+                Logout
               </button>
             </div>
           )}
