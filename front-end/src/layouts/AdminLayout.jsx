@@ -55,7 +55,7 @@ const Layout = () => {
   useEffect(() => {
     setLoading(true);
     if (user) {
-      console.log("✅ User is loaded:", user);
+      // console.log("✅ User is loaded:", user);
       setLoading(false);
     }
     setLoading(false);

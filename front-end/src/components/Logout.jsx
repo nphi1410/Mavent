@@ -10,7 +10,7 @@ const logout = async () => {
         });
         // Optionally clear user state in React
         if (response.status === 200) {
-            console.log('Logged out successfully');
+            // console.log('Logged out successfully');
             sessionStorage.removeItem('isLoggedIn');
             sessionStorage.removeItem('username');
             sessionStorage.removeItem('userRole');

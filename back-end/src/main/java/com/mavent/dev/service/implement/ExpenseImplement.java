@@ -73,10 +73,6 @@ public class ExpenseImplement implements ExpenseService {
     @Transactional
     public ExpenseResponseDTO createExpenseRequestWithAttachments(ExpenseCreateRequestDTO dto, List<MultipartFile> files) throws IOException {
 
-        if (dto.getBudgetId() <= 0) {
-            dto.setBudgetId(null);
-        }
-
         Expenses expense = ExpensesMapper.toEntity(dto);
         expense.setCreatedAt(LocalDateTime.now());
 
@@ -87,16 +83,16 @@ public class ExpenseImplement implements ExpenseService {
 //        System.out.println("Files is null? " + (files == null));
 //        System.out.println("Files is empty? " + (files != null && files.isEmpty()));
 
-        if (files != null) {
-            System.out.println("Number of files: " + files.size());
-            for (int i = 0; i < files.size(); i++) {
-                MultipartFile file = files.get(i);
-//                System.out.println("File " + i + " name: " + file.getOriginalFilename());
-//                System.out.println("File " + i + " type: " + file.getContentType());
-//                System.out.println("File " + i + " size: " + file.getSize());
-//                System.out.println("File " + i + " is allowed type? " + ALLOWED_IMAGE_TYPES.contains(file.getContentType()));
-            }
-        }
+//        if (files != null) {
+////            System.out.println("Number of files: " + files.size());
+//            for (int i = 0; i < files.size(); i++) {
+//                MultipartFile file = files.get(i);
+////                System.out.println("File " + i + " name: " + file.getOriginalFilename());
+////                System.out.println("File " + i + " type: " + file.getContentType());
+////                System.out.println("File " + i + " size: " + file.getSize());
+////                System.out.println("File " + i + " is allowed type? " + ALLOWED_IMAGE_TYPES.contains(file.getContentType()));
+//            }
+//        }
 
         List<ExpenseAttachments> attachments = new ArrayList<>();
         if (files != null && !files.isEmpty()) {
@@ -105,7 +101,7 @@ public class ExpenseImplement implements ExpenseService {
 //                System.out.println("Successfully uploaded " + attachments.size() + " attachments");
             } catch (Exception e) {
 //                System.err.println("Error uploading attachments: " + e.getMessage());
-                e.printStackTrace();
+//                e.printStackTrace();
                 // Không throw exception để vẫn lưu được expense
             }
         } else {
@@ -138,7 +134,7 @@ public class ExpenseImplement implements ExpenseService {
                 })
                 .toList();
 
-        System.out.println("Valid files count: " + validFiles.size() + " out of " + files.size());
+//        System.out.println("Valid files count: " + validFiles.size() + " out of " + files.size());
 
         if (validFiles.isEmpty()) {
             throw new RuntimeException("No valid image files were provided. Allowed types: JPEG, PNG, GIF, WebP");

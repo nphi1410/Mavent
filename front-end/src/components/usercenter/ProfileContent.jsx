@@ -34,12 +34,12 @@ const ProfileContent = () => {
   const handleAvatarUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
-      console.log('ProfileContent: Uploading avatar file:', file.name);
+      // console.log('ProfileContent: Uploading avatar file:', file.name);
       const formData = new FormData();
       formData.append('file', file);
       // Cân nhắc thêm state loading cho avatar upload nếu cần
       try {        const response = await uploadAvatar(formData); // Service trả về response.data
-        console.log('ProfileContent: Avatar upload response:', response);
+        // console.log('ProfileContent: Avatar upload response:', response);
         if (response && response.avatarUrl) { // Kiểm tra response và avatarUrl
           setUserData(prev => ({
             ...prev,
@@ -75,11 +75,11 @@ const ProfileContent = () => {
     setUpdateLoading(true); // Bắt đầu loading cho việc update
     setError(null); // Xóa lỗi cũ (nếu có)
     try {
-      console.log('ProfileContent: Starting update with data from child form:', dataFromChildForm);
+      // console.log('ProfileContent: Starting update with data from child form:', dataFromChildForm);
       
       // Gọi service updateProfile 
       const updatedUserProfile = await updateProfileService(dataFromChildForm);
-      console.log('ProfileContent: Response from updateProfileService:', updatedUserProfile);
+      // console.log('ProfileContent: Response from updateProfileService:', updatedUserProfile);
 
       if (updatedUserProfile && typeof updatedUserProfile === 'object') {
         setUserData(updatedUserProfile); // Cập nhật state với dữ liệu mới nhất
@@ -87,7 +87,7 @@ const ProfileContent = () => {
       } else {
         // Nếu API không trả về object user mới 
         // thì fetch lại để đảm bảo UI đồng bộ.
-        console.log('ProfileContent: Update processed, re-fetching profile for consistency.');
+        // console.log('ProfileContent: Update processed, re-fetching profile for consistency.');
         await fetchUserProfile(); 
         alert('Cập nhật thông tin thành công, dữ liệu đang được làm mới.');
       }

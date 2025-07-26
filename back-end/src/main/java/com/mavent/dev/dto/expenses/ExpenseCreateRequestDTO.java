@@ -20,6 +20,7 @@ import java.util.List;
 public class ExpenseCreateRequestDTO {
     private int eventId;
     private Integer budgetId;
+    private Integer taskId;
 
     private int categoryId;
     private int departmentId;
