@@ -6,7 +6,7 @@ import {
   faClock,
 } from "@fortawesome/free-solid-svg-icons";
 import { getDashboardMetrics } from "../../services/superadmin/DashboardService";
-import { getEvents } from "../../services/EventService";
+import { getEvents } from "../../services/eventService";
 import { Line, Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -292,27 +292,26 @@ const SuperAdminDashboard = () => {
                 </select>
               </div>
 
-              <div className="flex flex-col md:flex-row gap-6">
-                <div className="w-full md:w-1/2 bg-gray-200 p-6 rounded-xl shadow">
-                  <Line ref={eventLineRef} data={lineData} options={lineOpts} />
-                </div>
-                <div className="w-full md:w-1/2 bg-gray-200 p-6 rounded-xl shadow flex items-center justify-center">
-                  {selectedMonthIndex !== null ? (
-                    <Bar data={barData} options={barOpts} />
-                  ) : (
-                    <span className="text-gray-500 italic text-center">
-                      Click vào một tháng trên biểu đồ bên trái để xem thống kê
-                      theo tuần
-                    </span>
-                  )}
-                </div>
-              </div>
-            </>
-          )}
-        </>
-      )}
-    </div>
-  );
+                            <div className="flex flex-col md:flex-row gap-6">
+                                <div className="w-full md:w-1/2 bg-gray-200 p-6 rounded-xl shadow">
+                                    <Line ref={eventLineRef} data={lineData} options={lineOpts} />
+                                </div>
+                                <div className="w-full md:w-1/2 bg-gray-200 p-6 rounded-xl shadow flex items-center justify-center">
+                                    {selectedMonthIndex !== null ? (
+                                        <Bar data={barData} options={barOpts} />
+                                    ) : (
+                                        <span className="text-gray-500 italic text-center">
+                                            Click on a month on the chart on the left to see weekly statistics
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </>
+            )}
+        </div>
+    );
 };
 
 export default SuperAdminDashboard;
