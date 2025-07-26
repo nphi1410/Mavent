@@ -66,6 +66,8 @@ import RejectTaskRequest from "./components/usercenter/RejectTaskRequest.jsx";
 import RedirectPage from "./pages/UserAuthorization/UnauthorizedAccess.jsx";
 import CreatedEventsPage from "./pages/events/AllCreatedEvents.jsx";
 import CreatedEventLayout from "./layouts/CreatedEventLayout.jsx";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // Higher Order Components for Route Protection
 // const Protect = (Component) => <ProtectedRoute children={Component} />;
@@ -126,6 +128,7 @@ function App() {
                 <Route path="income" element={<AdminViewIncome />} />
                 <Route path="expenses" element={<AdminViewExpense />} />
                 <Route path="sponsorship" element={<SponsorshipPage />} />
+                <Route path="sponsorship/create" element={<SubmitSponsorshipPage />} />
                 <Route
                   path="sponsorship-packages"
                   element={<SponsorshipPackagesPage />}
@@ -208,7 +211,20 @@ function App() {
           </Route>
         </Route>
       </Routes >
+
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </Router >
+
+    
   );
 }
 

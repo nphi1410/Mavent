@@ -221,7 +221,7 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName })
       documentIds: selectedDocuments
     };
 
-    console.log("Submitting task with data:", taskData);
+    // console.log("Submitting task with data:", taskData);
 
     try {
       setSubmitting(true);

@@ -10,19 +10,19 @@ export const EventRoleProvider = ({ children }) => {
   const { id: eventId } = useParams();
   const navigate = useNavigate();
 
-  console.log("EventRoleProvider mounted. eventId:", eventId);
+  // console.log("EventRoleProvider mounted. eventId:", eventId);
 
   useEffect(() => {
-    console.log("Running useEffect with eventId:", eventId);
+    // console.log("Running useEffect with eventId:", eventId);
     setLoading(true);
     if (!eventId) {
-      console.log("No eventId found.");
+      // console.log("No eventId found.");
       return;
     }
     const fetchUserInfoInEvent = async () => {
       try {
         const response = await getUserInfoInEvent(eventId);
-        console.log("Fetched user:", response);
+        // console.log("Fetched user:", response);
         if (response) {
           // console.log("context: response data: ", response);
           setUser(response);
@@ -38,11 +38,11 @@ export const EventRoleProvider = ({ children }) => {
     };
 
     fetchUserInfoInEvent();
-    console.log("useEffect completed for eventId:", eventId);
+    // console.log("useEffect completed for eventId:", eventId);
   }, [eventId]);
 
   if (loading) {
-    console.log("Loading user role...");
+    // console.log("Loading user role...");
     return <div>Loading...</div>;
   }
 

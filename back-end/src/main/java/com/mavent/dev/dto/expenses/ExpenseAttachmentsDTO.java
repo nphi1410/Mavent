@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,5 +17,5 @@ public class ExpenseAttachmentsDTO {
     private String fileUrl;
     private String fileName;
     private String fileType;
-    private String uploadedAt;
+    private LocalDateTime uploadedAt;
 }
