@@ -42,7 +42,7 @@ const Content = ({ imageUrl }) => {
       {/* Left Column */}
       <div className="md:w-1/3 flex flex-col items-start px-4">
         <h2 className="text-4xl font-extrabold mb-6 border-b-4 border-amber-400 pb-2">
-          Recently Events
+          Recent Events
         </h2>
         <div className="flex flex-col gap-4 w-full">
           {trendingRecentlyEvents.map((event) => (

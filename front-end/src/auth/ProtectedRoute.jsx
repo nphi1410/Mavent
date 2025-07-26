@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { EventRoleContext, useEventRole } from "../context/EventRoleContext";
 import { useNavigate, Navigate, Outlet, useLocation, useParams } from "react-router-dom";
-import { getUserInfoInEvent } from "../services/userEventService";
 import RedirectPage from "../pages/UserAuthorization/UnauthorizedAccess";
-import { set } from "react-hook-form";
 
 function parseJwt(token) {
   const base64Url = token.split('.')[1];
