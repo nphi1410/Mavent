@@ -94,10 +94,6 @@ function SuperAdminSidebar() {
                 <FontAwesomeIcon icon={faUsers} />
                 All Users
               </Link>
-              <div className="py-2 flex items-center gap-3 hover:text-black cursor-pointer text-gray-600">
-                <FontAwesomeIcon icon={faPersonShelter} />
-                Invitations
-              </div>
             </div>
           )}
         </div>

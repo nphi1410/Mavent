@@ -8,19 +8,81 @@ import {
   faLocationDot,
 } from "@fortawesome/free-solid-svg-icons";
 import { getEventById } from "../../services/EventService";
+import { getAgendaItemsByEventId } from "../../services/AgendaService";
 
 function SuperAdminViewEventDetails() {
   const { eventId } = useParams(); //lấy eventId từ URL
   const [activeTab, setActiveTab] = useState("agenda");
   const [event, setEvent] = useState(null);
+  const [agendaItems, setAgendaItems] = useState([]);
+  const [loadingAgenda, setLoadingAgenda] = useState(false);
 
   useEffect(() => {
     const fetchEvent = async () => {
-      const data = await getEventById(eventId); //gọi API theo ID
-      setEvent(data);
+      try {
+        const data = await getEventById(eventId); //gọi API theo ID
+        setEvent(data);
+      } catch (error) {
+        console.error("Error fetching event:", error);
+      }
     };
     fetchEvent();
   }, [eventId]);
+
+  useEffect(() => {
+    const fetchAgenda = async () => {
+      if (eventId) {
+        setLoadingAgenda(true);
+        try {
+          const agendaData = await getAgendaItemsByEventId(eventId);
+          setAgendaItems(agendaData || []);
+        } catch (error) {
+          console.error("Error fetching agenda:", error);
+          setAgendaItems([]);
+        } finally {
+          setLoadingAgenda(false);
+        }
+      }
+    };
+    fetchAgenda();
+  }, [eventId]);
+
+  // Format datetime to display date and time
+  const formatDateTime = (dateTimeString) => {
+    if (!dateTimeString) return "";
+    try {
+      const date = new Date(dateTimeString);
+      // Format: DD/MM/YYYY HH:MM
+      return date.toLocaleString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return dateTimeString;
+    }
+  };
+
+  // Format time only to display in HH:MM format
+  const formatTime = (dateTimeString) => {
+    if (!dateTimeString) return "";
+    try {
+      const date = new Date(dateTimeString);
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch (error) {
+      return dateTimeString;
+    }
+  };
+
+  // Check if agenda items are on the same date
+  const isSameDate = (dateTime1, dateTime2) => {
+    if (!dateTime1 || !dateTime2) return false;
+    const date1 = new Date(dateTime1);
+    const date2 = new Date(dateTime2);
+    return date1.toDateString() === date2.toDateString();
+  };
 
   if (!event) return <div className="p-10">Loading...</div>; //loading state
 
@@ -121,37 +183,73 @@ function SuperAdminViewEventDetails() {
         >
           Agenda
         </button>
-        <button
-          onClick={() => setActiveTab("members")}
-          className={`px-4 py-2 border rounded-r ${
-            activeTab === "members"
-              ? "bg-black text-white"
-              : "bg-white text-gray-700"
-          }`}
-        >
-          Members
-        </button>
       </div>
 
       {activeTab === "agenda" && (
         <div className="border rounded-lg p-4 shadow-sm">
           <h2 className="text-2xl font-bold text-black mb-2">Event Agenda</h2>
-          <p className="text-sm text-gray-500 mb-1">Schedule for the day</p>
-          <div className="border-b py-4">
-            <p>
-              <span className="font-semibold">09:00 - 10:00</span> Registration
-              & Breakfast
-            </p>
-          </div>
-        </div>
-      )}
-
-      {activeTab === "members" && (
-        <div className="border rounded-lg p-4 shadow-sm">
-          <h2 className="text-xl font-semibold">Members</h2>
-          <p className="text-gray-600">
-            Details about members will appear here.
-          </p>
+          <p className="text-sm text-gray-500 mb-4">Schedule for the day</p>
+          
+          {loadingAgenda ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500">Loading agenda...</p>
+            </div>
+          ) : agendaItems.length > 0 ? (
+            <div className="space-y-4">
+              {agendaItems.map((item, index) => (
+                <div key={item.agendaId || index} className="border-b pb-4 last:border-b-0">
+                  <div className="flex flex-col gap-2 mb-2">
+                    {/* Show full datetime if different dates, otherwise show time only */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                      <span className="font-semibold text-blue-600 text-sm">
+                        {isSameDate(item.agendaStartTime, item.agendaEndTime) ? (
+                          <>
+                            <span className="block sm:inline">
+                              <FontAwesomeIcon icon={faCalendarAlt} /> {new Date(item.agendaStartTime).toLocaleDateString('vi-VN')}
+                            </span>
+                            <span className="block sm:inline sm:ml-2">
+                              <FontAwesomeIcon icon={faClock} />  {formatTime(item.agendaStartTime)} - {formatTime(item.agendaEndTime)}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="block">
+                              <FontAwesomeIcon icon={faCalendarAlt} /> Start: {formatDateTime(item.agendaStartTime)}
+                            </span>
+                            <span className="block">
+                              <FontAwesomeIcon icon={faCalendarAlt} /> End: {formatDateTime(item.agendaEndTime)}
+                            </span>
+                          </>
+                        )}
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-800">
+                      {item.agendaTitle}
+                    </h3>
+                  </div>
+                  {item.agendaDescription && (
+                    <p className="text-gray-600 ml-0 mb-2">
+                      {item.agendaDescription}
+                    </p>
+                  )}
+                  {item.speaker && (
+                    <p className="text-sm text-gray-500 ml-0 mt-1">
+                      <strong>👤 Speaker:</strong> {item.speaker}
+                    </p>
+                  )}
+                  {item.location && (
+                    <p className="text-sm text-gray-500 ml-0 mt-1">
+                      <strong>📍 Location:</strong> {item.location}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No agenda items available for this event.</p>
+            </div>
+          )}
         </div>
       )}
     </div>
