@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Api from '../../config/Api';
+import Alert from '../../components/ui/Alert';
+import { ArrowLeft } from 'lucide-react';
 
 const Register = () => {
   const [username, setUsername] = useState("");
@@ -10,6 +13,7 @@ const Register = () => {
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(false);
 
   const [registerError, setRegisterError] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -49,11 +53,7 @@ const Register = () => {
       }
     } catch (error) {
       console.log(error)
-      if (error.response?.status === 400) {
-        setRegisterError(response?.data);
-      } else {
-        setRegisterError("Failed to send OTP. Please try again.");
-      }
+      setRegisterError("Failed to send OTP. Please try again.");
     }
     setIsLoading(false);
   };
@@ -62,7 +62,7 @@ const Register = () => {
     e.preventDefault();
     try {
       setIsLoading(true);
-      const response = await axios.post("http://localhost:8080/api/public/register", {
+      const response = await Api.post("/public/register", {
         otp
       }, {
         headers: { "Content-Type": "application/json" },
@@ -76,7 +76,8 @@ const Register = () => {
         }, 2000); // Redirect after 2 seconds      
       }
     } catch (error) {
-      if (error.response?.status === 400) {
+      console.log("Error registering: ", error)
+      if (error.status === 400) {
         setRegisterError("Incorrect or expired OTP.");
       } else {
         setRegisterError("Registration failed. Try again later.");
@@ -85,7 +86,7 @@ const Register = () => {
     setIsLoading(false);
   };
 
-  
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-blue-900">
       <div className="bg-white p-10 rounded-2xl shadow-md w-full max-w-3xl">
@@ -170,7 +171,7 @@ const Register = () => {
             </div>
           )}
 
-          { isLoading && (
+          {isLoading && (
             <div className="text-blue-600 text-sm text-center mt-4">
               {otpSent ? "Registering..." : "Sending OTP..."}
             </div>
@@ -200,7 +201,17 @@ const Register = () => {
             Login now
           </Link>
         </p>
+        {
+          isRegistered && <Alert variant='success' message='Registered Successfully! Redirecting to Login...' />
+        }
+
+        <p className="text-center text-sm text-gray-600 mt-4">
+          <Link to="/" className="inline-text font-bold hover:underline hover:text-blue-900">
+             Back To Home
+          </Link>
+        </p>
       </div>
+
     </div>
   );
 };
