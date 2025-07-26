@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { getUserProfile, getUserTasks } from '../../services/ProfileService';
-import { getRequestsByEventId, updateRequest } from '../../services/requestService';
+import { getRequestsByEventId, updateRequest } from '../../services/RequestService';
 import { useNavigate, Link, useParams } from 'react-router-dom';
-import { getAccountById } from '../../services/accountService';
+import { getAccountById } from '../../services/AccountService';
 
 const RejectTaskRequest = () => {
   const [requests, setRequests] = useState([]);
