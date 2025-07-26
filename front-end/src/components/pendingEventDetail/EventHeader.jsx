@@ -72,7 +72,8 @@ export default function EventHeader({ event }) {
           <Users className="h-5 w-5 text-gray-500" />
           <div>
             <div className="text-sm text-gray-500">Capacity</div>
-            <div className="font-medium">{event.maxParticipants} participants</div>
+            <div className="font-medium">{event.maxParticipants} Participants</div>
+            <div className="font-medium">{event.maxMembers} Members</div>
           </div>
         </div>
       </div>

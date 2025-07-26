@@ -2,14 +2,13 @@ import { useEffect, useState } from "react"
 import { UserPlus, Search, X } from "lucide-react"
 import { Avatar } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { getAllAccounts } from "@/services/accountService"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { set } from "react-hook-form"
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate, useParams } from "react-router-dom"
 import { updatePendingEvent } from "../../services/eventService"
 import { addNewRole } from "../../services/roleService"
 import AccountList from "./AccountList"
+import Alert from "../ui/Alert"
 
 
 export default function EventApproval({ eventData }) {
@@ -17,6 +16,12 @@ export default function EventApproval({ eventData }) {
     const [status, setStatus] = useState("");
     const token = sessionStorage.getItem("token");
     const assignedBy = jwtDecode(token).accountId;
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Alert
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertVariant, setAlertVariant] = useState('');
+    const [message, setMessage] = useState('');
     // console.log("decoded token:", jwtDecode(token));
 
     const [adminAssigned, setAdminAssigned] = useState({
@@ -29,14 +34,19 @@ export default function EventApproval({ eventData }) {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const navigate = useNavigate();
 
+
+    // HANDLERS
+
     const handleAssignProposer = () => {
         console.log("Assigning proposer as event admin")
         const adminData = {
             accountId: eventData.creator.id,
+            avatarUrl: eventData.creator.avatarUrl,
+            username: eventData.creator.username,
             ...adminAssigned
         }
         setAdminAssigned(adminData)
-        console.log("Admin assigned data:", adminData)
+        // console.log("Admin assigned data:", adminData)
 
         // Implement actual assignment logic
     }
@@ -45,17 +55,21 @@ export default function EventApproval({ eventData }) {
         console.log("Assigning user as admin:", user)
         const adminData = {
             ...adminAssigned,
-            accountId: user.accountId
+            accountId: user.accountId,
+            avatarUrl: user.avatarUrl,
+            username: user.username
         }
         setAdminAssigned(adminData)
-        console.log("Admin assigned data by choosing:", adminData)
+        // console.log("Admin assigned data by choosing:", adminData)
         // Implement actual assignment logic
     }
 
     const handleSubmit = async () => {
         // console.log("Submitting event approval with status:", status, "and note:", note);
         // Implement actual submission logic
-
+        setIsSubmitting(true);
+        setShowAlert(false);
+        setMessage('');
         try {
             const updateStatusRes = await updatePendingEvent(eventData.id, {
                 status: status,
@@ -67,21 +81,28 @@ export default function EventApproval({ eventData }) {
             });
             if (updateStatusRes) {
                 console.log("Event status updated successfully:", updateStatusRes);
-                if( status.toUpperCase().includes("UPCOMING")) {
+                if (status.toUpperCase().includes("UPCOMING")) {
                     const addRoleRes = await addNewRole(eventData.id, adminAssigned);
                 }
+                setStatus("");
+                setAlertVariant("success");
+                setMessage("Event Updated Successfully!")
+                setShowAlert(true);
+                setNote("");
                 setTimeout(() => {
-                    navigate("/superadmin/events/pending");
-
                     // Reset state after submission
-                    setStatus("");
-                    setNote("");
-                }, 2000);
+
+                    navigate("/superadmin/events/pending");
+                }, 3000);
             }
 
         } catch (error) {
+            setAlertVariant("danger");
+            setMessage("Fail to update event!")
+            setShowAlert(true);
             console.error("Error submitting event approval:", error);
         }
+        setIsSubmitting(false);
     }
 
     // Mock search function - replace with actual API call
@@ -109,7 +130,7 @@ export default function EventApproval({ eventData }) {
                     <button
                         onClick={() => setStatus("UPCOMING")}
                         className={`inline-flex mr-5 items-center cursor-pointer px-4 py-2 border rounded-md shadow-sm text-sm font-medium 
-                            ${status.toUpperCase().includes("UPCOMING") ? `text-white bg-green-700` : `border-green-300 text-green-500`}
+                            ${status.toUpperCase().includes("UPCOMING") ? `text-white bg-green-700` : `border-green-600 text-green-700`}
                             hover:bg-green-700 hover:text-white 
                         `}
                     >
@@ -154,11 +175,11 @@ export default function EventApproval({ eventData }) {
                                 {adminAssigned && (
                                     <Badge className="h-full" variant="primary">
                                         <Avatar
-                                            src={users.find(user => user.accountId === adminAssigned.accountId)?.avatarUrl || "/placeholder.svg"}
-                                            alt={users.find(user => user.accountId === adminAssigned.accountId)?.username}
+                                            src={adminAssigned?.avatarUrl || "/placeholder.svg"}
+                                            alt={adminAssigned?.username}
                                             className="h-8 w-8"
                                         />
-                                        <hr />@{users.find(user => user.accountId === adminAssigned.accountId)?.username}
+                                        <hr />@{adminAssigned?.username}
                                     </Badge>
                                 )}
                                 <button
@@ -174,23 +195,38 @@ export default function EventApproval({ eventData }) {
                         </div>
                     ))}
 
-                {status && (
-                    <div className="pl-5 col-span-1">
-                        <h2 className="font-bold my-4">Confirm Submit</h2>
-                        <button
-                            onClick={() => handleSubmit()}
-                            className="inline-flex items-center px-4 py-2 cursor-pointer border border-blue-300 rounded-md shadow-sm text-sm font-medium text-blue-700 bg-white hover:bg-blue-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                        >
-                            SUBMIT
-                        </button>
-                    </div>
-                )}
-            </div>
+                {
+                    isSubmitting ?
+                        <div className="flex justify-center items-center">
+                            <div className="w-8 h-8 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+                        </div>
+                        :
+                        (status && (adminAssigned.accountId != null || status.includes("CANCELLED")) && (
+                            <div className="pl-5 col-span-1">
+                                <h2 className="font-bold my-4">Confirm Submit</h2>
+                                <button
+                                    onClick={() => handleSubmit()}
+                                    className="inline-flex items-center px-4 py-2 cursor-pointer border border-blue-300 rounded-md shadow-sm text-sm font-medium text-blue-700 bg-white hover:bg-blue-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                >
+                                    SUBMIT
+                                </button>
 
+                            </div>
+                        ))
+                }
+
+
+
+            </div>
+            {
+                showAlert && (
+                    <Alert variant={alertVariant} message={message} />
+                )
+            }
 
             {/* Search and Assign Other Admins */}
             {/* Modal */}
-            {isModalOpen && 
+            {isModalOpen &&
                 <AccountList
                     setIsModalOpen={setIsModalOpen}
                     handleAssignAdmin={handleAssignAdmin}
