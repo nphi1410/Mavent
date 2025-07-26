@@ -283,7 +283,7 @@ const UserTasksContent = () => {
               )}
               {/* Thêm link đến trang Task Cancel Requests */}
               <Link
-                to={`/event/${eventId}/staff/tasks/requests`}
+                to={`/event/${eventId}/staff/tasks-requests`}
                 className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
               >
                 <svg
@@ -302,7 +302,7 @@ const UserTasksContent = () => {
                 Task Requests
               </Link>
               <Link
-                to={`/event/${eventId}/staff/tasks/history`}
+                to={`/event/${eventId}/staff/tasks-history`}
                 className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg"
               >
                 View Task History

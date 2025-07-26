@@ -327,14 +327,14 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
     } catch (err) {
       setUpdateMessage({
         type: "error",
-        text: "Không thể xác nhận tham gia task",
+        text: "Cannot accept task",
       });
     }
   };
 
   const handleDeclineTask = async () => {
     if (!declineReason.trim()) {
-      alert("Vui lòng nhập lý do từ chối");
+      alert("Please enter a reason for declining");
       return;
     }
 
@@ -347,7 +347,7 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
       );
       setUpdateMessage({
         type: "success",
-        text: "Đã gửi yêu cầu từ chối task",
+        text: "Task declined successfully",
       });
       setShowDeclineModal(false);
       setDeclineReason('');
@@ -355,7 +355,7 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
     } catch (err) {
       setUpdateMessage({
         type: "error",
-        text: "Không thể gửi yêu cầu từ chối task",
+        text: "Cannot decline task",
       });
     }
   };
@@ -661,7 +661,7 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
 
       {/* Modal từ chối task */}
       {showDeclineModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000]">
+        <div className="fixed inset-0 backdrop-blur-[0px] bg-gray-900/40 flex items-center justify-center z-[10000]">
           <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
             <h3 className="text-lg font-semibold mb-4">Decline Task Invitation</h3>
             <textarea

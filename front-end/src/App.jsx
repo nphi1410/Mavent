@@ -132,8 +132,8 @@ function App() {
                 }
               >
                 <Route path="tasks" element={<UserTasksPage />} />
-                <Route path="tasks/history" element={<TaskHistory />} />
-                <Route path="tasks/requests" element={<RejectTaskRequest />} />
+                <Route path="tasks-history" element={<TaskHistory />} />
+                <Route path="tasks-requests" element={<RejectTaskRequest />} />
                 <Route path="documents" element={<DocumentsPage />} />
                 <Route
                   path="expenses-requests"
@@ -218,11 +218,6 @@ function App() {
             <Route index element={<ProfilePage />} />
             <Route path="attended" element={<UserEventsPage />} />
             <Route path="dashboard" element={<UserDashboardPage />} />
-            <Route path="tasks">
-              <Route index element={<UserTasksPage />} />
-              <Route path=":taskId" element={<TaskDetails />} />
-              <Route path="history" element={<TaskHistory />} />
-            </Route>
 
             <Route path="created-events">
               <Route index element={<CreatedEventsPage />} />

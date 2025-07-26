@@ -137,7 +137,7 @@ const Layout = () => {
       requiredRole: "MEMBER", // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
     },
     {
-      name: "sponsorship packages",
+      name: "sponsorship-packages",
       displayName: "Sponsorship Packages",
       icon: <FontAwesomeIcon icon={faCrown} />,
       link: `sponsorship-packages`,
@@ -179,7 +179,7 @@ const Layout = () => {
       requiredRole: "ADMIN",
     },
     {
-      name: "expenses requests",
+      name: "expenses-requests",
       displayName: "Expense Requests",
       icon: <FontAwesomeIcon icon={faMoneyBill1Wave} />,
       link: `expenses-requests`,

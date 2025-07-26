@@ -177,7 +177,8 @@ const RejectTaskRequest = () => {
   if (error) {
     return <div className="p-10 text-red-600 text-center">Error: {error}</div>;
   }
-
+  console.log('requests:', requests);
+  
   return (
     <main className="flex-grow p-10 bg-white">
       <div className="p-6 max-w-7xl mx-auto">
@@ -356,7 +357,7 @@ const RequestRow = ({ request, userProfile, onProcess, isProcessing }) => {
             </tr>
 
             {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="fixed inset-0 backdrop-blur-[0px] bg-gray-900/40 flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg p-6 w-96 max-w-full mx-4">
                         <h3 className="text-lg font-semibold mb-4">
                             {action === 'accept' ? 'Accept Request' : 'Reject Request'}
