@@ -5,7 +5,7 @@ import {
   faEye,
   faPencil,
 } from "@fortawesome/free-solid-svg-icons";
-import { getEvents, updateEvent } from "../../services/EventService";
+import { getEvents, updateEvent } from "../../services/eventService";
 import { getAllLocations } from "../../services/EventLocationService";
 import SuperAdminSidebar from "../../components/superadmin/SuperAdminSidebar";
 import SuperAdminHeader from "../../components/superadmin/SuperAdminHeader";

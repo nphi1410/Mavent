@@ -1,21 +1,17 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
-import { getEvents } from "../../services/EventService";
-import SuperAdminSidebar from "../../components/superadmin/SuperAdminSidebar";
-import SuperAdminActionDropdown from "../../components/superadmin/SuperAdminActionDropdown";
-import { useNavigate } from "react-router-dom";
-import { exportEventsToExcel } from "../../services/export/EventExportService";
-import { getAllLocations } from "../../services/EventLocationService";
-import SuperAdminHeader from "../../components/superadmin/SuperAdminHeader";
+import { faChevronDown, faEye, faPen } from "@fortawesome/free-solid-svg-icons";
+import { getEvents } from '../../services/EventService';
+import { useNavigate } from 'react-router-dom';
+import { exportEventsToExcel } from '../../services/export/eventExportService';
+import { getAllLocations } from '../../services/EventLocationService';
 
 function SuperAdminManageEvents() {
-  const [openId, setOpenId] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All Statuses");
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [events, setEvents] = useState([]);
-  const [locations, setLocations] = useState(new Map());
+    const [searchTerm, setSearchTerm] = useState("");
+    const [statusFilter, setStatusFilter] = useState("All Statuses");
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [events, setEvents] = useState([]);
+    const [locations, setLocations] = useState(new Map());
 
   const [currentPage, setCurrentPage] = useState(1);
   const [exporting, setExporting] = useState(false);
@@ -146,90 +142,65 @@ function SuperAdminManageEvents() {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border border-gray-200">
-            <thead>
-              <tr className="text-sm text-gray-500 border-b border-gray-200">
-                <th className="p-2 font-medium">Event Name</th>
-                <th className="p-2 font-medium">Start Date</th>
-                <th className="p-2 font-medium">End Date</th>
-                <th className="p-2 font-medium">Location</th>
-                <th className="p-2 font-medium">Status</th>
-                <th className="p-2 font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedEvents?.map((event) => (
-                <tr key={event.eventId} className="border-b border-gray-200">
-                  <td className="p-2 font-medium text-black whitespace-nowrap">
-                    {event.name}
-                  </td>
-                  <td className="p-2 whitespace-nowrap text-gray-600">
-                    {event.startDatetime.slice(0, 10)}
-                  </td>
-                  <td className="p-2 whitespace-nowrap text-gray-600">
-                    {event.endDatetime.slice(0, 10)}
-                  </td>
-                  <td className="p-2 whitespace-nowrap text-gray-600">
-                    {locations.get(event.locationId) ||
-                      event.location ||
-                      "Unknown"}
-                  </td>
-                  <td className="p-2 whitespace-nowrap text-gray-600">
-                    <span
-                      className={`text-xs font-semibold px-2 py-1 rounded-full
-                                                        ${
-                                                          event.status ===
-                                                          "RECRUITING"
-                                                            ? "bg-blue-100 text-blue-600"
-                                                            : event.status ===
-                                                              "UPCOMING"
-                                                            ? "bg-yellow-100 text-yellow-600"
-                                                            : event.status ===
-                                                              "ONGOING"
-                                                            ? "bg-green-100 text-green-600"
-                                                            : event.status ===
-                                                              "CANCELLED"
-                                                            ? "bg-[#ed4a3b] text-[#ebf5fa]"
-                                                            : event.status ===
-                                                              "ENDED"
-                                                            ? "bg-red-100 text-red-600"
-                                                            : event.status ===
-                                                              "PENDING"
-                                                            ? "bg-purple-100 text-purple-600"
-                                                            : event.status ===
-                                                              "REVIEWING"
-                                                            ? "bg-orange-100 text-orange-600"
-                                                            : "bg-gray-100 text-gray-600"
-                                                        }`}
-                    >
-                      {event.status}
-                    </span>
-                  </td>
-                  <td className="p-2 whitespace-nowrap text-left">
-                    <SuperAdminActionDropdown
-                      isOpen={openId === event.eventId}
-                      onToggle={() =>
-                        setOpenId(
-                          openId === event.eventId ? null : event.eventId
-                        )
-                      }
-                      onView={() => {
-                        navigate(`/superadmin/event-detail/${event.eventId}`);
-                        setOpenId(null);
-                      }}
-                      onEdit={() => {
-                        navigate(`/superadmin/edit-event/${event.eventId}`);
-                        setOpenId(null);
-                      }}
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                {/* Table */}
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border border-gray-200">
+                        <thead>
+                            <tr className="text-sm text-gray-500 border-b border-gray-200">
+                                <th className="p-2 font-medium">Event Name</th>
+                                <th className="p-2 font-medium">Start Date</th>
+                                <th className="p-2 font-medium">End Date</th>
+                                <th className="p-2 font-medium">Location</th>
+                                <th className="p-2 font-medium">Status</th>
+                                <th className="p-2 font-medium">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {paginatedEvents?.map((event) => (
+                                <tr key={event.eventId} className="border-b border-gray-200">
+                                    <td className="p-2 font-medium text-black whitespace-nowrap">{event.name}</td>
+                                    <td className="p-2 whitespace-nowrap text-gray-600">{event.startDatetime.slice(0, 10)}</td>
+                                    <td className="p-2 whitespace-nowrap text-gray-600">{event.endDatetime.slice(0, 10)}</td>
+                                    <td className="p-2 whitespace-nowrap text-gray-600">
+                                        {locations.get(event.locationId) || event.location || "Unknown"}
+                                    </td>
+                                    <td className="p-2 whitespace-nowrap text-gray-600">
+                                        <span className={`text-xs font-semibold px-2 py-1 rounded-full
+                                                        ${event.status === "RECRUITING" ? "bg-blue-100 text-blue-600"
+                                                : event.status === "UPCOMING" ? "bg-yellow-100 text-yellow-600"
+                                                    : event.status === "ONGOING" ? "bg-green-100 text-green-600"
+                                                        : event.status === "CANCELLED" ? "bg-[#ed4a3b] text-[#ebf5fa]"
+                                                            : event.status === "ENDED" ? "bg-red-100 text-red-600"
+                                                                : event.status === "PENDING" ? "bg-purple-100 text-purple-600"
+                                                                    : event.status === "REVIEWING" ? "bg-orange-100 text-orange-600"
+                                                                        : "bg-gray-100 text-gray-600"
+                                            }`}>
+                                            {event.status}
+                                        </span>
+                                    </td>
+                                    <td className="p-2 whitespace-nowrap">
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => navigate(`/superadmin/event-detail/${event.eventId}`)}
+                                                className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors duration-200"
+                                                title="View Event"
+                                            >
+                                                <FontAwesomeIcon icon={faEye} className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => navigate(`/superadmin/edit-event/${event.eventId}`)}
+                                                className="p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors duration-200"
+                                                title="Edit Event"
+                                            >
+                                                <FontAwesomeIcon icon={faPen} className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
 
         <div className="flex relative w-full">
           {/* Pagination */}
