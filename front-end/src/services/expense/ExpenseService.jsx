@@ -1,5 +1,21 @@
 import Api from "../../config/Api.jsx";
 
+// API timeouts
+const UPLOAD_TIMEOUT = 60000; // 60 seconds for file uploads
+const DEFAULT_TIMEOUT = 15000; // 15 seconds for other requests
+
+export const validateExpenseAmount = async (eventId, amount) => {
+    try {
+        const response = await Api.get(`/event/${eventId}/expenses/validate-amount`, {
+            params: { amount }
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error validating expense amount:", error);
+        throw error;
+    }
+}
+
 export const getExpenseCategories = async (eventId) => {
     try {
         const response = await Api.get(`/event/${eventId}/expenses/expense-categories`);
@@ -107,6 +123,55 @@ export const updateExpenseStatus = async (eventId, expenseId, updateStatus) => {
         return response.data;
     } catch (error) {
         console.error("Error updating expense status:", error);
+        throw error;
+    }
+};
+
+
+export const uploadExpenseReceipts = async (eventId, expenseId, files) => {
+    try {
+        // First check if the expense is in APPROVED status before uploading
+        try {
+            const expenseData = await getExpenseById(eventId, expenseId);
+            if (expenseData.status !== "APPROVED") {
+                throw new Error(`Cannot upload receipts: expense status is ${expenseData.status}, must be APPROVED`);
+            }
+        } catch (checkError) {
+            console.error("Error checking expense status:", checkError);
+            throw checkError;
+        }
+        
+        const formData = new FormData();
+        
+        // Add each file to the form data
+        files.forEach((file) => {
+            formData.append("files", file);
+        });
+        
+        // Add attachment type parameter
+        formData.append("attachmentType", "RECEIPT");
+        
+        // Use longer timeout for file uploads
+        const response = await Api.post(
+            `/event/${eventId}/expenses/${expenseId}/receipts`,
+            formData,
+            {
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                },
+                timeout: UPLOAD_TIMEOUT
+            }
+        );
+        
+        return response.data;
+    } catch (error) {
+        console.error("Error uploading receipts:", error);
+        // Provide a more user-friendly error message
+        if (error.response?.status === 500) {
+            if (error.response.data?.message?.includes("Can only upload receipts for approved expenses")) {
+                throw new Error("This expense is no longer in APPROVED status. Please refresh the page to see its current status.");
+            }
+        }
         throw error;
     }
 }

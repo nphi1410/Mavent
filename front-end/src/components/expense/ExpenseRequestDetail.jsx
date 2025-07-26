@@ -1,7 +1,7 @@
-import { ChevronLeft } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ChevronLeft, Upload } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
 import { formatMoney } from "../../utils/formatMoney.js";
-import { updateExpenseStatus } from "../../services/expense/ExpenseService.jsx";
+import { updateExpenseStatus, uploadExpenseReceipts } from "../../services/expense/ExpenseService.jsx";
 import { toast } from "react-toastify";
 import { useParams, useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
@@ -33,13 +33,12 @@ export default function ExpenseRequestDetail({
   const [loading, setLoading] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [fetchedTaskTitle, setFetchedTaskTitle] = useState("");
-  const taskTitle =
-    data?.taskTitle ||
-    passedTaskTitle ||
-    fetchedTaskTitle ||
-    taskTitleFromState ||
-    (taskId ? `Task #${taskId}` : "No Task");
+  const [selectedReceiptFiles, setSelectedReceiptFiles] = useState([]);
+  const [uploadingReceipts, setUploadingReceipts] = useState(false);
+  const [receiptPreviews, setReceiptPreviews] = useState([]);
+  const fileInputRef = useRef(null);
   const taskTitleFromState = location.state?.taskTitle;
+  const taskTitle = data?.taskTitle || passedTaskTitle || fetchedTaskTitle || taskTitleFromState || (taskId ? `Task #${taskId}` : "No Task");
 
   useEffect(() => {
     if (data) {
@@ -81,10 +80,13 @@ export default function ExpenseRequestDetail({
         options = ["APPROVED", "REJECTED"];
         break;
       case "APPROVED":
-        options = ["PAID", "REJECTED"];
+        options = ["REJECTED"];
         break;
       case "REJECTED":
         options = ["PENDING", "APPROVED", "REJECTED"];
+        break;
+      case "RECEIPT_SUBMITTED":
+        options = ["PAID", "REJECTED"];
         break;
       case "PAID":
         options = [];
@@ -108,6 +110,7 @@ export default function ExpenseRequestDetail({
       APPROVED: "bg-green-500 text-white",
       REJECTED: "bg-red-500 text-white",
       PAID: "bg-blue-500 text-white",
+      RECEIPT_SUBMITTED: "bg-purple-500 text-white",
     };
 
     return (
@@ -129,6 +132,112 @@ export default function ExpenseRequestDetail({
 
   const handleImageClick = (index) => {
     setSelectedImageIndex(index);
+  };
+
+  // Handle receipt file selection
+  const handleReceiptFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    const validFiles = [];
+    const newPreviews = [];
+
+    // Validate files
+    files.forEach(file => {
+      // Check if file is an image and under 10MB
+      if (file.type.match('image.*') && file.size <= 10 * 1024 * 1024) {
+        validFiles.push(file);
+        
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          newPreviews.push({
+            name: file.name,
+            url: e.target.result,
+            file: file
+          });
+          setReceiptPreviews([...newPreviews]);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        toast.error(`File ${file.name} is invalid. Make sure it's an image and under 10MB.`);
+      }
+    });
+
+    if (validFiles.length === 0) {
+      toast.error("No valid files selected. Please select valid image files under 10MB.");
+      return;
+    }
+
+    setSelectedReceiptFiles(validFiles);
+  };
+
+  // Remove a receipt preview
+  const removeReceiptPreview = (index) => {
+    const newPreviews = [...receiptPreviews];
+    newPreviews.splice(index, 1);
+    setReceiptPreviews(newPreviews);
+    
+    const newFiles = [...selectedReceiptFiles];
+    newFiles.splice(index, 1);
+    setSelectedReceiptFiles(newFiles);
+  };
+
+  // Upload receipts and change status to RECEIPT_SUBMITTED
+  const handleReceiptUpload = async () => {
+    if (selectedReceiptFiles.length === 0) {
+      toast.error("Please select at least one receipt file");
+      return;
+    }
+
+    try {
+      setUploadingReceipts(true);
+      toast.info("Uploading receipts...");
+      
+      // Double-check if expense is still in APPROVED status
+      if (currentStatus !== "APPROVED") {
+        toast.error(`Cannot upload receipts: expense status is ${currentStatus}, must be APPROVED`);
+        return;
+      }
+      
+      // Use the service to upload receipts
+      const response = await uploadExpenseReceipts(
+        data.eventId,
+        data.expenseId,
+        selectedReceiptFiles
+      );
+
+      // Handle successful response
+      toast.success("Receipts uploaded successfully");
+      
+      // Update expense status to RECEIPT_SUBMITTED (this should be automatic on backend)
+      setCurrentStatus("RECEIPT_SUBMITTED");
+      data.status = "RECEIPT_SUBMITTED";
+      
+      // Clear selected files and previews
+      setSelectedReceiptFiles([]);
+      setReceiptPreviews([]);
+      
+      // Update parent component if callback exists
+      if (onUpdateSuccess) {
+        const updatedExpense = { 
+          ...data,
+          status: "RECEIPT_SUBMITTED",
+        }; 
+        onUpdateSuccess(updatedExpense);
+      }
+    } catch (error) {
+      console.error("Error uploading receipts:", error);
+      
+      // Display more specific error messages
+      if (error.message?.includes("expense status")) {
+        toast.error(error.message);
+      } else if (error.response?.data?.message) {
+        toast.error(`Server error: ${error.response.data.message}`);
+      } else {
+        toast.error("Failed to upload receipts. Please try again.");
+      }
+    } finally {
+      setUploadingReceipts(false);
+    }
   };
 
   const handleStatusChange = async (e) => {
@@ -337,37 +446,75 @@ export default function ExpenseRequestDetail({
                 </div>
               </div>
 
-              {/* Images */}
+              {/* Evidence Attachments */}
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  Attachments:
+                  Evidence Attachments:
                 </label>
-                {data.attachments && data.attachments.length > 0 ? (
+                {data.attachments && data.attachments.filter(a => !a.attachmentType || a.attachmentType === "EVIDENCE").length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {data.attachments.map((attachment, index) => (
-                      <div key={index} className="relative">
-                        <a
-                          href={attachment.fileUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <img
-                            src={attachment.fileUrl}
-                            alt={`Attachment ${index + 1}`}
-                            className="w-full h-32 object-cover rounded-lg shadow-sm hover:opacity-90 transition-opacity"
-                          />
-                        </a>
-                      </div>
-                    ))}
+                    {data.attachments
+                      .filter(a => !a.attachmentType || a.attachmentType === "EVIDENCE")
+                      .map((attachment, index) => (
+                        <div key={index} className="relative">
+                          <a
+                            href={attachment.fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <img
+                              src={attachment.fileUrl}
+                              alt={`Evidence ${index + 1}`}
+                              className="w-full h-32 object-cover rounded-lg shadow-sm hover:opacity-90 transition-opacity"
+                            />
+                          </a>
+                        </div>
+                      ))}
                   </div>
                 ) : (
                   <div className="bg-white rounded-lg px-4 py-3 shadow-sm">
                     <span className="text-gray-500">
-                      No attachments provided
+                      No evidence attachments provided
                     </span>
                   </div>
                 )}
               </div>
+              
+              {/* Receipt Attachments - Only show if status is RECEIPT_SUBMITTED or PAID */}
+              {(currentStatus === "RECEIPT_SUBMITTED" || currentStatus === "PAID") && (
+                <div className="mt-6">
+                  <label className="block text-sm font-medium mb-2">
+                    Receipt Attachments:
+                  </label>
+                  {data.attachments && data.attachments.filter(a => a.attachmentType === "RECEIPT").length > 0 ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                      {data.attachments
+                        .filter(a => a.attachmentType === "RECEIPT")
+                        .map((attachment, index) => (
+                          <div key={index} className="relative">
+                            <a
+                              href={attachment.fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <img
+                                src={attachment.fileUrl}
+                                alt={`Receipt ${index + 1}`}
+                                className="w-full h-32 object-cover rounded-lg shadow-sm hover:opacity-90 transition-opacity border-2 border-purple-300"
+                              />
+                            </a>
+                          </div>
+                        ))}
+                    </div>
+                  ) : (
+                    <div className="bg-white rounded-lg px-4 py-3 shadow-sm">
+                      <span className="text-gray-500">
+                        No receipt attachments available
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Right Column - Feedback & Status Management */}
@@ -390,11 +537,83 @@ export default function ExpenseRequestDetail({
 
                 {currentStatus === "APPROVED" && (
                   <div className="mt-6">
-                    <div className="bg-green-100 border-l-4 border-green-500 p-4 rounded">
+                    <div className="bg-green-100 border-l-4 border-green-500 p-4 rounded mb-4">
                       <p className="text-green-700 font-medium">
                         This expense request has been approved
                       </p>
+                      <p className="text-green-600 text-sm mt-1">
+                        Please upload receipt(s) to proceed with payment
+                      </p>
                     </div>
+                    
+                    {/* Only show upload to creator with at least MEMBER role */}
+                    {data.createdByAccountId === parseInt(sessionStorage.getItem("accountId")) && (userRole === "MEMBER" || userRole === "DEPARTMENT_MANAGER" || userRole === "ADMIN") && (
+                      <div className="mt-4 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                        <h5 className="font-semibold text-gray-800 mb-2">Upload Receipts</h5>
+                        
+                        {/* Receipt file input */}
+                        <div className="mb-4">
+                          <div 
+                            className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-50"
+                            onClick={() => fileInputRef.current.click()}
+                          >
+                            <Upload className="mx-auto h-8 w-8 text-gray-400" />
+                            <p className="mt-1 text-sm text-gray-500">
+                              Click to upload receipt images (JPEG, PNG, GIF, WebP)
+                            </p>
+                            <p className="text-xs text-gray-400 mt-1">
+                              Max 10MB per file
+                            </p>
+                          </div>
+                          <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleReceiptFileChange}
+                            multiple
+                            accept="image/*"
+                            className="hidden"
+                          />
+                        </div>
+                        
+                        {/* Receipt previews */}
+                        {receiptPreviews.length > 0 && (
+                          <div className="mt-4">
+                            <p className="text-sm font-medium mb-2">Selected files:</p>
+                            <div className="grid grid-cols-2 gap-2">
+                              {receiptPreviews.map((preview, index) => (
+                                <div key={index} className="relative">
+                                  <img 
+                                    src={preview.url} 
+                                    alt={preview.name} 
+                                    className="h-24 w-full object-cover rounded"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => removeReceiptPreview(index)}
+                                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs"
+                                  >
+                                    &times;
+                                  </button>
+                                  <p className="text-xs truncate mt-1">{preview.name}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Upload button */}
+                        {selectedReceiptFiles.length > 0 && (
+                          <button
+                            type="button"
+                            className="mt-4 w-full bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition"
+                            onClick={handleReceiptUpload}
+                            disabled={uploadingReceipts}
+                          >
+                            {uploadingReceipts ? "Uploading..." : "Submit Receipts"}
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -403,6 +622,16 @@ export default function ExpenseRequestDetail({
                     <div className="bg-red-100 border-l-4 border-red-500 p-4 rounded">
                       <p className="text-red-700 font-medium">
                         This expense request has been rejected
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {currentStatus === "RECEIPT_SUBMITTED" && (
+                  <div className="mt-6">
+                    <div className="bg-purple-100 border-l-4 border-purple-500 p-4 rounded">
+                      <p className="text-purple-700 font-medium">
+                        Receipts submitted and awaiting payment
                       </p>
                     </div>
                   </div>

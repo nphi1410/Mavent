@@ -316,20 +316,22 @@ function StatusChart({ title, data }) {
       </ChartCard>
     );
 
-  const total = data.reduce((sum, item) => sum + (item.count || item.value), 0);
-  const chartJsColors = {
-    PAID: "rgba(34, 197, 94, 0.8)",
-    APPROVED: "rgba(59, 130, 246, 0.8)",
-    PENDING: "rgba(251, 191, 36, 0.8)",
-    REJECTED: "rgba(239, 68, 68, 0.8)",
-  };
+    const total = data.reduce((sum, item) => sum + (item.count || item.value), 0);
+    const chartJsColors = {
+        PAID: 'rgba(34, 197, 94, 0.8)',
+        APPROVED: 'rgba(59, 130, 246, 0.8)',
+        PENDING: 'rgba(251, 191, 36, 0.8)',
+        RECEIPT_SUBMITTED: 'rgba(118, 61, 230, 0.63)',
+        REJECTED: 'rgba(239, 68, 68, 0.8)'
+    };
 
-  const tailwindDotColors = {
-    PAID: "bg-green-500",
-    APPROVED: "bg-blue-500",
-    PENDING: "bg-yellow-500",
-    REJECTED: "bg-red-500",
-  };
+    const tailwindDotColors = {
+        PAID: 'bg-green-500',
+        APPROVED: 'bg-blue-500',
+        PENDING: 'bg-yellow-500',
+        RECEIPT_SUBMITTED: 'rgba(118, 61, 230, 0.63)',
+        REJECTED: 'bg-red-500'
+    };
 
   const chartData = {
     labels: data.map((d) => String(d.status)), // Chuyển đổi thành String

@@ -3,7 +3,10 @@ import { useParams } from "react-router-dom";
 import {
   getExpenseCategories,
   createExpenseRequest,
+  validateExpenseAmount,
 } from "../../services/expense/ExpenseService.jsx";
+import { getRemainingBudget } from "../../services/expense/BudgetService.jsx";
+import { formatMoney } from "../../utils/formatMoney.js";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
@@ -21,9 +24,12 @@ const ExpenseRequestPopup = ({
   const eventId = urlEventId ? parseInt(urlEventId) : null;
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [validatingAmount, setValidatingAmount] = useState(false);
+  const [isAmountValid, setIsAmountValid] = useState(true);
   const [categories, setCategories] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
+  const [remainingBudget, setRemainingBudget] = useState(null);
   const [formData, setFormData] = useState({
     note: "",
     amount: "",
@@ -34,17 +40,18 @@ const ExpenseRequestPopup = ({
   });
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         // console.log("Fetching expense categories for eventId:", eventId);
 
         if (!eventId) {
           console.error("EventId is undefined or null");
-          toast.error("Event ID is missing. Cannot load categories.");
+          toast.error("Event ID is missing. Cannot load data.");
           return;
         }
 
+        // Fetch categories
         const categoriesData = await getExpenseCategories(eventId);
         // console.log("Categories loaded:", categoriesData);
 
@@ -56,16 +63,25 @@ const ExpenseRequestPopup = ({
             category: categoriesData[0].categoryId,
           }));
         }
+        
+        // Fetch remaining budget
+        try {
+          const remaining = await getRemainingBudget(eventId);
+          setRemainingBudget(remaining);
+        } catch (budgetError) {
+          console.error("Error fetching remaining budget:", budgetError);
+          // Don't show error to user as budget might be optional
+        }
       } catch (error) {
-        console.error("Error fetching categories:", error);
-        toast.error("Failed to load categories");
+        console.error("Error fetching data:", error);
+        toast.error("Failed to load necessary data");
       } finally {
         setLoading(false);
       }
     };
 
     if (isOpen && eventId) {
-      fetchCategories();
+      fetchData();
     }
   }, [eventId, isOpen]);
 
@@ -76,12 +92,32 @@ const ExpenseRequestPopup = ({
     }
   }, [taskId]);
 
-  const handleChange = (e) => {
+  const handleChange = async (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
+    
+    // Validate amount against budget if the amount field is changed and is a valid number
+    if (name === 'amount' && value && !isNaN(Number(value)) && Number(value) > 0 && eventId) {
+      setValidatingAmount(true);
+      setIsAmountValid(true); // Reset to valid while checking
+      
+      try {
+        const isValid = await validateExpenseAmount(eventId, value);
+        setIsAmountValid(isValid);
+        
+        if (!isValid) {
+          toast.warning("The amount exceeds the remaining budget for this event");
+        }
+      } catch (error) {
+        console.error("Error validating expense amount:", error);
+        // We don't set isAmountValid to false here as the validation may have failed due to a network error
+      } finally {
+        setValidatingAmount(false);
+      }
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -94,6 +130,12 @@ const ExpenseRequestPopup = ({
       Number(formData.amount) <= 0
     ) {
       toast.error("Please enter a valid amount");
+      return;
+    }
+    
+    // Check if the amount exceeds the budget
+    if (!isAmountValid) {
+      toast.error("The expense amount exceeds the remaining budget for this event");
       return;
     }
 
@@ -222,9 +264,17 @@ const ExpenseRequestPopup = ({
         } else if (status === 400 && data && data.message) {
           toast.error(`Bad Request: ${data.message}`);
         } else if (status === 500) {
-          toast.error(
-            "Server error. Please try again later or contact support."
-          );
+          // Check if error message contains budget-related terms
+          const errorMessage = data?.message || "";
+          if (errorMessage.toLowerCase().includes("budget") || errorMessage.toLowerCase().includes("exceed")) {
+            toast.error("This expense exceeds the available budget for the event");
+            // Re-validate the amount
+            setIsAmountValid(false);
+          } else {
+            toast.error(
+              "Server error. Please try again later or contact support."
+            );
+          }
         } else if (data && data.message) {
           toast.error(`Error (${status}): ${data.message}`);
         } else {
@@ -346,17 +396,44 @@ const ExpenseRequestPopup = ({
               >
                 Amount (VND) *
               </label>
-              <input
-                type="number"
-                id="amount"
-                name="amount"
-                value={formData.amount}
-                onChange={handleChange}
-                placeholder="Enter amount in VND"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500"
-                required
-                min="0"
-              />
+              <div>
+                <div className="relative">
+                  <input
+                    type="number"
+                    id="amount"
+                    name="amount"
+                    value={formData.amount}
+                    onChange={handleChange}
+                    placeholder="Enter amount in VND"
+                    className={`w-full px-3 py-2 border ${
+                      !isAmountValid ? "border-red-500" : "border-gray-300"
+                    } rounded-md focus:outline-none ${
+                      !isAmountValid ? "focus:ring-red-500" : "focus:ring-blue-500"
+                    }`}
+                    required
+                    min="0"
+                  />
+                  {validatingAmount && (
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      <div className="animate-spin h-4 w-4 border-2 border-blue-500 rounded-full border-t-transparent"></div>
+                    </div>
+                  )}
+                </div>
+                
+                {remainingBudget !== null && (
+                  <div className="mt-1 flex justify-between items-center">
+                    <span className="text-xs text-gray-500">
+                      Remaining budget: <span className={`font-medium ${!isAmountValid ? "text-red-600" : "text-green-600"}`}>{formatMoney(remainingBudget)} VND</span>
+                    </span>
+                    
+                    {!isAmountValid && (
+                      <span className="text-xs text-red-600 font-medium">
+                        Amount exceeds available budget
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Category Dropdown */}
@@ -564,9 +641,9 @@ const ExpenseRequestPopup = ({
               </button>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || validatingAmount || !isAmountValid}
                 className={`px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-                  loading ? "opacity-50 cursor-not-allowed" : ""
+                  (loading || validatingAmount || !isAmountValid) ? "opacity-50 cursor-not-allowed" : ""
                 }`}
               >
                 {loading ? "Submitting..." : "Submit Expense Request"}

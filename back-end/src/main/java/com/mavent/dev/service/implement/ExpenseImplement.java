@@ -9,10 +9,13 @@ import com.mavent.dev.dto.expenses.ExpenseCreateRequestDTO;
 import com.mavent.dev.dto.expenses.ExpenseResponseDTO;
 import com.mavent.dev.dto.expenses.ExpenseUpdateDTO;
 import com.mavent.dev.entity.*;
+import com.mavent.dev.entity.ExpenseAttachments.AttachmentType;
+import com.mavent.dev.entity.Expenses.Status;
 
 import com.mavent.dev.mapper.ExpenseMapper;
 import com.mavent.dev.mapper.ExpensesMapper;
 import com.mavent.dev.repository.*;
+import com.mavent.dev.service.BudgetService;
 import com.mavent.dev.service.ExpenseService;
 import com.mavent.dev.service.globalservice.CloudService;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +55,9 @@ public class ExpenseImplement implements ExpenseService {
     @Autowired
     private CloudService cloudService;
 
+    @Autowired
+    private BudgetService budgetService;
+    
     @Override
     @Transactional
     public ExpenseResponseDTO createExpenseRequest(ExpenseCreateRequestDTO dto) {
@@ -59,61 +65,91 @@ public class ExpenseImplement implements ExpenseService {
         if (dto.getBudgetId() <= 0) {
             dto.setBudgetId(null);
         }
+        
+        // Validate expense amount against budget
+        if (dto.getAmount() != null && dto.getAmount().compareTo(BigInteger.ZERO) > 0) {
+            boolean isValidExpense = budgetService.validateExpenseAmount(dto.getEventId(), dto.getAmount());
+            if (!isValidExpense) {
+                throw new RuntimeException("Expense amount exceeds the remaining budget for this event");
+            }
+        }
 
         Expenses expense = ExpensesMapper.toEntity(dto);
         expense.setCreatedAt(LocalDateTime.now());
 
-
         Expenses savedExpense = expensesRepository.save(expense);
+        
+        // Update spent amount in budget if expense is created successfully
+        if (dto.getAmount() != null && dto.getAmount().compareTo(BigInteger.ZERO) > 0) {
+            budgetService.updateSpentAmount(dto.getEventId(), dto.getAmount());
+        }
 
         return ExpensesMapper.toDTO(savedExpense, new ArrayList<>());
+    }
+
+    @Transactional
+    @Override
+    public ExpenseResponseDTO uploadReceiptsAndUpdateStatus(int eventId, int expenseId, List<MultipartFile> files) throws IOException {
+        // 1. Kiểm tra expense
+        Expenses expense = expensesRepository.findByExpenseId(expenseId);
+        if (expense == null) {
+            throw new RuntimeException("Expense not found with id: " + expenseId);
+        }
+
+        if (expense.getEventId() != eventId) {
+            throw new RuntimeException("Expense does not belong to the specified event");
+        }
+
+        if (expense.getStatus() != Status.APPROVED) {
+            throw new RuntimeException("Can only upload receipts for approved expenses");
+        }
+
+        // 3. Upload files
+        List<ExpenseAttachments> attachments = uploadAttachments(expenseId, files, AttachmentType.RECEIPT);
+
+            expense.setStatus(Status.RECEIPT_SUBMITTED);
+            expense.setUpdatedAt(LocalDateTime.now());
+            expensesRepository.save(expense);
+
+        return ExpensesMapper.toDTO(expense, attachments);
     }
 
     @Override
     @Transactional
     public ExpenseResponseDTO createExpenseRequestWithAttachments(ExpenseCreateRequestDTO dto, List<MultipartFile> files) throws IOException {
+        
+        // Validate expense amount against budget
+        if (dto.getAmount() != null && dto.getAmount().compareTo(BigInteger.ZERO) > 0) {
+            boolean isValidExpense = budgetService.validateExpenseAmount(dto.getEventId(), dto.getAmount());
+            if (!isValidExpense) {
+                throw new RuntimeException("Expense amount exceeds the remaining budget for this event");
+            }
+        }
 
         Expenses expense = ExpensesMapper.toEntity(dto);
         expense.setCreatedAt(LocalDateTime.now());
 
         Expenses savedExpense = expensesRepository.save(expense);
-
-        // Debugging log
-//        System.out.println("ExpenseService: Processing files");
-//        System.out.println("Files is null? " + (files == null));
-//        System.out.println("Files is empty? " + (files != null && files.isEmpty()));
-
-//        if (files != null) {
-////            System.out.println("Number of files: " + files.size());
-//            for (int i = 0; i < files.size(); i++) {
-//                MultipartFile file = files.get(i);
-////                System.out.println("File " + i + " name: " + file.getOriginalFilename());
-////                System.out.println("File " + i + " type: " + file.getContentType());
-////                System.out.println("File " + i + " size: " + file.getSize());
-////                System.out.println("File " + i + " is allowed type? " + ALLOWED_IMAGE_TYPES.contains(file.getContentType()));
-//            }
-//        }
+        
+        // Update spent amount in budget if expense is created successfully
+        if (dto.getAmount() != null && dto.getAmount().compareTo(BigInteger.ZERO) > 0) {
+            budgetService.updateSpentAmount(dto.getEventId(), dto.getAmount());
+        }
 
         List<ExpenseAttachments> attachments = new ArrayList<>();
         if (files != null && !files.isEmpty()) {
             try {
-                attachments = uploadAttachments(savedExpense.getExpenseId(), files);
-//                System.out.println("Successfully uploaded " + attachments.size() + " attachments");
+                attachments = uploadAttachments(savedExpense.getExpenseId(), files, AttachmentType.EVIDENCE);
             } catch (Exception e) {
-//                System.err.println("Error uploading attachments: " + e.getMessage());
-//                e.printStackTrace();
-                // Không throw exception để vẫn lưu được expense
+                throw new RuntimeException("Failed to upload attachments: " + e.getMessage(), e);
             }
-        } else {
-//            System.out.println("No files to upload");
         }
-
         return ExpensesMapper.toDTO(savedExpense, attachments);
     }
 
-    @Override
     @Transactional
-    public List<ExpenseAttachments> uploadAttachments(int expenseId, List<MultipartFile> files) throws IOException {
+    @Override
+    public List<ExpenseAttachments> uploadAttachments(int expenseId, List<MultipartFile> files, AttachmentType attachmentType) throws IOException {
         List<ExpenseAttachments> savedAttachments = new ArrayList<>();
 
         Expenses expense = expensesRepository.findByExpenseId(expenseId);
@@ -121,20 +157,15 @@ public class ExpenseImplement implements ExpenseService {
             throw new RuntimeException("Expense not found with ID: " + expenseId);
         }
 
-//        System.out.println("uploadAttachments: Starting to process " + files.size() + " files");
-
         // Filter out non-image files
         List<MultipartFile> validFiles = files.stream()
                 .filter(file -> {
                     boolean isValid = ALLOWED_IMAGE_TYPES.contains(file.getContentType());
-//                    System.out.println("File: " + file.getOriginalFilename() +
-//                                      ", Type: " + file.getContentType() +
-//                                      ", Valid: " + isValid);
+
                     return isValid;
                 })
                 .toList();
 
-//        System.out.println("Valid files count: " + validFiles.size() + " out of " + files.size());
 
         if (validFiles.isEmpty()) {
             throw new RuntimeException("No valid image files were provided. Allowed types: JPEG, PNG, GIF, WebP");
@@ -150,6 +181,7 @@ public class ExpenseImplement implements ExpenseService {
                     .fileUrl(fileUrl)
                     .fileName(file.getOriginalFilename())
                     .fileType(file.getContentType())
+                    .attachmentType(attachmentType)
                     .uploadedAt(LocalDateTime.now())
                     .build();
 
@@ -168,6 +200,19 @@ public class ExpenseImplement implements ExpenseService {
         if (expense == null) {
             throw new RuntimeException("Expense not found with ID: " + dto.getExpenseId());
         }
+        
+        // If changing status to APPROVED, validate against budget
+        if (dto.getStatus() == Expenses.Status.APPROVED && 
+            expense.getStatus() != Expenses.Status.APPROVED) {
+                
+            // Validate expense amount against budget
+            if (expense.getAmount() != null && expense.getAmount().compareTo(BigInteger.ZERO) > 0) {
+                boolean isValidExpense = budgetService.validateExpenseAmount(expense.getEventId(), expense.getAmount());
+                if (!isValidExpense) {
+                    throw new RuntimeException("Cannot approve expense: Amount exceeds the remaining budget for this event");
+                }
+            }
+        }
 
         // Update the expense status
         expense.setStatus(Expenses.Status.valueOf(dto.getStatus().name()));
@@ -176,7 +221,15 @@ public class ExpenseImplement implements ExpenseService {
         expense.setUpdatedAt(LocalDateTime.now());
 
         Expenses updatedExpense = expensesRepository.save(expense);
-
+        
+        // If status changed to APPROVED, update the budget's spent amount
+        if (dto.getStatus() == Expenses.Status.APPROVED && 
+            expense.getStatus() != Expenses.Status.APPROVED && 
+            expense.getAmount() != null && 
+            expense.getAmount().compareTo(BigInteger.ZERO) > 0) {
+            
+            budgetService.updateSpentAmount(expense.getEventId(), expense.getAmount());
+        }
 
         List<ExpenseAttachments> attachments = attachmentsRepository.findAllByExpenseId(updatedExpense.getExpenseId());
 
@@ -293,4 +346,6 @@ public class ExpenseImplement implements ExpenseService {
                 .map(row -> new ExpenseSummaryByStatusDTO((Expenses.Status) row[0], (Long) row[1]))
                 .collect(Collectors.toList());
     }
+    
+
 }
