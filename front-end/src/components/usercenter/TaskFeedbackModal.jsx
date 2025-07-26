@@ -5,8 +5,8 @@ import {
     getTaskDocuments,
     updateTask
 } from '../../services/ProfileService';
-import { getAllAccounts } from '../../services/accountService';
-import { getDocumentsByEvent, uploadDocument } from '../../services/documentService';
+import { getAllAccounts } from '../../services/AccountService';
+import { getDocumentsByEvent, uploadDocument } from '../../services/DocumentService';
 
 const TaskFeedbackModal = ({ taskId, isOpen, onClose, taskData }) => {
   const [feedback, setFeedback] = useState([]);
