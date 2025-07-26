@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
-import EventHeader from "@/components/pendingEventDetail/EventHeader"
+import EventHeader from "../../components/pendingEventDetail/EventHeader"
 import EventTimeline from "@/components/pendingEventDetail/EventTimeline"
 import EventAgenda from "@/components/pendingEventDetail/EventAgenda"
-import EventProposal from "@/components/pendingEventDetail/EventProposal"
+import EventProposal from "../../components/pendingEventDetail/EventProposal"
 import EventMedia from "@/components/pendingEventDetail/EventMedia"
 import { getPendingEventDetailsById } from "@/services/EventService"
 import EventApproval from "@/components/pendingEventDetail/EventApproval"
@@ -11,11 +11,6 @@ import { useParams } from "react-router-dom"
 export default function PendingEventView() {
     const [eventData, setEventData] = useState({});
     const { eventId } = useParams(); // Assuming you're using react-router for navigation
-
-    // console.log("Admin assigned state:", adminAssigned.accountId);
-
-
-    // const [admin, setAdmin] = useState({});
 
     useEffect(() => {
         // Simulate fetching event data
@@ -43,6 +38,7 @@ export default function PendingEventView() {
             </div>
         );
     }
+
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-6xl mx-auto px-4 py-8">

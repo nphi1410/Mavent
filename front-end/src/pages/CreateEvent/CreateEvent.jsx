@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { createEvent, getEventById } from "../../services/eventService";
+import { createEvent, getEventById } from "../../services/EventService";
 import { getAllLocations } from "../../services/EventLocationService";
 import { getAllTags } from "../../services/EventTagService"; // Thêm import cho tag service
 import { useNavigate } from "react-router-dom";

@@ -4,7 +4,7 @@ import { faChevronDown, faEye, faPen } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from 'react-router-dom';
 
 import SuperAdminSidebar from '../../components/superadmin/SuperAdminSidebar';
-import { getAllAccounts } from '../../services/accountService';
+import { getAllAccounts } from '../../services/AccountService';
 import SuperAdminHeader from '../../components/superadmin/SuperAdminHeader';
 
 function SuperAdminManageUsers() {
