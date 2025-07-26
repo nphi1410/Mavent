@@ -1,5 +1,5 @@
 import { Calendar, Clock } from "lucide-react"
-import { vietnameseDate } from "@/utils/dateConvert"
+import { vietnameseDate } from "@/utils/DateConvert"
 
 export default function EventAgenda({ agendas }) {
     return (
