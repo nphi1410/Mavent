@@ -8,12 +8,15 @@ import com.mavent.dev.repository.EventAccountRoleRepository;
 import com.mavent.dev.repository.EventFeedbackRepository;
 import com.mavent.dev.repository.EventRepository;
 import com.mavent.dev.service.EventParticipantService;
+import com.mavent.dev.service.NotificationService;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class EventParticipantImplement implements EventParticipantService {
@@ -21,6 +24,8 @@ public class EventParticipantImplement implements EventParticipantService {
     private final EventAccountRoleRepository eventAccountRoleRepository;
     private final EventRepository eventRepository;
     private final EventFeedbackRepository eventFeedbackRepository;
+    @Autowired
+    private NotificationService notificationService;
 
     public EventParticipantImplement(EventAccountRoleRepository eventAccountRoleRepository, EventRepository eventRepository, EventFeedbackRepository eventFeedbackRepository) {
         this.eventAccountRoleRepository = eventAccountRoleRepository;
@@ -71,6 +76,26 @@ public class EventParticipantImplement implements EventParticipantService {
         feedback.setRating(dto.getRating());         // Gán số sao đánh giá
         feedback.setComment(dto.getComment());       // Gán nội dung bình luận
         feedback.setSubmittedAt(LocalDateTime.now()); // Thời gian gửi feedback
+
+        // 4. Gửi thông báo cho tất cả ADMIN trong sự kiện
+        List<EventAccountRole> admins = eventAccountRoleRepository.findByEventIdAndEventRole(
+                eventId,
+                EventAccountRole.EventRole.ADMIN
+        );
+
+        String notiType = "EVENT FEEDBACK";
+        String notiMessage = "A participant has submitted feedback for event: " + event.getName();
+
+        for (EventAccountRole admin : admins) {
+            notificationService.createNotification(
+                    admin.getAccountId(),
+                    eventId,
+                    null,
+                    null,
+                    notiType,
+                    notiMessage
+            );
+        }
 
         eventFeedbackRepository.save(feedback); // Lưu feedback vào database thông qua repository
     }

@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
-// Bỏ import axios nếu không dùng trực tiếp nữa
-// import axios from 'axios';
-import { getUserEvents } from "../../services/profileService"; // Sử dụng hàm service này
+import { getUserEvents } from "../../services/ProfileService"; 
 import EventCard from "./EventCard";
 import { useNavigate } from "react-router-dom";
 
@@ -10,7 +8,7 @@ const UserEventsContent = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const eventsPerPage = 3;
+  const eventsPerPage = 6;
 
   const [filters, setFilters] = useState({
     keyword: "",
@@ -22,34 +20,28 @@ const UserEventsContent = () => {
 
   useEffect(() => {
     const fetchEvents = async () => {
-      setLoading(true); // Bắt đầu quá trình tải
-      setError(null); // Xóa lỗi cũ
+      setLoading(true); 
+      setError(null); 
       try {
-        // Sử dụng hàm service getUserEvents
         const eventData = await getUserEvents();
-        setEvents(eventData); // Service đã trả về response.data
+        setEvents(eventData);
       } catch (err) {
-        // hàm getUserEvents trong service đã gọi handleAuthError,
-        // handleAuthError sẽ throw error (ví dụ 'Authentication required') nếu có lỗi xác thực
-        // hoặc tự động chuyển hướng nếu là 401.
         console.error("UserEventsContent: Failed to fetch events:", err);
-        // Hiển thị thông báo lỗi mà service đã throw, hoặc một thông báo chung
         setError(
           err.message || "Could not load events. Please try again later."
         );
       } finally {
-        setLoading(false); // Luôn đặt loading thành false sau khi hoàn tất
+        setLoading(false);
       }
     };
 
     fetchEvents();
-  }, [navigate]); // navigate thường ổn định, useEffect này sẽ chạy một lần khi component mount
+  }, [navigate]); 
 
-  // useEffect cho việc filter events 
   useEffect(() => {
     filterEvents();
-    setCurrentPage(1); // Reset về trang 1 mỗi khi events hoặc filters thay đổi
-  }, [events, filters, navigate]); // Thêm events làm dependency
+    setCurrentPage(1); 
+  }, [events, filters, navigate]); 
 
   const filterEvents = () => {
     let result = [...events];
@@ -67,8 +59,6 @@ const UserEventsContent = () => {
     setFilteredEvents(result);
   };
 
-  // ... (phần còn lại của component: tính toán phân trang, JSX, ...)
-  // Tính toán phân trang dựa trên filteredEvents
   const totalPages = Math.ceil((filteredEvents?.length || 0) / eventsPerPage);
   const paginatedEvents =
     filteredEvents?.slice(
@@ -82,15 +72,6 @@ const UserEventsContent = () => {
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
-
-  // if (error) return (
-  //   <div className="p-10 text-red-600 flex items-center justify-center">
-  //     <div className="text-center">
-  //       <div className="text-4xl mb-4">😕</div>
-  //       <div>Lỗi: {error}</div> {/* Hiển thị lỗi */}
-  //     </div>
-  //   </div>
-  // );
 
   return (
     <main className="flex-grow p-10 bg-white">

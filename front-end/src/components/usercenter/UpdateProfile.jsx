@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { updateProfile } from '../../services/profileService';
+import { updateProfile } from '../../services/ProfileService';
+import { getAllAccounts } from '../../services/accountService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSave, faXmark } from '@fortawesome/free-solid-svg-icons';
 import DatePicker from 'react-datepicker';
@@ -49,7 +50,6 @@ const UpdateProfile = ({ userData, onClose, onUpdate }) => {
     setError(null);
 
     try {
-      // Add gender validation
       if (!formData.gender) {
         setError('Please select your gender.');
         setLoading(false);
@@ -57,33 +57,55 @@ const UpdateProfile = ({ userData, onClose, onUpdate }) => {
       }
 
       if (formData.fullName.length > 100) {
-        setError('Full name không được quá 100 ký tự.');
+        setError('Full name cannot exceed 100 characters.');
         setLoading(false);
         return;
       }
 
       if (!/^0\d{9}$/.test(formData.phoneNumber)) {
-        setError('Số điện thoại phải bắt đầu bằng số 0 và có đúng 10 chữ số.');
+        setError('Phone number must start with 0 and be exactly 10 digits long.');
         setLoading(false);
         return;
       }
 
       if (!/^[A-Za-z]{2}\d{6}$/.test(formData.studentId)) {
-        setError('Mã số sinh viên phải gồm 2 chữ cái và 6 chữ số, ví dụ: SE123456.');
+        setError('Student ID must consist of 2 letters and 6 digits, e.g., SE123456.');
         setLoading(false);
         return;
+      }
+
+      const allAccounts = await getAllAccounts();
+
+      if (formData.phoneNumber !== userData.phoneNumber) {
+        const phoneExists = allAccounts.some(account => 
+          account.phoneNumber === formData.phoneNumber && account.id !== userData.id
+        );
+        if (phoneExists) {
+          setError('Phone number has already been used by another user.');
+          setLoading(false);
+          return;
+        }
+      }
+
+      if (formData.studentId !== userData.studentId) {
+        const studentIdExists = allAccounts.some(account => 
+          account.studentId === formData.studentId && account.id !== userData.id
+        );
+        if (studentIdExists) {
+          setError('Student ID has already been used by another user.');
+          setLoading(false);
+          return;
+        }
       }
 
       const dataToSubmit = {
         ...formData,
         dateOfBirth: formData.dateOfBirth ? formData.dateOfBirth.toISOString().split('T')[0] : null
       };
-
-      console.log('UpdateProfile.jsx: Đang gửi dữ liệu lên service:', dataToSubmit);
       onUpdate(dataToSubmit);
     } catch (err) {
-      console.error('UpdateProfile.jsx: Lỗi khi chuẩn bị dữ liệu hoặc gọi onUpdate:', err);
-      setError(err.message || 'Lỗi không xác định khi chuẩn bị dữ liệu.');
+      console.error('UpdateProfile.jsx: Error preparing data or calling onUpdate:', err);
+      setError(err.message || 'Unknown error occurred while preparing data.');
       setLoading(false);
     }
   };

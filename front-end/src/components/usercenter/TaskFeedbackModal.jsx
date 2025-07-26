@@ -4,7 +4,7 @@ import {
     createTaskFeedback,
     getTaskDocuments,
     updateTask
-} from '../../services/profileService';
+} from '../../services/ProfileService';
 import { getAllAccounts } from '../../services/accountService';
 import { getDocumentsByEvent, uploadDocument } from '../../services/documentService';
 
@@ -69,7 +69,7 @@ const TaskFeedbackModal = ({ taskId, isOpen, onClose, taskData }) => {
             setFeedback(data || []);
         } catch (err) {
             console.error("Failed to fetch feedback:", err);
-            setError(err.message || "Không thể tải phản hồi");
+            setError(err.message || "Can't fetch feedback");
         } finally {
             setLoading(false);
         }
@@ -127,7 +127,7 @@ const TaskFeedbackModal = ({ taskId, isOpen, onClose, taskData }) => {
             setNewComment('');
         } catch (err) {
             console.error("Failed to submit feedback:", err);
-            setError(err.message || "Không thể gửi phản hồi");
+            setError(err.message || "Can't submit feedback");
         } finally {
             setSubmitting(false);
         }
@@ -146,12 +146,12 @@ const TaskFeedbackModal = ({ taskId, isOpen, onClose, taskData }) => {
 
     const handleUploadDocument = async () => {
         if (!newDocument.file) {
-            setError('Vui lòng chọn file');
+            setError("Please select a file");
             return;
         }
 
         if (!taskData) {
-            setError('Không có thông tin task');
+            setError("No task information available");
             return;
         }
 
@@ -164,16 +164,12 @@ const TaskFeedbackModal = ({ taskId, isOpen, onClose, taskData }) => {
                 description: newDocument.description
             };
 
-            // Upload document mới
             const uploadedDoc = await uploadDocument(newDocument.file, documentData, null);
 
-            // Lấy danh sách document IDs hiện tại của task
             const currentDocIds = taskDocuments.map(doc => doc.documentId);
 
-            // Thêm document mới vào danh sách
             const updatedDocIds = [...currentDocIds, uploadedDoc.documentId];
 
-            // Sử dụng updateTask để update documents
             const updateData = {
                 title: taskData.title,
                 description: taskData.description,
@@ -201,7 +197,7 @@ const TaskFeedbackModal = ({ taskId, isOpen, onClose, taskData }) => {
             setError(null);
 
         } catch (err) {
-            setError('Không thể upload document: ' + err.message);
+            setError('Can not upload document: ' + err.message);
             console.error(err);
         } finally {
             setUploadingDocument(false);
@@ -210,19 +206,15 @@ const TaskFeedbackModal = ({ taskId, isOpen, onClose, taskData }) => {
 
     const handleAttachExistingDocument = async (documentId) => {
         try {
-            // Lấy danh sách document IDs hiện tại
             const currentDocIds = taskDocuments.map(doc => doc.documentId);
 
-            // Kiểm tra xem document đã được attach chưa
             if (currentDocIds.includes(documentId)) {
-                setError('Document này đã được attach vào task');
+                setError("This document is already attached to the task");
                 return;
             }
 
-            // Thêm document vào danh sách
             const updatedDocIds = [...currentDocIds, documentId];
 
-            // Update task với document mới
             const updateData = {
                 title: taskData.title,
                 description: taskData.description,
@@ -236,19 +228,17 @@ const TaskFeedbackModal = ({ taskId, isOpen, onClose, taskData }) => {
 
             await updateTask(taskId, updateData);
 
-            // Refresh task documents
             await fetchTaskDocuments();
             setError(null);
 
         } catch (err) {
-            setError('Không thể attach document: ' + err.message);
+            setError("Can't attach document: " + err.message);
             console.error(err);
         }
     };
 
     const handleRemoveDocument = async (documentId) => {
         try {
-            // Lấy danh sách document IDs hiện tại và loại bỏ document cần xóa
             const currentDocIds = taskDocuments.map(doc => doc.documentId);
             const updatedDocIds = currentDocIds.filter(id => id !== documentId);
 
@@ -271,7 +261,7 @@ const TaskFeedbackModal = ({ taskId, isOpen, onClose, taskData }) => {
             setError(null);
 
         } catch (err) {
-            setError('Không thể xóa document: ' + err.message);
+            setError("Can't remove document: " + err.message);
             console.error(err);
         }
     };
@@ -288,7 +278,7 @@ const TaskFeedbackModal = ({ taskId, isOpen, onClose, taskData }) => {
             }).format(date);
         } catch (error) {
             console.error("Error formatting date:", error, dateString);
-            return dateString || "Không có ngày";
+            return dateString || "Do not have date";
         }
     };
 
@@ -298,7 +288,8 @@ const TaskFeedbackModal = ({ taskId, isOpen, onClose, taskData }) => {
     const availableDocuments = documents.filter(doc =>
         !taskDocuments.some(taskDoc => taskDoc.documentId === doc.documentId)
     );
-
+    console.log("Available documents:", availableDocuments);
+    
     return (
         <div className="fixed inset-0 bg-gray-900/40 z-[10000] flex justify-center items-center p-4 overflow-y-auto">
             <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
@@ -536,7 +527,7 @@ const TaskFeedbackModal = ({ taskId, isOpen, onClose, taskData }) => {
                                         <h4 className="font-medium mb-3 text-sm">Available Documents from Event</h4>
                                         <div className="max-h-48 overflow-y-auto space-y-2">
                                             {availableDocuments.map((doc) => (
-                                                <div key={doc.documentId} className="flex items-center justify-between p-3 bg-white rounded-lg border">
+                                                <div key={doc.documentId} className="flex items-center justify-between p-3 bg-white rounded-lg">
                                                     <div className="flex items-center">
                                                         <svg
                                                             xmlns="http://www.w3.org/2000/svg"

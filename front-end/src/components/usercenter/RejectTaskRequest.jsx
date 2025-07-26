@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getUserProfile, getUserTasks } from '../../services/profileService';
+import { getUserProfile, getUserTasks } from '../../services/ProfileService';
 import { getRequestsByEventId, updateRequest } from '../../services/requestService';
 import { useNavigate, Link, useParams } from 'react-router-dom';
 import { getAccountById } from '../../services/accountService';
@@ -32,7 +32,6 @@ const RejectTaskRequest = () => {
 
                 const allRequests = await getRequestsByEventId(eventId);
 
-                // 👉 Enrich request với thông tin người gửi
                 const enrichedRequests = await Promise.all(
                     allRequests.map(async (req) => {
                         let user = null;
@@ -50,7 +49,6 @@ const RejectTaskRequest = () => {
                     })
                 );
 
-                // 👉 Lọc: (1) là người tạo request hoặc (2) task thuộc bạn
                 const relevantRequests = enrichedRequests.filter(request => {
                     const isUserRequest = request.requestByAccountId === profile.id;
                     const isTaskCreator = request.taskId &&
@@ -59,7 +57,6 @@ const RejectTaskRequest = () => {
                     return request.requestType === 'Cancel Task' && (isUserRequest || isTaskCreator);
                 });
 
-                // Enrich thêm task info
                 const finalRequests = relevantRequests.map(request => {
                     const associatedTask = tasks.find(task => task.taskId === request.taskId);
                     return {
@@ -101,7 +98,6 @@ const RejectTaskRequest = () => {
 
             await updateRequest(updateData);
 
-            // Refresh danh sách requests
             const allRequests = await getRequestsByEventId(eventId);
             const taskCancelRequests = allRequests.filter(request => {
                 return request.taskId &&
@@ -196,7 +192,6 @@ const RejectTaskRequest = () => {
                         <table className="min-w-full table-fixed">
                             <thead className="bg-gray-50">
                                 <tr>
-                                    {/* <th className="w-16 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase">Request ID</th> */}
                                     <th className="w-64 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase">Task Name</th>
                                     <th className="w-48 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase">Requester</th>
                                     <th className="w-80 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase">Reason</th>
@@ -287,7 +282,6 @@ const RequestRow = ({ request, userProfile, onProcess, isProcessing }) => {
     return (
         <>
             <tr className="hover:bg-gray-50">
-                {/* <td className="py-4 px-4 text-sm text-gray-900">#{request.requestId}</td> */}
                 <td className="py-4 px-4 text-sm text-gray-900">
                     <div className="font-medium truncate" title={request.taskName}>
                         {request.taskName}
@@ -313,7 +307,7 @@ const RequestRow = ({ request, userProfile, onProcess, isProcessing }) => {
                 </td>
                 <td className="py-4 px-4 text-sm">
                     {request.status === 'PENDING' && !isProcessing ? (
-                        request.assignedByAccountId === userProfile.id ? ( // 👈 CHỈ hiện nếu là người tạo task
+                        request.assignedByAccountId === userProfile.id ? ( 
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => handleActionClick('accept')}
@@ -342,10 +336,8 @@ const RequestRow = ({ request, userProfile, onProcess, isProcessing }) => {
                         <div className="text-xs text-gray-500">Processed</div>
                     )}
                 </td>
-
             </tr>
 
-            {/* Modal for response */}
             {showModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg p-6 w-96 max-w-full mx-4">

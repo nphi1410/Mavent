@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getUserTasks, getUserEvents, getUserProfile, getUserRoleInEvent } from '../../services/profileService';
+import { getUserTasks, getUserEvents, getUserProfile, getUserRoleInEvent } from '../../services/ProfileService';
 import TaskCard from './TaskCard';
 import TaskDashboard from './TaskDashboard';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
@@ -30,7 +30,7 @@ const UserTasksContent = () => {
   });
   const { id: eventId } = useParams();
   const [eventName, setEventName] = useState('');
-  const [userRole, setUserRole] = useState(null); // Thêm state cho user role
+  const [userRole, setUserRole] = useState(null); 
   const [loading, setLoading] = useState(true);
   const [filterLoading, setFilterLoading] = useState(false);
   const [error, setError] = useState(null);

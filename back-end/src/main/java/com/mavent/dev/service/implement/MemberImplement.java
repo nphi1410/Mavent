@@ -12,11 +12,13 @@ import com.mavent.dev.repository.AccountRepository;
 import com.mavent.dev.repository.DepartmentRepository;
 import com.mavent.dev.repository.EventAccountRoleRepository;
 import com.mavent.dev.service.MemberService;
+import com.mavent.dev.service.NotificationService;
 import com.mavent.dev.service.PermissionService;
 import com.mavent.dev.service.RoleValidator;
 import com.mavent.dev.mapper.MemberMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +45,8 @@ public class MemberImplement implements MemberService {
     private final MemberMapper memberMapper;
     private final RoleValidator roleValidator;
     private final PermissionService permissionService;
+    @Autowired
+    private NotificationService notificationService;
     
     @Override
     @Transactional(readOnly = true)
@@ -112,6 +116,27 @@ public class MemberImplement implements MemberService {
         // Lưu và đảm bảo dữ liệu được flush ngay lập tức đến database
         EventAccountRole updated = eventAccountRoleRepository.saveAndFlush(memberRole);
 
+        StringBuilder messageBuilder = new StringBuilder("Your membership information in the event has been updated.");
+
+        if (request.getEventRole() != null) {
+            messageBuilder.append(" New role: ").append(request.getEventRole()).append(".");
+        }
+        if (request.getDepartmentId() != null) {
+            messageBuilder.append(" New department assigned.");
+        }
+        if (request.getIsActive() != null && !request.getIsActive()) {
+            messageBuilder.append(" You have been deactivated.");
+        }
+
+        notificationService.createNotification(
+                request.getAccountId(),
+                request.getEventId(),
+                null,
+                null,
+                "MEMBER UPDATE",
+                messageBuilder.toString()
+        );
+
         return memberMapper.toMemberResponseDTO(updated);
     }
 
@@ -134,6 +159,26 @@ public class MemberImplement implements MemberService {
 
         // Save the updated role
         EventAccountRole updated = eventAccountRoleRepository.saveAndFlush(memberRole);
+
+        String message;
+        String type;
+
+        if (request.getIsBanned()) {
+            type = "MEMBER BANNED";
+            message = "You have been banned from the event.";
+        } else {
+            type = "MEMBER UNBANNED";
+            message = "You have been reinstated to participate in the event.";
+        }
+
+        notificationService.createNotification(
+                request.getAccountId(),
+                request.getEventId(),
+                null,
+                null,
+                type,
+                message
+        );
 
         return memberMapper.toMemberResponseDTO(updated);
     }

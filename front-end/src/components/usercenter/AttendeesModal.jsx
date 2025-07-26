@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getEventMembers, updateTaskAttendees } from '../../services/profileService';
+import { getEventMembers, updateTaskAttendees } from '../../services/ProfileService';
 
 const AttendeesModal = ({
   isOpen,
@@ -17,14 +17,12 @@ const AttendeesModal = ({
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
-  // Khởi tạo danh sách attendees được chọn từ prop attendees
   useEffect(() => {
     if (attendees && attendees.length > 0) {
       setSelectedAttendees(attendees.map(a => a.accountId));
     }
   }, [attendees]);
 
-  // Hàm bắt đầu chỉnh sửa danh sách attendees
   const handleStartEditing = async () => {
     if (!taskData || !taskData.eventId) return;
 
@@ -34,18 +32,17 @@ const AttendeesModal = ({
 
     try {
       const members = await getEventMembers(taskData.eventId);
-      setAvailableMembers(members || []);
+      const activeMembers = (members || []).filter(member => member.isActive === true);
+      setAvailableMembers(activeMembers);
     } catch (err) {
       console.error("Error loading member list:", err);
-      setError("Unable to load the event member list.");
+      setError("Unable to load the active event member list.");
     } finally {
       setLoadingMembers(false);
     }
   };
 
-  // Hàm để toggle chọn/bỏ chọn attendee
   const handleAttendeeToggle = (accountId) => {
-    // Không cho phép bỏ chọn người được giao task (leader)
     if (taskData && accountId === taskData.assignedToAccountId) return;
 
     setSelectedAttendees(prev => {
@@ -57,7 +54,6 @@ const AttendeesModal = ({
     });
   };
 
-  // Hàm cập nhật danh sách attendees
   const handleSaveAttendees = async () => {
     if (!taskData || !taskData.taskId) return;
 
@@ -67,15 +63,13 @@ const AttendeesModal = ({
 
     try {
       await updateTaskAttendees(taskData.taskId, selectedAttendees);
-      setSuccess("Cập nhật người tham gia thành công");
+      setSuccess("Updated attendees successfully!");
       setEditing(false);
 
-      // Thông báo cho component cha để refresh lại danh sách attendees
       if (onAttendeeUpdated) {
         onAttendeeUpdated();
       }
 
-      // Tự động đóng thông báo thành công sau 3 giây
       setTimeout(() => {
         setSuccess(null);
       }, 3000);
@@ -88,16 +82,13 @@ const AttendeesModal = ({
     }
   };
 
-  // Hàm hủy chỉnh sửa
   const handleCancelEditing = () => {
     setEditing(false);
-    // Reset lại danh sách selected attendees về trạng thái ban đầu
     if (attendees && attendees.length > 0) {
       setSelectedAttendees(attendees.map(a => a.accountId));
     }
   };
 
-  // Hàm hiển thị màu sắc và text cho status
   const getStatusDisplay = (status) => {
     switch (status) {
       case 'INVITED':
@@ -177,7 +168,7 @@ const AttendeesModal = ({
                       return (
                         <div
                           key={attendee.accountId}
-                          className={`flex items-center p-3 border rounded-lg ${taskData && attendee.accountId === taskData.assignedToAccountId
+                          className={`flex items-center p-3 rounded-lg ${taskData && attendee.accountId === taskData.assignedToAccountId
                             ? 'bg-blue-50 border-blue-200'
                             : 'border-gray-200'
                             }`}
@@ -204,14 +195,12 @@ const AttendeesModal = ({
                             </div>
                           </div>
                           <div className="flex flex-col items-end space-y-2">
-                            {/* Hiển thị badge leader */}
                             {taskData && attendee.accountId === taskData.assignedToAccountId && (
                               <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
                                 Leader
                               </span>
                             )}
 
-                            {/* Hiển thị badge status */}
                             <span className={`px-2 py-1 ${statusDisplay.color} text-xs rounded-full font-medium`}>
                               {statusDisplay.text}
                             </span>
@@ -264,72 +253,72 @@ const AttendeesModal = ({
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
                 </div>
               ) : (
-                <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-lg mb-4">
+                <div className="max-h-96 overflow-y-auto border-gray-200 rounded-lg mb-4">
                   {availableMembers.length > 0 ? (
-                    <div className="divide-y">
-                      {availableMembers.map(member => {
-                        // Tìm thông tin status nếu người này đã là attendee
-                        const existingAttendee = attendees?.find(a => a.accountId === member.accountId);
-                        const status = existingAttendee?.status;
-                        const statusDisplay = status ? getStatusDisplay(status) : null;
+                    <div className="">
+                      {availableMembers
+                        .filter(member => member.isActive === true)
+                        .map(member => {
+                          const existingAttendee = attendees?.find(a => a.accountId === member.accountId);
+                          const status = existingAttendee?.status;
+                          const statusDisplay = status ? getStatusDisplay(status) : null;
 
-                        return (
-                          <div
-                            key={member.accountId}
-                            className={`p-3 ${member.accountId === taskData?.assignedToAccountId
-                              ? 'bg-blue-50'
-                              : 'hover:bg-gray-50'
-                              }`}
-                          >
-                            <label className="flex items-center cursor-pointer w-full">
-                              <input
-                                type="checkbox"
-                                checked={selectedAttendees.includes(member.accountId)}
-                                onChange={() => handleAttendeeToggle(member.accountId)}
-                                disabled={member.accountId === taskData?.assignedToAccountId}
-                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 rounded"
-                              />
-                              <div className="ml-3 flex items-center flex-grow">
-                                <div className="flex-shrink-0 mr-3">
-                                  {member.avatarUrl ? (
-                                    <img
-                                      src={member.avatarUrl}
-                                      alt={member.name}
-                                      className="h-8 w-8 rounded-full object-cover"
-                                    />
-                                  ) : (
-                                    <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-semibold">
-                                      {(member.name || "?").charAt(0).toUpperCase()}
-                                    </div>
+                          return (
+                            <div
+                              key={member.accountId}
+                              className={`p-3 ${member.accountId === taskData?.assignedToAccountId
+                                ? 'bg-blue-50'
+                                : 'hover:bg-gray-50'
+                                }`}
+                            >
+                              <label className="flex items-center cursor-pointer w-full">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedAttendees.includes(member.accountId)}
+                                  onChange={() => handleAttendeeToggle(member.accountId)}
+                                  disabled={member.accountId === taskData?.assignedToAccountId}
+                                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 rounded"
+                                />
+                                <div className="ml-3 flex items-center flex-grow">
+                                  <div className="flex-shrink-0 mr-3">
+                                    {member.avatarUrl ? (
+                                      <img
+                                        src={member.avatarUrl}
+                                        alt={member.name}
+                                        className="h-8 w-8 rounded-full object-cover"
+                                      />
+                                    ) : (
+                                      <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-semibold">
+                                        {(member.name || "?").charAt(0).toUpperCase()}
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div>
+                                    <div className="font-medium">{member.name || member.fullName}</div>
+                                    <div className="text-xs text-gray-500">{member.email}</div>
+                                  </div>
+                                </div>
+                                <div className="flex flex-col items-end space-y-2">
+                                  {member.accountId === taskData?.assignedToAccountId && (
+                                    <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
+                                      LEADER
+                                    </span>
+                                  )}
+
+                                  {statusDisplay && (
+                                    <span className={`ml-2 px-2 py-1 ${statusDisplay.color} text-xs rounded-full font-medium`}>
+                                      {statusDisplay.text}
+                                    </span>
                                   )}
                                 </div>
-                                <div>
-                                  <div className="font-medium">{member.name || member.fullName}</div>
-                                  <div className="text-xs text-gray-500">{member.email}</div>
-                                </div>
-                              </div>
-                              <div className="flex flex-col items-end space-y-2">
-                                {member.accountId === taskData?.assignedToAccountId && (
-                                  <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
-                                    LEADER
-                                  </span>
-                                )}
-
-                                {/* Hiển thị status hiện tại nếu có */}
-                                {statusDisplay && (
-                                  <span className={`ml-2 px-2 py-1 ${statusDisplay.color} text-xs rounded-full font-medium`}>
-                                    {statusDisplay.text}
-                                  </span>
-                                )}
-                              </div>
-                            </label>
-                          </div>
-                        );
-                      })}
+                              </label>
+                            </div>
+                          );
+                        })}
                     </div>
                   ) : (
                     <div className="p-4 text-center text-gray-500">
-                      No members in this event.
+                      No active members in this event.
                     </div>
                   )}
                 </div>
