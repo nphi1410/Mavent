@@ -33,9 +33,18 @@ public class MemberController {
     @GetMapping
     public ResponseEntity<List<MemberResponseDTO>> getEventMembers(
             @PathVariable Integer eventId) {
+        // get all event-attended accounts (including PARTICIPANTS)
         List<MemberResponseDTO> members = memberService.getAllMembersByEventId(eventId);
         return ResponseEntity.ok(members);
     }
+
+    @GetMapping("/staffs")
+    public ResponseEntity<List<MemberResponseDTO>> getStaffMembers(@PathVariable Integer eventId) {
+        // get all staffs of event (MEMBERS, DEPARTMENT_MANAGER, ADMIN)
+        List<MemberResponseDTO> staffs = memberService.getAllStaffsByEventId(eventId);
+        return ResponseEntity.ok(staffs);
+    }
+
 
     @GetMapping("/manage-sponsor")
     public ResponseEntity<List<MemberDTO>> getSponsorManageable(@PathVariable Integer eventId){

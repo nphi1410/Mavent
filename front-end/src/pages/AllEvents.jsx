@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import EventFilter from "../components/filter/EventFilter";
 import CardMedium from "../components/card/CardMedium";
-import { getFilterEvents } from "../services/eventService";
+import { getFilterEvents } from "../services/EventService";
 
 const Events = () => {
   const [filteredEvents, setFilteredEvents] = useState([]);
@@ -29,7 +29,10 @@ const Events = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6 h-full">
           {filteredEvents.length > 0 ? (
             filteredEvents.map((event) => (
-              <div key={event.eventId || event.id} className="flex flex-col h-full">
+              <div
+                key={event.eventId || event.id}
+                className="flex flex-col h-full"
+              >
                 <CardMedium event={event} />
               </div>
             ))

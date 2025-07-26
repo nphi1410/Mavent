@@ -4,8 +4,10 @@ import com.mavent.dev.dto.EventCountDTO;
 import com.mavent.dev.dto.department.DepartmentResponseDTO;
 import com.mavent.dev.dto.department.UserEventInfoDTO;
 import com.mavent.dev.dto.event.EventAccountRoleDTO;
+import com.mavent.dev.dto.role.UserRoleDTO;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.EventAccountRole;
+import com.mavent.dev.mapper.EventAccountRoleMapper;
 import com.mavent.dev.repository.EventAccountRoleRepository;
 import com.mavent.dev.service.AccountService;
 import com.mavent.dev.service.DepartmentService;
@@ -44,12 +46,17 @@ public class EventAccountRoleImplement implements EventAccountRoleService {
     }
 
     @Override
+    public EventAccountRole getMemberByEventIdAndAccountId(Integer eventId, Integer accountId) {
+        return eventAccountRoleRepository.findByEventIdAndAccountId(eventId, accountId).orElse(null);
+    }
+
+    @Override
     public Page<EventAccountRoleDTO> getMembersByAccountIdWithPagination(Integer accountId, String searchTitle, String role, Pageable pageable) {
         return eventAccountRoleRepository.findPageByAccountId(accountId, searchTitle, role, pageable);
     }
 
     @Override
-    public List<EventAccountRoleDTO> getByAccountIdOnRole(Integer accountId){
+    public List<EventAccountRoleDTO> getByAccountIdOnRole(Integer accountId) {
         return eventAccountRoleRepository.findByAccountIdWithoutParticipant(accountId);
     }
 
@@ -60,7 +67,7 @@ public class EventAccountRoleImplement implements EventAccountRoleService {
 
     @Override
     public List<EventAccountRole> getMembersByEventIdAndRole(Integer eventId, EventAccountRole.EventRole role) {
-        return eventAccountRoleRepository.findByEventIdAndEventRole(eventId, role);
+        return eventAccountRoleRepository.findByEventIdAndEventRole(eventId, role).orElse(null);
     }
 
     @Override
@@ -71,6 +78,16 @@ public class EventAccountRoleImplement implements EventAccountRoleService {
     @Override
     public EventAccountRole addMemberToEvent(EventAccountRole eventAccountRole) {
         return eventAccountRoleRepository.save(eventAccountRole);
+    }
+
+    @Override
+    public UserRoleDTO getAdminAccount(Integer eventId) {
+        EventAccountRole admin = eventAccountRoleRepository.findAdminByEventId(eventId);
+        if (admin == null) {
+            return null; // No admin found for the event
+        }
+        Account account = accountService.getAccountById(admin.getAccountId());
+        return EventAccountRoleMapper.toUserRoleDTO(admin, account);
     }
 
     @Override

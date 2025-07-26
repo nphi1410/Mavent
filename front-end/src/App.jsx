@@ -21,7 +21,6 @@ import DepartmentManagementPage from "./pages/Departments/DepartmentManagementPa
 import DocumentsPage from "./pages/DocumentsPage";
 import EventDetailsByRoles from "./pages/events/eventDetailsByRoles.jsx";
 
-
 // Auth
 import ProtectedRoute from "./auth/ProtectedRoute";
 import SuperAdminRoute from "./auth/SuperAdminRoute";
@@ -93,7 +92,10 @@ function App() {
           <Route path="unauthorized" element={<RedirectPage />} />
 
           {/* Meeting Routes */}
-          <Route path="meetings" element={<ProtectedRoute isRequiredToHaveRole={true} />}>
+          <Route
+            path="meetings"
+            element={<ProtectedRoute isRequiredToHaveRole={true} />}
+          >
             <Route index element={<MeetingListPage />} />
             <Route path="edit" element={<MeetingEditPage />} />
           </Route>
@@ -101,49 +103,94 @@ function App() {
 
           {/* Routes that requires user to have ROLE in event */}
           <Route path="event/:id" element={<EventWrapper />}>
-            <Route path="staff"
-              element={
-                <Layout />
-              }
-            >
+            <Route path="staff" element={<Layout />}>
               {/* Route for all roles (PARTICIPANT, MEMBER, DEPARTMENT_MANAGER, ADMIN) */}
-              <Route element={<ProtectedRoute isRequiredToHaveRole={true} requiredRoles={["PARTICIPANT", "MEMBER", "DEPARTMENT_MANAGER", "ADMIN"]} />}>
+              <Route
+                element={
+                  <ProtectedRoute
+                    isRequiredToHaveRole={true}
+                    requiredRoles={[
+                      "PARTICIPANT",
+                      "MEMBER",
+                      "DEPARTMENT_MANAGER",
+                      "ADMIN",
+                    ]}
+                  />
+                }
+              >
                 <Route index element={<EventDetailsByRoles />} />
                 <Route path="details" element={<EventDetailsByRoles />} />
               </Route>
 
               {/* Routes for event staff only */}
-              <Route element={<ProtectedRoute isRequiredToHaveRole={true} requiredRoles={["MEMBER", "DEPARTMENT_MANAGER", "ADMIN"]} />}>
+              <Route
+                element={
+                  <ProtectedRoute
+                    isRequiredToHaveRole={true}
+                    requiredRoles={["MEMBER", "DEPARTMENT_MANAGER", "ADMIN"]}
+                  />
+                }
+              >
                 <Route path="tasks" element={<UserTasksPage />} />
-                <Route path="tasks/history" element={<TaskHistory />} />
-                <Route path="tasks/requests" element={<RejectTaskRequest />} />
+                <Route path="tasks-history" element={<TaskHistory />} />
+                <Route path="tasks-requests" element={<RejectTaskRequest />} />
                 <Route path="documents" element={<DocumentsPage />} />
-                <Route path="expenses-requests" element={<ExpenseRequestHistory />} />
-                <Route path="requests" element={(<RequestHistory />)} />
-                <Route path="sponsorship" element={<SponsorshipPage />} />
-                <Route path="sponsorship/create" element={<SubmitSponsorshipPage />} />
+                <Route
+                  path="expenses-requests"
+                  element={<ExpenseRequestHistory />}
+                />
+                <Route path="requests" element={<RequestHistory />} />
+                <Route path="sponsorships" element={<SponsorshipPage />} />
+                <Route
+                  path="sponsorships/create"
+                  element={<SubmitSponsorshipPage />}
+                />
                 <Route
                   path="sponsorship-packages"
                   element={<SponsorshipPackagesPage />}
                 />
+                <Route path="sponsors" element={<SponsorPage />} />
               </Route>
 
               {/* Routes for event admin and department manager only */}
-              <Route element={<ProtectedRoute isRequiredToHaveRole={true} requiredRoles={["ADMIN", "DEPARTMENT_MANAGER"]} />}>
+              <Route
+                element={
+                  <ProtectedRoute
+                    isRequiredToHaveRole={true}
+                    requiredRoles={["ADMIN", "DEPARTMENT_MANAGER"]}
+                  />
+                }
+              >
                 <Route path="members" element={<EventMemberPage />} />
                 {/* <Route path="expenses" element={<EventExpense />} /> */}
-
               </Route>
 
-              <Route element={<ProtectedRoute isRequiredToHaveRole={true} requiredRoles={["ADMIN"]} />}>
+              <Route
+                element={
+                  <ProtectedRoute
+                    isRequiredToHaveRole={true}
+                    requiredRoles={["ADMIN"]}
+                  />
+                }
+              >
                 <Route path="feedback" element={<ViewEventFeedback />} />
-                <Route path="departments" element={<DepartmentManagementPage />} />
+                <Route
+                  path="departments"
+                  element={<DepartmentManagementPage />}
+                />
                 <Route path="income" element={<AdminViewIncome />} />
                 <Route path="expenses" element={<AdminViewExpense />} />
               </Route>
 
               {/* Routes for participant only */}
-              <Route element={<ProtectedRoute isRequiredToHaveRole={true} requiredRoles={["PARTICIPANT"]} />}>
+              <Route
+                element={
+                  <ProtectedRoute
+                    isRequiredToHaveRole={true}
+                    requiredRoles={["PARTICIPANT"]}
+                  />
+                }
+              >
                 <Route
                   path="create-feedback"
                   element={<ParticipantFeedbackEvent />}
@@ -151,7 +198,6 @@ function App() {
               </Route>
             </Route>
           </Route>
-
 
           {/* Create Event-Protected Routes */}
           <Route path="create-event" element={<ProtectedRoute />}>
@@ -172,24 +218,26 @@ function App() {
             <Route index element={<ProfilePage />} />
             <Route path="attended" element={<UserEventsPage />} />
             <Route path="dashboard" element={<UserDashboardPage />} />
-            <Route path="tasks">
-              <Route index element={<UserTasksPage />} />
-              <Route path=":taskId" element={<TaskDetails />} />
-              <Route path="history" element={<TaskHistory />} />
-            </Route>
 
             <Route path="created-events">
               <Route index element={<CreatedEventsPage />} />
-              <Route path=":eventId" element={<CreatedEventLayout />} >
+              <Route path=":eventId" element={<CreatedEventLayout />}>
                 <Route index element={<CreateEvent isUpdatePage={true} />} />
-                <Route path="proposal" element={<CreateProposal isUpdatePage={true} />} />
-                <Route path="timeline" element={<CreateTimeline isUpdatePage={true} />} />
-                <Route path="agenda" element={<CreateAgenda isUpdatePage={true} />} />
+                <Route
+                  path="proposal"
+                  element={<CreateProposal isUpdatePage={true} />}
+                />
+                <Route
+                  path="timeline"
+                  element={<CreateTimeline isUpdatePage={true} />}
+                />
+                <Route
+                  path="agenda"
+                  element={<CreateAgenda isUpdatePage={true} />}
+                />
               </Route>
             </Route>
-
           </Route>
-
         </Route>
 
         {/* Super Admin Routes */}
@@ -217,7 +265,7 @@ function App() {
             <Route path="sponsors" element={<SponsorPage />} />
           </Route>
         </Route>
-      </Routes >
+      </Routes>
 
       <ToastContainer
         position="top-right"
@@ -229,9 +277,7 @@ function App() {
         draggable
         pauseOnHover
       />
-    </Router >
-
-    
+    </Router>
   );
 }
 

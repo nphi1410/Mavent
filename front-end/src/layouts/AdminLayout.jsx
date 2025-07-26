@@ -14,7 +14,8 @@ import {
   faMoneyBill1Wave,
   faHandHoldingDollar,
   faCrown,
-  faMoneyBillTrendUp
+  faMoneyBillTrendUp,
+  faHandshake,
 } from "@fortawesome/free-solid-svg-icons";
 import { EventRoleProvider, useEventRole } from "../context/EventRoleContext";
 import { set } from "react-hook-form";
@@ -58,7 +59,7 @@ const Layout = () => {
       setLoading(false);
     }
     setLoading(false);
-  }, [ user]);
+  }, [user]);
 
   // While loading, show a spinner or nothing
   if (roleLoading || loading) {
@@ -89,7 +90,6 @@ const Layout = () => {
     "documents",
     "requests",
     "feedback",
-    
   ].some((segment) => location.pathname.includes(segment));
 
   const allMenuItems = [
@@ -137,17 +137,24 @@ const Layout = () => {
       requiredRole: "MEMBER", // Visible to all roles (MEMBER, DEPARTMENT_MANAGER, and ADMIN)
     },
     {
-      name: "sponsorship packages",
+      name: "sponsorship-packages",
       displayName: "Sponsorship Packages",
       icon: <FontAwesomeIcon icon={faCrown} />,
       link: `sponsorship-packages`,
       requiredRole: "MEMBER",
     },
     {
-      name: "sponsorship",
+      name: "sponsors",
+      displayName: "Sponsor",
+      icon: <FontAwesomeIcon icon={faHandshake} />,
+      link: `sponsors`,
+      requiredRole: "MEMBER",
+    },
+    {
+      name: "sponsorships",
       displayName: "Sponsorship",
       icon: <FontAwesomeIcon icon={faHandHoldingDollar} />,
-      link: `sponsorship`,
+      link: `sponsorships`,
       requiredRole: "MEMBER",
     },
     {
@@ -169,16 +176,15 @@ const Layout = () => {
       displayName: "Expenses Reports",
       icon: <FontAwesomeIcon icon={faMoneyBill1Wave} />,
       link: `expenses`,
-      requiredRole: 'ADMIN'
+      requiredRole: "ADMIN",
     },
     {
-      name: "expenses requests",
+      name: "expenses-requests",
       displayName: "Expense Requests",
       icon: <FontAwesomeIcon icon={faMoneyBill1Wave} />,
       link: `expenses-requests`,
-      requiredRole: 'MEMBER'
-    }
-
+      requiredRole: "MEMBER",
+    },
   ];
 
   // Filter items based on user role

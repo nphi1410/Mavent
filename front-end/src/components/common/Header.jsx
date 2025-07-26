@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getUserProfile } from "../../services/profileService";
-import { getUnreadNotificationCount } from "../../services/notificationService";
+import { getUserProfile } from "../../services/ProfileService";
+import { getUnreadNotificationCount } from "../../services/NotificationService";
 import SideBar from "./SideBar";
 import NotificationModal from "./NotificationModal";
 
@@ -47,6 +47,7 @@ const Header = () => {
     if (isTrending) searchParams.set("isTrending", "true");
 
     navigate(`/events?${searchParams.toString()}`);
+    window.location.reload();
   };
 
   const handleNotificationClick = () => {
@@ -124,7 +125,7 @@ const Header = () => {
                   </svg>
                   {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      {unreadCount > 99 ? '99+' : unreadCount}
+                      {unreadCount > 99 ? "99+" : unreadCount}
                     </span>
                   )}
                 </button>

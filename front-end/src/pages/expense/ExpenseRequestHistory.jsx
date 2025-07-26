@@ -10,7 +10,7 @@ import {
 import ExpenseRequestPopup from "../../components/expense/ExpenseRequestPopup.jsx";
 import ExpenseRequestDetail from "../../components/expense/ExpenseRequestDetail.jsx";
 import { useEventRole } from "../../context/EventRoleContext.jsx";
-import { getUserInfoInEvent } from "../../services/userEventService.jsx";
+import { getUserInfoInEvent } from "../../services/UserEventService.jsx";
 import { formatMoney } from "../../utils/formatMoney.js";
 
 import { getBudgetByEventId } from "../../services/expense/BudgetService.jsx";
@@ -47,10 +47,10 @@ export default function ExpenseRequestHistory() {
         setTaskId(location.state.taskId);
         setTaskTitle(location.state.taskTitle || "");
       }
-      
+
       // Open the create form
       setShowCreateForm(true);
-      
+
       // Remove the state from history to prevent re-opening on back/forward navigation
       navigate(location.pathname, { replace: true });
     }
@@ -205,14 +205,16 @@ export default function ExpenseRequestHistory() {
       setLoading(true);
       const expenseDetail = await getExpenseById(eventId, expenseId);
       setSelectedExpense(expenseDetail);
-      
+
       // Nếu expense có task ID, tìm task title nếu có thể
       if (expenseDetail.taskId) {
         try {
           // Import động để tránh circular dependency
-          const { getTaskDetails } = await import("../../services/profileService");
+          const { getTaskDetails } = await import(
+            "../../services/ProfileService.jsx"
+          );
           const taskData = await getTaskDetails(expenseDetail.taskId);
-          
+
           if (taskData && taskData.title) {
             // Cập nhật task title trong state
             setTaskTitle(taskData.title);
@@ -222,7 +224,7 @@ export default function ExpenseRequestHistory() {
           // Silent fail - we'll use default title or task ID
         }
       }
-      
+
       setShowDetailPopup(true);
     } catch (error) {
       console.error("Error fetching expense details:", error);
@@ -268,13 +270,14 @@ export default function ExpenseRequestHistory() {
           onClose={() => setShowCreateForm(false)}
           accountId={user.accountId}
           departmentId={user.departmentId}
-          budgetId={budgetId} 
+          budgetId={budgetId}
           eventId={eventId}
           taskId={taskId}
           taskTitle={taskTitle}
           onSubmitSuccess={handleFormSubmit}
         />
-      )}      {showDetailPopup && selectedExpense && (
+      )}{" "}
+      {showDetailPopup && selectedExpense && (
         <ExpenseRequestDetail
           isOpen={showDetailPopup}
           onClose={() => setShowDetailPopup(false)}
@@ -303,7 +306,6 @@ export default function ExpenseRequestHistory() {
           userRole={role}
         />
       )}
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Page Title */}
         <div className="mb-8">

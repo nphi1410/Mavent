@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { getUserTasks, getUserEvents } from '../../services/profileService';
+import { getUserTasks, getUserEvents } from '../../services/ProfileService';
 import TaskCard from './TaskCard';
 import { useNavigate, Link, useParams } from 'react-router-dom';
 
 const TaskHistory = () => {
   const [displayTasks, setDisplayTasks] = useState([]);
-  const [eventName, setEventName] = useState('');
+  const [eventName, setEventName] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -19,11 +19,13 @@ const TaskHistory = () => {
         // Fetch all user tasks + events
         const [tasks, events] = await Promise.all([
           getUserTasks({}), // API lấy toàn bộ tasks của user
-          getUserEvents()   // API lấy toàn bộ events user tham gia
+          getUserEvents(), // API lấy toàn bộ events user tham gia
         ]);
 
         // Tìm tên event từ eventId
-        const matchedEvent = events.find(e => e.eventId === parseInt(eventId));
+        const matchedEvent = events.find(
+          (e) => e.eventId === parseInt(eventId)
+        );
         if (matchedEvent) {
           setEventName(matchedEvent.eventName);
         }
@@ -32,16 +34,16 @@ const TaskHistory = () => {
         const historyTasks = tasks.filter(
           (task) =>
             task.eventId === parseInt(eventId) &&
-            ['DONE', 'REJECTED', 'CANCELLED'].includes(task.status)
+            ["DONE", "REJECTED", "CANCELLED"].includes(task.status)
         );
 
         setDisplayTasks(historyTasks);
       } catch (err) {
-        console.error('Error fetching task history:', err);
+        console.error("Error fetching task history:", err);
         if (err.response?.status === 401) {
-          navigate('/login');
+          navigate("/login");
         } else {
-          setError(err.message || 'Failed to load task history');
+          setError(err.message || "Failed to load task history");
         }
       } finally {
         setLoading(false);
@@ -60,11 +62,7 @@ const TaskHistory = () => {
   }
 
   if (error) {
-    return (
-      <div className="p-10 text-red-600 text-center">
-        Error: {error}
-      </div>
-    );
+    return <div className="p-10 text-red-600 text-center">Error: {error}</div>;
   }
 
   return (
@@ -91,22 +89,32 @@ const TaskHistory = () => {
             <table className="min-w-full table-fixed">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="w-12 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase">No.</th>
-                  <th className="w-80 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                  <th className="w-36 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase">Due Date</th>
-                  <th className="w-24 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                  <th className="w-24 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase">Priority</th>
-                  <th className="w-24 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                  <th className="w-32 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                  <th className="w-12 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase">
+                    No.
+                  </th>
+                  <th className="w-80 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase">
+                    Name
+                  </th>
+                  <th className="w-36 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase">
+                    Due Date
+                  </th>
+                  <th className="w-24 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase">
+                    Status
+                  </th>
+                  <th className="w-24 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase">
+                    Priority
+                  </th>
+                  <th className="w-24 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase">
+                    Role
+                  </th>
+                  <th className="w-32 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase">
+                    Action
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {displayTasks.map((task, index) => (
-                  <TaskCard
-                    key={task.taskId}
-                    task={task}
-                    index={index + 1}
-                  />
+                  <TaskCard key={task.taskId} task={task} index={index + 1} />
                 ))}
               </tbody>
             </table>

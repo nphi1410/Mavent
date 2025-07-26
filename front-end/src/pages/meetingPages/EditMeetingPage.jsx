@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useForm, FormProvider, Controller } from "react-hook-form";
+import {
+  useForm,
+  FormProvider,
+  Controller,
+  useFormContext,
+} from "react-hook-form";
 import {
   getMeetingById,
   createMeeting,
   updateMeeting,
   getMeetingAttendees,
-} from "../../services/meetingService";
-import { getDepartmentsByEventId } from "../../services/departmentService";
-import memberService from "../../services/memberService";
+} from "../../services/MeetingService";
+import { getDepartmentsByEventId } from "../../services/DepartmentService";
+import memberService from "../../services/MemberService";
 import MeetingAttendeeSelect from "../../components/meeting/MeetingAttendeeSelect";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -39,7 +44,7 @@ const EditMeetingPage = () => {
     },
   });
 
-  const { handleSubmit, reset, register, control, watch } = methods;
+  const { handleSubmit, getValues, reset, register, control, watch } = methods;
 
   const [departments, setDepartments] = useState([]);
   const [attendees, setAttendees] = useState([]);
@@ -143,20 +148,49 @@ const EditMeetingPage = () => {
             </select>
           </div>
 
-          <Input label="Title" name="title" register={register} />
-          <Input label="Location" name="location" register={register} />
+          <Input
+            label="Title"
+            name="title"
+            isRequired
+            registerOptions={{ required: "Title is required" }}
+          />
+
+          <Input
+            label="Location"
+            name="location"
+            isRequired
+            registerOptions={{ required: "Location is required" }}
+          />
+
           <Input label="Meeting Link" name="meetingLink" register={register} />
           <Input
             label="Meeting Time"
             name="meetingDatetime"
             type="datetime-local"
-            register={register}
+            isRequired
+            registerOptions={{
+              required: "Start time is required",
+              validate: (value) => {
+                const now = new Date();
+                const start = new Date(value);
+                return start >= now || "Start time must be in the future";
+              },
+            }}
           />
+
           <Input
             label="End Time"
             name="endDatetime"
             type="datetime-local"
-            register={register}
+            isRequired
+            registerOptions={{
+              required: "End time is required",
+              validate: (value) => {
+                const end = new Date(value);
+                const start = new Date(getValues("meetingDatetime"));
+                return end > start || "End time must be after start time";
+              },
+            }}
           />
         </div>
 
@@ -209,16 +243,34 @@ const EditMeetingPage = () => {
 };
 
 // Reusable components
-const Input = ({ label, name, register, type = "text" }) => (
-  <div>
-    <label className="block text-sm font-medium">{label}</label>
-    <input
-      type={type}
-      {...register(name)}
-      className="mt-1 w-full border rounded-md px-3 py-2"
-    />
-  </div>
-);
+const Input = ({
+  label,
+  name,
+  registerOptions = {},
+  type = "text",
+  isRequired = false,
+}) => {
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext();
+
+  return (
+    <div>
+      <label className="block text-sm font-medium">
+        {label} {isRequired && <span className="text-red-500">*</span>}
+      </label>
+      <input
+        type={type}
+        {...register(name, registerOptions)}
+        className="mt-1 w-full border rounded-md px-3 py-2"
+      />
+      {errors[name] && (
+        <p className="text-sm text-red-600 mt-1">{errors[name]?.message}</p>
+      )}
+    </div>
+  );
+};
 
 const Textarea = ({ label, name, register }) => (
   <div>

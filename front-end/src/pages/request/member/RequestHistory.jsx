@@ -6,11 +6,11 @@ import {
   getRequestsByEventIdAndDepartmentId, // for department manager
   getRequestsByEventId, // for admin
   getRequestTypes,
-} from "../../../services/requestService";
+} from "../../../services/RequestService.jsx";
 import RequestForm from "../../../components/request/CreateRequest.jsx";
 import RequestDetailsPopup from "../../../components/request/MemberRequestDetails.jsx";
 import { useEventRole } from "../../../context/EventRoleContext.jsx";
-import { getUserInfoInEvent } from "../../../services/userEventService.jsx";
+import { getUserInfoInEvent } from "../../../services/UserEventService.jsx";
 
 export default function RequestHistory() {
   const { user } = useEventRole();
@@ -283,116 +283,114 @@ export default function RequestHistory() {
             </div>
 
             {/* Table */}
-            {
-              !requests || requests.length === 0 ?
-                  <div className="rounded-xl p-6 bg-red-100">
-                    <p className="text-red-700">
-                      There are no requests created for this event yet.
-                    </p>
-                  </div>
-                :
-                <div className="bg-[#ffffff] rounded-lg overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-rose-200">
-                      <thead>
-                        <tr>
-                          {!role.toLowerCase().includes("member") && (
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                              Requested By
-                            </th>
-                          )}
+            {!requests || requests.length === 0 ? (
+              <div className="rounded-xl p-6 bg-red-100">
+                <p className="text-red-700">
+                  There are no requests created for this event yet.
+                </p>
+              </div>
+            ) : (
+              <div className="bg-[#ffffff] rounded-lg overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-rose-200">
+                    <thead>
+                      <tr>
+                        {!role.toLowerCase().includes("member") && (
                           <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                            Request Title
+                            Requested By
                           </th>
-                          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                            Type
-                          </th>
-                          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                            Created Date
-                          </th>
-                          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                            Status
-                          </th>
-                          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                            Answered Date
-                          </th>
-                          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                            View Detail
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-rose-200">
-                        {
-
-
-                          filteredRequests?.map((request) => (
-                            <tr
-                              key={request.requestId}
-                              className="hover:bg-gray-200 transition-colors duration-150"
-                            >
-                              {/* <td className="px-6 py-4 text-sm text-gray-900">{
+                        )}
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                          Request Title
+                        </th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                          Type
+                        </th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                          Created Date
+                        </th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                          Status
+                        </th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                          Answered Date
+                        </th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                          View Detail
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-rose-200">
+                      {filteredRequests?.map((request) => (
+                        <tr
+                          key={request.requestId}
+                          className="hover:bg-gray-200 transition-colors duration-150"
+                        >
+                          {/* <td className="px-6 py-4 text-sm text-gray-900">{
                           request.requestByAccountId ? 
                             getAccountById(request.requestByAccountId)?.username : "Unknown User"
                         }</td> */}
-                              {!role.toLowerCase().includes("member") && (
-                                <td className="px-6 py-4 text-sm text-gray-900">
-                                  {request.requestByUsername
-                                    ? request.requestByUsername
-                                    : "Unknown User"}
-                                </td>
-                              )}
-                              <td className="px-6 py-4 text-sm text-gray-900">
-                                {request.title}
-                              </td>
-                              <td className="px-6 py-4 text-sm text-gray-900">
-                                {request.requestType || "Unknown Type"}
-                              </td>
-                              <td className="px-6 py-4 text-sm text-gray-900 whitespace-pre-line">
-                                {request.createdAt
-                                  ? new Date(request.createdAt).toLocaleDateString(
-                                    "en-US",
-                                    {
-                                      year: "numeric",
-                                      month: "2-digit",
-                                      day: "2-digit",
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    }
-                                  )
-                                  : "Not Yet"}
-                              </td>
-                              <td className="px-6 py-4">
-                                {getStatusBadge(request.status)}
-                              </td>
-                              <td className="px-6 py-4 text-sm text-gray-900 whitespace-pre-line">
-                                {request.status !== "PENDING"
-                                  ? new Date(request.updatedAt).toLocaleDateString(
-                                    "en-US",
-                                    {
-                                      year: "numeric",
-                                      month: "2-digit",
-                                      day: "2-digit",
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    }
-                                  )
-                                  : "Not Yet"}
-                              </td>
-                              <td className="px-6 py-4">
-                                <button
-                                  onClick={() => handleViewDetail(request.requestId)}
-                                  className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-4 rounded-full text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                                >
-                                  View
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                      </tbody>
-                    </table>
-                  </div>
+                          {!role.toLowerCase().includes("member") && (
+                            <td className="px-6 py-4 text-sm text-gray-900">
+                              {request.requestByUsername
+                                ? request.requestByUsername
+                                : "Unknown User"}
+                            </td>
+                          )}
+                          <td className="px-6 py-4 text-sm text-gray-900">
+                            {request.title}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-900">
+                            {request.requestType || "Unknown Type"}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-900 whitespace-pre-line">
+                            {request.createdAt
+                              ? new Date(request.createdAt).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    year: "numeric",
+                                    month: "2-digit",
+                                    day: "2-digit",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  }
+                                )
+                              : "Not Yet"}
+                          </td>
+                          <td className="px-6 py-4">
+                            {getStatusBadge(request.status)}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-900 whitespace-pre-line">
+                            {request.status !== "PENDING"
+                              ? new Date(request.updatedAt).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    year: "numeric",
+                                    month: "2-digit",
+                                    day: "2-digit",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  }
+                                )
+                              : "Not Yet"}
+                          </td>
+                          <td className="px-6 py-4">
+                            <button
+                              onClick={() =>
+                                handleViewDetail(request.requestId)
+                              }
+                              className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-4 rounded-full text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            >
+                              View
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-            }
+              </div>
+            )}
 
             {/* Pagination */}
             {/* <div className="flex justify-center items-center space-x-2 mt-6">

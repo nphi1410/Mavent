@@ -9,7 +9,7 @@ import Pagination from "../../components/member/Pagination";
 import NoResults from "../../components/member/NoResults";
 import MemberDetailModal from "../../components/member/MemberDetailModal";
 import EditMemberModal from "../../components/member/EditMemberModal";
-import memberService from "../../services/memberService";
+import memberService from "../../services/MemberService";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
@@ -106,17 +106,13 @@ const EventMemberPage = () => {
         // Add status filter if available - follow memberService.js format
         if (statusFilter) {
           // Normalize status to match memberService expectations
-          params.status =
-            statusFilter.toLowerCase().trim();
+          params.status = statusFilter.toLowerCase().trim();
         } // Add role filter if available - follow memberService.js format
         if (roleFilter) {
-        
           params.role = roleFilter.trim().toUpperCase();
         }
 
-      
         if (departmentFilter !== undefined && departmentFilter !== "") {
-      
           const departmentValue =
             Number.isInteger(Number(departmentFilter)) &&
             Number(departmentFilter) > 0

@@ -15,6 +15,11 @@ public interface MemberService {
      */
     List<MemberResponseDTO> getAllMembersByEventId(Integer eventId);
 
+    /*
+        Get all staff by event ID (Members, department managers, admin)
+    */
+    List<MemberResponseDTO> getAllStaffsByEventId(Integer eventId);
+
 
     /**
      * Get member details by event and account ID.

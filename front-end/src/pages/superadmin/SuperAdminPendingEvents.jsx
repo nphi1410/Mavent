@@ -1,10 +1,8 @@
 import { useEffect, useState, useMemo } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown, faEye, faPencil } from "@fortawesome/free-solid-svg-icons";
-import { getEvents, updateEvent } from '../../services/eventService';
+import { faEye } from "@fortawesome/free-solid-svg-icons";
+import { getEvents } from '../../services/EventService';
 import { getAllLocations } from '../../services/EventLocationService';
-import SuperAdminSidebar from '../../components/superadmin/SuperAdminSidebar';
-import SuperAdminHeader from '../../components/superadmin/SuperAdminHeader';
 import { useNavigate } from 'react-router-dom';
 
 // Simple Popup Component
@@ -54,12 +52,12 @@ function SuperAdminPendingEvents() {
                 if (loc.locationId && loc.locationName) {
                     locationMap.set(loc.locationId, loc.locationName);
                 } else {
-                    console.warn("Dữ liệu địa điểm không đúng định dạng:", loc);
+                    console.warn("Wrong Location Data Format: ", loc);
                 }
             });
             setLocations(locationMap);
         } catch (error) {
-            console.error("Lỗi khi lấy danh sách địa điểm:", error);
+            console.error("Error fetching Locations: ", error);
             // Có thể đặt popup thông báo lỗi cho người dùng ở đây
         }
     };
@@ -70,7 +68,7 @@ function SuperAdminPendingEvents() {
             // Lọc chỉ các sự kiện có trạng thái PENDING
             setEvents(data.filter(event => event.status === "PENDING"));
         } catch (error) {
-            console.error("Lỗi khi lấy sự kiện:", error);
+            console.error("Error fetching Event: ", error);
             // Có thể đặt popup thông báo lỗi cho người dùng ở đây
         }
     };
@@ -96,23 +94,6 @@ function SuperAdminPendingEvents() {
     const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
     const startIndex = (currentPage - 1) * eventsPerPage;
     const paginatedEvents = filteredEvents.slice(startIndex, startIndex + eventsPerPage);
-
-    const handleStatusUpdate = async (eventId, newStatus) => {
-        try {
-            // Gọi hàm updateEvent từ eventService và chỉ truyền trường status cần cập nhật
-            await updateEvent(eventId, { status: newStatus });
-
-            // Xóa sự kiện đã được cập nhật khỏi trạng thái cục bộ
-            setEvents(prevEvents => prevEvents.filter(event => event.eventId !== eventId));
-            setPopupMessage("Đã chấp nhận cho tổ chức sự kiện này");
-            setShowPopup(true);
-            setDropdownOpen(null); // Đóng dropdown sau khi cập nhật
-        } catch (error) {
-            console.error("Lỗi khi cập nhật trạng thái sự kiện:", error);
-            setPopupMessage("Có lỗi xảy ra khi cập nhật trạng thái.");
-            setShowPopup(true);
-        }
-    };
 
     const closePopup = () => {
         setShowPopup(false);
@@ -185,7 +166,7 @@ function SuperAdminPendingEvents() {
                                                     )} */}
                                     </td>
                                     <td className="p-2 whitespace-nowrap text-gray-600 relative">
-                                        <button className='m-1 rounded hover:bg-gray-100 mr-2'
+                                        <button className='m-1 ml-4 rounded hover:bg-gray-100'
                                             onClick={() => navigate(`${event.eventId}`)}
                                         >
                                             <FontAwesomeIcon icon={faEye} color='blue' />
@@ -193,7 +174,7 @@ function SuperAdminPendingEvents() {
                                         <button
 
                                         >
-                                            <FontAwesomeIcon icon={faPencil} color='red' />
+                                            {/* <FontAwesomeIcon icon={faPencil} color='red' /> */}
                                         </button>
                                     </td>
                                 </tr>

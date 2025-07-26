@@ -16,10 +16,7 @@ import com.mavent.dev.dto.superadmin.EventDTO;
 import com.mavent.dev.entity.Account;
 import com.mavent.dev.entity.Event;
 import com.mavent.dev.entity.EventAccountRole;
-import com.mavent.dev.service.AccountService;
-import com.mavent.dev.service.DepartmentService;
-import com.mavent.dev.service.EventAccountRoleService;
-import com.mavent.dev.service.EventService;
+import com.mavent.dev.service.*;
 import com.mavent.dev.service.globalservice.CloudService;
 import com.mavent.dev.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -59,8 +56,12 @@ public class EventController {
 
     @Autowired
     private MailConfig mailConfig;
+
     @Autowired
     private UpdatePendingEventDTO updatePendingEventDTO;
+
+    @Autowired
+    private NotificationService notificationService;
 
     // Tạo sự kiện kèm ảnh banner và poster (fix multipart + JSON)
     @PostMapping(value = "/create-event", consumes = "multipart/form-data")
@@ -188,8 +189,8 @@ public class EventController {
 
     //Get Event By ID
     @GetMapping("/{id}")
-    public Event getEventById(@PathVariable("id") Integer eventId) {
-        return eventService.getEventEntityById(eventId);
+    public FilterEventDTO getEventById(@PathVariable("id") Integer eventId) {
+        return eventService.getEventDetailsById(eventId);
     }
 
     @GetMapping("/{eventId}/user")
@@ -230,28 +231,56 @@ public class EventController {
         try {
             System.out.println("Updating pending event with ID: " + eventId + " to status: " + updatePendingEventDTO.getStatus());
             boolean updated = eventService.updatePendingEvent(eventId, updatePendingEventDTO.getStatus());
-            String message = "Your request to Creat Event " + updatePendingEventDTO.getEventName() + " has been Updated with Status: " + updatePendingEventDTO.getStatus() + ".\n";
+
+            String message = "Your request to Create Event " + updatePendingEventDTO.getEventName() + " has been Updated with Status: " + updatePendingEventDTO.getStatus() + ".\n";
             if (updatePendingEventDTO.getAssignedByAccountName() != null)
-                message += "This request was udpated by " + updatePendingEventDTO.getAssignedByAccountName() + ".\n";
+                message += "This request was updated by " + updatePendingEventDTO.getAssignedByAccountName() + ".\n";
             if (updatePendingEventDTO.getNote() != null)
                 message += "Note: " + updatePendingEventDTO.getNote() + ".\n";
             message += "If you have any questions, please contact the admin.";
 
             if (updated) {
                 Account account = accountService.getAccountById(updatePendingEventDTO.getAccountId());
+
                 mailConfig.sendMail(
                         account.getEmail(),
                         "[MAVENT] Your Event-Creation Request has been Updated!",
                         message
                 );
+
+                String status = updatePendingEventDTO.getStatus();
+                String notiType = null;
+                String notiMessage = null;
+
+                if ("UPCOMING".equalsIgnoreCase(status)) {
+                    notiType = "EVENT APPROVAL";
+                    notiMessage = "Your event " + updatePendingEventDTO.getEventName() + " has been approved.";
+                } else if ("CANCELLED".equalsIgnoreCase(status)) {
+                    notiType = "EVENT REJECTION";
+                    notiMessage = "Your event " + updatePendingEventDTO.getEventName() + " has been rejected.";
+                }
+
+                if (notiType != null) {
+                    notificationService.createNotification(
+                            updatePendingEventDTO.getAccountId(),
+                            eventId,
+                            null,
+                            null,
+                            notiType,
+                            notiMessage
+                    );
+                }
+
                 return ResponseEntity.ok("Cập nhật sự kiện thành công với ID: " + eventId);
             }
+
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy sự kiện với ID: " + eventId);
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi cập nhật sự kiện: " + e.getMessage());
         }
     }
+
 
     @GetMapping("/created/{eventId}")
     public ResponseEntity<?> getCreatedEventById(@PathVariable Integer eventId) {

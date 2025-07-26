@@ -1,7 +1,7 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen, faTrash } from "@fortawesome/free-solid-svg-icons";
-import { deleteSponsorshipPackage } from "../../services/sponsorshipService";
+import { deleteSponsorshipPackage } from "../../services/SponsorshipService";
 
 const SponsorshipPackage = ({ pkg, onEdit, onReload, setSelectedPackage }) => {
   const handleDelete = async () => {

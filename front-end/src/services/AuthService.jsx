@@ -20,7 +20,7 @@ export const logout = async () => {
     sessionStorage.removeItem("isLoggedIn");
     sessionStorage.removeItem("username");
 
-    console.log("Logout successful");
+    // console.log("Logout successful");
 
     return response.data; // return success
   } catch (error) {

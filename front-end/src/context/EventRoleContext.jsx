@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { getUserInfoInEvent } from "../services/userEventService";
+import { getUserInfoInEvent } from "../services/UserEventService";
 import { useNavigate, useParams } from "react-router-dom";
 
 export const EventRoleContext = createContext();
@@ -60,7 +60,7 @@ export const useEventRole = () => {
     return {
       user: null,
       roleLoading: true,
-    }
+    };
   }
   return context;
-}
+};
