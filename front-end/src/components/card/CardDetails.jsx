@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Tag from "./Tag";
 import { useNavigate } from "react-router-dom";
 import { separateDayMonthYear } from "../../utils/DateConvert";
-import { getTags } from "../../services/tagService";
+import { getTags } from "../../services/TagService";
 
 const CardDetails = ({ event }) => {
   const navigate = useNavigate();

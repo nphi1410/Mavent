@@ -1,12 +1,18 @@
-import { useEffect, useState } from "react"
-import { getRequestTypes, createRequest } from "../../services/requestService";
+import { useEffect, useState } from "react";
+import { getRequestTypes, createRequest } from "../../services/RequestService";
 
-export default function RequestForm({ eventId, accountId, departmentId, onClose, requestTypes }) {
+export default function RequestForm({
+  eventId,
+  accountId,
+  departmentId,
+  onClose,
+  requestTypes,
+}) {
   // const [requestTypes, setRequestTypes] = useState("")
-  const [selectedRequestTypeId, setSelectedRequestTypeId] = useState("")
-  const [requestTitle, setRequestTitle] = useState("")
-  const [requestDescription, setRequestDescription] = useState("")
-  const [files, setFiles] = useState(null)
+  const [selectedRequestTypeId, setSelectedRequestTypeId] = useState("");
+  const [requestTitle, setRequestTitle] = useState("");
+  const [requestDescription, setRequestDescription] = useState("");
+  const [files, setFiles] = useState(null);
 
   // useEffect((e) => {
   //   const fetchRequestTypes = async () => {
@@ -17,7 +23,7 @@ export default function RequestForm({ eventId, accountId, departmentId, onClose,
   //       console.log("requestTypes:", requestTypes)
   //     } catch (err) {
   //       console.error("Error fetching request types:", err);
-  //     } 
+  //     }
   //   };
 
   //   fetchRequestTypes();
@@ -47,18 +53,19 @@ export default function RequestForm({ eventId, accountId, departmentId, onClose,
 
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
-      onClose()
+      onClose();
     }
-  }
+  };
 
   if (!requestTypes || requestTypes.length === 0) {
     return <p>No request types available.</p>;
   }
 
   return (
-
-    <div className="fixed inset-0 backdrop-blur-[0px] bg-gray-900/40 z-[9999] flex items-center justify-center p-4"
-      onClick={handleBackdropClick}>
+    <div
+      className="fixed inset-0 backdrop-blur-[0px] bg-gray-900/40 z-[9999] flex items-center justify-center p-4"
+      onClick={handleBackdropClick}
+    >
       <div className="w-full max-w-md bg-white rounded-lg shadow-lg overflow-hidden">
         {/* Card Header */}
         <div className="flex justify-between py-6 px-6 border-b border-gray-100">
@@ -71,7 +78,6 @@ export default function RequestForm({ eventId, accountId, departmentId, onClose,
             Cancel
           </button>
         </div>
-
 
         {/* Card Content */}
         <div className="p-6">
@@ -87,16 +93,31 @@ export default function RequestForm({ eventId, accountId, departmentId, onClose,
                   <option value="" disabled>
                     Select Request Type
                   </option>
-                  {requestTypes?.filter(filteredType => filteredType.isActive).map((type) => (
-                    <option key={type.requestTypeId} value={type.requestTypeId}>
-                      {type.name}
-                    </option>
-                  ))}
+                  {requestTypes
+                    ?.filter((filteredType) => filteredType.isActive)
+                    .map((type) => (
+                      <option
+                        key={type.requestTypeId}
+                        value={type.requestTypeId}
+                      >
+                        {type.name}
+                      </option>
+                    ))}
                 </select>
                 {/* Custom dropdown arrow */}
                 <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  <svg
+                    className="w-4 h-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </div>
               </div>
@@ -156,5 +177,5 @@ export default function RequestForm({ eventId, accountId, departmentId, onClose,
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,45 +1,47 @@
-import React, { useState, useEffect } from 'react';
-import { updateProfile } from '../../services/profileService';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSave, faXmark } from '@fortawesome/free-solid-svg-icons';
-import DatePicker from 'react-datepicker';
+import React, { useState, useEffect } from "react";
+import { updateProfile } from "../../services/ProfileService";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSave, faXmark } from "@fortawesome/free-solid-svg-icons";
+import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 const UpdateProfile = ({ userData, onClose, onUpdate }) => {
   const [formData, setFormData] = useState({
-    fullName: userData?.fullName || '',
-    studentId: userData?.studentId || '',
-    gender: userData?.gender || '',
-    email: userData?.email || '',
-    phoneNumber: userData?.phoneNumber || '',
-    dateOfBirth: userData?.dateOfBirth ? new Date(userData.dateOfBirth) : null
+    fullName: userData?.fullName || "",
+    studentId: userData?.studentId || "",
+    gender: userData?.gender || "",
+    email: userData?.email || "",
+    phoneNumber: userData?.phoneNumber || "",
+    dateOfBirth: userData?.dateOfBirth ? new Date(userData.dateOfBirth) : null,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     setFormData({
-      fullName: userData?.fullName || '',
-      studentId: userData?.studentId || '',
-      gender: userData?.gender || '',
-      email: userData?.email || '',
-      phoneNumber: userData?.phoneNumber || '',
-      dateOfBirth: userData?.dateOfBirth ? new Date(userData.dateOfBirth) : null
+      fullName: userData?.fullName || "",
+      studentId: userData?.studentId || "",
+      gender: userData?.gender || "",
+      email: userData?.email || "",
+      phoneNumber: userData?.phoneNumber || "",
+      dateOfBirth: userData?.dateOfBirth
+        ? new Date(userData.dateOfBirth)
+        : null,
     });
   }, [userData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleDateChange = (date) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      dateOfBirth: date
+      dateOfBirth: date,
     }));
   };
 
@@ -51,39 +53,46 @@ const UpdateProfile = ({ userData, onClose, onUpdate }) => {
     try {
       // Add gender validation
       if (!formData.gender) {
-        setError('Please select your gender.');
+        setError("Please select your gender.");
         setLoading(false);
         return;
       }
 
       if (formData.fullName.length > 100) {
-        setError('Full name không được quá 100 ký tự.');
+        setError("Full name không được quá 100 ký tự.");
         setLoading(false);
         return;
       }
 
       if (!/^0\d{9}$/.test(formData.phoneNumber)) {
-        setError('Số điện thoại phải bắt đầu bằng số 0 và có đúng 10 chữ số.');
+        setError("Số điện thoại phải bắt đầu bằng số 0 và có đúng 10 chữ số.");
         setLoading(false);
         return;
       }
 
       if (!/^[A-Za-z]{2}\d{6}$/.test(formData.studentId)) {
-        setError('Mã số sinh viên phải gồm 2 chữ cái và 6 chữ số, ví dụ: SE123456.');
+        setError(
+          "Mã số sinh viên phải gồm 2 chữ cái và 6 chữ số, ví dụ: SE123456."
+        );
         setLoading(false);
         return;
       }
 
       const dataToSubmit = {
         ...formData,
-        dateOfBirth: formData.dateOfBirth ? formData.dateOfBirth.toISOString().split('T')[0] : null
+        dateOfBirth: formData.dateOfBirth
+          ? formData.dateOfBirth.toISOString().split("T")[0]
+          : null,
       };
 
       // console.log('UpdateProfile.jsx: Đang gửi dữ liệu lên service:', dataToSubmit);
       onUpdate(dataToSubmit);
     } catch (err) {
-      console.error('UpdateProfile.jsx: Lỗi khi chuẩn bị dữ liệu hoặc gọi onUpdate:', err);
-      setError(err.message || 'Lỗi không xác định khi chuẩn bị dữ liệu.');
+      console.error(
+        "UpdateProfile.jsx: Lỗi khi chuẩn bị dữ liệu hoặc gọi onUpdate:",
+        err
+      );
+      setError(err.message || "Lỗi không xác định khi chuẩn bị dữ liệu.");
       setLoading(false);
     }
   };
@@ -92,8 +101,14 @@ const UpdateProfile = ({ userData, onClose, onUpdate }) => {
     <div className="fixed inset-0 backdrop-blur-[0px] bg-gray-900/40 z-[9999] flex justify-center items-center p-4 overflow-y-auto">
       <div className="my-8 bg-white rounded-xl p-6 sm:p-8 max-w-2xl w-full shadow-[0_0_15px_rgba(0,0,0,0.1)] border border-gray-100">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Update Profile</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700" disabled={loading}>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
+            Update Profile
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700"
+            disabled={loading}
+          >
             <FontAwesomeIcon icon={faXmark} size="lg" />
           </button>
         </div>
@@ -107,7 +122,10 @@ const UpdateProfile = ({ userData, onClose, onUpdate }) => {
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
             <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="fullName"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Full Name
               </label>
               <input
@@ -122,7 +140,10 @@ const UpdateProfile = ({ userData, onClose, onUpdate }) => {
             </div>
 
             <div>
-              <label htmlFor="studentId" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="studentId"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Student ID
               </label>
               <input
@@ -136,7 +157,10 @@ const UpdateProfile = ({ userData, onClose, onUpdate }) => {
             </div>
 
             <div className="w-full relative">
-              <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="dateOfBirth"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Date of Birth
               </label>
               <div className="relative z-[1000]">
@@ -159,16 +183,19 @@ const UpdateProfile = ({ userData, onClose, onUpdate }) => {
                     {
                       name: "offset",
                       options: {
-                        offset: [0, 10]
-                      }
-                    }
+                        offset: [0, 10],
+                      },
+                    },
                   ]}
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="gender"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Gender
               </label>
               <select
@@ -186,7 +213,10 @@ const UpdateProfile = ({ userData, onClose, onUpdate }) => {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Email
               </label>
               <input
@@ -200,7 +230,10 @@ const UpdateProfile = ({ userData, onClose, onUpdate }) => {
             </div>
 
             <div>
-              <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="phoneNumber"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Phone
               </label>
               <input
@@ -221,14 +254,22 @@ const UpdateProfile = ({ userData, onClose, onUpdate }) => {
               className="px-4 py-2 border border-gray-300 text-sm font-medium text-gray-700 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-colors flex items-center gap-2"
               disabled={loading}
             >
-              <FontAwesomeIcon icon={faXmark} className="w-3 h-3 sm:w-4 sm:h-4" /> Cancel
+              <FontAwesomeIcon
+                icon={faXmark}
+                className="w-3 h-3 sm:w-4 sm:h-4"
+              />{" "}
+              Cancel
             </button>
             <button
               type="submit"
               className="px-4 py-2 bg-[#00157be1] text-sm font-medium text-white rounded-md shadow-sm hover:bg-[#001168] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00157be1] transition-colors flex items-center gap-2 disabled:opacity-70"
               disabled={loading}
             >
-              <FontAwesomeIcon icon={faSave} className="w-3 h-3 sm:w-4 sm:h-4" /> {loading ? 'Updating...' : 'Save Changes'}
+              <FontAwesomeIcon
+                icon={faSave}
+                className="w-3 h-3 sm:w-4 sm:h-4"
+              />{" "}
+              {loading ? "Updating..." : "Save Changes"}
             </button>
           </div>
         </form>

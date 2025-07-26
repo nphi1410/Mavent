@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createEvent, getEventById } from "../../services/eventService";
 import { getAllLocations } from "../../services/EventLocationService";
+import { getAllTags } from "../../services/EventTagService"; // Thêm import cho tag service
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from 'jwt-decode';
 
@@ -28,6 +29,10 @@ const CreateEvent = ({ isUpdatePage = false }) => {
     const [bannerFile, setBannerFile] = useState(null);
     const [posterFile, setPosterFile] = useState(null);
 
+    // Thêm state cho tags
+    const [availableTags, setAvailableTags] = useState([]);
+    const [selectedTags, setSelectedTags] = useState([]);
+
     const navigate = useNavigate();
 
     const [loading, setLoading] = useState(false);
@@ -40,7 +45,21 @@ const CreateEvent = ({ isUpdatePage = false }) => {
             const data = await getAllLocations();
             setLocations(data);
         };
+        
+        // Thêm fetch tags
+        const fetchTags = async () => {
+            try {
+                const tags = await getAllTags();
+                setAvailableTags(tags);
+                console.log("Fetched tags:", tags);
+            } catch (error) {
+                console.error("Error fetching tags:", error);
+            }
+        };
+
         fetchLocations();
+        fetchTags(); // Gọi fetch tags
+
         if (isUpdatePage) {
             const eventId = window.location.pathname.split("/").pop();
             const fetchCreatedEvent = async () => {
@@ -96,6 +115,19 @@ const CreateEvent = ({ isUpdatePage = false }) => {
         setSuccessMessage("");
     };
 
+    // Thêm function xử lý chọn/bỏ chọn tags
+    const handleTagToggle = (tagId) => {
+        setSelectedTags(prev => {
+            if (prev.includes(tagId)) {
+                return prev.filter(id => id !== tagId);
+            } else {
+                return [...prev, tagId];
+            }
+        });
+        setErrorMessage("");
+        setSuccessMessage("");
+    };
+
     const validateForm = () => {
         const {
             name,
@@ -107,25 +139,26 @@ const CreateEvent = ({ isUpdatePage = false }) => {
             maxParticipantNumber,
         } = formData;
 
-        if (!name.trim()) return setError("Tên sự kiện không được để trống.");
+        if (!name.trim()) return setError("Event name cannot be empty.");
 
-        if (!description.trim()) return setError("Mô tả không được để trống.");
-        if (!locationId) return setError("Vui lòng chọn địa điểm.");
+        if (!description.trim()) return setError("Description cannot be empty.");
+        if (!locationId) return setError("Please select location.");
 
-        if (!startDatetime) return setError("Thời gian bắt đầu không được để trống.");
-        if (!endDatetime) return setError("Thời gian kết thúc không được để trống.");
+        if (!startDatetime) return setError("Start time cannot be blank.");
+        if (!endDatetime) return setError("End time cannot be blank.");
 
         const start = new Date(startDatetime);
         const end = new Date(endDatetime);
-        if (end <= start) return setError("Thời gian kết thúc phải sau thời gian bắt đầu.");
+        if (end <= start) return setError("The end time must be after the start time.");
 
-        if (maxMemberNumber < 0) return setError("Số thành viên tối đa không được âm.");
-        if (maxParticipantNumber < 0) return setError("Số người tham gia tối đa không được âm.");
-        if (maxParticipantNumber < maxMemberNumber)
-            return setError("Số người tham gia không được nhỏ hơn số thành viên.");
+        if (maxMemberNumber < 0) return setError("Maximum number of members cannot be negative.");
+        if (maxParticipantNumber < 0) return setError("Maximum number of participants cannot be negative.");
 
-        if (!bannerFile) return setError("Vui lòng chọn ảnh banner.");
-        if (!posterFile) return setError("Vui lòng chọn ảnh poster.");
+        // SỬA: Chỉ validate file khi không phải update mode
+        if (!isUpdatePage) {
+            if (!bannerFile) return setError("Please select banner image.");
+            if (!posterFile) return setError("Please select poster image.");
+        }
 
         return true;
     };
@@ -146,7 +179,16 @@ const CreateEvent = ({ isUpdatePage = false }) => {
             return;
         }
 
-        const result = await createEvent(formData, bannerFile, posterFile);
+        // Debug: Log tất cả data trước khi gửi
+        console.log("=== DEBUG CREATE EVENT ===");
+        console.log("Selected Tags:", selectedTags);
+        console.log("Form Data:", formData);
+        console.log("Banner File:", bannerFile);
+        console.log("Poster File:", posterFile);
+        console.log("========================");
+
+        // Cập nhật call createEvent với selectedTags
+        const result = await createEvent(formData, bannerFile, posterFile, selectedTags);
 
         if (result.success) {
             setSuccessMessage("Tạo sự kiện thành công!");
@@ -164,43 +206,38 @@ const CreateEvent = ({ isUpdatePage = false }) => {
         <div className="min-h-screen bg-green-50 px-4 py-8">
             <div className="max-w-4xl mx-auto text-center">
                 <h1 className="text-3xl font-bold">Create New Event</h1>
-                {
-                    !isUpdatePage && (
-                        <div>
-                            <p className="mt-2 text-gray-600">Fill in the details to get started</p>
+                <p className="mt-2 text-gray-600">Fill in the details to get started</p>
 
-                            {/* Stepper */}
-                            <div className="mt-6 flex justify-center items-center gap-6">
-                                <div className="flex items-center gap-2 text-green-600 font-medium">
-                                    <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">1</div>
-                                    Event Details
-                                </div>
-                                <div className="h-px w-8 bg-gray-400"></div>
-                                <div className="flex items-center gap-2 text-green-600 font-medium">
-                                    <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">2</div>
-                                    Proposal
-                                </div>
-                                <div className="h-px w-8 bg-gray-400"></div>
-                                <div className="flex items-center gap-2 text-green-600 font-medium">
-                                    <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">3</div>
-                                    Timeline
-                                </div>
-                                <div className="h-px w-8 bg-gray-400"></div>
-                                <div className="flex items-center gap-2 text-green-600 font-medium">
-                                    <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">4</div>
-                                    Agenda
-                                </div>
-                            </div>
-                        </div>
-                    )
-                }
+                {/* Stepper */}
+                <div className="mt-6 flex justify-center items-center gap-6">
+                    <div className="flex items-center gap-2 text-green-600 font-medium">
+                        <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">1</div>
+                        Event Details
+                    </div>
+                    <div className="h-px w-8 bg-gray-400"></div>
+                    <div className="flex items-center gap-2 text-green-600 font-medium">
+                        <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">2</div>
+                        Proposal
+                    </div>
+                    <div className="h-px w-8 bg-gray-400"></div>
+                    <div className="flex items-center gap-2 text-green-600 font-medium">
+                        <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">3</div>
+                        Timeline
+                    </div>
+                    <div className="h-px w-8 bg-gray-400"></div>
+                    <div className="flex items-center gap-2 text-green-600 font-medium">
+                        <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">4</div>
+                        Agenda
+                    </div>
+                </div>
             </div>
+
             <form onSubmit={handleSubmit} className="max-w-4xl mx-auto mt-10 space-y-8">
                 <div className="bg-white shadow rounded-xl p-6 space-y-6">
                     {/* Event Name */}
                     <div>
                         <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                            Tên sự kiện <span className="text-red-500">*</span>
+                            Event Name <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
@@ -216,7 +253,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                     {/* Description */}
                     <div>
                         <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                            Mô tả <span className="text-red-500">*</span>
+                            Event Description <span className="text-red-500">*</span>
                         </label>
                         <textarea
                             id="description"
@@ -233,7 +270,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label htmlFor="startDatetime" className="block text-sm font-medium text-gray-700 mb-1">
-                                Thời gian bắt đầu <span className="text-red-500">*</span>
+                                Start time <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="datetime-local"
@@ -246,7 +283,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                         </div>
                         <div>
                             <label htmlFor="endDatetime" className="block text-sm font-medium text-gray-700 mb-1">
-                                Thời gian kết thúc <span className="text-red-500">*</span>
+                                End time <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="datetime-local"
@@ -262,7 +299,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                     {/* Location */}
                     <div>
                         <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
-                            Địa điểm <span className="text-red-500">*</span>
+                            Location <span className="text-red-500">*</span>
                         </label>
                         <select
                             id="locationId"
@@ -272,7 +309,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                             onChange={handleChange}
                             required
                         >
-                            <option value="">-- Vui lòng chọn địa điểm --</option>
+                            <option value="">-- Please select location --</option>
                             {locations.map((loc) => (
                                 <option key={loc.locationId} value={loc.locationId}>
                                     {loc.locationName}
@@ -281,11 +318,38 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                         </select>
                     </div>
 
+                    {/* Thêm phần chọn Tags - SỬA LẠI PROPERTY NAME */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Event Tags
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                            {availableTags.map((tag) => (
+                                <button
+                                    key={tag.tagId}
+                                    type="button"
+                                    onClick={() => handleTagToggle(tag.tagId)}
+                                    className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+                                        selectedTags.includes(tag.tagId)
+                                            ? 'bg-green-600 text-white border-green-600'
+                                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    {tag.name}
+                                </button>
+                            ))}
+                        </div>
+                        {selectedTags.length > 0 && (
+                            <p className="text-sm text-gray-500 mt-2">
+                                Selected {selectedTags.length} tag(s)
+                            </p>
+                        )}
+                    </div>
 
                     {/* D-Day Info */}
                     <div>
                         <label htmlFor="ddayInfo" className="block text-sm font-medium text-gray-700 mb-1">
-                            Thông tin D-Day
+                            D-Day Information
                         </label>
                         <input
                             type="text"
@@ -301,7 +365,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label htmlFor="maxMemberNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                                Số thành viên tối đa
+                                Maximum number of members
                             </label>
                             <input
                                 type="number"
@@ -315,7 +379,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                         </div>
                         <div>
                             <label htmlFor="maxParticipantNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                                Số người tham gia tối đa
+                                Maximum number of participants
                             </label>
                             <input
                                 type="number"
@@ -332,7 +396,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                     {/* Status */}
                     <div>
                         <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                            Trạng thái
+                            Status
                         </label>
                         <input
                             type="text"
@@ -405,7 +469,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                                 className="cursor-pointer bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={loading}
                             >
-                                {loading ? "Đang tạo..." : "Create Event & Next to Proposal"}
+                                {loading ? "Creating..." : "Create Event & Next to Proposal"}
                             </button>
                         </div>
 

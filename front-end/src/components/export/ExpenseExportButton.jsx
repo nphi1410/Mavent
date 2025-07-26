@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileExcel, faSpinner } from '@fortawesome/free-solid-svg-icons';
-import { exportExpensesToExcel } from '../../services/expenseExportService'; // Adjust path as needed
+import { exportExpensesToExcel } from '../../services/ExpenseExportService'; // Adjust path as needed
 
 function ExpenseExportButton({ eventId, fileName = 'expenses_report' }) {
     const [loading, setLoading] = useState(false);

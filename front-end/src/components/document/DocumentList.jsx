@@ -27,7 +27,7 @@ import {
   getDocumentPreviewUrl,
   deleteDocument,
   updateDocument,
-} from "../../services/documentService.jsx";
+} from "../../services/DocumentService.jsx";
 import DocumentPreviewModal from "./DocumentPreviewModal";
 
 const DocumentList = ({
@@ -955,8 +955,6 @@ const DocumentList = ({
     );
   };
 
-  
-
   // Document detail modal component
   const DocumentDetailModal = ({
     isOpen,
@@ -967,15 +965,17 @@ const DocumentList = ({
     onEdit,
     onDelete,
   }) => {
-
     const handleBackDropClick = (e) => {
-    if (e.target === e.currentTarget){
-      onClose();
-    }
-  }
+      if (e.target === e.currentTarget) {
+        onClose();
+      }
+    };
     if (!isOpen || !document) return null;
     return (
-      <div onClick={handleBackDropClick} className="fixed inset-0 backdrop-blur-lg bg-black/50 flex items-center justify-center z-9999 p-4 overflow-y-auto">
+      <div
+        onClick={handleBackDropClick}
+        className="fixed inset-0 backdrop-blur-lg bg-black/50 flex items-center justify-center z-9999 p-4 overflow-y-auto"
+      >
         <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto flex flex-col">
           {/* Header */}
           <div className="border-b px-6 py-4 flex justify-between items-center sticky top-0 bg-white z-10 shadow-sm">

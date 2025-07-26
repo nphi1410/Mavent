@@ -5,8 +5,8 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { getMeetingByAccountId } from "../../services/meetingService";
-import { getJoiningEvent } from "../../services/eventService";
+import { getMeetingByAccountId } from "../../services/MeetingService";
+import { getJoiningEvent } from "../../services/EventService";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import MeetingFilter from "../../components/filter/MeetingFilter";
 import ClockCard from "../../components/visual/CLockCard";
@@ -56,6 +56,7 @@ const MeetingListPage = () => {
         eventId: !eventId || eventId === "undefined" ? undefined : eventId,
       };
       const data = await getMeetingByAccountId(accountId, filters);
+
       setMeetings(data.content);
       setTotalPagesFromApi(data.page.totalPages);
     } catch (error) {

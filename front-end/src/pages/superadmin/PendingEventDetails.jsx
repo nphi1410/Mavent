@@ -4,8 +4,8 @@ import EventTimeline from "@/components/pendingEventDetail/EventTimeline"
 import EventAgenda from "@/components/pendingEventDetail/EventAgenda"
 import EventProposal from "../../components/pendingEventDetail/EventProposal"
 import EventMedia from "@/components/pendingEventDetail/EventMedia"
-import { getPendingEventDetailsById } from "@/services/eventService"
-import EventApproval from "../../components/pendingEventDetail/EventApproval"
+import { getPendingEventDetailsById } from "@/services/EventService"
+import EventApproval from "@/components/pendingEventDetail/EventApproval"
 import { useParams } from "react-router-dom"
 
 export default function PendingEventView() {
