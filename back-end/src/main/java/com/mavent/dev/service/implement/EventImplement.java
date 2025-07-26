@@ -20,7 +20,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -46,7 +45,15 @@ public class EventImplement implements EventService {
     private LocationService locationService;
 
     @Override
-    public Page<FilterEventDTO> getFilterEvents(String name, String status, List<Integer> tagIds, String sortType, int page, int size, String type, boolean isTrending) {
+    public Page<FilterEventDTO> getFilterEvents(
+            String name,
+            String status,
+            List<Integer> tagIds,
+            String sortType,
+            int page,
+            int size,
+            String type,
+            boolean isTrending) {
         Pageable pageable = PageRequest.of(page, size);
         boolean tagCheck = tagIds != null && !tagIds.isEmpty();
         return eventRepository.findAllUnified(name, status, type, tagCheck, tagIds, isTrending, sortType, pageable);
@@ -134,6 +141,19 @@ public class EventImplement implements EventService {
         Event event = null;
         try {
             event = eventRepository.findByEventId(eventId);
+        } catch (Exception e) {
+            System.err.println("Event not found with ID: " + eventId);
+            System.err.println("Error: " + e);
+        }
+
+        return event;
+    }
+
+    @Override
+    public FilterEventDTO getEventDetailsById(Integer eventId) {
+        FilterEventDTO event = null;
+        try {
+            event = eventRepository.findDetailsByEventId(eventId);
         } catch (Exception e) {
             System.err.println("Event not found with ID: " + eventId);
             System.err.println("Error: " + e);

@@ -373,4 +373,7 @@ public interface EventAccountRoleRepository extends JpaRepository<EventAccountRo
 
     @Query(value = "SELECT * FROM event_account_role WHERE event_id = :eventId AND event_role != 'PARTICIPANT' AND is_active = true", nativeQuery = true)
     List<EventAccountRole> findStaffsByEventId(Integer eventId);
+
+    void deleteByEventIdAndAccountId(Integer eventId, Integer accountId);
+
 }

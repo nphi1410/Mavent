@@ -81,7 +81,7 @@ const UserTasksContent = () => {
     };
     fetchInitialData();
   }, [navigate, eventId]);
-  console.log(userRole);
+  // console.log(userRole);
 
   useEffect(() => {
     const fetchFilteredTasks = async () => {

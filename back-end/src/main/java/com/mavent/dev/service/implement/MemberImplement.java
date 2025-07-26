@@ -16,9 +16,14 @@ import com.mavent.dev.mapper.MemberMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Simplified implementation of MemberService.
@@ -78,6 +83,7 @@ public class MemberImplement implements MemberService {
         // Optimization: Batch load accounts and departments to prevent N+1 queries
         return memberMapper.toListMemberResponseWithPreloadedData(staffs);
     }
+    
 
 
     @Override
@@ -119,6 +125,12 @@ public class MemberImplement implements MemberService {
     public MemberResponseDTO banMember(BanMemberRequestDTO request) {
         // Find existing member role
         EventAccountRole memberRole = findEventAccountRole(request.getEventId(), request.getAccountId());
+
+        if (memberRole.getEventRole().equals(EventAccountRole.EventRole.GUEST)){
+
+            eventAccountRoleRepository.deleteByEventIdAndAccountId(memberRole.getEventId(), memberRole.getAccountId());
+            return memberMapper.toMemberResponseDTO(memberRole);
+        }
 
         // Validate ban permissions using roleValidator
         roleValidator.validateBanPermission(

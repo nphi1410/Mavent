@@ -15,7 +15,9 @@ public interface FilterEventDTO {
 
     LocalDateTime getEndDatetime();
 
-    String getLocation();
+    Integer getLocationId();
+
+    String getLocationName();
 
     String getDdayInfo();
 
@@ -25,7 +27,11 @@ public interface FilterEventDTO {
 
     EventStatus getStatus();
 
-    Integer getCreatedBy();
+    Integer getCreatedByAccountId();
+
+    String getCreatedByAvatar();
+
+    String getCreatedByName();
 
     Boolean getIsDeleted();
 

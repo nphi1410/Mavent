@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -14,6 +15,7 @@ import java.util.List;
 @Builder
 public class ExpenseResponseDTO {
     private Integer expenseId;
+    private int taskId;
     private int eventId;
     private int categoryId;
     private String categoryName;
@@ -28,7 +30,7 @@ public class ExpenseResponseDTO {
     private Integer approvedByAccountId;
 
     private String responseContent;
-    private String createdAt;
-    private String updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private List<ExpenseAttachmentsDTO> attachments;
 }

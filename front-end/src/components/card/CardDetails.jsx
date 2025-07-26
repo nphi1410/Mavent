@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { separateDayMonthYear } from "../../utils/DateConvert";
 import { getTags } from "../../services/tagService";
 
-const CardDetails = ({event}) => {
+const CardDetails = ({ event }) => {
   const navigate = useNavigate();
   const [tags, setTags] = useState([]);
   const [day, month, year] = separateDayMonthYear(
@@ -33,61 +33,65 @@ const CardDetails = ({event}) => {
   return (
     <div
       onClick={handleClick}
-      className="card flex flex-col md:flex-row border border-gray-300 rounded-xl shadow-sm my-4 p-6 hover:shadow-lg active:shadow-xl transition-shadow duration-300 gap-6 bg-white"
+      className="group cursor-pointer flex flex-col md:flex-row border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-shadow bg-white p-4 md:p-6 mb-6 gap-6"
     >
       {/* Image */}
-      <div className="image md:w-1/4 w-full rounded-lg overflow-hidden flex-shrink-0">
+      <div className="md:w-1/4 w-full aspect-square rounded-lg overflow-hidden">
         <img
           src={event.posterUrl}
           alt={event.name}
-          className="w-full h-48 md:h-full object-cover"
+          className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
         />
       </div>
 
       {/* Details */}
-      <div className="details flex-1 flex flex-col justify-between">
+      <div className="flex-1 flex flex-col justify-between">
         <div>
-          <h3 className="title text-2xl font-bold mb-3 text-gray-900">
+          <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3">
             {event.name}
           </h3>
 
-          <div className="flex flex-wrap gap-8 text-gray-600 mb-4 text-sm">
+          <div className="flex flex-wrap gap-6 text-sm text-gray-600 mb-4">
             <span className="flex items-center gap-2">
               <FontAwesomeIcon icon={faCalendar} />
               <span>
-               Start date: {month} {day}, {year}
+                Start: {month} {day}, {year}
               </span>
             </span>
-            <span className="flex items-center gap-1">
-              Rating:
-              <FontAwesomeIcon icon={faStar} color="oklch(79.5% 0.184 86.047)" />{" "}
-              <span className="text-yellow-500">{event.avgRating}</span>
+
+            <span className="flex items-center gap-2">
+              <FontAwesomeIcon icon={faStar} className="text-yellow-500" />
+              <span className="text-gray-700 font-medium">
+                {event.avgRating ?? "No rated"}
+              </span>
             </span>
           </div>
 
-          <p className="description text-gray-700 text-base leading-relaxed line-clamp-4 text-justify">
+          <p className="text-gray-700 text-sm md:text-base leading-relaxed line-clamp-4 text-justify">
             {event.description}
           </p>
         </div>
 
-        <div className="last-line flex flex-col md:flex-row justify-between items-center gap-4 mt-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mt-6">
           {/* Tags */}
-          <div className="tags flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2">
             {tags.map((tag) => (
               <Tag key={tag.tagId} topic={tag.name} />
             ))}
           </div>
 
           {/* Author */}
-          <div className="author flex items-center gap-3">
-            <div className="avatar rounded-full border-2 border-gray-300 w-12 h-12 bg-white overflow-hidden flex-shrink-0">
+          <div className="flex items-center gap-3 mt-2 md:mt-0">
+            {event.createdByAvatar && (
               <img
-                src="/avatar.jpg"
-                alt="avatar"
-                className="w-full h-full object-cover rounded-full"
+                src={event.createdByAvatar}
+                alt="Avatar"
+                className="w-8 h-8 rounded-full object-cover"
               />
-            </div>
-            <span className="font-semibold text-gray-900">JS CLUB</span>
+            )}
+            <span className="text-sm font-semibold text-gray-800">
+              {event.createdByName ?? "Unknown"}
+            </span>
           </div>
         </div>
       </div>

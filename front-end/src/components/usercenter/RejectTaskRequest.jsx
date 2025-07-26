@@ -139,8 +139,8 @@ const RejectTaskRequest = () => {
             minute: '2-digit'
         });
     };
-    console.log('userTasks:', userTasks);
-    console.log(userProfile);
+    // console.log('userTasks:', userTasks);
+    // console.log(userProfile);
 
 
     const getStatusBadge = (status) => {

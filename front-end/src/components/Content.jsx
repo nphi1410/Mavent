@@ -46,11 +46,7 @@ const Content = ({ imageUrl }) => {
         </h2>
         <div className="flex flex-col gap-4 w-full">
           {trendingRecentlyEvents.map((event) => (
-            <CardSmall
-              key={event.eventId}
-              event={event}
-              imageUrl={imageUrl}
-            />
+            <CardSmall key={event.eventId} event={event} imageUrl={imageUrl} />
           ))}
         </div>
       </div>

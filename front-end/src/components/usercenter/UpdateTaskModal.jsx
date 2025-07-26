@@ -176,7 +176,7 @@ const UpdateTaskModal = ({ isOpen, onClose, taskData, onTaskUpdated }) => {
   };
 
   const hasEditPermission = () => {
-    console.log("Checking edit permission for task:", taskData, "Current user ID:", currentUserId);
+    // console.log("Checking edit permission for task:", taskData, "Current user ID:", currentUserId);
 
     if (!taskData || !currentUserId) return false;
     return currentUserId === taskData.assignedByAccountId;
@@ -310,7 +310,7 @@ const UpdateTaskModal = ({ isOpen, onClose, taskData, onTaskUpdated }) => {
 
     updateData.departmentId = formData.departmentId ? parseInt(formData.departmentId) : null;
 
-    console.log("Updating task with data:", updateData); // Debug log
+    // console.log("Updating task with data:", updateData); // Debug log
 
     try {
       setSubmitting(true);

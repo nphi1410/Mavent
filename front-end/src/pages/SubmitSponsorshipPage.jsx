@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   createSponsor,
   getSponsorById,
@@ -16,6 +16,8 @@ import ContactAccountSelect from "../components/sponsorship/ContactAccountSelect
 import AgreementInput from "../components/sponsorship/AgreementInput";
 import CreateSponsorModal from "../components/sponsorship/CreateSponsorModal";
 import memberService from "../services/memberService";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const SubmitSponsorshipPage = () => {
   const methods = useForm();
@@ -156,6 +158,12 @@ const SubmitSponsorshipPage = () => {
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white shadow rounded-2xl mt-10">
+      <Link
+        to={`/event/${id}/staff/sponsorships`}
+        className=" text-indigo-600 flex items-center gap-2"
+      >
+        <FontAwesomeIcon icon={faArrowLeft} size="x" /> Back
+      </Link>
       <h2 className="text-2xl font-bold mb-6">Create New Sponsorship</h2>
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">

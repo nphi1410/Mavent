@@ -48,6 +48,7 @@ public class ExpensesMapper {
                 .departmentId(dto.getDepartmentId())
                 .amount(dto.getAmount())
                 .budgetId(dto.getBudgetId())
+                .taskId(dto.getTaskId() != null ? dto.getTaskId() : 0)
                 .note(dto.getNote())
                 .status(Status.PENDING)
                 .createdByAccountId(dto.getCreatedByAccountId())
@@ -99,6 +100,7 @@ public class ExpensesMapper {
         return ExpenseResponseDTO.builder()
                 .expenseId(expense.getExpenseId())
                 .eventId(expense.getEventId())
+                .taskId(expense.getTaskId())
                 .categoryId(expense.getCategoryId())
                 .categoryName(category != null ? category.getCategoryName() : "Unknown")
                 .departmentId(expense.getDepartmentId())
@@ -112,8 +114,8 @@ public class ExpensesMapper {
                 .approvedByAccountId(expense.getApprovedByAccountId())
 
                 .responseContent(expense.getResponseContent())
-                .createdAt(expense.getCreatedAt() != null ? expense.getCreatedAt().format(formatter) : null)
-                .updatedAt(expense.getUpdatedAt() != null ? expense.getUpdatedAt().format(formatter) : null)
+                .createdAt(expense.getCreatedAt() != null ? expense.getCreatedAt() : null)
+                .updatedAt(expense.getUpdatedAt() != null ? expense.getUpdatedAt() : null)
                 .attachments(attachmentDTOs)
                 .build();
     }
@@ -123,7 +125,7 @@ public class ExpensesMapper {
             return null;
         }
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
         
         return ExpenseAttachmentsDTO.builder()
                 .attachmentId(attachment.getExpenseAttachmentId())
@@ -131,7 +133,7 @@ public class ExpensesMapper {
                 .fileUrl(attachment.getFileUrl())
                 .fileName(attachment.getFileName())
                 .fileType(attachment.getFileType())
-                .uploadedAt(attachment.getUploadedAt() != null ? attachment.getUploadedAt().format(formatter) : null)
+                .uploadedAt(attachment.getUploadedAt() != null ? attachment.getUploadedAt() : null)
                 .build();
     }
 }
