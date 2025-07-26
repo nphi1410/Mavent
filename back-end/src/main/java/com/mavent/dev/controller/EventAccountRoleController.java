@@ -35,7 +35,6 @@ public class EventAccountRoleController {
             addEventAccountRoleDTO.setEventId(eventId);
             EventAccountRole eventAccountRole = EventAccountRoleMapper.toEntity(addEventAccountRoleDTO);
             if (eventAccountRole == null) {
-
                 return ResponseEntity.badRequest().body("Invalid event account role data");
             }
             Account account = accountService.getAccountById(addEventAccountRoleDTO.getAccountId());

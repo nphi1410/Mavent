@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react"
 import EventHeader from "../../components/pendingEventDetail/EventHeader"
-import EventTimeline from "@/components/pendingEventDetail/EventTimeline"
-import EventAgenda from "@/components/pendingEventDetail/EventAgenda"
+import EventTimeline from "../../components/pendingEventDetail/EventTimeline"
+import EventAgenda from "../../components/pendingEventDetail/EventAgenda"
 import EventProposal from "../../components/pendingEventDetail/EventProposal"
-import EventMedia from "@/components/pendingEventDetail/EventMedia"
+import EventMedia from "../../components/pendingEventDetail/EventMedia"
 import { getPendingEventDetailsById } from "@/services/EventService"
-import EventApproval from "@/components/pendingEventDetail/EventApproval"
+import EventApproval from "../../components/pendingEventDetail/EventApproval"
 import { useParams } from "react-router-dom"
 
 export default function PendingEventView() {
@@ -23,7 +23,7 @@ export default function PendingEventView() {
             try {
                 const response = await getPendingEventDetailsById(eventId); // Example endpoint
                 setEventData(response || {});
-                console.log("Fetched event data:", response);
+                // console.log("Fetched event data:", response);
             } catch (error) {
                 console.error("Error fetching event data:", error);
             }

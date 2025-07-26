@@ -89,7 +89,7 @@ export const createEvent = async (
     };
   } catch (error) {
     console.error("Error creating event:", error);
-    let errorMessage = "Tạo sự kiện thất bại";
+    let errorMessage = "Fail to Create Event";
 
     if (error.response && error.response.data) {
       // Nếu response.data là string, dùng trực tiếp
@@ -128,12 +128,12 @@ export const updateEvent = async (id, eventData, bannerFile, posterFile) => {
     if (posterFile) formData.append("poster", posterFile);
 
     // 3. Gửi PUT request
-    const response = await Api.put(`/events/${id}`, formData, {
+     const response = await Api.put(`/events/${id}`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
-    });
-
+    });   
+    
     return response.data;
   } catch (error) {
     console.error(`Error updating event with ID ${id}:`, error);

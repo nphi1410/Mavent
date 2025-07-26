@@ -16,7 +16,6 @@ const AccountList = ({ setIsModalOpen, handleAssignAdmin }) => {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      console.log("path name: ", location.pathname);
       try {
         if (location.pathname.includes("edit-event")) {
           // get event members by id
@@ -24,13 +23,13 @@ const AccountList = ({ setIsModalOpen, handleAssignAdmin }) => {
           if (response) {
             setUsers(response || []);
             setSearchResults(response || []);
-            console.log("Fetched users:", response);
+            // console.log("Fetched users:", response);
           }
         } else {
           const response = await getAllAccounts();
           setUsers(response || []);
           setSearchResults(response || []);
-          console.log("Fetched users:", response);
+        //   console.log("Fetched users:", response);
         }
       } catch (error) {
         console.error("Error fetching users:", error);

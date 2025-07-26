@@ -7,9 +7,7 @@ import {
   faClock,
   faLocationDot,
 } from "@fortawesome/free-solid-svg-icons";
-import SuperAdminSidebar from "../../components/superadmin/SuperAdminSidebar";
 import { getEventById } from "../../services/EventService";
-import SuperAdminHeader from "../../components/superadmin/SuperAdminHeader";
 
 function SuperAdminViewEventDetails() {
   const { eventId } = useParams(); //lấy eventId từ URL

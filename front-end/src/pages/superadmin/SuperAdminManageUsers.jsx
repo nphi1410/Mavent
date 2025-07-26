@@ -1,11 +1,8 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown, faEye, faPen } from "@fortawesome/free-solid-svg-icons";
+import { faChevronDown, faEye } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from 'react-router-dom';
-
-import SuperAdminSidebar from '../../components/superadmin/SuperAdminSidebar';
 import { getAllAccounts } from '../../services/AccountService';
-import SuperAdminHeader from '../../components/superadmin/SuperAdminHeader';
 
 function SuperAdminManageUsers() {
     const [users, setUsers] = useState([]);
