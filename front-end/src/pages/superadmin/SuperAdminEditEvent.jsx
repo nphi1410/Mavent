@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import SuperAdminSidebar from "../../components/superadmin/SuperAdminSidebar";
 import SuperAdminHeader from "../../components/superadmin/SuperAdminHeader";
-import { Avatar } from "../../components/ui/avatar";
+import { Avatar } from "../../components/ui/Avatar";
 import { getAssignedAdmin, updateRole } from "../../services/RoleService";
 import { getEventById, updateEvent } from "../../services/EventService";
 import { getAllLocations } from "../../services/EventLocationService";
