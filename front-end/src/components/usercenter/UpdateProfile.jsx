@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { updateProfile } from '../../services/ProfileService';
-import { getAllAccounts } from '../../services/accountService';
+import { getAllAccounts } from '../../services/AccountService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSave, faXmark } from '@fortawesome/free-solid-svg-icons';
 import DatePicker from 'react-datepicker';
