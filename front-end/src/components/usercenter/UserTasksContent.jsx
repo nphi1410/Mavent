@@ -1,11 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { getUserTasks, getUserEvents, getUserProfile, getUserRoleInEvent } from '../../services/profileService';
-import TaskCard from './TaskCard';
-import TaskDashboard from './TaskDashboard';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
-import CreateTaskModal from './CreateTaskModal';
-import TaskDetails from './TaskDetails';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import {
+  getUserTasks,
+  getUserEvents,
+  getUserProfile,
+  getUserRoleInEvent,
+} from "../../services/ProfileService";
+import TaskCard from "./TaskCard";
+import TaskDashboard from "./TaskDashboard";
+import { useLocation, useNavigate, Link } from "react-router-dom";
+import CreateTaskModal from "./CreateTaskModal";
+import TaskDetails from "./TaskDetails";
+import { useParams } from "react-router-dom";
 
 const parseStatus = (status) => {
   if (status === "active") return ["TODO", "DOING", "REVIEW", "OVERDUE"];
@@ -22,14 +27,14 @@ const UserTasksContent = () => {
   const [userProfile, setUserProfile] = useState(null);
 
   const [filters, setFilters] = useState({
-    keyword: '',
-    status: '',
-    priority: '',
-    sortOrder: '',
-    role: ''
+    keyword: "",
+    status: "",
+    priority: "",
+    sortOrder: "",
+    role: "",
   });
   const { id: eventId } = useParams();
-  const [eventName, setEventName] = useState('');
+  const [eventName, setEventName] = useState("");
   const [userRole, setUserRole] = useState(null); // Thêm state cho user role
   const [loading, setLoading] = useState(true);
   const [filterLoading, setFilterLoading] = useState(false);
@@ -52,22 +57,27 @@ const UserTasksContent = () => {
       try {
         const [tasks, events] = await Promise.all([
           getUserTasks({}),
-          getUserEvents()
+          getUserEvents(),
         ]);
         const taskList = Array.isArray(tasks) ? tasks : [];
         setEvents(events);
 
-        const matchedEvent = events.find(e => e.eventId === parseInt(eventId));
+        const matchedEvent = events.find(
+          (e) => e.eventId === parseInt(eventId)
+        );
         if (matchedEvent) {
           setEventName(matchedEvent.eventName);
           setUserRole(matchedEvent.role); // Lưu role của user trong event này
         }
 
         // Lọc task theo eventId
-        const activeTasks = filterActiveTasks(taskList)
-          .filter(task => task.eventId === parseInt(eventId));
+        const activeTasks = filterActiveTasks(taskList).filter(
+          (task) => task.eventId === parseInt(eventId)
+        );
 
-        setAllTasks(taskList.filter(task => task.eventId === parseInt(eventId)));
+        setAllTasks(
+          taskList.filter((task) => task.eventId === parseInt(eventId))
+        );
         setDisplayTasks(activeTasks);
       } catch (err) {
         if (err.response?.status === 401) {
@@ -96,11 +106,13 @@ const UserTasksContent = () => {
           status: statusString || undefined,
           priority: filters.priority || undefined,
           sortOrder: filters.sortOrder || undefined,
-          eventName: eventName || undefined
+          eventName: eventName || undefined,
         });
 
         let fetchedTasks = Array.isArray(response) ? response : [];
-        fetchedTasks = fetchedTasks.filter(task => task.eventId === parseInt(eventId));
+        fetchedTasks = fetchedTasks.filter(
+          (task) => task.eventId === parseInt(eventId)
+        );
 
         if (filters.role && userProfile) {
           const userId = userProfile.id;
@@ -178,11 +190,13 @@ const UserTasksContent = () => {
         status: statusString || undefined,
         priority: filters.priority || undefined,
         sortOrder: filters.sortOrder || undefined,
-        eventName: eventName || undefined
+        eventName: eventName || undefined,
       });
 
       let fetchedTasks = Array.isArray(response) ? response : [];
-      fetchedTasks = fetchedTasks.filter(task => task.eventId === parseInt(eventId));
+      fetchedTasks = fetchedTasks.filter(
+        (task) => task.eventId === parseInt(eventId)
+      );
 
       if (filters.role && userProfile) {
         const userId = userProfile.id;
@@ -244,10 +258,12 @@ const UserTasksContent = () => {
   };
 
   // Kiểm tra quyền tạo task
-  const canCreateTask = userRole === 'ADMIN' || userRole === 'DEPARTMENT_MANAGER';
+  const canCreateTask =
+    userRole === "ADMIN" || userRole === "DEPARTMENT_MANAGER";
 
   if (loading) return <div className="text-center py-10">Loading...</div>;
-  if (error) return <div className="text-center text-red-500 py-10">{error}</div>;
+  if (error)
+    return <div className="text-center text-red-500 py-10">{error}</div>;
 
   return (
     <>
@@ -275,8 +291,18 @@ const UserTasksContent = () => {
                 to={`/event/${eventId}/staff/tasks/requests`}
                 className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
                 </svg>
                 Task Requests
               </Link>
@@ -309,8 +335,8 @@ const UserTasksContent = () => {
                   ],
                 },
                 {
-                  label: 'Status',
-                  name: 'status',
+                  label: "Status",
+                  name: "status",
                   options: [
                     { value: "", label: "Active Tasks" },
                     { value: "TODO", label: "To Do" },
@@ -400,13 +426,27 @@ const UserTasksContent = () => {
               <table className="min-w-full table-fixed">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="w-12 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
-                    <th className="w-48 md:w-64 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th className="w-32 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
-                    <th className="w-24 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="w-24 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
-                    <th className="w-24 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                    <th className="w-32 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                    <th className="w-12 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      No.
+                    </th>
+                    <th className="w-48 md:w-64 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th className="w-32 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Due Date
+                    </th>
+                    <th className="w-24 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="w-24 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Priority
+                    </th>
+                    <th className="w-24 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Role
+                    </th>
+                    <th className="w-32 py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Action
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -496,7 +536,6 @@ const UserTasksContent = () => {
               eventName={eventName}
             />
           )}
-
         </div>
       </main>
       {openTaskId && (

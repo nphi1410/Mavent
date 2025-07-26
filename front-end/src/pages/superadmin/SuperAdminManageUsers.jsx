@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faEye, faPen } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from 'react-router-dom';
@@ -17,48 +17,50 @@ function SuperAdminManageUsers() {
     const [currentPage, setCurrentPage] = useState(1);
     const usersPerPage = 5;
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const rolesOptions = ["ALL ROLES", "SUPER_ADMIN", "USER"];
-    const genderOptions = ["ALL GENDERS", "MALE", "FEMALE", "OTHER"];
+  const rolesOptions = ["ALL ROLES", "SUPER_ADMIN", "USER"];
+  const genderOptions = ["ALL GENDERS", "MALE", "FEMALE", "OTHER"];
 
-    useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                const data = await getAllAccounts();
-                setUsers(data);
-            } catch (error) {
-                console.error("Error fetching users:", error);
-            }
-        };
-
-        fetchUsers();
-    }, []);
-
-    const filterUsers = (users, searchTerm, role, gender) => {
-        return users.filter((user) => {
-            const matchesSearch = user.fullName?.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesRole = role === "ALL ROLES" || user.systemRole === role;
-            const matchesGender = gender === "ALL GENDERS" || user.gender === gender;
-            return matchesSearch && matchesRole && matchesGender;
-        });
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const data = await getAllAccounts();
+        setUsers(data);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
     };
 
-    const filteredUsers = useMemo(() => {
-        const noFilters =
-            searchTerm.trim() === "" &&
-            roleFilter === "ALL ROLES" &&
-            genderFilter === "ALL GENDERS";
-        return noFilters
-            ? users
-            : filterUsers(users, searchTerm, roleFilter, genderFilter);
-    }, [users, searchTerm, roleFilter, genderFilter]);
+    fetchUsers();
+  }, []);
 
-    const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
-    const currentUsers = filteredUsers.slice(
-        (currentPage - 1) * usersPerPage,
-        currentPage * usersPerPage
-    );
+  const filterUsers = (users, searchTerm, role, gender) => {
+    return users.filter((user) => {
+      const matchesSearch = user.fullName
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      const matchesRole = role === "ALL ROLES" || user.systemRole === role;
+      const matchesGender = gender === "ALL GENDERS" || user.gender === gender;
+      return matchesSearch && matchesRole && matchesGender;
+    });
+  };
+
+  const filteredUsers = useMemo(() => {
+    const noFilters =
+      searchTerm.trim() === "" &&
+      roleFilter === "ALL ROLES" &&
+      genderFilter === "ALL GENDERS";
+    return noFilters
+      ? users
+      : filterUsers(users, searchTerm, roleFilter, genderFilter);
+  }, [users, searchTerm, roleFilter, genderFilter]);
+
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+  const currentUsers = filteredUsers.slice(
+    (currentPage - 1) * usersPerPage,
+    currentPage * usersPerPage
+  );
 
     return (
         <div className="py-10 w-full">

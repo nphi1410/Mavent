@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Navigate, Outlet, useLocation, useParams } from "react-router-dom";
-import { getUserRoleInEvent } from "../services/roleService";
-import { jwtDecode } from 'jwt-decode';
+import { getUserRoleInEvent } from "../services/RoleService";
+import { jwtDecode } from "jwt-decode";
 import { EventRoleContext } from "../context/EventRoleContext";
 
 // Utility function to check login status
@@ -19,7 +19,9 @@ const isSuperAdmin = () => {
     const decoded = jwtDecode(token);
     // Check for "ROLE_SUPER_ADMIN" which is a system-level role, not an event-level role
     // This is separate from the EventRole enum in the backend
-    return Array.isArray(decoded.roles) && decoded.roles.includes("ROLE_SUPER_ADMIN");
+    return (
+      Array.isArray(decoded.roles) && decoded.roles.includes("ROLE_SUPER_ADMIN")
+    );
   } catch (e) {
     console.error("Invalid token when checking super admin status", e);
     return false;
@@ -66,27 +68,27 @@ const EventMemberRoute = () => {
         if (role === null || role === undefined) {
           // console.log('EventMemberRoute - Role is null or undefined');
           isAuth = false;
-          userRole = '';
+          userRole = "";
         }
         // If role is a string, use it directly
-        else if (typeof role === 'string') {
+        else if (typeof role === "string") {
           userRole = role.toUpperCase(); // Normalize to uppercase to match ROLE_HIERARCHY keys
           // console.log('EventMemberRoute - Role is a string:', userRole);
         }
         // If role is an object with a role property
-        else if (typeof role === 'object' && role.role) {
+        else if (typeof role === "object" && role.role) {
           userRole = role.role.toUpperCase(); // Normalize to uppercase
           // console.log('EventMemberRoute - Extracted role from object:', userRole);
         }
         // If role is an object with a roleName property
-        else if (typeof role === 'object' && role.roleName) {
+        else if (typeof role === "object" && role.roleName) {
           userRole = role.roleName.toUpperCase(); // Normalize to uppercase
           // console.log('EventMemberRoute - Extracted roleName from object:', userRole);
         }
         // For any other unexpected format, default to empty
         else {
           // console.log('EventMemberRoute - Unexpected role format:', typeof role);
-          userRole = '';
+          userRole = "";
         }
 
         setUserEventRole(userRole);
@@ -136,19 +138,29 @@ const EventMemberRoute = () => {
   }, [eventId]);
 
   if (isLoading) {
-    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        Loading...
+      </div>
+    );
   }
 
   if (!isAuthorized) {
     // Redirect to event details page with a message    // Customize message based on the route
-    const isDocumentsRoute = location.pathname.includes('documents');
+    const isDocumentsRoute = location.pathname.includes("documents");
     const message = isDocumentsRoute
       ? "You need to be a member of this event to access the documents page."
       : "You need to be an admin of this event to access this page.";
 
-    return <Navigate to={`/events/${eventId}`} state={{
-      unauthorizedMessage: message
-    }} replace />;
+    return (
+      <Navigate
+        to={`/events/${eventId}`}
+        state={{
+          unauthorizedMessage: message,
+        }}
+        replace
+      />
+    );
   }
 
   return (

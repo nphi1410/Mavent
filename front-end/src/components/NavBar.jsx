@@ -3,7 +3,7 @@ import { Mousewheel, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
-import { getTags } from "./../services/tagService";
+import { getTags } from "../services/TagService";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 const NavBar = () => {

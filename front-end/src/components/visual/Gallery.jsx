@@ -1,28 +1,28 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getFilterEvents } from "../../services/eventService";
+import { getFilterEvents } from "../../services/EventService";
 
 const Gallery = () => {
   const navigate = useNavigate();
 
   const [trendingOnGoingEvents, setTrendingOnGoingEvents] = useState([]);
-  
-    useEffect(() => {
-      async function fetchTrendingOngoing() {
-        const data = await getFilterEvents({
-          page: 0,
-          size: 5,
-          isTrending: true,
-          type: "ongoing",
-          sortType: "END_DATE_ASC",
-        });
-        if (data) {
-          setTrendingOnGoingEvents(data.content || []);
-        }
+
+  useEffect(() => {
+    async function fetchTrendingOngoing() {
+      const data = await getFilterEvents({
+        page: 0,
+        size: 5,
+        isTrending: true,
+        type: "ongoing",
+        sortType: "END_DATE_ASC",
+      });
+      if (data) {
+        setTrendingOnGoingEvents(data.content || []);
       }
-  
-      fetchTrendingOngoing();
-    }, []);
+    }
+
+    fetchTrendingOngoing();
+  }, []);
 
   const handleClick = () => {
     navigate("/events");

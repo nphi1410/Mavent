@@ -10,12 +10,12 @@ import SponsorSelect from "../components/sponsorship/SponsorSelect";
 import {
   createSponsorship,
   getSponsorshipPackages,
-} from "../services/sponsorshipService";
+} from "../services/SponsorshipService";
 import PackageSelect from "../components/sponsorship/PackageSelect";
 import ContactAccountSelect from "../components/sponsorship/ContactAccountSelect";
 import AgreementInput from "../components/sponsorship/AgreementInput";
 import CreateSponsorModal from "../components/sponsorship/CreateSponsorModal";
-import memberService from "../services/memberService";
+import memberService from "../services/MemberService";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 

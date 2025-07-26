@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { jwtDecode } from 'jwt-decode';
+import { jwtDecode } from "jwt-decode";
 import RedirectPage from "../pages/UserAuthorization/UnauthorizedAccess";
 import { logout } from "../services/AuthService";
 
 function parseJwt(token) {
-  const base64Url = token.split('.')[1];
-  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const base64Url = token.split(".")[1];
+  const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
   const jsonPayload = decodeURIComponent(
     atob(base64)
-      .split('')
-      .map((c) => `%${('00' + c.charCodeAt(0).toString(16)).slice(-2)}`)
-      .join('')
+      .split("")
+      .map((c) => `%${("00" + c.charCodeAt(0).toString(16)).slice(-2)}`)
+      .join("")
   );
   return JSON.parse(jsonPayload);
 }
@@ -38,29 +38,32 @@ const SuperAdminRoute = () => {
     } catch (e) {
       console.error("Invalid token: ", e);
     }
-  }, [token])
+  }, [token]);
 
   if (roles.length === 0 || isTokenExpired) {
     // console.log("No role found, redirecting to login");
-    return <RedirectPage
-      message={`You must be logged in first!`}
-      pageName="Login Page"
-      redirectUrl="/login"
-    />
+    return (
+      <RedirectPage
+        message={`You must be logged in first!`}
+        pageName="Login Page"
+        redirectUrl="/login"
+      />
+    );
   }
 
   if (!roles.includes("ROLE_SUPER_ADMIN")) {
     // console.log("User access denied, redirecting to profile");
-    alert("You don't have permission to view this page")
-    return <RedirectPage
-      message={`You must have ${requiredRoles} privileges to access this content`}
-      pageName="Home Page"
-      redirectUrl="/"
-    />
+    alert("You don't have permission to view this page");
+    return (
+      <RedirectPage
+        message={`You must have ${requiredRoles} privileges to access this content`}
+        pageName="Home Page"
+        redirectUrl="/"
+      />
+    );
   }
 
   return <Outlet />;
-
 };
 
 export default SuperAdminRoute;

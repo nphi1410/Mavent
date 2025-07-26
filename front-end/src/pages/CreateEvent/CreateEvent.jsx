@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createEvent, getEventById } from "../../services/eventService";
 import { getAllLocations } from "../../services/EventLocationService";
-import { getAllTags } from "../../services/eventTagService"; // Thêm import cho tag service
+import { getAllTags } from "../../services/eventTagService";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from 'jwt-decode';
 
@@ -239,7 +239,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                     {/* Event Name */}
                     <div>
                         <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                            Event Name <span className="text-red-500">*</span>
+                            Tên sự kiện <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
@@ -255,7 +255,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                     {/* Description */}
                     <div>
                         <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                            Event Description <span className="text-red-500">*</span>
+                            Mô tả <span className="text-red-500">*</span>
                         </label>
                         <textarea
                             id="description"
@@ -272,7 +272,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label htmlFor="startDatetime" className="block text-sm font-medium text-gray-700 mb-1">
-                                Start time <span className="text-red-500">*</span>
+                                Thời gian bắt đầu <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="datetime-local"
@@ -285,7 +285,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                         </div>
                         <div>
                             <label htmlFor="endDatetime" className="block text-sm font-medium text-gray-700 mb-1">
-                                End time <span className="text-red-500">*</span>
+                                Thời gian kết thúc <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="datetime-local"
@@ -301,7 +301,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                     {/* Location */}
                     <div>
                         <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
-                            Location <span className="text-red-500">*</span>
+                            Địa điểm <span className="text-red-500">*</span>
                         </label>
                         <select
                             id="locationId"
@@ -323,7 +323,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                     {/* Thêm phần chọn Tags - SỬA LẠI PROPERTY NAME */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Event Tags
+                            Tags sự kiện
                         </label>
                         <div className="flex flex-wrap gap-2">
                             {availableTags.map((tag) => (
@@ -343,7 +343,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                         </div>
                         {selectedTags.length > 0 && (
                             <p className="text-sm text-gray-500 mt-2">
-                                Selected {selectedTags.length} tag(s)
+                                Đã chọn {selectedTags.length} tag(s)
                             </p>
                         )}
                     </div>
@@ -351,7 +351,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                     {/* D-Day Info */}
                     <div>
                         <label htmlFor="ddayInfo" className="block text-sm font-medium text-gray-700 mb-1">
-                            D-Day Information
+                            Thông tin D-Day
                         </label>
                         <input
                             type="text"
@@ -367,7 +367,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label htmlFor="maxMemberNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                                Maximum number of members
+                                Số thành viên tối đa
                             </label>
                             <input
                                 type="number"
@@ -381,7 +381,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                         </div>
                         <div>
                             <label htmlFor="maxParticipantNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                                Maximum number of participants
+                                Số người tham gia tối đa
                             </label>
                             <input
                                 type="number"
@@ -398,7 +398,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                     {/* Status */}
                     <div>
                         <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                            Status
+                            Trạng thái
                         </label>
                         <input
                             type="text"
@@ -471,7 +471,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                                 className="cursor-pointer bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={loading}
                             >
-                                {loading ? "Creating..." : "Create Event & Next to Proposal"}
+                                {loading ? "Đang tạo..." : "Create Event & Next to Proposal"}
                             </button>
                         </div>
 

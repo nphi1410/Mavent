@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import EventBarChart from "../components/chart/EventBarChart";
 import EventAccountRoleTable from "../components/EventAccountRoleTable";
-import { getAttendingEvent } from "../services/eventService";
+import { getAttendingEvent } from "../services/EventService";
 import AttendingSummaryBoard from "../components/AttendingSummaryBoard";
 import EventRoleFilter from "../components/filter/EventRoleFilter";
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { getLogoUrl } from "../../services/logoService";
+import { getLogoUrl } from "../../services/LogoService";
 
 const SponsorCard = ({ sponsor }) => {
   const logoUrl = getLogoUrl(sponsor.logoUrl);

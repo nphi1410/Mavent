@@ -8,8 +8,8 @@ import TagsList from "../components/TagsList";
 import OrganizerContact from "../components/OrganizerContact";
 import RelevantEvent from "../components/RelevantEvent";
 import DepartmentList from "../components/department/DepartmentList";
-import { getEventById } from "../services/eventService";
-import { getUserInfoInEvent } from "../services/userEventService"; // Assuming you have this service to fetch user info in the event
+import { getEventById } from "../services/EventService";
+import { getUserInfoInEvent } from "../services/UserEventService"; // Assuming you have this service to fetch user info in the event
 import { useNavigate } from "react-router-dom";
 import EventSponsors from "../components/sponsorship/EventSponsors";
 
