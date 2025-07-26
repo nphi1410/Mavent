@@ -45,7 +45,7 @@ const CreateEvent = ({ isUpdatePage = false }) => {
             const data = await getAllLocations();
             setLocations(data);
         };
-        
+
         // Thêm fetch tags
         const fetchTags = async () => {
             try {
@@ -206,30 +206,35 @@ const CreateEvent = ({ isUpdatePage = false }) => {
         <div className="min-h-screen bg-green-50 px-4 py-8">
             <div className="max-w-4xl mx-auto text-center">
                 <h1 className="text-3xl font-bold">Create New Event</h1>
-                <p className="mt-2 text-gray-600">Fill in the details to get started</p>
+                {
+                    !isUpdatePage &&
+                    <div>
+                        <p className="mt-2 text-gray-600">Fill in the details to get started</p>
 
-                {/* Stepper */}
-                <div className="mt-6 flex justify-center items-center gap-6">
-                    <div className="flex items-center gap-2 text-green-600 font-medium">
-                        <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">1</div>
-                        Event Details
+                        {/* Stepper */}
+                        <div className="mt-6 flex justify-center items-center gap-6">
+                            <div className="flex items-center gap-2 text-green-600 font-medium">
+                                <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">1</div>
+                                Event Details
+                            </div>
+                            <div className="h-px w-8 bg-gray-400"></div>
+                            <div className="flex items-center gap-2 text-green-600 font-medium">
+                                <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">2</div>
+                                Proposal
+                            </div>
+                            <div className="h-px w-8 bg-gray-400"></div>
+                            <div className="flex items-center gap-2 text-green-600 font-medium">
+                                <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">3</div>
+                                Timeline
+                            </div>
+                            <div className="h-px w-8 bg-gray-400"></div>
+                            <div className="flex items-center gap-2 text-green-600 font-medium">
+                                <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">4</div>
+                                Agenda
+                            </div>
+                        </div>
                     </div>
-                    <div className="h-px w-8 bg-gray-400"></div>
-                    <div className="flex items-center gap-2 text-green-600 font-medium">
-                        <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">2</div>
-                        Proposal
-                    </div>
-                    <div className="h-px w-8 bg-gray-400"></div>
-                    <div className="flex items-center gap-2 text-green-600 font-medium">
-                        <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">3</div>
-                        Timeline
-                    </div>
-                    <div className="h-px w-8 bg-gray-400"></div>
-                    <div className="flex items-center gap-2 text-green-600 font-medium">
-                        <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">4</div>
-                        Agenda
-                    </div>
-                </div>
+                }
             </div>
 
             <form onSubmit={handleSubmit} className="max-w-4xl mx-auto mt-10 space-y-8">
@@ -329,11 +334,10 @@ const CreateEvent = ({ isUpdatePage = false }) => {
                                     key={tag.tagId}
                                     type="button"
                                     onClick={() => handleTagToggle(tag.tagId)}
-                                    className={`px-3 py-1 rounded-full text-sm border transition-colors ${
-                                        selectedTags.includes(tag.tagId)
-                                            ? 'bg-green-600 text-white border-green-600'
-                                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                                    }`}
+                                    className={`px-3 py-1 rounded-full text-sm border transition-colors ${selectedTags.includes(tag.tagId)
+                                        ? 'bg-green-600 text-white border-green-600'
+                                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                        }`}
                                 >
                                     {tag.name}
                                 </button>
