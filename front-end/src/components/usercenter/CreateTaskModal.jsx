@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { createTask, getEventDepartments, getEventMembers } from '../../services/ProfileService';
-import { getDocumentsByEvent, uploadDocument } from '../../services/documentService';
+import { getDocumentsByEvent, uploadDocument } from '../../services/DocumentService';
 
 const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName }) => {
   const [loading, setLoading] = useState(true);
