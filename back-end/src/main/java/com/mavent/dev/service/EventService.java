@@ -14,21 +14,18 @@ import java.util.List;
 public interface EventService {
     List<EventDTO> getAllEvents();
 
-
     Page<FilterEventDTO> getFilterEvents(String name, String status, List<Integer> tagIds, String sortType, int page, int size, String type, boolean isTrending);
 
-
     EventDTO getEventById(Integer eventId);
-
 
     Event getEventEntityById(Integer eventId);
 
     EventDTO updateEvent(Integer eventId, EventDTO eventDTO);
 
-
     Page<T> getEventByDateRange(String type, Boolean isTrending);
 
-    EventDTO createEvent(EventDTO eventDTO);
+    // Cập nhật method createEvent để nhận thêm parameter tagIds
+    EventDTO createEvent(EventDTO eventDTO, List<Integer> tagIds);
 
     List<EventMemberDTO> getEventMembers(Integer eventId);
 

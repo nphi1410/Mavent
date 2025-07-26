@@ -19,7 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +45,10 @@ public class EventImplement implements EventService {
     @Autowired
     private LocationService locationService;
 
+    // Thêm EventTagService để xử lý tags
+    @Autowired
+    private EventTagService eventTagService;
+
     @Override
     public Page<FilterEventDTO> getFilterEvents(String name, String status, List<Integer> tagIds, String sortType, int page, int size, String type, boolean isTrending) {
         Pageable pageable = PageRequest.of(page, size);
@@ -52,30 +56,57 @@ public class EventImplement implements EventService {
         return eventRepository.findAllUnified(name, status, type, tagCheck, tagIds, isTrending, sortType, pageable);
     }
 
+    // Cập nhật method createEvent để nhận thêm parameter tagIds
     @Override
-    public EventDTO createEvent(EventDTO eventDTO) {
-        Event event = new Event();
+    @Transactional
+    public EventDTO createEvent(EventDTO eventDTO, List<Integer> tagIds) {
+        try {
+            System.out.println("=== EventImplement.createEvent ===");
+            System.out.println("Creating event: " + eventDTO.getName());
+            System.out.println("TagIds: " + tagIds);
 
-        event.setName(eventDTO.getName());
-        event.setDescription(eventDTO.getDescription());
-        event.setStartDatetime(eventDTO.getStartDatetime());
-        event.setEndDatetime(eventDTO.getEndDatetime());
-        event.setLocation(eventDTO.getLocation());
-        event.setLocationId(eventDTO.getLocationId());
-        event.setDdayInfo(eventDTO.getDdayInfo());
-        event.setMaxMemberNumber(eventDTO.getMaxMemberNumber());
-        event.setMaxParticipantNumber(eventDTO.getMaxParticipantNumber());
-        event.setStatus(eventDTO.getStatus()); // Có thể null lúc tạo
-        event.setBannerUrl(eventDTO.getBannerUrl());
-        event.setPosterUrl(eventDTO.getPosterUrl());
-        event.setCreatedBy(eventDTO.getCreatedBy());
-        event.setIsDeleted(false);
-        event.setCreatedAt(java.time.LocalDateTime.now());
-        event.setUpdatedAt(java.time.LocalDateTime.now());
+            Event event = new Event();
 
-        Event savedEvent = eventRepository.save(event);
+            event.setName(eventDTO.getName());
+            event.setDescription(eventDTO.getDescription());
+            event.setStartDatetime(eventDTO.getStartDatetime());
+            event.setEndDatetime(eventDTO.getEndDatetime());
+            event.setLocation(eventDTO.getLocation());
+            event.setLocationId(eventDTO.getLocationId());
+            event.setDdayInfo(eventDTO.getDdayInfo());
+            event.setMaxMemberNumber(eventDTO.getMaxMemberNumber());
+            event.setMaxParticipantNumber(eventDTO.getMaxParticipantNumber());
+            event.setStatus(eventDTO.getStatus()); // Có thể null lúc tạo
+            event.setBannerUrl(eventDTO.getBannerUrl());
+            event.setPosterUrl(eventDTO.getPosterUrl());
+            event.setCreatedBy(eventDTO.getCreatedBy());
+            event.setIsDeleted(false);
+            event.setCreatedAt(java.time.LocalDateTime.now());
+            event.setUpdatedAt(java.time.LocalDateTime.now());
 
-        return mapToDTO(savedEvent);
+            System.out.println("Saving event to database...");
+            Event savedEvent = eventRepository.save(event);
+            System.out.println("Event saved with ID: " + savedEvent.getEventId());
+
+            // Thêm logic lưu tags sau khi lưu event thành công
+            if (tagIds != null && !tagIds.isEmpty()) {
+                System.out.println("Saving event tags...");
+                eventTagService.saveEventTags(savedEvent.getEventId(), tagIds);
+                System.out.println("Event tags saved successfully");
+            } else {
+                System.out.println("No tags to save");
+            }
+
+            System.out.println("Event creation completed successfully");
+            return mapToDTO(savedEvent);
+
+        } catch (Exception e) {
+            System.err.println("=== ERROR IN EventImplement.createEvent ===");
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
+            System.err.println("===========================================");
+            throw e; // Re-throw để controller bắt được
+        }
     }
 
     @Override
@@ -108,7 +139,6 @@ public class EventImplement implements EventService {
     public List<EventCountDTO> getMonthlyStatistic(String status) {
         return eventRepository.countByMonthWithoutStatus(status);
     }
-
 
     @Override
     public List<EventDTO> getAllEvents() {
@@ -163,7 +193,6 @@ public class EventImplement implements EventService {
                 event.getUpdatedAt()
         );
     }
-
 
     @Override
     public boolean checkEventAccess(Integer eventId, Integer accountId) {

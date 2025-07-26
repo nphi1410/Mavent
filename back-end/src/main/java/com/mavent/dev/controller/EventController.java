@@ -1,5 +1,6 @@
 package com.mavent.dev.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -59,34 +61,56 @@ public class EventController {
 
     @Autowired
     private MailConfig mailConfig;
-    @Autowired
-    private UpdatePendingEventDTO updatePendingEventDTO;
 
-    // Tạo sự kiện kèm ảnh banner và poster (fix multipart + JSON)
+    // XÓA DÒNG LỖI - UpdatePendingEventDTO không phải là component
+    // @Autowired
+    // private UpdatePendingEventDTO updatePendingEventDTO;
+
+    // Cập nhật method tạo sự kiện kèm ảnh banner và poster + tags
+    // Cập nhật method tạo sự kiện kèm ảnh banner và poster + tags
     @PostMapping(value = "/create-event", consumes = "multipart/form-data")
-    public ResponseEntity<?> createEvent(@RequestParam("event") String eventJson, @RequestPart("banner") MultipartFile banner, @RequestPart("poster") MultipartFile poster) {
+    public ResponseEntity<?> createEvent(
+            @RequestParam("event") String eventJson,
+            @RequestPart("banner") MultipartFile banner,
+            @RequestPart("poster") MultipartFile poster,
+            @RequestParam(value = "tags", required = false) String tagsJson) { // Thêm parameter cho tags
         try {
+            System.out.println("=== DEBUG CREATE EVENT ===");
+            System.out.println("Event JSON: " + eventJson);
+            System.out.println("Tags JSON: " + tagsJson);
+            System.out.println("Banner file: " + (banner != null ? banner.getOriginalFilename() : "null"));
+            System.out.println("Poster file: " + (poster != null ? poster.getOriginalFilename() : "null"));
+
             //Tạo ObjectMapper hỗ trợ LocalDateTime
             ObjectMapper mapper = new ObjectMapper();
             mapper.registerModule(new JavaTimeModule());
             mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+            mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"));
 
             //Parse JSON thành EventDTO
             EventDTO eventDTO = mapper.readValue(eventJson, EventDTO.class);
 
+            // Parse tags JSON thành List<Integer> nếu có
+            List<Integer> tagIds = null;
+            if (tagsJson != null && !tagsJson.trim().isEmpty()) {
+                tagIds = mapper.readValue(tagsJson, new TypeReference<List<Integer>>() {});
+            }
+
             //Upload ảnh
             String bannerUrl = cloudService.uploadFile(banner, "event-banner");
+
             String posterUrl = cloudService.uploadFile(poster, "event-poster");
 
             eventDTO.setBannerUrl(bannerUrl);
             eventDTO.setPosterUrl(posterUrl);
 
-            //Lưu event
-            EventDTO createdEvent = eventService.createEvent(eventDTO);
+            //Lưu event kèm tags
+            EventDTO createdEvent = eventService.createEvent(eventDTO, tagIds);
 
             return ResponseEntity.ok(createdEvent);
 
         } catch (Exception e) {
+            e.printStackTrace();
 
             return ResponseEntity.status(500).body("Tạo sự kiện thất bại: " + e.getMessage());
         }

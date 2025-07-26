@@ -54,7 +54,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)                .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/events/**",
-                                "/api/tags",
+                                "/api/tags/**",
                                 "/api/document",
                                 "/api/documents/**",
                                 "/api/event/sponsorship/public/*",
