@@ -5,11 +5,14 @@ import com.mavent.dev.dto.request.ProcessRequestDTO;
 import com.mavent.dev.dto.request.RequestDTO;
 import com.mavent.dev.dto.request.UpdateRequestDTO;
 import com.mavent.dev.entity.Request;
+import com.mavent.dev.entity.Task;
 import com.mavent.dev.entity.TaskAttendee;
 import com.mavent.dev.mapper.RequestMapper;
 import com.mavent.dev.repository.RequestRepository;
 import com.mavent.dev.repository.TaskAttendeeRepository;
+import com.mavent.dev.repository.TaskRepository;
 import com.mavent.dev.service.AccountService;
+import com.mavent.dev.service.NotificationService;
 import com.mavent.dev.service.RequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -29,7 +32,10 @@ public class RequestImplement implements RequestService {
     private AccountService accountService;
     @Autowired
     private TaskAttendeeRepository taskAttendeeRepository;
-
+    @Autowired
+    private TaskRepository taskRepository;
+    @Autowired
+    private NotificationService notificationService;
     @Override
     public List<RequestDTO> getRequestByAccountAndEventId(Integer accountId, Integer eventId) {
         return requestRepository.getRequests(
@@ -93,21 +99,68 @@ public class RequestImplement implements RequestService {
             if (request == null) {
                 return false;
             }
+
             request.setStatus(Request.Status.valueOf(requestDTO.getStatus()));
             request.setResponseByAccountId(requestDTO.getResponseByAccountId());
             request.setResponseContent(requestDTO.getResponseContent());
             request.setUpdatedAt(LocalDateTime.now());
-//            System.out.println("Updating request: " + requestDTO.getRequestId());
             requestRepository.save(request);
-//            System.out.println("Request updated successfully: " + requestDTO.getRequestId());
-//            Request newRequest = requestRepository.findByRequestId(requestId);
-//            System.out.println("New Request Details: " + newRequest.getStatus());
+
+            // Xử lý logic cho Cancel Task request
+            if (request.getRequestTypeId() == 4) {
+                if ("REJECTED".equals(requestDTO.getStatus())) {
+                    TaskAttendee attendee = taskAttendeeRepository
+                            .findByTaskIdAndAccountId(request.getTaskId(), request.getRequestByAccountId())
+                            .orElse(null);
+
+                    if (attendee != null) {
+                        attendee.setStatus(TaskAttendee.Status.INVITED);
+                        taskAttendeeRepository.save(attendee);
+                    }
+
+                    Task task = taskRepository.findById(request.getTaskId()).orElse(null);
+                    String taskTitle = task != null ? task.getTitle() : "Unknown Task";
+
+                    notificationService.createNotification(
+                            request.getRequestByAccountId(),
+                            task.getEventId(),
+                            request.getRequestId(),
+                            task.getTaskId(),
+                            "CANNOT REJECT TASK",
+                            "Your cancel request for task '" + taskTitle + "' has been rejected. You are still assigned to the task."
+                    );
+
+                } else if ("APPROVED".equals(requestDTO.getStatus())) {
+                    TaskAttendee attendee = taskAttendeeRepository
+                            .findByTaskIdAndAccountId(request.getTaskId(), request.getRequestByAccountId())
+                            .orElse(null);
+
+                    if (attendee != null) {
+                        attendee.setStatus(TaskAttendee.Status.DECLINED);
+                        taskAttendeeRepository.save(attendee);
+                    }
+
+                    Task task = taskRepository.findById(request.getTaskId()).orElse(null);
+                    String taskTitle = task != null ? task.getTitle() : "Unknown Task";
+
+                    notificationService.createNotification(
+                            request.getRequestByAccountId(),
+                            task.getEventId(),
+                            request.getRequestId(),
+                            task.getTaskId(),
+                            "TASK CANCEL APPROVED",
+                            "Your cancel request for task '" + taskTitle + "' has been approved. You are no longer assigned to this task."
+                    );
+                }
+            }
+
             return true;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
+
 
     @Override
     @Transactional

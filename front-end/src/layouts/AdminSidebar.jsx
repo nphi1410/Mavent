@@ -19,7 +19,8 @@ const Sidebar = ({ isOpen, onToggle, mainItems }) => {
   // console.log("pathSegments: " + pathSegments);
   const { id } = useParams();
 
-  const activeItem = pathSegments[pathSegments.length - 1] || "";
+  const activeItem = location.pathname.includes("tasks") ? "tasks" : pathSegments[pathSegments.length - 1];
+  // console.log("activeItem: " + activeItem);
   const manageUrl = `/event/${id}/staff/`;
 
   return (

@@ -114,52 +114,77 @@ const NotificationModal = ({ isOpen, onClose, onUnreadCountUpdate }) => {
   };
 
   const handleNotificationRouting = (notification) => {
-    const { type, eventId, taskId } = notification;
+    const { type, eventId, taskId, requestId } = notification;
 
     switch (type) {
-      case "ACCEPTANCE OF REQUEST":
       case "EVENT APPROVAL":
       case "EVENT UPDATE":
         if (eventId) navigate(`/event/${eventId}/staff/details`);
         break;
-      case "UPDATE TASK DONE":
-      case "TASK ASSIGNMENT":
-      case "FEEDBACK TASK":
-        if (taskId) {
-          // console.log(`Navigating to task with ID: ${taskId}`);
+      case "EVENT REJECTION":
+        if (eventId) navigate(`/profile/created-events/${eventId}`);
+        break;
+      case "EVENT FEEDBACK":
+        if (eventId) navigate(`/event/${eventId}/staff/feedback`);
+        break;
 
-          getTaskById(taskId)
-            .then((task) => {
-              if (task && task.eventId) {
-                navigate(`/event/${task.eventId}/staff/tasks`, {
-                  state: { openTaskId: taskId },
-                });
-              } else {
-                console.error("Không tìm thấy eventId trong task");
-              }
-            })
-            .catch((err) => {
-              console.error("Error fetching task details:", err);
-            });
+      case "MEMBER UPDATE":
+      case "MEMBER UNBANNED":
+        if (eventId) navigate(`/event/${eventId}/staff/details`);
+        break;
+
+      case "TASK ASSIGNMENT":
+      case "TASK STATUS UPDATE":
+      case "TASK UPDATED":
+        if (taskId) {
+          getTaskById(taskId).then((task) => {
+            if (task?.eventId)
+              navigate(`/event/${task.eventId}/staff/tasks`, {
+                state: { openTaskId: taskId },
+              });
+          });
         }
         break;
 
+      case "TASK ATTENDEE":
+      case "TASK ATTENDEE REMOVED":
+      case "TASK FEEDBACK":
+      case "TASK DOCUMENT UPDATE":
+      case "CANNOT REJECT TASK":
+        if (taskId) {
+          getTaskById(taskId).then((task) => {
+            if (task?.eventId)
+              navigate(`/event/${task.eventId}/staff/tasks`, {
+                state: { openTaskId: taskId },
+              });
+          });
+        }
+        break;
+
+      case "REJECT TASK REQUEST":
+        if (eventId)
+          navigate(`/event/${eventId}/staff/tasks-requests`);
+        break;
+
       case "MEETING INVITATION":
-        navigate(`/events/${eventId}/meetings`);
+      case "MEETING UPDATE":
+      case "MEETING CANCELLATION":
+        if (eventId) navigate(`/meetings`);
         break;
-      case "EVENT FEEDBACK":
-        navigate(`/events/${eventId}/feedback`);
+
+      case "ACCEPTANCE OF REQUEST":
+        if (eventId)
+          navigate(`/event/${eventId}/staff/requests`);
+        else if (requestId)
+          navigate(`/profile/dashboard`);
         break;
-      case "DOCUMENT UPLOADED":
-        navigate(`/events/${eventId}/documents`);
-        break;
-      case "BUDGET UPDATED":
-        navigate(`/events/${eventId}/budget`);
-        break;
+
       default:
+        console.warn("Unknown notification type:", type);
         break;
     }
   };
+
 
   const handleClose = async () => {
     try {
@@ -234,9 +259,8 @@ const NotificationModal = ({ isOpen, onClose, onUnreadCountUpdate }) => {
                 <div
                   key={notification.notificationId}
                   onClick={() => handleNotificationClick(notification)}
-                  className={`p-4 flex gap-3 cursor-pointer transition-colors hover:bg-gray-50 ${
-                    !isRead ? "bg-blue-50" : "bg-white"
-                  }`}
+                  className={`p-4 flex gap-3 cursor-pointer transition-colors hover:bg-gray-50 ${!isRead ? "bg-blue-50" : "bg-white"
+                    }`}
                 >
                   <div className="text-xl ms-3 me-3">
                     {isRead ? (
@@ -253,9 +277,8 @@ const NotificationModal = ({ isOpen, onClose, onUnreadCountUpdate }) => {
                   </div>
                   <div className="flex-1">
                     <p
-                      className={`text-sm font-semibold ${
-                        isRead ? "text-gray-600" : "text-gray-900"
-                      }`}
+                      className={`text-sm font-semibold ${isRead ? "text-gray-600" : "text-gray-900"
+                        }`}
                     >
                       {notification.type} - {notification.message}
                     </p>
