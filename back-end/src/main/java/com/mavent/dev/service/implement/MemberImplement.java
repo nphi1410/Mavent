@@ -4,8 +4,6 @@ import com.mavent.dev.dto.member.BanMemberRequestDTO;
 import com.mavent.dev.dto.member.MemberDTO;
 import com.mavent.dev.dto.member.MemberResponseDTO;
 import com.mavent.dev.dto.member.UpdateMemberRequestDTO;
-import com.mavent.dev.entity.Account;
-import com.mavent.dev.entity.Department;
 import com.mavent.dev.entity.EventAccountRole;
 import com.mavent.dev.exception.MemberNotFoundException;
 import com.mavent.dev.repository.AccountRepository;
@@ -18,14 +16,9 @@ import com.mavent.dev.mapper.MemberMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Simplified implementation of MemberService.
@@ -43,41 +36,48 @@ public class MemberImplement implements MemberService {
     private final MemberMapper memberMapper;
     private final RoleValidator roleValidator;
     private final PermissionService permissionService;
-    
+
     @Override
     @Transactional(readOnly = true)
     public List<MemberResponseDTO> getAllMembersByEventId(Integer eventId) {
         // Lấy danh sách EventAccountRole cho event
         List<EventAccountRole> members = eventAccountRoleRepository.findByEventId(eventId);
-        
+
         // Optimization: Batch load accounts and departments to prevent N+1 queries
-        Set<Integer> accountIds = new HashSet<>();
-        Set<Integer> departmentIds = new HashSet<>();
-        
-        // Collect all needed IDs
-        for (EventAccountRole member : members) {
-            accountIds.add(member.getAccountId());
-            if (member.getAssignedByAccountId() != null) {
-                accountIds.add(member.getAssignedByAccountId());
-            }
-            if (member.getDepartmentId() != null) {
-                departmentIds.add(member.getDepartmentId());
-            }
-        }
-        
-        // Batch load accounts and departments
-        Map<Integer, Account> accountMap = accountRepository.findAllById(accountIds).stream()
-                .collect(Collectors.toMap(Account::getAccountId, account -> account));
-        
-        Map<Integer, Department> departmentMap = departmentRepository.findAllById(departmentIds).stream()
-                .collect(Collectors.toMap(Department::getDepartmentId, department -> department));
-        
-        // Map to DTOs with preloaded data
-        return members.stream()
-                .map(member -> memberMapper.toMemberResponseWithPreloadedData(member, accountMap, departmentMap))
-                .collect(Collectors.toList());
+//        Set<Integer> accountIds = new HashSet<>();
+//        Set<Integer> departmentIds = new HashSet<>();
+//
+//        // Collect all needed IDs
+//        for (EventAccountRole member : members) {
+//            accountIds.add(member.getAccountId());
+//            if (member.getAssignedByAccountId() != null) {
+//                accountIds.add(member.getAssignedByAccountId());
+//            }
+//            if (member.getDepartmentId() != null) {
+//                departmentIds.add(member.getDepartmentId());
+//            }
+//        }
+//
+//        // Batch load accounts and departments
+//        Map<Integer, Account> accountMap = accountRepository.findAllById(accountIds).stream()
+//                .collect(Collectors.toMap(Account::getAccountId, account -> account));
+//
+//        Map<Integer, Department> departmentMap = departmentRepository.findAllById(departmentIds).stream()
+//                .collect(Collectors.toMap(Department::getDepartmentId, department -> department));
+//
+//        // Map to DTOs with preloaded data
+//        return members.stream()
+//                .map(member -> memberMapper.toMemberResponseWithPreloadedData(member, accountMap, departmentMap))
+//                .collect(Collectors.toList());
+        return memberMapper.toListMemberResponseWithPreloadedData(members);
     }
-    
+
+    @Override
+    public List<MemberResponseDTO> getAllStaffsByEventId(Integer eventId) {
+        List<EventAccountRole> staffs = eventAccountRoleRepository.findStaffsByEventId(eventId);
+        // Optimization: Batch load accounts and departments to prevent N+1 queries
+        return memberMapper.toListMemberResponseWithPreloadedData(staffs);
+    }
 
 
     @Override
@@ -119,14 +119,14 @@ public class MemberImplement implements MemberService {
     public MemberResponseDTO banMember(BanMemberRequestDTO request) {
         // Find existing member role
         EventAccountRole memberRole = findEventAccountRole(request.getEventId(), request.getAccountId());
-        
+
         // Validate ban permissions using roleValidator
         roleValidator.validateBanPermission(
-            request.getEventId(), 
-            request.getAccountId(), 
-            request.getAssignedByAccountId(),
-            memberRole.getEventRole(),
-            request.getIsBanned()
+                request.getEventId(),
+                request.getAccountId(),
+                request.getAssignedByAccountId(),
+                memberRole.getEventRole(),
+                request.getIsBanned()
         );
 
         // Update active status

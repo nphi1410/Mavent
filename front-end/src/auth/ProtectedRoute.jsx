@@ -66,7 +66,7 @@ const ProtectedRoute = ({ isRequiredToHaveRole, requiredRoles, children }) => {
   if (!isAuthorized && isRequiredToHaveRole) {
     // console.log("User not authorized, redirecting");
     return <RedirectPage
-      message={`You must have ${requiredRoles} privileges to access this content`}
+      message={`You do not have authority to access this content`}
       pageName="Details Page"
       redirectUrl="/"
     />

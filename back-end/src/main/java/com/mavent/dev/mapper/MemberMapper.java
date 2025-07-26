@@ -9,7 +9,11 @@ import com.mavent.dev.repository.DepartmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Mapper for converting between Member entities and DTOs.
@@ -45,6 +49,32 @@ public class MemberMapper {
         Account assignedBy = eventAccountRole.getAssignedByAccountId() != null ?
                 accountRepository.findById(eventAccountRole.getAssignedByAccountId()).orElse(null) : null;
 
+        return memberResponseDTOBuilder(eventAccountRole, account, department, assignedBy);
+    }
+
+    /**
+     * Convert EventAccountRole entity to MemberResponseDTO using preloaded data.
+     * This prevents N+1 queries by using already loaded account and department maps.
+     */
+    public MemberResponseDTO toMemberResponseWithPreloadedData(
+            EventAccountRole eventAccountRole,
+            Map<Integer, Account> accountMap,
+            Map<Integer, Department> departmentMap) {
+        
+        if (eventAccountRole == null) {
+            return null;
+        }
+        
+        Account account = accountMap.get(eventAccountRole.getAccountId());
+        Department department = eventAccountRole.getDepartmentId() != null ?
+                departmentMap.get(eventAccountRole.getDepartmentId()) : null;
+        Account assignedBy = eventAccountRole.getAssignedByAccountId() != null ?
+                accountMap.get(eventAccountRole.getAssignedByAccountId()) : null;
+
+        return memberResponseDTOBuilder(eventAccountRole, account, department, assignedBy);
+    }
+
+    private MemberResponseDTO memberResponseDTOBuilder(EventAccountRole eventAccountRole, Account account, Department department, Account assignedBy) {
         return MemberResponseDTO.builder()
                 // Account Information
                 .accountId(account != null ? account.getAccountId() : null)
@@ -71,49 +101,34 @@ public class MemberMapper {
                 .build();
     }
 
-    /**
-     * Convert EventAccountRole entity to MemberResponseDTO using preloaded data.
-     * This prevents N+1 queries by using already loaded account and department maps.
-     */
-    public MemberResponseDTO toMemberResponseWithPreloadedData(
-            EventAccountRole eventAccountRole,
-            Map<Integer, Account> accountMap,
-            Map<Integer, Department> departmentMap) {
-        
-        if (eventAccountRole == null) {
-            return null;
+    public List<MemberResponseDTO> toListMemberResponseWithPreloadedData(List<EventAccountRole> list) {
+        // Optimization: Batch load accounts and departments to prevent N+1 queries
+        Set<Integer> accountIds = new HashSet<>();
+        Set<Integer> departmentIds = new HashSet<>();
+
+        // Collect all needed IDs
+        for (EventAccountRole member : list) {
+            accountIds.add(member.getAccountId());
+            if (member.getAssignedByAccountId() != null) {
+                accountIds.add(member.getAssignedByAccountId());
+            }
+            if (member.getDepartmentId() != null) {
+                departmentIds.add(member.getDepartmentId());
+            }
         }
-        
-        Account account = accountMap.get(eventAccountRole.getAccountId());
-        Department department = eventAccountRole.getDepartmentId() != null ?
-                departmentMap.get(eventAccountRole.getDepartmentId()) : null;
-        Account assignedBy = eventAccountRole.getAssignedByAccountId() != null ?
-                accountMap.get(eventAccountRole.getAssignedByAccountId()) : null;
-        
-        return MemberResponseDTO.builder()
-                // Account Information
-                .accountId(account != null ? account.getAccountId() : null)
-                .username(account != null ? account.getUsername() : null)
-                .email(account != null ? account.getEmail() : null)
-                .fullName(account != null ? account.getFullName() : null)
-                .studentId(account != null ? account.getStudentId() : null)
-                .dateOfBirth(account != null ? account.getDateOfBirth() : null)
-                .phoneNumber(account != null ? account.getPhoneNumber() : null)
-                .gender(account != null && account.getGender() != null ? account.getGender().name() : null)
-                .avatarUrl(account != null ? account.getAvatarUrl() : null)
-                .systemRole(account != null && account.getSystemRole() != null ? account.getSystemRole().name() : null)
-                // Event Role Information
-                .eventId(eventAccountRole.getEventId())
-                .eventRole(eventAccountRole.getEventRole().name())
-                .departmentId(eventAccountRole.getDepartmentId())
-                .departmentName(department != null ? department.getName() : null)
-                .isActive(eventAccountRole.getIsActive())
-                .assignedByAccountId(eventAccountRole.getAssignedByAccountId())
-                .assignedByName(assignedBy != null ?
-                        getDisplayName(assignedBy.getFullName(), assignedBy.getUsername()) : null)
-                .joinedAt(eventAccountRole.getCreatedAt())
-                .updatedAt(eventAccountRole.getUpdatedAt())
-                .build();
+
+        // Batch load accounts and departments
+        Map<Integer, Account> accountMap = accountRepository.findAllById(accountIds).stream()
+                .collect(Collectors.toMap(Account::getAccountId, account -> account));
+
+        Map<Integer, Department> departmentMap = departmentRepository.findAllById(departmentIds).stream()
+                .collect(Collectors.toMap(Department::getDepartmentId, department -> department));
+
+        // Map to DTOs with preloaded data
+        return list.stream()
+                .map(member -> toMemberResponseWithPreloadedData(member, accountMap, departmentMap))
+                .collect(Collectors.toList());
+
     }
 
     /**

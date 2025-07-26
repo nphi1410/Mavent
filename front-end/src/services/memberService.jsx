@@ -368,6 +368,15 @@ const memberService = {
       throw error;
     }
   },
+
+  getStaffsByEventId: async (eventId) => {
+    try {
+      const response = await Api.get(`/events/${eventId}/members/staffs`);
+      return response.data;
+    } catch (err) {
+      console.error(`Error fetching staffs for event ${eventId}: `, err);
+    }
+  }
 };
 
 export default memberService;

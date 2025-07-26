@@ -57,7 +57,7 @@
 //
 //        Expenses savedExpense = expensesRepository.save(expense);
 //
-//        return ExpensesMapper.toDTO(savedExpense, new ArrayList<>());
+//        return ExpensesMapper.toUserRoleDTO(savedExpense, new ArrayList<>());
 //    }
 //
 //    @Override
@@ -103,7 +103,7 @@
 ////            System.out.println("No files to upload");
 //        }
 //
-//        return ExpensesMapper.toDTO(savedExpense, attachments);
+//        return ExpensesMapper.toUserRoleDTO(savedExpense, attachments);
 //    }
 //
 //    @Override
@@ -175,7 +175,7 @@
 //
 //        List<ExpenseAttachments> attachments = attachmentsRepository.findAllByExpenseId(updatedExpense.getExpenseId());
 //
-//        return ExpensesMapper.toDTO(updatedExpense, attachments);
+//        return ExpensesMapper.toUserRoleDTO(updatedExpense, attachments);
 //    }
 //
 //    @Override
@@ -185,7 +185,7 @@
 //        return expenses.stream()
 //                .map(expense -> {
 //                    List<ExpenseAttachments> attachments = attachmentsRepository.findAllByExpenseId(expense.getExpenseId());
-//                    return ExpensesMapper.toDTO(expense, attachments);
+//                    return ExpensesMapper.toUserRoleDTO(expense, attachments);
 //                })
 //                .collect(Collectors.toList());
 //    }
@@ -197,7 +197,7 @@
 //        return expenses.stream()
 //                .map(expense -> {
 //                    List<ExpenseAttachments> attachments = attachmentsRepository.findAllByExpenseId(expense.getExpenseId());
-//                    return ExpensesMapper.toDTO(expense, attachments);
+//                    return ExpensesMapper.toUserRoleDTO(expense, attachments);
 //                })
 //                .collect(Collectors.toList());
 //    }
@@ -213,6 +213,6 @@
 //        // Get attachments
 //        List<ExpenseAttachments> attachments = attachmentsRepository.findAllByExpenseId(expense.getExpenseId());
 //
-//        return ExpensesMapper.toDTO(expense, attachments);
+//        return ExpensesMapper.toUserRoleDTO(expense, attachments);
 //    }
 //}

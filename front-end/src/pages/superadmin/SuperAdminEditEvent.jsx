@@ -2,11 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import SuperAdminSidebar from '../../components/superadmin/SuperAdminSidebar';
 import SuperAdminHeader from '../../components/superadmin/SuperAdminHeader';
+import { Avatar } from '../../components/ui/avatar';
+import { getAssignedAdmin, updateRole } from '../../services/roleService';
 import { getEventById, updateEvent } from '../../services/eventService';
 import { getAllLocations } from '../../services/EventLocationService';
+import { Badge } from '../../components/ui/Badge';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import AccountList from '../../components/pendingEventDetail/AccountList';
+import { jwtDecode } from 'jwt-decode';
 
 function SuperAdminEditEvent() {
     const { eventId } = useParams();
+    const token = sessionStorage.getItem("token");
+    const assigner = jwtDecode(token).accountId;
 
     /* ---------- STATE ---------- */
     const [eventData, setEventData] = useState({
@@ -21,10 +29,25 @@ function SuperAdminEditEvent() {
     });
 
     const [locations, setLocations] = useState([]);
+    const [adminAssigned, setAdminAssigned] = useState(null);
+    const [oldAdmin, setOldAdmin] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     // NEW — state cho file
     const [bannerFile, setBannerFile] = useState(null);
     const [posterFile, setPosterFile] = useState(null);
+
+    const handleAssignAdmin = (user) => {
+        console.log("Assigning user as admin:", user)
+        const adminData = {
+            ...adminAssigned,
+            accountId: user.accountId
+        }
+        setAdminAssigned(adminData)
+        console.log("Admin assigned data by choosing:", adminData)
+        // Implement actual assignment logic
+    }
 
     /* ---------- FETCH LOCATIONS ---------- */
     useEffect(() => {
@@ -36,6 +59,7 @@ function SuperAdminEditEvent() {
                 console.error('Failed to fetch locations:', err);
             }
         })();
+
     }, []);
 
     /* ---------- FETCH EVENT ---------- */
@@ -59,6 +83,22 @@ function SuperAdminEditEvent() {
                 console.error('Failed to fetch event:', err);
             }
         })();
+
+        const getAdmin = async () => {
+            try {
+                const response = await getAssignedAdmin(eventId);
+                if (response) {
+                    setAdminAssigned(response);
+                    setOldAdmin(response);
+                }
+                console.log('Assigned admin:', response);
+            } catch (error) {
+                console.error('Error fetching assigned admin:', error);
+            }
+        }
+        getAdmin();
+
+        setIsLoading(false);
     }, [eventId]);
 
     /* ---------- HANDLERS ---------- */
@@ -75,6 +115,34 @@ function SuperAdminEditEvent() {
             bannerFile,
             posterFile
         );
+        if (!oldAdmin) {
+            const oldAdminUpdate = {
+                assignedByAccountId: assigner,
+                newRole: 'MEMBER',
+                eventId: eventId,
+                accountId: oldAdmin.accountId,
+            }
+            console.log("Old Admin Update:", oldAdminUpdate);
+            const updateOldAdminRes = await updateRole(oldAdminUpdate);
+        }
+
+        const newAdminUpdate = {
+            assignedByAccountId: assigner,
+            newRole: 'ADMIN',
+            eventId: eventId,
+            accountId: adminAssigned.accountId,
+        }
+
+        console.log("New Admin Update:", newAdminUpdate);
+        const updateRoleRes = await Promise.all([
+            updateRole(newAdminUpdate),
+        ]);
+
+        if (updateRoleRes.some(res => !res)) {
+            alert('Cập nhật vai trò thất bại, vui lòng thử lại.');
+            return;
+        }
+
         if (result) {
             alert('Cập nhật sự kiện thành công!');
             window.location.href = '/superadmin/events';
@@ -278,17 +346,59 @@ function SuperAdminEditEvent() {
 
                 <section className='bg-white p-6 shadow rounded-xl space-y-4 mb-4'>
                     <h2 className='text-2xl font-semibold text-black mb-4'>
-                                    
+                        Update Admin
                     </h2>
                     <div className='space-y-4'>
+                        {/* {console.log('Admin Assigned in return :', adminAssigned)} */}
 
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <h2 className="my-4">Current <span className="text-red-700 font-medium">Admin</span>:</h2>
+                        {
+                            isLoading !== true ? (
+                                adminAssigned !== null ? (
+                                    <Badge className="h-full" variant="primary">
+                                        <Avatar
+                                            src={adminAssigned?.avatarUrl || "/placeholder.svg"}
+                                            alt={adminAssigned?.username}
+                                            className="h-8 w-8"
+                                        />
+                                        <hr />@{adminAssigned?.username}
+                                    </Badge>
+                                ) : (
+                                    <h3 className="my-4">No <span className="text-red-700 font-medium">Admin </span> assigned yet!</h3>
+                                )) : (
+                                <h3 className="my-4">Loading curre  nt admin...</h3>
+                            )
+                        }
+                        <button
+                            type='button'
+                            className="inline-flex items-center cursor-pointer px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-blue-800 bg-white  hover:bg-blue-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            onClick={() => {
+                                setIsModalOpen(true)
+                            }}
+                        >
+                            <FontAwesomeIcon icon="fa-solid fa-pen-to-square" className="h-4 w-4" />
+                        </button>
                     </div>
                 </section>
             </div>
+            {
+                isModalOpen && (
+                    <AccountList
+                        setIsModalOpen={setIsModalOpen}
+                        handleAssignAdmin={(user) => {
+                            setAdminAssigned(user);
+                            // console.log("Assigned admin:", user.accountId);
+                        }}
+                    />
+                )
+            }
 
 
             {/* BUTTONS */}
             <div className='flex justify-end gap-4 mt-6'>
+
                 <button
                     type='button'
                     onClick={() => window.history.back()}
