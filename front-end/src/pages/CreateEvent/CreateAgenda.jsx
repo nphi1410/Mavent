@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClock, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { createAgendaItem, getAgendaItemsByEventId } from '../../services/agendaService'; // giả định bạn đã có service này
 
-const CreateAgenda = ({isUpdatePage = false}) => {
+const CreateAgenda = ({ isUpdatePage = false }) => {
     const navigate = useNavigate();
     const { eventId } = useParams();
     const [agendas, setAgendas] = useState([
@@ -77,27 +77,31 @@ const CreateAgenda = ({isUpdatePage = false}) => {
                 <p className="mt-2 text-gray-600">Define the detailed agenda for your event</p>
 
                 {/* Stepper */}
-                <div className="mt-6 flex justify-center items-center gap-6">
-                    <div className="flex items-center gap-2 text-green-600 font-medium">
-                        <div className="w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center">✓</div>
-                        Event Details
-                    </div>
-                    <div className="h-px w-8 bg-gray-400"></div>
-                    <div className="flex items-center gap-2 text-green-600 font-medium">
-                        <div className="w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center">✓</div>
-                        Proposal
-                    </div>
-                    <div className="h-px w-8 bg-gray-400"></div>
-                    <div className="flex items-center gap-2 text-green-600 font-medium">
-                        <div className="w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center">✓</div>
-                        Timeline
-                    </div>
-                    <div className="h-px w-8 bg-gray-400"></div>
-                    <div className="flex items-center gap-2 text-green-600 font-medium">
-                        <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">4</div>
-                        Agenda
-                    </div>
-                </div>
+                {
+                    !isUpdatePage && (
+                        <div className="mt-6 flex justify-center items-center gap-6">
+                            <div className="flex items-center gap-2 text-green-600 font-medium">
+                                <div className="w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center">✓</div>
+                                Event Details
+                            </div>
+                            <div className="h-px w-8 bg-gray-400"></div>
+                            <div className="flex items-center gap-2 text-green-600 font-medium">
+                                <div className="w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center">✓</div>
+                                Proposal
+                            </div>
+                            <div className="h-px w-8 bg-gray-400"></div>
+                            <div className="flex items-center gap-2 text-green-600 font-medium">
+                                <div className="w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center">✓</div>
+                                Timeline
+                            </div>
+                            <div className="h-px w-8 bg-gray-400"></div>
+                            <div className="flex items-center gap-2 text-green-600 font-medium">
+                                <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">4</div>
+                                Agenda
+                            </div>
+                        </div>
+                    )
+                }
             </div>
 
             {/* Agenda Form */}

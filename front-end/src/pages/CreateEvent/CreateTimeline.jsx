@@ -42,7 +42,7 @@ const CreateTimeline = ({ isUpdatePage = false }) => {
             fetchTimeline();
         }
     }, [eventId]);
-    console.log("Stages state:", stages);   
+    console.log("Stages state:", stages);
 
 
     const handleChange = (index, field, value) => {
@@ -95,27 +95,32 @@ const CreateTimeline = ({ isUpdatePage = false }) => {
                 </div>
 
                 {/* Stepper */}
-                <div className="mt-6 flex justify-center items-center gap-6">
-                    <div className="flex items-center gap-2 text-green-600 font-medium">
-                        <div className="w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center">✓</div>
-                        Event Details
-                    </div>
-                    <div className="h-px w-8 bg-gray-400"></div>
-                    <div className="flex items-center gap-2 text-green-600 font-medium">
-                        <div className="w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center">✓</div>
-                        Proposal
-                    </div>
-                    <div className="h-px w-8 bg-gray-400"></div>
-                    <div className="flex items-center gap-2 text-green-600 font-medium">
-                        <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">3</div>
-                        Timeline
-                    </div>
-                    <div className="h-px w-8 bg-gray-400"></div>
-                    <div className="flex items-center gap-2 text-green-600 font-medium">
-                        <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">4</div>
-                        Agenda
-                    </div>
-                </div>
+                {
+                    !isUpdatePage && (
+                        <div className="mt-6 flex justify-center items-center gap-6">
+                            <div className="flex items-center gap-2 text-green-600 font-medium">
+                                <div className="w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center">✓</div>
+                                Event Details
+                            </div>
+                            <div className="h-px w-8 bg-gray-400"></div>
+                            <div className="flex items-center gap-2 text-green-600 font-medium">
+                                <div className="w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center">✓</div>
+                                Proposal
+                            </div>
+                            <div className="h-px w-8 bg-gray-400"></div>
+                            <div className="flex items-center gap-2 text-green-600 font-medium">
+                                <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">3</div>
+                                Timeline
+                            </div>
+                            <div className="h-px w-8 bg-gray-400"></div>
+                            <div className="flex items-center gap-2 text-green-600 font-medium">
+                                <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">4</div>
+                                Agenda
+                            </div>
+                        </div>
+
+                    )
+                }
             </div>
 
             {/* Timeline Form */}
