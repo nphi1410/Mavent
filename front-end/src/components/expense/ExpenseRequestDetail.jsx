@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { formatMoney } from "../../utils/formatMoney.js";
 import { updateExpenseStatus } from "../../services/expense/ExpenseService.jsx";
 import { toast } from "react-toastify";
+import { useParams, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 export default function ExpenseRequestDetail({
   isOpen,
@@ -10,26 +12,63 @@ export default function ExpenseRequestDetail({
   expenseData,
   categories,
   onUpdateSuccess,
+  taskTitle: passedTaskTitle,
+  userRole,
 }) {
   if (!isOpen) return null;
+  const { id: eventId } = useParams();
+  const isAdmin = userRole?.toUpperCase() === "ADMIN";
+
+  const navigate = useNavigate();
 
   const data = expenseData;
+  const location = useLocation();
+
+  const taskId = data?.taskId;
+
   const [currentStatus, setCurrentStatus] = useState(data?.status || "");
   const [showStatusForm, setShowStatusForm] = useState(false);
   const [newStatus, setNewStatus] = useState("");
   const [statusComment, setStatusComment] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [fetchedTaskTitle, setFetchedTaskTitle] = useState("");
+  const taskTitle = data?.taskTitle || passedTaskTitle || fetchedTaskTitle || taskTitleFromState || (taskId ? `Task #${taskId}` : "No Task");
+  const taskTitleFromState = location.state?.taskTitle;
 
   useEffect(() => {
     if (data) {
       setCurrentStatus(data.status);
+      
+      // Fetch task title if we have taskId but no title
+      if (data.taskId && !data.taskTitle && !passedTaskTitle) {
+        fetchTaskTitle(data.taskId);
+      }
     }
-  }, [data]);
+  }, [data, passedTaskTitle]);
+  
+  // Hàm để fetch task title từ API nếu cần
+  const fetchTaskTitle = async (taskId) => {
+    if (!taskId) return;
+    
+    try {
+      // Import động để tránh circular dependency
+      const { getTaskDetails } = await import("../../services/profileService");
+      const taskData = await getTaskDetails(taskId);
+      
+      if (taskData && taskData.title) {
+        setFetchedTaskTitle(taskData.title);
+      }
+    } catch (error) {
+      console.error("Error fetching task details:", error);
+      // Silent fail - we'll use default title
+    }
+  };
 
   // Get available status options based on current status
   const getStatusOptions = () => {
     let options = [];
+    if (!isAdmin) return []; 
     switch (currentStatus) {
       case "PENDING":
         options = ["APPROVED", "REJECTED"];
@@ -115,7 +154,7 @@ export default function ExpenseRequestDetail({
 
       if (onUpdateSuccess) {
         const updatedExpense = { ...data }; // clone tránh mutation ngoài ý
-  onUpdateSuccess(updatedExpense);
+        onUpdateSuccess(updatedExpense);
       }
     } catch (error) {
       console.error("Error updating status:", error);
@@ -166,6 +205,37 @@ export default function ExpenseRequestDetail({
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column - Expense Details */}
             <div className="lg:col-span-2 space-y-6">
+              {taskId ? (
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Linked Task
+                  </label>
+                  <div className="flex justify-between items-center bg-blue-50 border border-blue-300 rounded-md px-3 py-2">
+                    <span className="text-blue-700 text-sm font-medium truncate">
+                      {taskTitle}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigate(`/event/${eventId}/staff/tasks`, {
+                          state: {
+                            openTaskId: taskId,
+                          },
+                        });
+                      }}
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      Go to Task
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    No Linked Task
+                  </label>
+                </div>
+              )}
               {/* Amount */}
               <div>
                 <div className="bg-white rounded-lg px-4 py-3 shadow-sm">

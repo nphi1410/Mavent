@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
   getAllExpenses,
@@ -19,6 +19,8 @@ import LottieLoader from "../../components/visual/LottieLoader.jsx";
 export default function ExpenseRequestHistory() {
   const { user } = useEventRole();
   const { id: eventId } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const [expenses, setExpenses] = useState([]);
   const [filteredExpenses, setFilteredExpenses] = useState([]);
@@ -34,6 +36,25 @@ export default function ExpenseRequestHistory() {
   const [dataLoaded, setDataLoaded] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState(null);
   const [showDetailPopup, setShowDetailPopup] = useState(false);
+  const [taskId, setTaskId] = useState(null);
+  const [taskTitle, setTaskTitle] = useState("");
+
+  // Check location state for automatic popup opening
+  useEffect(() => {
+    if (location.state && location.state.openCreate) {
+      // Set task ID if provided
+      if (location.state.taskId) {
+        setTaskId(location.state.taskId);
+        setTaskTitle(location.state.taskTitle || "");
+      }
+      
+      // Open the create form
+      setShowCreateForm(true);
+      
+      // Remove the state from history to prevent re-opening on back/forward navigation
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location, navigate]);
 
   // Fetch expenses based on user role
   useEffect(() => {
@@ -184,6 +205,24 @@ export default function ExpenseRequestHistory() {
       setLoading(true);
       const expenseDetail = await getExpenseById(eventId, expenseId);
       setSelectedExpense(expenseDetail);
+      
+      // Nếu expense có task ID, tìm task title nếu có thể
+      if (expenseDetail.taskId) {
+        try {
+          // Import động để tránh circular dependency
+          const { getTaskDetails } = await import("../../services/profileService");
+          const taskData = await getTaskDetails(expenseDetail.taskId);
+          
+          if (taskData && taskData.title) {
+            // Cập nhật task title trong state
+            setTaskTitle(taskData.title);
+          }
+        } catch (taskError) {
+          console.error("Error fetching task details:", taskError);
+          // Silent fail - we'll use default title or task ID
+        }
+      }
+      
       setShowDetailPopup(true);
     } catch (error) {
       console.error("Error fetching expense details:", error);
@@ -229,13 +268,13 @@ export default function ExpenseRequestHistory() {
           onClose={() => setShowCreateForm(false)}
           accountId={user.accountId}
           departmentId={user.departmentId}
-          budgetId={budgetId}
+          budgetId={budgetId} 
           eventId={eventId}
+          taskId={taskId}
+          taskTitle={taskTitle}
           onSubmitSuccess={handleFormSubmit}
         />
-      )}
-
-      {showDetailPopup && selectedExpense && (
+      )}      {showDetailPopup && selectedExpense && (
         <ExpenseRequestDetail
           isOpen={showDetailPopup}
           onClose={() => setShowDetailPopup(false)}
@@ -260,6 +299,8 @@ export default function ExpenseRequestHistory() {
               )
             );
           }}
+          taskTitle={selectedExpense?.taskTitle || taskTitle}
+          userRole={role}
         />
       )}
 
