@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faEye, faPencil } from "@fortawesome/free-solid-svg-icons";
-import { getEvents, updateEvent } from '../../services/eventService';
+import { getEvents, updateEvent } from '../../services/EventService';
 import { getAllLocations } from '../../services/EventLocationService';
 import SuperAdminSidebar from '../../components/superadmin/SuperAdminSidebar';
 import SuperAdminHeader from '../../components/superadmin/SuperAdminHeader';
