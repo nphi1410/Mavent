@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getUserProfile, uploadAvatar, updateProfile as updateProfileService } from "../../services/ProfileService"; // Đổi tên updateProfile để tránh trùng
-import { getUserProfile, uploadAvatar, updateProfile as updateProfileService } from "../../services/ProfileService"; // Đổi tên updateProfile để tránh trùng
+import { getUserProfile, uploadAvatar, updateProfile as updateProfileService } from "../../services/ProfileService"; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload, faUser } from '@fortawesome/free-solid-svg-icons';
 import UpdateProfile from "./UpdateProfile";
