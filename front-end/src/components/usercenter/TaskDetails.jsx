@@ -3,8 +3,12 @@ import { getTaskDetails, updateTaskStatus, getUserProfile, getTaskAttendees, get
 import AttendeesModal from './AttendeesModal';
 import UpdateTaskModal from './UpdateTaskModal';
 import TaskFeedbackModal from './TaskFeedbackModal';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
+  const navigate = useNavigate();
+  const { id: eventId } = useParams(); // Get eventId from URL params
+  
   // State hiện tại
   const [task, setTask] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -153,6 +157,7 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
     const isAssignee = currentUserId === task.assignedToAccountId;
     const isCreator = currentUserId === task.assignedByAccountId;
     const canCancelTask = isCreator && !['DONE', 'REJECTED', 'CANCELLED'].includes(task.status);
+    const isTaskDoing = task.status === 'DOING';
     // console.log(canCancelTask, task.status, isCreator);
 
     // Helper: Nút Cancel (tránh lặp code)
@@ -350,6 +355,23 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
       setUpdateMessage({ type: 'error', text: 'Không thể gửi yêu cầu từ chối task' });
     }
   };
+  
+  // Function to handle Create Expense Request button click
+  const handleCreateExpenseRequest = () => {
+    if (!eventId || !task) return;
+    
+    // Navigate to expense request page with state to open the create popup
+    navigate(`/event/${eventId}/staff/expenses-requests`, {
+      state: { 
+        openCreate: true,
+        taskId: task.taskId,
+        taskTitle: task.title,
+      }
+    });
+    
+    // Close the task details modal
+    if (onClose) onClose();
+  };
 
   const renderAttendeeActions = () => {
     // Kiểm tra xem user có phải là attendee không và có status INVITED
@@ -507,6 +529,18 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
                     </div>
                   ) : renderActionButton()}
                 </div>
+                
+                {/* Show Create Expense Request button when task status is DOING */}
+                {task && task.status === 'DOING' && (
+                  <div className="text-center mt-4">
+                    <button
+                      onClick={() => handleCreateExpenseRequest()}
+                      className="bg-blue-600 text-white px-6 py-2 rounded-xl font-medium hover:bg-blue-700 transition-all duration-200"
+                    >
+                      Create Expense Request
+                    </button>
+                  </div>
+                )}
 
                 {/* Hiển thị attendee actions khi có status INVITED */}
                 {renderAttendeeActions()}

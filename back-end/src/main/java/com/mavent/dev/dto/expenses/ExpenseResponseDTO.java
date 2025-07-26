@@ -15,6 +15,7 @@ import java.util.List;
 @Builder
 public class ExpenseResponseDTO {
     private Integer expenseId;
+    private int taskId;
     private int eventId;
     private int categoryId;
     private String categoryName;
