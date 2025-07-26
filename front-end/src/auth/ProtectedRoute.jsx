@@ -11,6 +11,18 @@ const isLoggedIn = () => {
   return !!token;
 };
 
+function parseJwt(token) {
+  const base64Url = token.split('.')[1];
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const jsonPayload = decodeURIComponent(
+    atob(base64)
+      .split('')
+      .map((c) => `%${('00' + c.charCodeAt(0).toString(16)).slice(-2)}`)
+      .join('')
+  );
+  return JSON.parse(jsonPayload);
+}
+
 const ProtectedRoute = ({ isRequiredToHaveRole, requiredRoles, children }) => {
   const { id: eventId } = useParams();
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -18,12 +30,19 @@ const ProtectedRoute = ({ isRequiredToHaveRole, requiredRoles, children }) => {
   // const [contextUser, setContextUser] = useState(null);
   const { user, roleLoading } = useEventRole();
   const navigate = useNavigate();
-  
+
 
   useEffect(() => {
     // console.log('useEffect in PR');
     // console.log('user role in PR' ,user?.role)
     // if (loading) return;
+
+    const payload = parseJwt(token);
+    if (Date.now() > new Date(payload.exp * 1000)) {
+      logout();
+    } else {
+      setIsTokenExpired(false);
+    }
     setLoading(true);
 
     if (!isLoggedIn()) {
@@ -66,7 +85,7 @@ const ProtectedRoute = ({ isRequiredToHaveRole, requiredRoles, children }) => {
   if (!isAuthorized && isRequiredToHaveRole) {
     // console.log("User not authorized, redirecting");
     return <RedirectPage
-      message={`You must have ${requiredRoles} privileges to access this content`}
+      message={`You do not have authority to access this content`}
       pageName="Details Page"
       redirectUrl="/"
     />
