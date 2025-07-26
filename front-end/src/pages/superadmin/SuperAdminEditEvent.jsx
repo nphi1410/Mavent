@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Avatar } from "../../components/ui/Avatar";
 import { getAssignedAdmin, updateRole } from "../../services/RoleService";
-import { getEventById, updateEvent } from "../../services/eventService";
+import { getEventById, updateEvent } from "../../services/EventService";
 import { getAllLocations } from "../../services/EventLocationService";
 import { Badge } from "../../components/ui/Badge";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
