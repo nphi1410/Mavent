@@ -33,29 +33,36 @@ export default function ExpenseRequestDetail({
   const [loading, setLoading] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [fetchedTaskTitle, setFetchedTaskTitle] = useState("");
-  const taskTitle = data?.taskTitle || passedTaskTitle || fetchedTaskTitle || taskTitleFromState || (taskId ? `Task #${taskId}` : "No Task");
+  const taskTitle =
+    data?.taskTitle ||
+    passedTaskTitle ||
+    fetchedTaskTitle ||
+    taskTitleFromState ||
+    (taskId ? `Task #${taskId}` : "No Task");
   const taskTitleFromState = location.state?.taskTitle;
 
   useEffect(() => {
     if (data) {
       setCurrentStatus(data.status);
-      
+
       // Fetch task title if we have taskId but no title
       if (data.taskId && !data.taskTitle && !passedTaskTitle) {
         fetchTaskTitle(data.taskId);
       }
     }
   }, [data, passedTaskTitle]);
-  
+
   // Hàm để fetch task title từ API nếu cần
   const fetchTaskTitle = async (taskId) => {
     if (!taskId) return;
-    
+
     try {
       // Import động để tránh circular dependency
-      const { getTaskDetails } = await import("../../services/profileService");
+      const { getTaskDetails } = await import(
+        "../../services/ProfileService.jsx"
+      );
       const taskData = await getTaskDetails(taskId);
-      
+
       if (taskData && taskData.title) {
         setFetchedTaskTitle(taskData.title);
       }
@@ -68,7 +75,7 @@ export default function ExpenseRequestDetail({
   // Get available status options based on current status
   const getStatusOptions = () => {
     let options = [];
-    if (!isAdmin) return []; 
+    if (!isAdmin) return [];
     switch (currentStatus) {
       case "PENDING":
         options = ["APPROVED", "REJECTED"];

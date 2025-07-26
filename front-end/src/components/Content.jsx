@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import CardSmall from "./card/CardSmall";
 import CardDetails from "./card/CardDetails";
-import { getFilterEvents } from "../services/eventService";
+import { getFilterEvents } from "../services/EventService";
 
 const Content = ({ imageUrl }) => {
   const [trendingUpcomingEvents, setTrendingUpcomingEvents] = useState([]);

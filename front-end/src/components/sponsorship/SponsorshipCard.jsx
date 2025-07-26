@@ -3,7 +3,7 @@ import { vietnameseDate } from "../../utils/DateConvert";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
-import { deleteSponsorship } from "../../services/sponsorshipService";
+import { deleteSponsorship } from "../../services/SponsorshipService";
 
 const SponsorshipCard = ({ item }) => {
   const navigate = useNavigate();

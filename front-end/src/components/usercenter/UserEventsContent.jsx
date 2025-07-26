@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 // Bỏ import axios nếu không dùng trực tiếp nữa
 // import axios from 'axios';
-import { getUserEvents } from "../../services/profileService"; // Sử dụng hàm service này
+import { getUserEvents } from "../../services/ProfileService"; // Sử dụng hàm service này
 import EventCard from "./EventCard";
 import { useNavigate } from "react-router-dom";
 
@@ -45,7 +45,7 @@ const UserEventsContent = () => {
     fetchEvents();
   }, [navigate]); // navigate thường ổn định, useEffect này sẽ chạy một lần khi component mount
 
-  // useEffect cho việc filter events 
+  // useEffect cho việc filter events
   useEffect(() => {
     filterEvents();
     setCurrentPage(1); // Reset về trang 1 mỗi khi events hoặc filters thay đổi

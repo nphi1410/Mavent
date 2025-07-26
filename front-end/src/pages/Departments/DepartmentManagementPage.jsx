@@ -13,7 +13,7 @@ import {
   faCheckSquare,
 } from "@fortawesome/free-solid-svg-icons";
 import DepartmentFormModal from "../../components/department/DepartmentFormModal";
-import * as departmentService from "../../services/departmentService";
+import * as departmentService from "../../services/DepartmentService";
 
 // Notification component
 const Notification = ({ type, message, onClose }) => {
@@ -322,8 +322,6 @@ const DepartmentManagementPage = () => {
       document.head.removeChild(styleEl);
     };
   }, []);
-
-
 
   // Load real data from API
   useEffect(() => {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { createSponsorshipPackage } from "../../services/sponsorshipService";
+import { createSponsorshipPackage } from "../../services/SponsorshipService";
 
 const SubmitPackageModal = ({
   isOpen,

@@ -1,8 +1,8 @@
 import { faCalendar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useState } from "react";
-import { getAccountById } from "../services/accountService";
-import { registerEvent } from "../services/eventService";
+import { getAccountById } from "../services/AccountService";
+import { registerEvent } from "../services/EventService";
 import { useNavigate } from "react-router-dom";
 import DepartmentChooseForm from "./department/DepartmentChooseForm";
 
@@ -91,22 +91,26 @@ const EventBanner = ({ eventData }) => {
             <FontAwesomeIcon icon={faCalendar} />
             {eventData.startDatetime.split("T")[0]}
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 mt-4">
-            <button
-              onClick={() => handleRegister(PARTICIPANT_ROLE)}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-2 px-4 rounded text-sm sm:text-base"
-            >
-              Participate Now
-            </button>
-            {eventData.status === RECRUITING_STATUS && (
+          {Date.now() > eventData.endDatetime ? (
+            <div className="flex flex-col sm:flex-row gap-4 mt-4">
               <button
-                onClick={() => handleRegister(MEMBER_ROLE)}
-                className="bg-gray-200 hover:bg-gray-300 transition text-gray-800 font-semibold py-2 px-4 rounded text-sm sm:text-base"
+                onClick={() => handleRegister(PARTICIPANT_ROLE)}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-2 px-4 rounded text-sm sm:text-base"
               >
-                Become a Member
+                Participate Now
               </button>
-            )}
-          </div>
+              {eventData.status === RECRUITING_STATUS && (
+                <button
+                  onClick={() => handleRegister(MEMBER_ROLE)}
+                  className="bg-gray-200 hover:bg-gray-300 transition text-gray-800 font-semibold py-2 px-4 rounded text-sm sm:text-base"
+                >
+                  Become a Member
+                </button>
+              )}
+            </div>
+          ) : (
+            <span>Event has ended</span>
+          )}
 
           {/* Department Choose Form */}
           {showDepartmentForm && (

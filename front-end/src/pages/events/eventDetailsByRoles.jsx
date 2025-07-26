@@ -1,5 +1,5 @@
 import AgendaList from "../../components/event/AgendaList";
-import { getEventById } from "../../services/eventService";
+import { getEventById } from "../../services/EventService";
 import { useEffect, useState } from "react";
 import { Calendar, MessageSquare, MapPin, User } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
