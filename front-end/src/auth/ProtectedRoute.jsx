@@ -7,9 +7,7 @@ import {
   useLocation,
   useParams,
 } from "react-router-dom";
-import { getUserInfoInEvent } from "../services/UserEventService";
 import RedirectPage from "../pages/UserAuthorization/UnauthorizedAccess";
-import { set } from "react-hook-form";
 
 function parseJwt(token) {
   const base64Url = token.split(".")[1];

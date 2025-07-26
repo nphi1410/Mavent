@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createEvent, getEventById } from "../../services/EventService";
 import { getAllLocations } from "../../services/EventLocationService";
-import { getAllTags } from "../../services/EventTagService"; // Thêm import cho tag service
+import { getAllTags } from "../../services/eventTagService"; // Thêm import cho tag service
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
@@ -218,40 +218,45 @@ const CreateEvent = ({ isUpdatePage = false }) => {
     <div className="min-h-screen bg-green-50 px-4 py-8">
       <div className="max-w-4xl mx-auto text-center">
         <h1 className="text-3xl font-bold">Create New Event</h1>
-        <p className="mt-2 text-gray-600">Fill in the details to get started</p>
+        {!isUpdatePage && (
+          <div>
+            <p className="mt-2 text-gray-600">
+              Fill in the details to get started
+            </p>
 
-        {/* Stepper */}
-        <div className="mt-6 flex justify-center items-center gap-6">
-          <div className="flex items-center gap-2 text-green-600 font-medium">
-            <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">
-              1
+            {/* Stepper */}
+            <div className="mt-6 flex justify-center items-center gap-6">
+              <div className="flex items-center gap-2 text-green-600 font-medium">
+                <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">
+                  1
+                </div>
+                Event Details
+              </div>
+              <div className="h-px w-8 bg-gray-400"></div>
+              <div className="flex items-center gap-2 text-green-600 font-medium">
+                <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">
+                  2
+                </div>
+                Proposal
+              </div>
+              <div className="h-px w-8 bg-gray-400"></div>
+              <div className="flex items-center gap-2 text-green-600 font-medium">
+                <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">
+                  3
+                </div>
+                Timeline
+              </div>
+              <div className="h-px w-8 bg-gray-400"></div>
+              <div className="flex items-center gap-2 text-green-600 font-medium">
+                <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">
+                  4
+                </div>
+                Agenda
+              </div>
             </div>
-            Event Details
           </div>
-          <div className="h-px w-8 bg-gray-400"></div>
-          <div className="flex items-center gap-2 text-green-600 font-medium">
-            <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">
-              2
-            </div>
-            Proposal
-          </div>
-          <div className="h-px w-8 bg-gray-400"></div>
-          <div className="flex items-center gap-2 text-green-600 font-medium">
-            <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">
-              3
-            </div>
-            Timeline
-          </div>
-          <div className="h-px w-8 bg-gray-400"></div>
-          <div className="flex items-center gap-2 text-green-600 font-medium">
-            <div className="w-6 h-6 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center">
-              4
-            </div>
-            Agenda
-          </div>
-        </div>
+        )}
       </div>
-
       <form
         onSubmit={handleSubmit}
         className="max-w-4xl mx-auto mt-10 space-y-8"

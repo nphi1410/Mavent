@@ -189,7 +189,8 @@ public class AccountController {
         }
 
         String otp = accountService.getRandomOTP();
-        mailConfig.sendMail(request.getEmail(), "Your OTP Code for Reset Password at Mavent", "Your OTP code for Reset Password at Mavent is: " + otp);
+        String mailContent = "Your OTP Code for Resetting password at MAVENT is: " + otp + ". Please remember that this OTP only last for 2 minutes.";
+        mailConfig.sendMail(request.getEmail(), "Your OTP Code for Reset Password at Mavent", mailContent);
 
         session.setAttribute("reset_email", request.getEmail());
         session.setAttribute("reset_otp", otp);
@@ -215,6 +216,7 @@ public class AccountController {
         }
         account.setPasswordHash(passwordEncoder.encode(newPassword));
         accountRepository.save(account);
+
         mailConfig.sendMail(email, "Your New Password for Mavent", "Your new password is: " + newPassword);
 
         return ResponseEntity.ok("Account password is reset successfully. You can now reset your password.");
