@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getSponsorshipPackages } from "../services/SponsorshipService";
 import { useParams } from "react-router-dom";
 import SubmitPackageModal from "../components/sponsorship/SubmitPackageModal";
-import SponsorshipPackage from "../components/sponsorship/sponsorshipPackage";
+import SponsorshipPackage from "../components/sponsorship/SponsorshipPackage";
 
 const SponsorshipPackagesPage = () => {
   const { id } = useParams();
