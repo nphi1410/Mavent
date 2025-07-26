@@ -426,14 +426,14 @@ public class AccountController {
 
         Account account = getAuthenticatedAccount(request);
         if (account == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Bạn cần đăng nhập để cập nhật trạng thái task");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You have to login to update task status");
         }
 
         try {
             TaskDTO currentTask = accountService.getTaskDetails(account.getAccountId(), taskId);
             if (currentTask == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("Không tìm thấy task với ID: " + taskId);
+                        .body("Can not find task with this ID: " + taskId);
             }
 
             String newStatus = statusUpdateDTO.getStatus();
@@ -460,24 +460,24 @@ public class AccountController {
 
             if (!isValidTransition) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Không thể chuyển trạng thái từ " + currentStatus + " sang " + newStatus);
+                        .body("Can not update task status from " + currentStatus + " to " + newStatus);
             }
 
             if (needsCreatorPermission) {
                 if (!account.getAccountId().equals(currentTask.getAssignedByAccountId())) {
                     if ("CANCELLED".equals(newStatus)) {
                         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                                .body("Chỉ người tạo task mới có thể hủy task này");
+                                .body("Just the creator of the task can change the status to " + newStatus);
                     } else {
                         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                                .body("Chỉ người tạo task mới có thể chuyển trạng thái task này sang " + newStatus);
+                                .body("Just the creator of the task can change the status to " + newStatus);
                     }
                 }
             } else {
                 if (!account.getAccountId().equals(currentTask.getAssignedToAccountId()) &&
                         !account.getAccountId().equals(currentTask.getAssignedByAccountId())) {
                     return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                            .body("Chỉ người được giao hoặc người tạo task mới có thể chuyển trạng thái này");
+                            .body("Just the assignee or creator of the task can change the status to " + newStatus);
                 }
             }
 
@@ -485,7 +485,7 @@ public class AccountController {
             return ResponseEntity.ok(updatedTask);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Lỗi khi cập nhật trạng thái task: " + e.getMessage());
+                    .body("Error: " + e.getMessage());
         }
     }
 
@@ -765,8 +765,7 @@ public ResponseEntity<?> updateTaskDocuments(
     if (task == null) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Task not found");
     }
-    
-    // Kiểm tra quyền (creator hoặc assignee)
+
     if (!account.getAccountId().equals(task.getAssignedByAccountId()) &&
         !account.getAccountId().equals(task.getAssignedToAccountId())) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)

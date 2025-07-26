@@ -125,7 +125,6 @@ export const getUserTasks = async (params = {}) => {
   }
 };
 
-// Add this new function to fetch task details
 export const getTaskDetails = async (taskId) => {
   try {
     const response = await Api.get(`/user/tasks/${taskId}`);
@@ -133,14 +132,14 @@ export const getTaskDetails = async (taskId) => {
   } catch (error) {
     console.error("Error fetching task details:", error);
     handleAuthError(error);
-    // Return null or throw an error depending on how you want to handle it
     return null;
   }
 };
 
 export const updateTaskStatus = async (taskId, newStatus) => {
   try {
-    // Thay đổi từ /user/tasks/ thành /api/user/tasks/ nếu cần
+    console.log("Updating task status:", { taskId, newStatus });
+    
     const response = await Api.patch(`user/tasks/${taskId}/status`, {
       status: newStatus
     });
@@ -151,8 +150,6 @@ export const updateTaskStatus = async (taskId, newStatus) => {
     throw error;
   }
 };
-
-// Thêm hàm này vào cuối file profileService.jsx
 
 export const getTaskAttendees = async (taskId) => {
   try {
@@ -165,7 +162,6 @@ export const getTaskAttendees = async (taskId) => {
   }
 };
 
-// Thêm hàm tạo task
 export const createTask = async (taskData) => {
   try {
     const response = await Api.post('/user/tasks', taskData);
@@ -179,7 +175,6 @@ export const createTask = async (taskData) => {
 
 export const getUserRoleInEvent = async (eventId) => {
   try {
-    // Đơn giản hóa: Chỉ gọi API và trả về dữ liệu
     const response = await Api.get(`/events/${eventId}/members/me`);
     return response.data;
   } catch (error) {
@@ -192,8 +187,6 @@ export const getUserRoleInEvent = async (eventId) => {
 export const getEventMembers = async (eventId) => {
   try {
     const response = await Api.get(`/events/${eventId}/members`);
-    
-    // Đơn giản hóa: Chỉ trả về response.data thay vì xử lý nhiều trường hợp
     return response.data;
     
     return adaptedData;

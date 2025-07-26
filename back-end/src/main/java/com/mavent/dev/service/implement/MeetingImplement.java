@@ -9,6 +9,7 @@ import com.mavent.dev.entity.Meeting;
 import com.mavent.dev.entity.MeetingAttendee;
 import com.mavent.dev.repository.*;
 import com.mavent.dev.service.MeetingService;
+import com.mavent.dev.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +36,8 @@ public class MeetingImplement implements MeetingService {
     private GoogleTokenRepository tokenRepository;
     @Autowired
     private GoogleCalendarEventRepository calendarEventRepository;
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     public Meeting createMeeting(MeetingRequest meeting, List<Integer> attendeeIds) {
@@ -49,6 +52,17 @@ public class MeetingImplement implements MeetingService {
         }
         meetingAttendeeRepository.saveAll(attendees);
         meetingAttendeeRepository.deleteOld(meeting.getMeetingId(), attendeeIds);
+
+        for (Integer attendeeId : attendeeIds) {
+            notificationService.createNotification(
+                    attendeeId,
+                    savedMeeting.getEventId(),
+                    null,
+                    null,
+                    "MEETING INVITATION",
+                    "You have been invited to a meeting: " + savedMeeting.getTitle()
+            );
+        }
 
         // 3. For each attendee, sync Google Calendar if connected
         for (MeetingAttendee attendee : attendees) {
@@ -128,6 +142,15 @@ public class MeetingImplement implements MeetingService {
                 if (calEventOpt.isPresent()) {
                     calendarService.updateMeetingEvent(accessToken, updated, calEventOpt.get().getGoogleEventId());
                 }
+
+                notificationService.createNotification(
+                        accountId,
+                        updated.getEventId(),
+                        null,
+                        null,
+                        "MEETING UPDATE",
+                        "The meeting '" + updated.getTitle() + "' has been updated."
+                );
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -141,6 +164,9 @@ public class MeetingImplement implements MeetingService {
         if (!meetingRepository.existsById(meetingId)) {
             throw new RuntimeException("Meeting not found with ID: " + meetingId);
         }
+
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new RuntimeException("Meeting not found with ID: " + meetingId));
 
         // 1. Delete Google Calendar Events for each attendee
         List<MeetingAttendee> attendees = meetingAttendeeRepository.findByMeetingId(meetingId);
@@ -161,6 +187,15 @@ public class MeetingImplement implements MeetingService {
                     calendarService.deleteMeetingEvent(accessToken, calEventOpt.get().getGoogleEventId());
                     calendarEventRepository.delete(calEventOpt.get());
                 }
+
+                notificationService.createNotification(
+                        accountId,
+                        null,
+                        null,
+                        null,
+                        "MEETING CANCELLATION",
+                        "The meeting " + meeting.getTitle() + " has been cancelled."
+                );
             } catch (Exception e) {
                 e.printStackTrace();
             }

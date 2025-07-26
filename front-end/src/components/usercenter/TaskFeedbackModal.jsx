@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from "react";
 import {
-  getTaskFeedback,
-  createTaskFeedback,
-  getTaskDocuments,
-  updateTask,
-} from "../../services/ProfileService";
-import { getAllAccounts } from "../../services/AccountService";
-import {
-  getDocumentsByEvent,
-  uploadDocument,
-} from "../../services/DocumentService";
+    getTaskFeedback,
+    createTaskFeedback,
+    getTaskDocuments,
+    updateTask
+} from '../../services/ProfileService';
+import { getAllAccounts } from '../../services/accountService';
+import { getDocumentsByEvent, uploadDocument } from '../../services/documentService';
 
 const TaskFeedbackModal = ({ taskId, isOpen, onClose, taskData }) => {
   const [feedback, setFeedback] = useState([]);
@@ -65,19 +62,19 @@ const TaskFeedbackModal = ({ taskId, isOpen, onClose, taskData }) => {
     }
   };
 
-  const fetchFeedback = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await getTaskFeedback(taskId);
-      setFeedback(data || []);
-    } catch (err) {
-      console.error("Failed to fetch feedback:", err);
-      setError(err.message || "Không thể tải phản hồi");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const fetchFeedback = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await getTaskFeedback(taskId);
+            setFeedback(data || []);
+        } catch (err) {
+            console.error("Failed to fetch feedback:", err);
+            setError(err.message || "Can't fetch feedback");
+        } finally {
+            setLoading(false);
+        }
+    };
 
   const fetchTaskDocuments = async () => {
     setLoadingDocuments(true);
@@ -125,18 +122,18 @@ const TaskFeedbackModal = ({ taskId, isOpen, onClose, taskData }) => {
     e.preventDefault();
     if (!newComment.trim()) return;
 
-    setSubmitting(true);
-    try {
-      const data = await createTaskFeedback(taskId, newComment);
-      setFeedback([...feedback, data]);
-      setNewComment("");
-    } catch (err) {
-      console.error("Failed to submit feedback:", err);
-      setError(err.message || "Không thể gửi phản hồi");
-    } finally {
-      setSubmitting(false);
-    }
-  };
+        setSubmitting(true);
+        try {
+            const data = await createTaskFeedback(taskId, newComment);
+            setFeedback([...feedback, data]);
+            setNewComment('');
+        } catch (err) {
+            console.error("Failed to submit feedback:", err);
+            setError(err.message || "Can't submit feedback");
+        } finally {
+            setSubmitting(false);
+        }
+    };
 
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
@@ -149,16 +146,16 @@ const TaskFeedbackModal = ({ taskId, isOpen, onClose, taskData }) => {
     }
   };
 
-  const handleUploadDocument = async () => {
-    if (!newDocument.file) {
-      setError("Vui lòng chọn file");
-      return;
-    }
+    const handleUploadDocument = async () => {
+        if (!newDocument.file) {
+            setError("Please select a file");
+            return;
+        }
 
-    if (!taskData) {
-      setError("Không có thông tin task");
-      return;
-    }
+        if (!taskData) {
+            setError("No task information available");
+            return;
+        }
 
     try {
       setUploadingDocument(true);
@@ -169,30 +166,22 @@ const TaskFeedbackModal = ({ taskId, isOpen, onClose, taskData }) => {
         description: newDocument.description,
       };
 
-      // Upload document mới
-      const uploadedDoc = await uploadDocument(
-        newDocument.file,
-        documentData,
-        null
-      );
+            const uploadedDoc = await uploadDocument(newDocument.file, documentData, null);
 
-      // Lấy danh sách document IDs hiện tại của task
-      const currentDocIds = taskDocuments.map((doc) => doc.documentId);
+            const currentDocIds = taskDocuments.map(doc => doc.documentId);
 
-      // Thêm document mới vào danh sách
-      const updatedDocIds = [...currentDocIds, uploadedDoc.documentId];
+            const updatedDocIds = [...currentDocIds, uploadedDoc.documentId];
 
-      // Sử dụng updateTask để update documents
-      const updateData = {
-        title: taskData.title,
-        description: taskData.description,
-        dueDate: new Date(taskData.dueDate).toISOString(),
-        priority: taskData.priority,
-        eventId: taskData.eventId,
-        assignedToAccountId: taskData.assignedToAccountId,
-        departmentId: taskData.departmentId,
-        documentIds: updatedDocIds,
-      };
+            const updateData = {
+                title: taskData.title,
+                description: taskData.description,
+                dueDate: new Date(taskData.dueDate).toISOString(),
+                priority: taskData.priority,
+                eventId: taskData.eventId,
+                assignedToAccountId: taskData.assignedToAccountId,
+                departmentId: taskData.departmentId,
+                documentIds: updatedDocIds
+            };
 
       await updateTask(taskId, updateData);
 
@@ -207,57 +196,53 @@ const TaskFeedbackModal = ({ taskId, isOpen, onClose, taskData }) => {
       const fileInput = document.querySelector('input[type="file"]');
       if (fileInput) fileInput.value = "";
 
-      setError(null);
-    } catch (err) {
-      setError("Không thể upload document: " + err.message);
-      console.error(err);
-    } finally {
-      setUploadingDocument(false);
-    }
-  };
+            setError(null);
 
-  const handleAttachExistingDocument = async (documentId) => {
-    try {
-      // Lấy danh sách document IDs hiện tại
-      const currentDocIds = taskDocuments.map((doc) => doc.documentId);
+        } catch (err) {
+            setError('Can not upload document: ' + err.message);
+            console.error(err);
+        } finally {
+            setUploadingDocument(false);
+        }
+    };
 
-      // Kiểm tra xem document đã được attach chưa
-      if (currentDocIds.includes(documentId)) {
-        setError("Document này đã được attach vào task");
-        return;
-      }
+    const handleAttachExistingDocument = async (documentId) => {
+        try {
+            const currentDocIds = taskDocuments.map(doc => doc.documentId);
 
-      // Thêm document vào danh sách
-      const updatedDocIds = [...currentDocIds, documentId];
+            if (currentDocIds.includes(documentId)) {
+                setError("This document is already attached to the task");
+                return;
+            }
 
-      // Update task với document mới
-      const updateData = {
-        title: taskData.title,
-        description: taskData.description,
-        dueDate: new Date(taskData.dueDate).toISOString(),
-        priority: taskData.priority,
-        eventId: taskData.eventId,
-        assignedToAccountId: taskData.assignedToAccountId,
-        departmentId: taskData.departmentId,
-        documentIds: updatedDocIds,
-      };
+            const updatedDocIds = [...currentDocIds, documentId];
+
+            const updateData = {
+                title: taskData.title,
+                description: taskData.description,
+                dueDate: new Date(taskData.dueDate).toISOString(),
+                priority: taskData.priority,
+                eventId: taskData.eventId,
+                assignedToAccountId: taskData.assignedToAccountId,
+                departmentId: taskData.departmentId,
+                documentIds: updatedDocIds
+            };
 
       await updateTask(taskId, updateData);
 
-      // Refresh task documents
-      await fetchTaskDocuments();
-      setError(null);
-    } catch (err) {
-      setError("Không thể attach document: " + err.message);
-      console.error(err);
-    }
-  };
+            await fetchTaskDocuments();
+            setError(null);
 
-  const handleRemoveDocument = async (documentId) => {
-    try {
-      // Lấy danh sách document IDs hiện tại và loại bỏ document cần xóa
-      const currentDocIds = taskDocuments.map((doc) => doc.documentId);
-      const updatedDocIds = currentDocIds.filter((id) => id !== documentId);
+        } catch (err) {
+            setError("Can't attach document: " + err.message);
+            console.error(err);
+        }
+    };
+
+    const handleRemoveDocument = async (documentId) => {
+        try {
+            const currentDocIds = taskDocuments.map(doc => doc.documentId);
+            const updatedDocIds = currentDocIds.filter(id => id !== documentId);
 
       // Update task
       const updateData = {
@@ -273,65 +258,55 @@ const TaskFeedbackModal = ({ taskId, isOpen, onClose, taskData }) => {
 
       await updateTask(taskId, updateData);
 
-      // Refresh task documents
-      await fetchTaskDocuments();
-      setError(null);
-    } catch (err) {
-      setError("Không thể xóa document: " + err.message);
-      console.error(err);
-    }
-  };
+            // Refresh task documents
+            await fetchTaskDocuments();
+            setError(null);
 
-  const formatDate = (dateString) => {
-    try {
-      const date = new Date(dateString);
-      return new Intl.DateTimeFormat("vi-VN", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      }).format(date);
-    } catch (error) {
-      console.error("Error formatting date:", error, dateString);
-      return dateString || "Không có ngày";
-    }
-  };
+        } catch (err) {
+            setError("Can't remove document: " + err.message);
+            console.error(err);
+        }
+    };
+
+    const formatDate = (dateString) => {
+        try {
+            const date = new Date(dateString);
+            return new Intl.DateTimeFormat('vi-VN', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }).format(date);
+        } catch (error) {
+            console.error("Error formatting date:", error, dateString);
+            return dateString || "Do not have date";
+        }
+    };
 
   if (!isOpen) return null;
 
-  // Lọc ra documents chưa được attach
-  const availableDocuments = documents.filter(
-    (doc) =>
-      !taskDocuments.some((taskDoc) => taskDoc.documentId === doc.documentId)
-  );
-
-  return (
-    <div className="fixed inset-0 bg-gray-900/40 z-[10000] flex justify-center items-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <header className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold">Task Feedback & Documents</h2>
-            <button
-              onClick={onClose}
-              className="text-gray-500 hover:text-gray-800"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </header>
+    // Lọc ra documents chưa được attach
+    const availableDocuments = documents.filter(doc =>
+        !taskDocuments.some(taskDoc => taskDoc.documentId === doc.documentId)
+    );
+    console.log("Available documents:", availableDocuments);
+    
+    return (
+        <div className="fixed inset-0 bg-gray-900/40 z-[10000] flex justify-center items-center p-4 overflow-y-auto">
+            <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+                <div className="p-6">
+                    <header className="flex justify-between items-center mb-6">
+                        <h2 className="text-xl font-bold">Task Feedback & Documents</h2>
+                        <button
+                            onClick={onClose}
+                            className="text-gray-500 hover:text-gray-800"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </header>
 
           {/* Error message */}
           {error && (
@@ -579,68 +554,56 @@ const TaskFeedbackModal = ({ taskId, isOpen, onClose, taskData }) => {
                   </div>
                 )}
 
-                {/* Available Documents from Event */}
-                {availableDocuments.length > 0 && (
-                  <div>
-                    <h4 className="font-medium mb-3 text-sm">
-                      Available Documents from Event
-                    </h4>
-                    <div className="max-h-48 overflow-y-auto space-y-2">
-                      {availableDocuments.map((doc) => (
-                        <div
-                          key={doc.documentId}
-                          className="flex items-center justify-between p-3 bg-white rounded-lg border"
-                        >
-                          <div className="flex items-center">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-4 w-4 text-gray-400 mr-3"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                              />
-                            </svg>
-                            <div>
-                              <p className="font-medium text-xs text-gray-900">
-                                {doc.title}
-                              </p>
-                              {doc.description && (
-                                <p className="text-xs text-gray-600">
-                                  {doc.description}
-                                </p>
-                              )}
-                              <p className="text-xs text-gray-500">
-                                {doc.fileType} •{" "}
-                                {new Date(doc.createdAt).toLocaleDateString()}
-                              </p>
+                                {/* Available Documents from Event */}
+                                {availableDocuments.length > 0 && (
+                                    <div>
+                                        <h4 className="font-medium mb-3 text-sm">Available Documents from Event</h4>
+                                        <div className="max-h-48 overflow-y-auto space-y-2">
+                                            {availableDocuments.map((doc) => (
+                                                <div key={doc.documentId} className="flex items-center justify-between p-3 bg-white rounded-lg">
+                                                    <div className="flex items-center">
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            className="h-4 w-4 text-gray-400 mr-3"
+                                                            fill="none"
+                                                            viewBox="0 0 24 24"
+                                                            stroke="currentColor"
+                                                        >
+                                                            <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={2}
+                                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                            />
+                                                        </svg>
+                                                        <div>
+                                                            <p className="font-medium text-xs text-gray-900">{doc.title}</p>
+                                                            {doc.description && (
+                                                                <p className="text-xs text-gray-600">{doc.description}</p>
+                                                            )}
+                                                            <p className="text-xs text-gray-500">
+                                                                {doc.fileType} • {new Date(doc.createdAt).toLocaleDateString()}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleAttachExistingDocument(doc.documentId)}
+                                                        className="text-[#00155c] hover:text-[#172c70] text-xs font-medium"
+                                                    >
+                                                        Attach
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                          </div>
-                          <button
-                            onClick={() =>
-                              handleAttachExistingDocument(doc.documentId)
-                            }
-                            className="text-[#00155c] hover:text-[#172c70] text-xs font-medium"
-                          >
-                            Attach
-                          </button>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+                    )}
+                </div>
             </div>
-          )}
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default TaskFeedbackModal;

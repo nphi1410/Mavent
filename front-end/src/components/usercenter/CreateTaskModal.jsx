@@ -1,46 +1,19 @@
-import React, { useState, useEffect } from "react";
-import {
-  getUserEvents,
-  getUserRoleInEvent,
-  createTask,
-  getEventDepartments,
-} from "../../services/ProfileService";
-import {
-  getDocumentsByEvent,
-  uploadDocument,
-} from "../../services/DocumentService";
-import DatePicker from "react-datepicker";
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { getEventMembers } from "../../services/ProfileService";
+import { createTask, getEventDepartments, getEventMembers } from '../../services/ProfileService';
+import { getDocumentsByEvent, uploadDocument } from '../../services/documentService';
 
-const CreateTaskModal = ({
-  isOpen,
-  onClose,
-  onTaskCreated,
-  eventId,
-  eventName,
-}) => {
-  // Bỏ các state liên quan đến step và event selection
+const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, eventId, eventName }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [members, setMembers] = useState([]);
-
-  // State cho departments
   const [departments, setDepartments] = useState([]);
-  const [loadingDepartments, setLoadingDepartments] = useState(false);
-
-  // State cho documents
   const [documents, setDocuments] = useState([]);
   const [selectedDocuments, setSelectedDocuments] = useState([]);
-  const [loadingDocuments, setLoadingDocuments] = useState(false);
   const [uploadingDocument, setUploadingDocument] = useState(false);
   const [showUploadForm, setShowUploadForm] = useState(false);
-  const [newDocument, setNewDocument] = useState({
-    file: null,
-    title: "",
-    description: "",
-  });
-
+  const [newDocument, setNewDocument] = useState({ file: null, title: '', description: '' });
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -48,26 +21,23 @@ const CreateTaskModal = ({
     priority: "MEDIUM",
     assignedToAccountId: "",
     attendees: [],
-    departmentId: "",
-    documentIds: [],
+    departmentId: '',
   });
   const [formErrors, setFormErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
-  // useEffect khi mở modal - fetch data cho event cụ thể
   useEffect(() => {
     if (isOpen && eventId) {
       const fetchEventData = async () => {
         try {
           setLoading(true);
+          setError(null);
 
-          // Fetch members, departments, và documents cho event này
-          const [membersData, departmentsData, documentsData] =
-            await Promise.all([
-              getEventMembers(eventId),
-              getEventDepartments(eventId),
-              getDocumentsByEvent(eventId),
-            ]);
+          const [membersData, departmentsData, documentsData] = await Promise.all([
+            getEventMembers(eventId),
+            getEventDepartments(eventId),
+            getDocumentsByEvent(eventId)
+          ]);
 
           setMembers(membersData || []);
           setDepartments(departmentsData || []);
@@ -82,7 +52,6 @@ const CreateTaskModal = ({
 
       fetchEventData();
 
-      // Reset form khi mở modal
       setFormData({
         title: "",
         description: "",
@@ -99,76 +68,91 @@ const CreateTaskModal = ({
     }
   }, [isOpen, eventId]);
 
-  const handleInputChange = (e) => {
+  const activeMembers = useMemo(() => {
+    return (members || []).filter(member => member.isActive === true);
+  }, [members]);
+
+  const activeMembersWithDepartment = useMemo(() => {
+    return activeMembers.map(member => ({
+      ...member,
+      isInSelectedDepartment: formData.departmentId && 
+        String(member.departmentId) === String(formData.departmentId)
+    }));
+  }, [activeMembers, formData.departmentId]);
+
+  const handleInputChange = useCallback((e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (formErrors[name]) {
       setFormErrors((prev) => ({ ...prev, [name]: null }));
     }
-  };
+  }, [formErrors]);
 
-  const handleDateChange = (date) => {
-    setFormData((prev) => ({ ...prev, dueDate: date }));
+  const handleDateChange = useCallback((date) => {
+    setFormData(prev => ({ ...prev, dueDate: date }));
     if (formErrors.dueDate) {
       setFormErrors((prev) => ({ ...prev, dueDate: null }));
     }
-  };
+  }, [formErrors]);
 
-  const handleAssigneeChange = (e) => {
+  const handleAssigneeChange = useCallback((e) => {
     const assigneeId = e.target.value;
     setFormData((prev) => ({ ...prev, assignedToAccountId: assigneeId }));
     if (formErrors.assignedToAccountId) {
       setFormErrors((prev) => ({ ...prev, assignedToAccountId: null }));
     }
-  };
+  }, [formErrors]);
 
-  const handleAttendeeToggle = (accountId) => {
-    setFormData((prev) => {
-      if (accountId === formData.assignedToAccountId) {
-        return prev;
-      }
+  const handleAttendeeToggle = useCallback((accountId) => {
+    setFormData(prev => {
+      if (accountId === prev.assignedToAccountId) return prev;
       const attendees = prev.attendees.includes(accountId)
         ? prev.attendees.filter((id) => id !== accountId)
         : [...prev.attendees, accountId];
-
       return { ...prev, attendees };
     });
-  };
+  }, []);
 
-  const handleDepartmentChange = (e) => {
+  const handleDepartmentChange = useCallback((e) => {
     const departmentId = e.target.value;
-    setFormData((prev) => ({ ...prev, departmentId }));
+    setFormData(prev => ({ ...prev, departmentId }));
+
+    if (departmentId) {
+      const departmentMemberIds = members
+        .filter(member => String(member.departmentId) === String(departmentId) && member.isActive)
+        .map(member => member.accountId);
+      
+      setFormData(prev => ({
+        ...prev,
+        attendees: [...new Set([...prev.attendees, ...departmentMemberIds.filter(id => String(id) !== String(prev.assignedToAccountId))])]
+      }));
+    }
+    
     if (formErrors.departmentId) {
       setFormErrors((prev) => ({ ...prev, departmentId: null }));
     }
-  };
+  }, [members, formErrors]);
 
-  // Document handling functions
-  const handleDocumentToggle = (documentId) => {
-    setSelectedDocuments((prev) =>
+  const handleDocumentToggle = useCallback((documentId) => {
+    setSelectedDocuments(prev =>
       prev.includes(documentId)
         ? prev.filter((id) => id !== documentId)
         : [...prev, documentId]
     );
-  };
+  }, []);
 
-  const handleFileSelect = (e) => {
+  const handleFileSelect = useCallback((e) => {
     const file = e.target.files[0];
     if (file) {
-      setNewDocument((prev) => ({
-        ...prev,
-        file,
-        title: file.name,
-      }));
+      setNewDocument(prev => ({ ...prev, file, title: file.name }));
     }
-  };
+  }, []);
 
-  const handleUploadDocument = async () => {
+  const handleUploadDocument = useCallback(async () => {
     if (!newDocument.file) {
-      setError("Vui lòng chọn file");
+      setError('Please select a file to upload.');
       return;
     }
-
     try {
       setUploadingDocument(true);
       const documentData = {
@@ -177,34 +161,23 @@ const CreateTaskModal = ({
         title: newDocument.title || newDocument.file.name,
         description: newDocument.description,
       };
-
-      const response = await uploadDocument(
-        newDocument.file,
-        documentData,
-        null
-      );
-
-      // Thêm document mới vào danh sách và tự động chọn
-      const newDoc = response;
-      setDocuments((prev) => [...prev, newDoc]);
-      setSelectedDocuments((prev) => [...prev, newDoc.documentId]);
-
-      // Reset form upload
-      setNewDocument({ file: null, title: "", description: "" });
+      const newDoc = await uploadDocument(newDocument.file, documentData, null);
+      
+      setDocuments(prev => [...prev, newDoc]);
+      setSelectedDocuments(prev => [...prev, newDoc.documentId]);
+      setNewDocument({ file: null, title: '', description: '' });
       setShowUploadForm(false);
-
-      // Reset file input
+      
       const fileInput = document.querySelector('input[type="file"]');
-      if (fileInput) fileInput.value = "";
+      if (fileInput) fileInput.value = '';
     } catch (err) {
-      setError("Không thể upload document: " + err.message);
-      console.error(err);
+      setError('Cannot upload document: ' + err.message);
     } finally {
       setUploadingDocument(false);
     }
-  };
-
-  const validateForm = () => {
+  }, [newDocument, eventId, formData.departmentId]);
+  
+  const validateForm = useCallback(() => {
     const errors = {};
     if (!formData.title.trim()) errors.title = "Title must not be empty";
     if (!formData.description.trim())
@@ -214,51 +187,38 @@ const CreateTaskModal = ({
       errors.assignedToAccountId = "Please select a task assignee";
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
-  };
+  }, [formData]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
-
     if (!validateForm()) return;
 
-    // Thêm người được giao task vào danh sách attendees nếu chưa có
-    const attendees = [...formData.attendees];
-    const assignedId = formData.assignedToAccountId;
-    if (assignedId && !attendees.includes(assignedId)) {
-      attendees.push(assignedId);
-    }
+    const attendees = [...new Set([...formData.attendees, formData.assignedToAccountId])].filter(Boolean);
 
     const taskData = {
       title: formData.title,
       description: formData.description,
       dueDate: formData.dueDate.toISOString(),
       priority: formData.priority,
-      eventId: parseInt(eventId), // Sử dụng eventId từ props
-      assignedToAccountId: parseInt(assignedId),
-      taskAttendees: attendees.map((id) => parseInt(id)),
-      departmentId: formData.departmentId
-        ? parseInt(formData.departmentId)
-        : null,
-      documentIds: selectedDocuments,
+      eventId: parseInt(eventId),
+      assignedToAccountId: parseInt(formData.assignedToAccountId),
+      taskAttendees: attendees.map(id => parseInt(id)),
+      departmentId: formData.departmentId ? parseInt(formData.departmentId) : null,
+      documentIds: selectedDocuments
     };
-
-    // console.log("Submitting task with data:", taskData);
 
     try {
       setSubmitting(true);
-      const createdTask = await createTask(taskData);
-
-      if (createdTask) {
-        if (onTaskCreated) onTaskCreated();
-        onClose();
-      }
+      await createTask(taskData);
+      onTaskCreated?.();
+      onClose();
     } catch (err) {
       console.error("Error creating task:", err);
       setError(err.message || "Can not create task");
     } finally {
       setSubmitting(false);
     }
-  };
+  }, [formData, selectedDocuments, eventId, validateForm, onTaskCreated, onClose]);
 
   if (!isOpen) return null;
 
@@ -429,7 +389,7 @@ const CreateTaskModal = ({
                     } rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   >
                     <option value="">-- Assign to: --</option>
-                    {members.map((member) => (
+                    {activeMembers.map(member => (
                       <option key={member.accountId} value={member.accountId}>
                         {member.name} ({member.email})
                       </option>
@@ -442,7 +402,6 @@ const CreateTaskModal = ({
                   )}
                 </div>
 
-                {/* Documents Section */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Documents (optional)
@@ -495,13 +454,10 @@ const CreateTaskModal = ({
                         ))}
                       </div>
                     ) : (
-                      <p className="text-gray-500 text-sm">
-                        No documents available for this event
-                      </p>
+                      <p className="text-gray-500 text-sm">No documents available for this event</p>
                     )}
                   </div>
 
-                  {/* Upload Form */}
                   {showUploadForm && (
                     <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
                       <h4 className="font-medium mb-3">Upload New Document</h4>
@@ -574,14 +530,16 @@ const CreateTaskModal = ({
                     Task Attendees (optional)
                   </label>
                   <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-lg p-2">
-                    {members.length > 0 ? (
-                      members.map((member) => (
+                    {activeMembers.length > 0 ? (
+                      activeMembersWithDepartment.map(member => (
                         <div
                           key={member.accountId}
                           className={`p-2 mb-1 rounded-md ${
                             member.accountId === formData.assignedToAccountId
-                              ? "bg-blue-100 text-blue-800"
-                              : "hover:bg-gray-100"
+                              ? 'bg-blue-100 text-blue-800'
+                              : member.isInSelectedDepartment
+                                ? 'bg-green-50 border border-green-200'
+                                : 'hover:bg-gray-100'
                           }`}
                         >
                           <label className="flex items-center space-x-2 cursor-pointer">
@@ -601,25 +559,31 @@ const CreateTaskModal = ({
                               }
                               className="h-4 w-4 rounded text-blue-600 focus:ring-blue-500"
                             />
-                            <span>
-                              {member.fullName}{" "}
-                              {member.accountId ===
-                                formData.assignedToAccountId && (
-                                <span className="text-blue-600 text-xs">
-                                  (Leader)
-                                </span>
+                            <div className="flex-grow">
+                              <span>
+                                {member.fullName} 
+                                {member.accountId === formData.assignedToAccountId && 
+                                  <span className="text-blue-600 text-xs"> (Leader)</span>
+                                }
+                                {member.isInSelectedDepartment && member.accountId !== formData.assignedToAccountId &&
+                                  <span className="text-green-600 text-xs"> (Dept. Member)</span>
+                                }
+                              </span>
+                              {member.departmentName && (
+                                <div className="text-xs text-gray-500">{member.departmentName}</div>
                               )}
-                            </span>
+                            </div>
                           </label>
                         </div>
                       ))
                     ) : (
-                      <p className="text-gray-500 p-2">No member yet</p>
+                      <p className="text-gray-500 p-2">No active members yet</p>
                     )}
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
-                    * The leader is automatically included in the participant
-                    list.
+                    * Only active members can be assigned. The leader is automatically included in the participant list.
+                    <br />
+                    * Selecting a department will automatically include all department members as attendees.
                   </p>
                 </div>
               </div>
@@ -645,4 +609,6 @@ const CreateTaskModal = ({
   );
 };
 
-export default CreateTaskModal;
+CreateTaskModal.displayName = 'CreateTaskModal';
+
+export default React.memo(CreateTaskModal);
