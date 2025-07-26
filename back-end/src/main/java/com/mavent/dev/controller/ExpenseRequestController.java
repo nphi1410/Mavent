@@ -3,12 +3,14 @@ package com.mavent.dev.controller;
 import com.mavent.dev.dto.expenses.ExpenseCreateRequestDTO;
 import com.mavent.dev.dto.expenses.ExpenseResponseDTO;
 import com.mavent.dev.dto.expenses.ExpenseUpdateDTO;
+
 import com.mavent.dev.entity.Budgets;
 import com.mavent.dev.entity.ExpenseAttachments;
 import com.mavent.dev.entity.ExpenseCategories;
 import com.mavent.dev.service.BudgetService;
 import com.mavent.dev.service.ExpenseCategoryService;
 import com.mavent.dev.service.ExpenseService;
+import com.nimbusds.openid.connect.sdk.assurance.evidences.attachment.AttachmentType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.MediaType;
@@ -36,6 +38,17 @@ public class ExpenseRequestController {
     public ResponseEntity<List<ExpenseCategories>> getAllCategories() {
         List<ExpenseCategories> categories = categoryService.getAllExpenseCategories();
         return ResponseEntity.ok(categories);
+    }
+
+    @PostMapping(value = "/{expenseId}/receipts", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ExpenseResponseDTO> uploadReceipts(
+            @PathVariable int eventId,
+            @PathVariable int expenseId,
+            @RequestParam("files") List<MultipartFile> files) throws IOException {
+
+        // Upload receipts and update status to RECEIPT_SUBMITTED automatically
+        ExpenseResponseDTO response = expenseService.uploadReceiptsAndUpdateStatus(eventId, expenseId, files);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping(value = "/budget")
@@ -67,17 +80,17 @@ public class ExpenseRequestController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping(value = "/{expenseId}/attachments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<List<ExpenseAttachments>> addAttachmentsToExpense(
-            @PathVariable int eventId,
-            @PathVariable int expenseId,
-            @RequestParam("files") List<MultipartFile> files) throws IOException {
-
-//        System.out.println("addAttachmentsToExpense: Files count = " + (files != null ? files.size() : "null"));
-
-        List<ExpenseAttachments> attachments = expenseService.uploadAttachments(expenseId, files);
-        return ResponseEntity.ok(attachments);
-    }
+//    @PostMapping(value = "/{expenseId}/attachments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ResponseEntity<List<ExpenseAttachments>> addAttachmentsToExpense(
+//            @PathVariable int eventId,
+//            @PathVariable int expenseId,
+//            @RequestParam("files") List<MultipartFile> files) throws IOException {
+//
+////        System.out.println("addAttachmentsToExpense: Files count = " + (files != null ? files.size() : "null"));
+//
+//        List<ExpenseAttachments> attachments = expenseService.uploadAttachments(expenseId, files, );
+//        return ResponseEntity.ok(attachments);
+//    }
 
     @PutMapping("{expenseId}")
     public ResponseEntity<ExpenseResponseDTO> updateExpenseStatus(
@@ -116,4 +129,18 @@ public class ExpenseRequestController {
         return ResponseEntity.ok(expense);
     }
 
+    /**
+     * Check if an expense amount is valid against the event budget
+     * @param eventId The ID of the event
+     * @param amount The expense amount to validate
+     * @return A ResponseEntity containing a boolean indicating if the expense is valid
+     */
+    @GetMapping("/validate-amount")
+    public ResponseEntity<Boolean> validateExpenseAmount(
+            @PathVariable int eventId,
+            @RequestParam java.math.BigInteger amount) {
+
+        boolean isValid = budgetService.validateExpenseAmount(eventId, amount);
+        return ResponseEntity.ok(isValid);
+    }
 }

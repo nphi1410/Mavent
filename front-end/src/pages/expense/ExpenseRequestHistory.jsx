@@ -364,7 +364,7 @@ export default function ExpenseRequestHistory() {
               </div>
 
               {/* Create button for members and department managers */}
-              {(role.toLowerCase() === "member" ||
+              {/* {(role.toLowerCase() === "member" ||
                 role.toLowerCase() === "department_manager") && (
                 <div className="flex-shrink-0">
                   <button
@@ -374,7 +374,7 @@ export default function ExpenseRequestHistory() {
                     Create Expense Request
                   </button>
                 </div>
-              )}
+              )} */}
             </div>
 
             {/* Expense Table */}

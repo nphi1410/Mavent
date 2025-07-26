@@ -16,7 +16,6 @@ import com.mavent.dev.repository.ExpenseCategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import java.util.stream.Collectors;
@@ -73,9 +72,6 @@ public class ExpensesMapper {
         if (expense == null) {
             return null;
         }
-        
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        
 
         ExpenseCategories category = categoryRepository.findExpenseCategoryByCategoryId(expense.getCategoryId());
 
@@ -125,13 +121,12 @@ public class ExpensesMapper {
             return null;
         }
 
-
-        
         return ExpenseAttachmentsDTO.builder()
                 .attachmentId(attachment.getExpenseAttachmentId())
                 .expenseId(attachment.getExpenseId())
                 .fileUrl(attachment.getFileUrl())
                 .fileName(attachment.getFileName())
+                .attachmentType(attachment.getAttachmentType())
                 .fileType(attachment.getFileType())
                 .uploadedAt(attachment.getUploadedAt() != null ? attachment.getUploadedAt() : null)
                 .build();

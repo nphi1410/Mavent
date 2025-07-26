@@ -5,6 +5,7 @@ import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 @Data
@@ -16,9 +17,9 @@ public class Budgets {
     private int budgetId;
     private int eventId;
     @Column(name = "total_amount", columnDefinition = "BIGINT")
-    private Long totalAmount;
+    private BigInteger totalAmount;
     @Column(name = "spent_amount", columnDefinition = "BIGINT")
-    private Long spentAmount;
+    private BigInteger spentAmount;
     private String notes;
     @CreationTimestamp
     private LocalDateTime createdAt;

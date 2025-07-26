@@ -1,5 +1,6 @@
 package com.mavent.dev.dto.expenses;
 
+import com.mavent.dev.entity.ExpenseAttachments;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,5 +18,6 @@ public class ExpenseAttachmentsDTO {
     private String fileUrl;
     private String fileName;
     private String fileType;
+    private ExpenseAttachments.AttachmentType attachmentType;
     private LocalDateTime uploadedAt;
 }

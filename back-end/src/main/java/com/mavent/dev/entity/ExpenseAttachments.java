@@ -36,4 +36,13 @@ public class ExpenseAttachments {
     @CreationTimestamp
     @Column(name = "uploaded_at")
     private LocalDateTime uploadedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column( name = "attachment_type")
+    private ExpenseAttachments.AttachmentType attachmentType;
+
+    public enum AttachmentType {
+        RECEIPT,
+        EVIDENCE
+    }
 }

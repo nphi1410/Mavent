@@ -77,6 +77,7 @@ public class Expenses {
         PENDING,
         APPROVED,
         REJECTED,
-        PAID
+        PAID,
+        RECEIPT_SUBMITTED
     }
 }

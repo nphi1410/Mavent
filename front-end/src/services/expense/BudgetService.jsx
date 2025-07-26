@@ -11,3 +11,18 @@ export const getBudgetByEventId = async (eventId) => {
         throw error;
     }
 }
+
+export const getRemainingBudget = async (eventId) => {
+    try {
+        const budget = await getBudgetByEventId(eventId);
+        if (!budget) return null;
+        
+        const totalAmount = budget.totalAmount || 0;
+        const spentAmount = budget.spentAmount || 0;
+        
+        return totalAmount - spentAmount;
+    } catch (error) {
+        console.error("Error calculating remaining budget:", error);
+        throw error;
+    }
+}
