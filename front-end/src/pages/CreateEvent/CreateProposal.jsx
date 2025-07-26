@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getEventById } from "../../services/eventService";
+import { getEventById } from "../../services/EventService";
 import {
     createProposalItem,
     getProposalByEventId,
