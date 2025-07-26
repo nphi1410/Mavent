@@ -7,8 +7,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { set } from "react-hook-form"
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate, useParams } from "react-router-dom"
-import { updatePendingEvent } from "../../services/eventService"
-import { addNewRole } from "../../services/roleService"
+import { updatePendingEvent } from "../../services/EventService"
+import { addNewRole } from "../../services/RoleService"
 import AccountList from "./AccountList"
 
 

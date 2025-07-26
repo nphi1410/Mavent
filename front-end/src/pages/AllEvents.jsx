@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import EventFilter from "../components/filter/EventFilter";
 import CardMedium from "../components/card/CardMedium";
-import { getFilterEvents } from "../services/eventService";
+import { getFilterEvents } from "../services/EventService";
 
 const Events = () => {
   const [filteredEvents, setFilteredEvents] = useState([]);
