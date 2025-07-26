@@ -20,7 +20,7 @@ import java.util.Optional;
  * Provides data access methods for event-account role relationships.
  */
 @Repository
-public interface EventAccountRoleRepository extends JpaRepository<EventAccountRole, Integer> {
+public interface EventAccountRoleRepository extends JpaRepository<EventAccountRole, EventAccountRole.PK> {
 
     /**
      * Find all roles for a specific event using composite key.
