@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { jwtDecode } from 'jwt-decode';
 import RedirectPage from "../pages/UserAuthorization/UnauthorizedAccess";
+import { logout } from "../services/AuthService";
 
 function parseJwt(token) {
   const base64Url = token.split('.')[1];
@@ -27,7 +28,11 @@ const SuperAdminRoute = () => {
       const payload = parseJwt(token);
       // console.log("Issued at (iat):", new Date(payload.iat * 1000));
       // console.log("Expires at (exp):", new Date(payload.exp * 1000).toLocaleString());
-      setIsTokenExpired(Date.now() > new Date(payload.exp * 1000));
+      if (Date.now() > new Date(payload.exp * 1000)) {
+        logout();
+      } else {
+        setIsTokenExpired(false);
+      }
       // console.log("decoded: ", decoded);
       setRoles(decoded.roles || []);
     } catch (e) {
