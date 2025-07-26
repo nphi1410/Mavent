@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Avatar } from "../../components/ui/avatar";
+import { Avatar } from "../../components/ui/Avatar";
 import { getAssignedAdmin, updateRole } from "../../services/RoleService";
 import { getEventById, updateEvent } from "../../services/eventService";
 import { getAllLocations } from "../../services/EventLocationService";
