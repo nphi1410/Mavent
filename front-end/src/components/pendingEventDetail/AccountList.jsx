@@ -1,5 +1,5 @@
 import { Search, X } from "lucide-react";
-import { Avatar } from "../ui/avatar";
+import { Avatar } from "../ui/Avatar";
 import { useEffect, useState } from "react";
 import { getAllAccounts } from "../../services/AccountService";
 import { useLocation, useParams } from "react-router-dom";
