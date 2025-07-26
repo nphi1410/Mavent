@@ -4,11 +4,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
 import { separateDayMonthYear } from "../../utils/DateConvert";
 
-const CardSmall = ({event }) => {
+const CardSmall = ({ event }) => {
   const navigate = useNavigate();
-  const [day, month, year] = separateDayMonthYear(
-    new Date(event.endDatetime)
-  );
+  const [day, month, year] = separateDayMonthYear(new Date(event.endDatetime));
   const handleClick = () => {
     navigate(`/events/${event.eventId}`);
   };
@@ -25,14 +23,19 @@ const CardSmall = ({event }) => {
           className="w-full h-24 object-cover"
         />
       </div>
-      <div className="details flex flex-col justify-center">
+      <div className="details h-full flex flex-col ">
         <span className="title text-lg font-semibold text-gray-900 mb-1">
           {event.name}
         </span>
-        <span className="text-gray-600 text-sm flex items-center gap-2">
-          <FontAwesomeIcon icon={faCalendar} />
-          End Date: {month} {day}, {year}
-        </span>
+        <div>
+          <span className="text-gray-600 text-sm flex items-center gap-2">
+            <FontAwesomeIcon icon={faCalendar} />
+            End Date: {month} {day}, {year}
+          </span>
+          <span className="text-gray-600 text-sm">
+            Created By: {event.createdByName ?? "Unknown"}
+          </span>
+        </div>
       </div>
     </div>
   );

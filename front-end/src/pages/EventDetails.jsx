@@ -27,11 +27,13 @@ const EventDetails = () => {
         setLoading(true);
         try {
           const data = await getEventById(id);
+          console.log("Event Data:", data);
+
           setEventData(data);
         } catch (err) {
           console.error("Failed to fetch event:", err);
           setError("Something went wrong.");
-        } finally {                                                                     
+        } finally {
           setLoading(false);
         }
       };

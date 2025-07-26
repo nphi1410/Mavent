@@ -119,7 +119,13 @@ public class MemberImplement implements MemberService {
     public MemberResponseDTO banMember(BanMemberRequestDTO request) {
         // Find existing member role
         EventAccountRole memberRole = findEventAccountRole(request.getEventId(), request.getAccountId());
-        
+
+        if (memberRole.getEventRole().equals(EventAccountRole.EventRole.GUEST)){
+
+            eventAccountRoleRepository.deleteByEventIdAndAccountId(memberRole.getEventId(), memberRole.getAccountId());
+            return memberMapper.toMemberResponseDTO(memberRole);
+        }
+
         // Validate ban permissions using roleValidator
         roleValidator.validateBanPermission(
             request.getEventId(), 
