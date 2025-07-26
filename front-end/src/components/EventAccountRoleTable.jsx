@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import EventAccountRoleTicket from "./EventAccountRoleTicket";
+import EventAccountRoleTicket from "./EventAccountRoleTIcket";
 import { vietnameseDate } from "../utils/DateConvert";
 
 const EventAccountRoleTable = ({ eventData = [] }) => {

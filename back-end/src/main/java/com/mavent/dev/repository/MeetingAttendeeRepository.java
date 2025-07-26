@@ -17,23 +17,26 @@ public interface MeetingAttendeeRepository extends JpaRepository<MeetingAttendee
     void deleteByMeetingId(Integer meetingId);
 
     @Query(value = """
-            SELECT 
-                ma.meeting_id AS meetingId,
-                a.account_id AS accountId,
-                a.username AS username,
-                a.email AS email,
-                a.full_name AS fullName,
-                a.avatar_url AS avatarUrl,
-                a.phone_number AS phoneNumber,
-                a.gender AS gender,
-                a.student_id AS studentId,
-                a.date_of_birth AS dateOfBirth,
-                ma.attendance_status AS attendaceStatus
-            FROM meeting_attendees ma
-            JOIN accounts a ON ma.account_id = a.account_id
-            WHERE ma.meeting_id = :meetingId
+                SELECT 
+                    ma.meeting_id AS meetingId,
+                    a.account_id AS accountId,
+                    a.username AS username,
+                    a.email AS email,
+                    a.full_name AS fullName,
+                    a.avatar_url AS avatarUrl,
+                    a.phone_number AS phoneNumber,
+                    a.gender AS gender,
+                    a.student_id AS studentId,
+                    a.date_of_birth AS dateOfBirth,
+                    ma.attendance_status AS attendaceStatus
+                FROM meeting_attendees ma
+                JOIN accounts a ON ma.account_id = a.account_id
+                JOIN event_account_role ear ON ear.account_id = ma.account_id
+                WHERE ma.meeting_id = :meetingId
+                  AND ear.is_active = true
             """, nativeQuery = true)
     List<MeetingAttendeeDTO> findMeetingAttendees(@Param("meetingId") Integer meetingId);
+
 
     @Transactional
     @Modifying
