@@ -2,14 +2,16 @@ import React, { useEffect, useState } from "react";
 import { getUserProfile, uploadAvatar, updateProfile as updateProfileService } from "../../services/profileService"; // Đổi tên updateProfile để tránh trùng
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload, faUser } from '@fortawesome/free-solid-svg-icons';
-import UpdateProfile from "./UpdateProfile"; 
+import UpdateProfile from "./UpdateProfile";
+import { useNavigate } from "react-router-dom";
 
 const ProfileContent = () => {
   const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false); // State để mở/đóng modal UpdateProfile
   const [updateLoading, setUpdateLoading] = useState(false); // State loading riêng cho quá trình update
+  const navigate = useNavigate();
 
   const fetchUserProfile = async () => {
     setLoading(true); // Bắt đầu loading khi fetch profile
@@ -29,7 +31,7 @@ const ProfileContent = () => {
 
   useEffect(() => {
     fetchUserProfile();
-  }, []); 
+  }, []);
 
   const handleAvatarUpload = async (event) => {
     const file = event.target.files[0];
@@ -38,16 +40,17 @@ const ProfileContent = () => {
       const formData = new FormData();
       formData.append('file', file);
       // Cân nhắc thêm state loading cho avatar upload nếu cần
-      try {        const response = await uploadAvatar(formData); // Service trả về response.data
+      try {
+        const response = await uploadAvatar(formData); // Service trả về response.data
         // console.log('ProfileContent: Avatar upload response:', response);
         if (response && response.avatarUrl) { // Kiểm tra response và avatarUrl
           setUserData(prev => ({
             ...prev,
             avatarUrl: response.avatarUrl
           }));
-           alert('Avatar updated successfully!');
+          alert('Avatar updated successfully!');
         } else {
-            throw new Error("Invalid response from avatar upload");
+          throw new Error("Invalid response from avatar upload");
         }
       } catch (err) {
         console.error('ProfileContent: Avatar upload error:', err);
@@ -76,7 +79,7 @@ const ProfileContent = () => {
     setError(null); // Xóa lỗi cũ (nếu có)
     try {
       // console.log('ProfileContent: Starting update with data from child form:', dataFromChildForm);
-      
+
       // Gọi service updateProfile 
       const updatedUserProfile = await updateProfileService(dataFromChildForm);
       // console.log('ProfileContent: Response from updateProfileService:', updatedUserProfile);
@@ -88,7 +91,7 @@ const ProfileContent = () => {
         // Nếu API không trả về object user mới 
         // thì fetch lại để đảm bảo UI đồng bộ.
         // console.log('ProfileContent: Update processed, re-fetching profile for consistency.');
-        await fetchUserProfile(); 
+        await fetchUserProfile();
         alert('Cập nhật thông tin thành công, dữ liệu đang được làm mới.');
       }
       setIsUpdating(false); // Đóng modal
@@ -97,7 +100,7 @@ const ProfileContent = () => {
       let alertMessage = 'Không thể cập nhật thông tin. Vui lòng thử lại.';
       if (error.message === 'Authentication required') { // Từ handleAuthError của service
         // Service đã chuyển hướng, không cần làm gì thêm
-        return; 
+        return;
       } else if (error.response && error.response.data && error.response.data.message) {
         alertMessage = error.response.data.message;
       } else if (error.message) {
@@ -128,7 +131,7 @@ const ProfileContent = () => {
       </div>
     </div>
   );
-  
+
   if (!userData && !loading) return ( // Trường hợp không có userData sau khi load xong và không có lỗi
     <div className="p-10 text-gray-600 text-center">Không thể tải dữ liệu người dùng.</div>
   );
@@ -141,7 +144,7 @@ const ProfileContent = () => {
           <div className="relative group w-32 h-32 sm:w-40 sm:h-40">
             {userData?.avatarUrl ? (
               <img
-                src={userData.avatarUrl} 
+                src={userData.avatarUrl}
                 alt="Profile"
                 className="w-full h-full rounded-full object-cover border-4 border-white shadow-lg"
               />
@@ -161,8 +164,8 @@ const ProfileContent = () => {
             </label>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold mt-4 text-gray-800 truncate max-w-[250px]">
-            @{userData?.username?.length > 15 
-              ? `${userData.username.substring(0, 15)}...` 
+            @{userData?.username?.length > 15
+              ? `${userData.username.substring(0, 15)}...`
               : userData?.username || "User Profile"}
           </h1>
           {/* <p className="text-sm text-gray-500">@{userData?.username}</p> */}
@@ -171,49 +174,56 @@ const ProfileContent = () => {
         {/* Phần Thông Tin Chi Tiết */}
         <div className="mb-8 sm:mb-10 bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
           <div className="divide-y divide-gray-200">
-          {
-            [
-              ["Full Name", "fullName"],
-              ["Student ID", "studentId"],
-              ["Email", "email"], // Email vẫn hiển thị dù không sửa được
-              ["Phone", "phoneNumber"],
-              ["Date of Birth", "dateOfBirth"], 
-              ["Gender", "gender"]
-            ].map(([label, field]) => {
-              let displayValue = userData?.[field];
+            {
+              [
+                ["Full Name", "fullName"],
+                ["Student ID", "studentId"],
+                ["Email", "email"], // Email vẫn hiển thị dù không sửa được
+                ["Phone", "phoneNumber"],
+                ["Date of Birth", "dateOfBirth"],
+                ["Gender", "gender"]
+              ].map(([label, field]) => {
+                let displayValue = userData?.[field];
 
-              if (field === "dateOfBirth") {
-                displayValue = formatDate(displayValue);
-              }
-              if (field === "gender" && displayValue) {
-                displayValue = displayValue.charAt(0).toUpperCase() + displayValue.slice(1).toLowerCase();
-              }
+                if (field === "dateOfBirth") {
+                  displayValue = formatDate(displayValue);
+                }
+                if (field === "gender" && displayValue) {
+                  displayValue = displayValue.charAt(0).toUpperCase() + displayValue.slice(1).toLowerCase();
+                }
 
 
-              const valueToRender = (displayValue === null || displayValue === undefined || displayValue === "") ? (
-                <span className="text-gray-400 italic">Not provided</span>
-              ) : (
-                displayValue
-              );
+                const valueToRender = (displayValue === null || displayValue === undefined || displayValue === "") ? (
+                  <span className="text-gray-400 italic">Not provided</span>
+                ) : (
+                  displayValue
+                );
 
-              return (
-                <div
-                  key={field}
-                  className="py-3 sm:py-4 px-4 sm:px-6 grid grid-cols-3 gap-4 items-center hover:bg-gray-50 transition-colors"
-                >
-                  <span className="text-sm font-medium text-gray-600 col-span-1">{label}:</span>
-                  <span className="text-sm text-gray-800 col-span-2 break-words">{valueToRender}</span>
-                </div>
-              );
-            })
-          }
+                return (
+                  <div
+                    key={field}
+                    className="py-3 sm:py-4 px-4 sm:px-6 grid grid-cols-3 gap-4 items-center hover:bg-gray-50 transition-colors"
+                  >
+                    <span className="text-sm font-medium text-gray-600 col-span-1">{label}:</span>
+                    <span className="text-sm text-gray-800 col-span-2 break-words">{valueToRender}</span>
+                  </div>
+                );
+              })
+            }
           </div>
         </div>
 
         {/* Nút Update Profile */}
-        <div className="flex justify-end px-0 sm:px-6 mb-6"> 
+        <div className="flex justify-end px-0 sm:px-1 mb-6">
           <button
-            onClick={() => { 
+            onClick={() => navigate("/change-password")}
+            className="bg-green-700 text-white font-semibold rounded-lg px-4 py-2.5 mx-8
+                        hover:bg-green-900"
+          >
+            Change Password
+          </button>
+          <button
+            onClick={() => {
               setError(null); // Xóa lỗi cũ (nếu có) trước khi mở modal
               setIsUpdating(true);
             }}
@@ -221,16 +231,17 @@ const ProfileContent = () => {
           >
             Update Profile
           </button>
+
         </div>
 
         {/* Modal Update Profile */}
         {isUpdating && (
-          <UpdateProfile 
+          <UpdateProfile
             userData={userData}
             onClose={() => setIsUpdating(false)}
             onUpdate={handleProfileUpdate} // Truyền hàm xử lý update mới
-            // Truyền thêm updateLoading nếu UpdateProfile cần biết trạng thái loading của cha
-            // isParentLoading={updateLoading} 
+          // Truyền thêm updateLoading nếu UpdateProfile cần biết trạng thái loading của cha
+          // isParentLoading={updateLoading} 
           />
         )}
       </div>
