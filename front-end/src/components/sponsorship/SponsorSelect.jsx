@@ -1,5 +1,5 @@
 import Select from "react-select";
-import { getLogoUrl } from "../../services/logoService";
+import { getLogoUrl } from "../../services/LogoService";
 
 const SponsorSelect = ({ sponsors, value, onChange, onCreateNew }) => {
   const CREATE_NEW_OPTION = {

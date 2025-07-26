@@ -1,5 +1,5 @@
 import React from "react";
-import { getLogoUrl } from "../../services/logoService";
+import { getLogoUrl } from "../../services/LogoService";
 import { vietnameseDate } from "../../utils/DateConvert";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen, faTrash } from "@fortawesome/free-solid-svg-icons";

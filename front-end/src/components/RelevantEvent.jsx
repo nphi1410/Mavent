@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import CardRelevant from "./card/CardMedium";
-import { getTags } from "../services/tagService";
-import { getFilterEvents } from "../services/eventService";
+import { getTags } from "../services/TagService";
+import { getFilterEvents } from "../services/EventService";
 
 const RelevantEvent = ({ eventData }) => {
   const [tagIds, setTagIds] = useState([]);

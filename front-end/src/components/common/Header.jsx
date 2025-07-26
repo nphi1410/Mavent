@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getUserProfile } from "../../services/profileService";
-import { getUnreadNotificationCount } from "../../services/notificationService";
+import { getUserProfile } from "../../services/ProfileService";
+import { getUnreadNotificationCount } from "../../services/NotificationService";
 import SideBar from "./SideBar";
 import NotificationModal from "./NotificationModal";
 

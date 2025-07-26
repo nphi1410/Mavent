@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   getDepartmentsByEventId,
   getMemberCount,
-} from "../../services/departmentService";
+} from "../../services/DepartmentService";
 
 // Component hiển thị danh sách phòng ban theo sự kiện
 function DepartmentList({ eventId }) {
@@ -15,7 +15,6 @@ function DepartmentList({ eventId }) {
       try {
         setLoading(true);
         const data = await getDepartmentsByEventId(eventId);
-    
 
         // Store the departments initially
         setDepartments(data);

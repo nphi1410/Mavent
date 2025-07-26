@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getDepartmentsByEventId } from "../../services/departmentService";
+import { getDepartmentsByEventId } from "../../services/DepartmentService";
 
 const DepartmentChooseForm = ({ eventId, onDepartmentSelect, onClose }) => {
   const [departmentList, setDepartmentList] = useState([]);
