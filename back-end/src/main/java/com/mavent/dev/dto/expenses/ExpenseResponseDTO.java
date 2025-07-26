@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class ExpenseResponseDTO {
     private int createdByAccountId;
     private String createdByFullName;
     private Integer approvedByAccountId;
-
+    private LocalDate paymentDate;
     private String responseContent;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

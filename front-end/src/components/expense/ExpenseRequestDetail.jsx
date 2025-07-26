@@ -391,7 +391,7 @@ export default function ExpenseRequestDetail({
                   <div className="bg-white rounded-lg px-4 py-3 shadow-sm">
                     <span className="text-gray-800">
                       {data.paymentDate
-                        ? new Date(data.paymentDate).toLocaleDateString()
+                        ? new Date(data.paymentDate).toDateString()
                         : "N/A"}
                     </span>
                   </div>
