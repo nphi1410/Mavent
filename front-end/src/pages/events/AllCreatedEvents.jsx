@@ -18,7 +18,7 @@ const CreatedEventsPage = () => {
         const fetchEventsByCreator = async () => {
             try {
                 const response = await getEventsByCreator(); // Replace with your actual API endpoint
-                console.log("Fetched events:", response.data)
+                // console.log("Fetched events:", response)
                 if (response) setEvents(response)
             } catch (error) {
                 console.error("Error fetching events:", error)

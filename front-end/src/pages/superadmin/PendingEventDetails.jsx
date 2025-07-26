@@ -28,7 +28,7 @@ export default function PendingEventView() {
             try {
                 const response = await getPendingEventDetailsById(eventId); // Example endpoint
                 setEventData(response || {});
-                console.log("Fetched event data:", response);
+                // console.log("Fetched event data:", response);
             } catch (error) {
                 console.error("Error fetching event data:", error);
             }
