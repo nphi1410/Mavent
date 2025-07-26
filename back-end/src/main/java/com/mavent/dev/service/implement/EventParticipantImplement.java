@@ -78,10 +78,10 @@ public class EventParticipantImplement implements EventParticipantService {
         feedback.setSubmittedAt(LocalDateTime.now()); // Thời gian gửi feedback
 
         // 4. Gửi thông báo cho tất cả ADMIN trong sự kiện
-        List<EventAccountRole> admins = eventAccountRoleRepository.findByEventIdAndEventRole(
-                eventId,
-                EventAccountRole.EventRole.ADMIN
-        );
+        List<EventAccountRole> admins = eventAccountRoleRepository
+                .findByEventIdAndEventRole(eventId, EventAccountRole.EventRole.ADMIN)
+                .orElseThrow(() -> new IllegalStateException("Không tìm thấy admin trong sự kiện này"));
+
 
         String notiType = "EVENT FEEDBACK";
         String notiMessage = "A participant has submitted feedback for event: " + event.getName();
