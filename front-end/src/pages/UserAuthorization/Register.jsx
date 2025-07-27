@@ -53,16 +53,16 @@ const Register = () => {
       }
     } catch (error) {
       console.log(error)
-      switch (error.code) { 
+      switch (error.code) {
         case "ERR_NETWORK": setRegisterError("Error Network. Try again later");
-        break;
+          break;
         case "ERR_BAD_REQUEST": setRegisterError(error.response.data)
-        break;
-        default: 
-      setRegisterError("Failed to send OTP. Please try again.");
-      break;
+          break;
+        default:
+          setRegisterError("Failed to send OTP. Please try again.");
+          break;
       }
-      
+
     }
     setIsLoading(false);
   };
@@ -216,7 +216,7 @@ const Register = () => {
 
         <p className="text-center text-sm text-gray-600 mt-4">
           <Link to="/" className="inline-text font-bold hover:underline hover:text-blue-900">
-             Back To Home
+            Back To Home
           </Link>
         </p>
       </div>
