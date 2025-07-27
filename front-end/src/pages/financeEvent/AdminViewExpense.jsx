@@ -312,7 +312,7 @@ function StatusChart({ title, data }) {
   if (!data || data.length === 0)
     return (
       <ChartCard title={title}>
-        <p className="text-gray-500">Không có dữ liệu để hiển thị.</p>
+        <p className="text-gray-500">No data to display.</p>
       </ChartCard>
     );
 
@@ -557,22 +557,22 @@ function AdminViewExpense() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <VerticalBarChart
-              title="Chi tiêu theo danh mục"
+              title="Spend by category"
               data={categoriesData}
             />
             <HorizontalBarChart
-              title="Chi tiêu theo phòng ban"
+              title="Spending by department"
               data={departmentsData}
             />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <PieChart
-              title="Phương thức thanh toán"
+              title="Payment method"
               data={paymentMethodsData}
             />
             <StatusChart
-              title="Tổng quan trạng thái chi tiêu"
+              title="Spending status overview"
               data={statusesData}
             />
           </div>
