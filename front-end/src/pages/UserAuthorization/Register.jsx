@@ -53,7 +53,16 @@ const Register = () => {
       }
     } catch (error) {
       console.log(error)
+      switch (error.code) { 
+        case "ERR_NETWORK": setRegisterError("Error Network. Try again later");
+        break;
+        case "ERR_BAD_REQUEST": setRegisterError(error.response.data)
+        break;
+        default: 
       setRegisterError("Failed to send OTP. Please try again.");
+      break;
+      }
+      
     }
     setIsLoading(false);
   };
