@@ -241,10 +241,10 @@ const AdminViewIncome = () => {
                 onChange={(e) => setDateRange(e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="all">Tất cả thời gian</option>
-                <option value="30">30 ngày qua</option>
-                <option value="7">7 ngày qua</option>
-                <option value="today">Hôm nay</option>
+                <option value="all">All the time</option>
+                <option value="30">Last 30 days</option>
+                <option value="7">Last 7 days</option>
+                <option value="today">Today</option>
               </select>
               {/* Create and Update buttons */}
               <button
@@ -252,7 +252,7 @@ const AdminViewIncome = () => {
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center gap-2"
               >
                 <FontAwesomeIcon icon={faPlus} />
-                Tạo Thu nhập
+                Generate Income
               </button>
             </div>
           </div>
@@ -277,7 +277,7 @@ const AdminViewIncome = () => {
                 VNĐ
               </p>
               <p className="text-blue-100 text-lg">
-                từ {numberOfSources} nguồn thu nhập
+                from {numberOfSources} sources income
               </p>
             </div>
           </div>
@@ -289,7 +289,7 @@ const AdminViewIncome = () => {
           <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-semibold text-gray-900">
-                Phân tích thu nhập
+                Income Analysis
               </h3>
               <i className="fa-solid fa-filter w-5 h-5 text-gray-400"></i>
             </div>
@@ -298,13 +298,13 @@ const AdminViewIncome = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-2 text-gray-600">Loại</th>
+                    <th className="text-left py-3 px-2 text-gray-600">Type</th>
                     <th className="text-left py-3 px-2 text-gray-600">
-                      Số tiền
+                      Amount
                     </th>
-                    <th className="text-left py-3 px-2 text-gray-600">Ngày</th>
+                    <th className="text-left py-3 px-2 text-gray-600">Date</th>
                     <th className="text-left py-3 px-2 text-gray-600">
-                      Hành động
+                      Action
                     </th>{" "}
                     {/* New column for actions */}
                   </tr>
@@ -346,10 +346,10 @@ const AdminViewIncome = () => {
                         <td className="py-4 px-2 text-gray-600">
                           {entry.date
                             ? new Date(entry.date).toLocaleDateString("en-US", {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                              })
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })
                             : "N/A"}
                         </td>
                         <td className="py-4 px-2">
@@ -358,7 +358,7 @@ const AdminViewIncome = () => {
                             className="px-3 py-1 bg-indigo-500 text-white rounded-md shadow hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex items-center justify-center gap-1 text-sm"
                           >
                             <FontAwesomeIcon icon={faEdit} />
-                            Sửa
+                            Update
                           </button>
                         </td>
                       </tr>
@@ -369,7 +369,7 @@ const AdminViewIncome = () => {
                         colSpan="4"
                         className="text-center py-4 text-gray-500"
                       >
-                        Không có dữ liệu thu nhập.
+                        No income data available.
                       </td>
                     </tr>
                   )}
@@ -406,9 +406,8 @@ const AdminViewIncome = () => {
                   <div key={type} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div
-                        className={`w-4 h-4 rounded ${
-                          colors[index % colors.length]
-                        }`}
+                        className={`w-4 h-4 rounded ${colors[index % colors.length]
+                          }`}
                       />
                       <span className="text-sm font-medium text-gray-700">
                         {formatSourceType(type)}
@@ -456,9 +455,8 @@ const AdminViewIncome = () => {
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className={`p-3 ${
-                      bgMap[type] || "bg-gray-100"
-                    } rounded-full`}
+                    className={`p-3 ${bgMap[type] || "bg-gray-100"
+                      } rounded-full`}
                   >
                     {iconMap[type] || getTypeIcon("Default", "w-6 h-6")}
                   </div>
