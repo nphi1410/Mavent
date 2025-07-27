@@ -41,7 +41,7 @@ const SuperAdminRoute = () => {
   }, [token]);
 
   if (roles.length === 0 || isTokenExpired) {
-    // console.log("No role found, redirecting to login");
+    console.log("No role found, redirecting to login");
     return (
       <RedirectPage
         message={`You must be logged in first!`}
@@ -52,11 +52,11 @@ const SuperAdminRoute = () => {
   }
 
   if (!roles.includes("ROLE_SUPER_ADMIN")) {
-    // console.log("User access denied, redirecting to profile");
-    alert("You don't have permission to view this page");
+    console.log("User access denied, redirecting to profile");
+    // alert("You don't have permission to view this page");
     return (
       <RedirectPage
-        message={`You must have ${requiredRoles} privileges to access this content`}
+        message={`You don't have privileges to access this content`}
         pageName="Home Page"
         redirectUrl="/"
       />
