@@ -3,7 +3,8 @@ import { getTaskDetails, updateTaskStatus, getUserProfile, getTaskAttendees, get
 import AttendeesModal from './AttendeesModal';
 import UpdateTaskModal from './UpdateTaskModal';
 import TaskFeedbackModal from './TaskFeedbackModal';
-
+import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
   const [task, setTask] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -12,6 +13,8 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
   const [updateMessage, setUpdateMessage] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
 
+  const {id:eventId} = useParams();
+  const navigate = useNavigate();
   // State cho attendees
   const [attendees, setAttendees] = useState([]);
   const [loadingAttendees, setLoadingAttendees] = useState(false);
@@ -362,8 +365,10 @@ const TaskDetails = ({ taskId, isOpen, onClose, onTaskUpdated }) => {
 
   // Function to handle Create Expense Request button click
   const handleCreateExpenseRequest = () => {
+    
+    
     if (!eventId || !task) return;
-
+    // console.log(eventId, task);
     // Navigate to expense request page with state to open the create popup
     navigate(`/event/${eventId}/staff/expenses-requests`, {
       state: {
